@@ -19,6 +19,11 @@ import { createStopContinuationGuardHook } from './stop-continuation-guard';
 import { createReviewerCheckHook } from './reviewer-check';
 import { createRalphLoopHook } from './ralph-loop';
 
+// v2.0 메모리 관련 훅
+import { createPostTaskReflectionHook } from './post-task-reflection';
+import { createImplicitFeedbackHook } from './implicit-feedback';
+import { createMemoryInjectorHook, createMemoryInitHook } from './memory-injector';
+
 // ============================================================
 // 모든 내장 훅 생성
 // ============================================================
@@ -63,6 +68,12 @@ export function createBuiltinHooks(
   // 보호 훅들
   hooks.push(createStopContinuationGuardHook(context));
 
+  // v2.0 메모리 훅들
+  hooks.push(createMemoryInitHook(context));
+  hooks.push(createMemoryInjectorHook(context));
+  hooks.push(createPostTaskReflectionHook(context));
+  hooks.push(createImplicitFeedbackHook(context));
+
   // 우선순위로 정렬
   hooks.sort((a, b) => b.priority - a.priority);
 
@@ -87,4 +98,9 @@ export {
   createStopContinuationGuardHook,
   createReviewerCheckHook,
   createRalphLoopHook,
+  // v2.0 메모리 훅
+  createPostTaskReflectionHook,
+  createImplicitFeedbackHook,
+  createMemoryInjectorHook,
+  createMemoryInitHook,
 };

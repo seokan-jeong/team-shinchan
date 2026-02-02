@@ -16,6 +16,11 @@ import { createFrontendUiUxSkill } from './frontend-ui-ux';
 import { createHelpSkill } from './help';
 import { createCancelSkill } from './cancel';
 
+// v2.0 메모리 스킬
+import { createMemoriesSkill } from './memories';
+import { createForgetSkill } from './forget';
+import { createLearnSkill } from './learn';
+
 // ============================================================
 // 모든 내장 스킬 생성
 // ============================================================
@@ -32,6 +37,10 @@ export function createBuiltinSkills(context: PluginContext): SkillConfig[] {
     createFrontendUiUxSkill(context),
     createHelpSkill(context),
     createCancelSkill(context),
+    // v2.0 메모리 스킬
+    createMemoriesSkill(context),
+    createForgetSkill(context),
+    createLearnSkill(context),
   ];
 }
 
@@ -50,4 +59,8 @@ export {
   createFrontendUiUxSkill,
   createHelpSkill,
   createCancelSkill,
+  // v2.0 메모리 스킬
+  createMemoriesSkill,
+  createForgetSkill,
+  createLearnSkill,
 };

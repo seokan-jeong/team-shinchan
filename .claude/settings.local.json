@@ -3,7 +3,8 @@
     "allow": [
       "WebFetch(domain:api.github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Skill(planner)"
+      "Skill(planner)",
+      "Bash(git tag:*)"
     ]
   }
 }

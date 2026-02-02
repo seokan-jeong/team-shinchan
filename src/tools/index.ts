@@ -16,6 +16,9 @@ import { createAstGrepTool } from './ast-grep';
 import { createLspDiagnosticsTool, createLspRenameTool, createLspReferencesTool } from './lsp';
 import { createSessionManagerTool } from './session-manager';
 
+// v2.0 메모리 도구
+import { createMemoryOpsTool } from './memory-ops';
+
 // ============================================================
 // 모든 내장 도구 생성
 // ============================================================
@@ -47,6 +50,9 @@ export function createBuiltinTools(context: PluginContext): ToolConfig[] {
 
     // 세션
     createSessionManagerTool(context),
+
+    // v2.0 메모리
+    createMemoryOpsTool(context),
   ];
 }
 
@@ -67,4 +73,6 @@ export {
   createLspRenameTool,
   createLspReferencesTool,
   createSessionManagerTool,
+  // v2.0 메모리
+  createMemoryOpsTool,
 };

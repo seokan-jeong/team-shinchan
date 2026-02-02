@@ -1,0 +1,29 @@
+{
+  "name": "team-seokan",
+  "version": "0.1.0",
+  "description": "짱구 캐릭터 기반 멀티 에이전트 오케스트레이션 시스템",
+  "main": "dist/index.js",
+  "author": "seokan",
+  "homepage": "https://github.com/seokan/team-seokan",
+  "claude": {
+    "minVersion": "1.0.0"
+  },
+  "capabilities": {
+    "agents": true,
+    "hooks": true,
+    "tools": true,
+    "skills": true,
+    "mcp": true
+  },
+  "settings": {
+    "defaultModel": "sonnet",
+    "maxConcurrentAgents": 5,
+    "maxRetries": 3,
+    "contextWarningThreshold": 50,
+    "enableRalphLoop": true,
+    "enableTodoEnforcer": true,
+    "enableIntentGate": true,
+    "enableReviewerCheck": true,
+    "language": "ko"
+  }
+}

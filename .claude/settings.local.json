@@ -24,7 +24,9 @@
       "Bash(npm run typecheck:*)",
       "Bash(gh repo rename:*)",
       "Bash(git remote:*)",
-      "WebFetch(domain:anthropic.com)"
+      "WebFetch(domain:anthropic.com)",
+      "Bash(claude plugin list:*)",
+      "Bash(claude plugin)"
     ]
   },
   "enableAllProjectMcpServers": true,

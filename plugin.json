@@ -1,6 +1,6 @@
 {
   "name": "team-shinchan",
-  "version": "2.2.3",
+  "version": "2.3.0",
   "description": "15 Shinchan character agents + Debate system + Self-learning memory system",
   "main": "dist/index.js",
   "author": "seokan",

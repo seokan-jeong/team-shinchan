@@ -2,9 +2,9 @@
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "team-seokan",
   "metadata": {
-    "description": "짱구 캐릭터 기반 멀티 에이전트 오케스트레이션 시스템. 14개 전문 에이전트와 자기학습/회고/개선 기능을 제공합니다."
+    "description": "짱구 캐릭터 기반 멀티 에이전트 오케스트레이션 시스템. 15개 전문 에이전트 + 토론 시스템 + 자기학습 메모리 시스템을 제공합니다."
   },
-  "description": "짱구 캐릭터 기반 멀티 에이전트 오케스트레이션 - 자기학습, 회고, 개선 시스템",
+  "description": "15개 짱구 캐릭터 에이전트 + 토론 시스템 + 자기학습 메모리 시스템",
   "owner": {
     "name": "seokan",
     "email": "seokan@example.com"
@@ -12,8 +12,8 @@
   "plugins": [
     {
       "name": "team-seokan",
-      "version": "2.0.0",
-      "description": "14개 짱구 캐릭터 에이전트 + 자기학습 메모리 시스템",
+      "version": "2.1.0",
+      "description": "15개 짱구 캐릭터 에이전트 + 토론 시스템 + 자기학습 메모리 시스템",
       "category": "productivity",
       "source": "./",
       "homepage": "https://github.com/seokan-jeong/team-seokan",

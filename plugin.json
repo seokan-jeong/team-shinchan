@@ -1,7 +1,7 @@
 {
   "name": "team-seokan",
-  "version": "2.0.0",
-  "description": "짱구 캐릭터 기반 멀티 에이전트 오케스트레이션 시스템 - 자기학습, 회고, 개선 기능 포함",
+  "version": "2.1.0",
+  "description": "15개 짱구 캐릭터 에이전트 + 토론 시스템 + 자기학습 메모리 시스템",
   "main": "dist/index.js",
   "author": "seokan",
   "homepage": "https://github.com/seokan/team-seokan",

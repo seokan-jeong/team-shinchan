@@ -12,7 +12,7 @@
   "plugins": [
     {
       "name": "team-shinchan",
-      "version": "2.2.2",
+      "version": "2.2.3",
       "description": "15 Shinchan character agents + Debate system + Self-learning memory system",
       "category": "productivity",
       "source": {

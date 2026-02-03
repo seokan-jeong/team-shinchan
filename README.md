@@ -8,7 +8,7 @@
 
 *Stop doing everything yourself - orchestrate a team.*
 
-[![Version](https://img.shields.io/badge/version-2.7.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
+[![Version](https://img.shields.io/badge/version-2.8.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.ai)
 
@@ -144,6 +144,42 @@ git clone https://github.com/seokan-jeong/team-shinchan.git ~/.claude/plugins/te
 </td>
 </tr>
 </table>
+
+---
+
+## How Skills Work
+
+**Skills are not just documentation - they automatically invoke specialist agents.**
+
+```
+/team-shinchan:start
+       │
+       ▼
+┌──────────────────────────────────────┐
+│  Task(subagent_type="shinnosuke")    │  ← Auto-invoked
+└──────────────────┬───────────────────┘
+                   ▼
+┌──────────────────────────────────────┐
+│  Shinnosuke orchestrates:            │
+│  ├─ Nene (planning)                  │
+│  ├─ Shiro (exploration)              │
+│  ├─ Bo/Aichan/Bunta (implementation) │
+│  └─ Action Kamen (review)            │
+└──────────────────────────────────────┘
+```
+
+| Skill | Auto-Invokes |
+|-------|--------------|
+| `/start` | Shinnosuke → Full workflow |
+| `/plan` | Nene → Structured planning |
+| `/analyze` | Hiroshi → Deep analysis |
+| `/deepsearch` | Shiro → Masumi |
+| `/debate` | Midori → Expert panel |
+| `/autopilot` | Shinnosuke → Autonomous mode |
+| `/ultrawork` | Shinnosuke → Parallel execution |
+| `/ralph` | Kazama → Persistent loop |
+
+**You run the skill, agents do the work.**
 
 ---
 

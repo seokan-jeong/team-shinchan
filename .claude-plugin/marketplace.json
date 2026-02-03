@@ -12,10 +12,13 @@
   "plugins": [
     {
       "name": "team-shinchan",
-      "version": "2.2.1",
+      "version": "2.2.2",
       "description": "15 Shinchan character agents + Debate system + Self-learning memory system",
       "category": "productivity",
-      "source": "https://github.com/seokan-jeong/team-shinchan",
+      "source": {
+        "source": "github",
+        "repo": "seokan-jeong/team-shinchan"
+      },
       "homepage": "https://github.com/seokan-jeong/team-shinchan",
       "tags": [
         "multi-agent",

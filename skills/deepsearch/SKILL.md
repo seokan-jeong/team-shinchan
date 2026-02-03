@@ -6,6 +6,31 @@ user-invocable: true
 
 # Deepsearch Skill
 
+## ⚠️ MANDATORY: Agent Invocation
+
+**이 스킬 실행 시 반드시 다음을 수행하세요:**
+
+```typescript
+// 1. 빠른 검색 (Shiro)
+Task(
+  subagent_type="team-shinchan:shiro",
+  model="haiku",
+  prompt="사용자 요청: [요청 내용]\n\n코드베이스를 탐색하세요."
+)
+
+// 2. 필요시 심층 검색 (Masumi)
+Task(
+  subagent_type="team-shinchan:masumi",
+  model="sonnet",
+  prompt="Shiro 검색 결과: [결과]\n\n심층 분석을 수행하세요."
+)
+```
+
+**❌ Explore 에이전트 또는 직접 Glob/Grep 사용 금지**
+**✅ Shiro → Masumi 순서로 위임하세요**
+
+---
+
 ## Features
 
 - Shiro(Explorer): Fast filename/keyword search

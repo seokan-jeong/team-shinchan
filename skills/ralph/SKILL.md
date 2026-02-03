@@ -6,6 +6,33 @@ user-invocable: true
 
 # Ralph Skill
 
+## ⚠️ MANDATORY: Agent Invocation
+
+**이 스킬 실행 시 반드시 다음을 수행하세요:**
+
+```typescript
+Task(
+  subagent_type="team-shinchan:kazama",
+  model="opus",
+  prompt=`작업 요청: [요청 내용]
+
+/team-shinchan:ralph 모드로 실행합니다.
+완료될 때까지 멈추지 마세요:
+1. TODO 리스트 체크
+2. 다음 작업 실행 (적절한 에이전트 위임)
+3. 결과 검증
+4. 실패 시 → 원인 분석 → 재시도
+5. 성공 시 → 다음 작업
+6. 모든 작업 완료 → Action Kamen 최종 검증
+7. 검증 실패 → 수정 후 재검증`
+)
+```
+
+**❌ 중간에 멈추지 마세요**
+**✅ Kazama(Hephaestus)가 완료까지 지속 실행**
+
+---
+
 ## Features
 
 - Infinite retry until task completion

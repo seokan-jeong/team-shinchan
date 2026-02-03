@@ -6,6 +6,23 @@ user-invocable: true
 
 # Plan Skill
 
+## ⚠️ MANDATORY: Agent Invocation
+
+**이 스킬 실행 시 반드시 다음을 수행하세요:**
+
+```typescript
+Task(
+  subagent_type="team-shinchan:nene",
+  model="opus",
+  prompt="사용자 요청: [요청 내용]\n\n체계적인 작업 계획을 수립하세요."
+)
+```
+
+**❌ 직접 계획을 작성하지 마세요**
+**✅ Nene 에이전트에게 위임하세요**
+
+---
+
 ## Features
 
 - Nene(Planner) clarifies requirements through interview

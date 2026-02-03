@@ -6,6 +6,23 @@ user-invocable: true
 
 # Analyze Skill
 
+## ⚠️ MANDATORY: Agent Invocation
+
+**이 스킬 실행 시 반드시 다음을 수행하세요:**
+
+```typescript
+Task(
+  subagent_type="team-shinchan:hiroshi",
+  model="opus",
+  prompt="사용자 요청: [요청 내용]\n\n심층 분석을 수행하세요."
+)
+```
+
+**❌ 직접 분석하지 마세요**
+**✅ Hiroshi(Oracle) 에이전트에게 위임하세요**
+
+---
+
 ## Features
 
 - Analyze code structure, dependencies, complexity

@@ -10,6 +10,37 @@ user-invocable: true
 
 ---
 
+## ⚠️ MANDATORY: Agent Invocation
+
+**이 스킬 실행 시 반드시 다음을 수행하세요:**
+
+```
+1. Task 도구를 호출합니다
+2. subagent_type: "team-shinchan:shinnosuke"
+3. model: "opus"
+4. prompt: 사용자의 요청 + 컨텍스트 전달
+```
+
+**예시:**
+```typescript
+Task(
+  subagent_type="team-shinchan:shinnosuke",
+  model="opus",
+  prompt="사용자 요청: [요청 내용]\n\n/team-shinchan:start 스킬이 실행되었습니다. 통합 워크플로우를 시작하세요."
+)
+```
+
+**❌ 절대 하지 마세요:**
+- 직접 코드 탐색/수정
+- Explore 에이전트 사용
+- 문서만 출력하고 끝내기
+
+**✅ 반드시 하세요:**
+- Shinnosuke 에이전트를 Task 도구로 소환
+- Shinnosuke가 Nene, Shiro, Bo 등을 순차적으로 호출하도록 위임
+
+---
+
 ## When to Use
 
 - Starting a new feature or task

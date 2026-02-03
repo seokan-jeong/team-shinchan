@@ -6,6 +6,30 @@ user-invocable: true
 
 # Debate Skill
 
+## ⚠️ MANDATORY: Agent Invocation
+
+**이 스킬 실행 시 반드시 다음을 수행하세요:**
+
+```typescript
+Task(
+  subagent_type="team-shinchan:midori",
+  model="opus",
+  prompt=`토론 주제: [주제]
+
+Midori(Moderator)로서 토론을 진행하세요:
+1. 주제에 맞는 전문가 패널 선정
+2. 각 전문가의 의견 수집 (병렬)
+3. 토론 라운드 진행 (최대 3회)
+4. Hiroshi가 합의 도출
+5. Action Kamen 검증`
+)
+```
+
+**❌ 직접 의견을 제시하지 마세요**
+**✅ Midori가 토론을 조율하도록 위임**
+
+---
+
 ## Features
 
 - Auto-summons expert agents based on topic

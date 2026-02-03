@@ -112,6 +112,7 @@ Auto-activate skills/agents when detecting these patterns:
 | Git/commit work | `git-master` skill (auto) |
 | "analyze", "debug", "why not working" | `analyze` skill |
 | "find", "search" | `deepsearch` skill |
+| "ISSUE-xxx", "work on issue", "docs-work" | `docs-work` skill |
 | "cancel", "stop", "abort" | appropriate cancel skill |
 
 ---
@@ -150,6 +151,7 @@ Auto-activate skills/agents when detecting these patterns:
 | `plan` | Planning session | "plan", "design" |
 | `analyze` | Analysis mode | "analyze", "debug" |
 | `deepsearch` | Deep search | "deepsearch", "find" |
+| `docs-work` | Issue-based work workflow | "ISSUE-xxx", "docs-work" |
 | `debate` | Debate mode | "debate", "opinion", "discuss", "pros cons" |
 | `git-master` | Git specialist | git-related tasks |
 | `frontend-ui-ux` | UI/UX specialist | UI-related tasks |
@@ -193,6 +195,8 @@ Announce when activating major behaviors:
 > "Starting **debate session**. Midori(Moderator) will gather expert opinions to find the optimal solution."
 
 > "Delegating to **Hiroshi(Oracle)** for deep analysis."
+
+> "Starting **docs-work** for ISSUE-xxx. Phase-based workflow with auto-documentation."
 
 ---
 

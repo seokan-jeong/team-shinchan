@@ -3,6 +3,11 @@ node_modules/
 
 # Build output
 dist/
+src/
+
+# Package files (not needed for this plugin)
+package.json
+package-lock.json
 
 # IDE
 .idea/
@@ -22,10 +27,9 @@ npm-debug.log*
 .env
 .env.local
 
-# Local settings (not for public repo)
+# Local settings
 .claude/settings.local.json
-.serena/project.yml
-plugin.json
+.serena/
 
 # Cache
 .cache/

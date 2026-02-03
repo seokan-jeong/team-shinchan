@@ -1,20 +1,20 @@
 /**
- * Debate 스킬 - 에이전트 간 토론을 통한 최적 해결책 도출
+ * Debate Skill - Find optimal solutions through agent debates
  */
 
 import type { SkillConfig, PluginContext, SkillResult, BuiltinAgentName } from '../../../types';
 
-// 토론 주제별 참여 에이전트 매핑
+// Debate participants by topic
 const DEBATE_PARTICIPANTS: Record<string, BuiltinAgentName[]> = {
-  frontend: ['suji', 'shinhyungman'],
-  backend: ['heukgom', 'shinhyungman'],
-  devops: ['hooni', 'shinhyungman'],
-  architecture: ['shinhyungman', 'yuri', 'bongmisun'],
-  fullstack: ['suji', 'heukgom', 'hooni', 'shinhyungman'],
-  default: ['shinhyungman', 'bongmisun'],
+  frontend: ['aichan', 'hiroshi'],
+  backend: ['bunta', 'hiroshi'],
+  devops: ['masao', 'hiroshi'],
+  architecture: ['hiroshi', 'nene', 'misae'],
+  fullstack: ['aichan', 'bunta', 'masao', 'hiroshi'],
+  default: ['hiroshi', 'misae'],
 };
 
-// 주제 키워드 분석
+// Analyze topic for participant selection
 function analyzeTopicForParticipants(topic: string): BuiltinAgentName[] {
   const lowerTopic = topic.toLowerCase();
 
@@ -37,57 +37,57 @@ function analyzeTopicForParticipants(topic: string): BuiltinAgentName[] {
   return DEBATE_PARTICIPANTS.default;
 }
 
-// 에이전트 이름 매핑
+// Agent display names
 const AGENT_DISPLAY_NAMES: Record<BuiltinAgentName, string> = {
-  jjangu: '짱구',
-  jjanga: '짱아',
-  maenggu: '맹구',
-  cheolsu: '철수',
-  suji: '수지',
-  heukgom: '흑곰',
-  hooni: '훈이',
-  shinhyungman: '신형만',
-  yuri: '유리',
-  bongmisun: '봉미선',
-  actiongamen: '액션가면',
-  heendungi: '흰둥이',
-  chaesunga: '채성아',
-  namiri: '나미리',
-  yiseul: '이슬',
+  shinnosuke: 'Shinnosuke',
+  himawari: 'Himawari',
+  bo: 'Bo',
+  kazama: 'Kazama',
+  aichan: 'Aichan',
+  bunta: 'Bunta',
+  masao: 'Masao',
+  hiroshi: 'Hiroshi',
+  nene: 'Nene',
+  misae: 'Misae',
+  actionkamen: 'Action Kamen',
+  shiro: 'Shiro',
+  masumi: 'Masumi',
+  ume: 'Ume',
+  midori: 'Midori',
 };
 
-// 에이전트 역할 매핑
+// Agent roles
 const AGENT_ROLES: Record<BuiltinAgentName, string> = {
-  jjangu: 'Orchestrator',
-  jjanga: 'Atlas',
-  maenggu: 'Executor',
-  cheolsu: 'Hephaestus',
-  suji: 'Frontend',
-  heukgom: 'Backend',
-  hooni: 'DevOps',
-  shinhyungman: 'Oracle',
-  yuri: 'Planner',
-  bongmisun: 'Metis',
-  actiongamen: 'Reviewer',
-  heendungi: 'Explorer',
-  chaesunga: 'Librarian',
-  namiri: 'Multimodal',
-  yiseul: 'Moderator',
+  shinnosuke: 'Orchestrator',
+  himawari: 'Atlas',
+  bo: 'Executor',
+  kazama: 'Hephaestus',
+  aichan: 'Frontend',
+  bunta: 'Backend',
+  masao: 'DevOps',
+  hiroshi: 'Oracle',
+  nene: 'Planner',
+  misae: 'Metis',
+  actionkamen: 'Reviewer',
+  shiro: 'Explorer',
+  masumi: 'Librarian',
+  ume: 'Multimodal',
+  midori: 'Moderator',
 };
 
 export function createDebateSkill(context: PluginContext): SkillConfig {
   return {
     name: 'debate',
     displayName: 'Debate',
-    description: '에이전트 간 토론을 통해 최적의 해결책을 도출합니다.',
+    description: 'Find optimal solutions through agent debates.',
     triggers: ['debate', '토론', '의견', '논의', '장단점', '비교'],
     autoActivate: true,
 
     handler: async ({ args, sessionState }): Promise<SkillResult> => {
-      const topic = args || '토론 주제를 입력해주세요';
+      const topic = args || 'Please enter a debate topic';
       const participants = analyzeTopicForParticipants(topic);
 
-      // 세션 상태 업데이트
+      // Update session state
       sessionState.activeSkill = 'debate';
       sessionState.debateActive = true;
       sessionState.debateRound = 0;
@@ -101,58 +101,58 @@ export function createDebateSkill(context: PluginContext): SkillConfig {
 
       return {
         success: true,
-        output: `🗣️ **토론 세션 시작**
+        output: `🗣️ **Debate Session Started**
 
-## 주제
+## Topic
 ${topic}
 
-## 참여 에이전트
+## Participating Agents
 ${participantList}
 
-## 토론 진행 방식
+## Debate Process
 
-### Phase 1: 의견 수집
-각 전문가가 자신의 관점에서 의견을 제시합니다.
+### Phase 1: Opinion Collection
+Each expert presents their perspective.
 
-### Phase 2: 상호 피드백 (최대 3라운드)
-다른 의견에 대한 피드백과 반론을 교환합니다.
+### Phase 2: Mutual Feedback (Max 3 rounds)
+Exchange feedback and rebuttals on opinions.
 
-### Phase 3: 합의 도출
-신형만(Oracle)이 모든 의견을 종합하여 최종안을 제시합니다.
+### Phase 3: Consensus Building
+Hiroshi(Oracle) synthesizes all opinions for final recommendation.
 
-### Phase 4: 검증
-액션가면(Reviewer)이 합의안을 검토합니다.
+### Phase 4: Verification
+Action Kamen(Reviewer) reviews the consensus.
 
 ---
 
-**이슬(Moderator)에게 토론 진행을 위임합니다...**`,
+**Delegating to Midori(Moderator) for facilitation...**`,
 
         inject: `<debate-mode>
-토론 세션이 활성화되었습니다.
+Debate session is active.
 
-## 토론 규칙
-- 최대 라운드: 3회
-- 각 발언: 최대 500토큰
-- 합의 실패 시: 투표로 결정
+## Debate Rules
+- Max rounds: 3
+- Each statement: Max 500 tokens
+- No consensus: Vote to decide
 
-## 토론 프로세스
+## Debate Process
 
-### Step 1: 의견 수집 (병렬)
-다음 에이전트들에게 동시에 의견을 요청하세요:
-${participants.map(p => `- Task(subagent_type="team-seokan:${p}", prompt="주제: ${topic}\n\n이 주제에 대한 당신의 전문적 의견을 제시해주세요. 장점, 단점, 권장 사항을 포함해주세요.")`).join('\n')}
+### Step 1: Collect Opinions (Parallel)
+Request opinions from the following agents simultaneously:
+${participants.map(p => `- Task(subagent_type="team-shinchan:${p}", prompt="Topic: ${topic}\n\nPlease provide your expert opinion on this topic. Include pros, cons, and recommendations.")`).join('\n')}
 
-### Step 2: 피드백 라운드
-수집된 의견을 각 에이전트에게 공유하고 상호 피드백을 요청하세요.
+### Step 2: Feedback Rounds
+Share collected opinions with each agent and request mutual feedback.
 
-### Step 3: 합의 도출
-Task(subagent_type="team-seokan:shinhyungman", prompt="다음 의견들을 종합하여 최적의 해결책을 제시해주세요: [의견들]")
+### Step 3: Consensus Building
+Task(subagent_type="team-shinchan:hiroshi", prompt="Please synthesize the following opinions and propose the optimal solution: [opinions]")
 
-### Step 4: 검증
-Task(subagent_type="team-seokan:actiongamen", prompt="다음 합의안을 검토해주세요: [합의안]")
+### Step 4: Verification
+Task(subagent_type="team-shinchan:actionkamen", prompt="Please review the following consensus: [consensus]")
 
-## 토론 진행
-이슬(Moderator)가 토론을 진행합니다.
-Task(subagent_type="team-seokan:yiseul", prompt="토론 주제: ${topic}\n참여자: ${participants.join(', ')}\n\n토론을 진행하고 합의를 도출해주세요.")
+## Debate Facilitation
+Midori(Moderator) will facilitate the debate.
+Task(subagent_type="team-shinchan:midori", prompt="Debate topic: ${topic}\nParticipants: ${participants.join(', ')}\n\nPlease facilitate the debate and reach consensus.")
 </debate-mode>`,
       };
     },

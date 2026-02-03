@@ -1,5 +1,5 @@
 /**
- * Team-Seokan 설정 시스템
+ * Team-Shinchan 설정 시스템
  */
 
 import type { PluginSettings, ModelTier, BuiltinAgentName, AgentOverrideConfig } from '../types';
@@ -37,9 +37,9 @@ export async function loadPluginConfig(): Promise<PluginSettings> {
 
   // 설정 파일 경로들
   const configPaths = [
-    join(process.cwd(), '.team-seokan', 'config.json'),
-    join(process.cwd(), 'team-seokan.config.json'),
-    join(homedir(), '.config', 'team-seokan', 'config.json'),
+    join(process.cwd(), '.team-shinchan', 'config.json'),
+    join(process.cwd(), 'team-shinchan.config.json'),
+    join(homedir(), '.config', 'team-shinchan', 'config.json'),
   ];
 
   for (const configPath of configPaths) {
@@ -90,29 +90,29 @@ function mergeSettings(
 
 export const AGENT_MODEL_MAP: Record<BuiltinAgentName, ModelTier> = {
   // 오케스트레이션 (Opus)
-  jjangu: 'opus',
-  jjanga: 'opus',
-  yiseul: 'opus',  // 토론 진행자
+  shinnosuke: 'opus',
+  himawari: 'opus',
+  midori: 'opus',  // 토론 진행자
 
   // 실행 (Sonnet/Opus)
-  maenggu: 'sonnet',
-  cheolsu: 'opus',
+  bo: 'sonnet',
+  kazama: 'opus',
 
   // 전문가 (Sonnet)
-  suji: 'sonnet',
-  heukgom: 'sonnet',
-  hooni: 'sonnet',
+  aichan: 'sonnet',
+  bunta: 'sonnet',
+  masao: 'sonnet',
 
   // 조언/계획 (Opus/Sonnet)
-  shinhyungman: 'opus',
-  yuri: 'opus',
-  bongmisun: 'sonnet',
-  actiongamen: 'opus',
+  hiroshi: 'opus',
+  nene: 'opus',
+  misae: 'sonnet',
+  actionkamen: 'opus',
 
   // 탐색/유틸리티 (Haiku/Sonnet)
-  heendungi: 'haiku',
-  chaesunga: 'sonnet',
-  namiri: 'sonnet',
+  shiro: 'haiku',
+  masumi: 'sonnet',
+  ume: 'sonnet',
 };
 
 // ============================================================
@@ -120,12 +120,12 @@ export const AGENT_MODEL_MAP: Record<BuiltinAgentName, ModelTier> = {
 // ============================================================
 
 export const READ_ONLY_AGENTS: BuiltinAgentName[] = [
-  'shinhyungman',  // Oracle
-  'yuri',          // Planner
-  'bongmisun',     // Metis
-  'actiongamen',   // Reviewer
-  'heendungi',     // Explorer
-  'chaesunga',     // Librarian
+  'hiroshi',      // Oracle
+  'nene',         // Planner
+  'misae',        // Metis
+  'actionkamen',  // Reviewer
+  'shiro',        // Explorer
+  'masumi',       // Librarian
 ];
 
 // ============================================================
@@ -133,12 +133,12 @@ export const READ_ONLY_AGENTS: BuiltinAgentName[] = [
 // ============================================================
 
 export const AGENT_CATEGORIES = {
-  orchestration: ['jjangu', 'jjanga'],
-  execution: ['maenggu', 'cheolsu'],
-  specialist: ['suji', 'heukgom', 'hooni'],
-  advisor: ['shinhyungman', 'yuri', 'bongmisun', 'actiongamen'],
-  exploration: ['heendungi', 'chaesunga'],
-  utility: ['namiri'],
+  orchestration: ['shinnosuke', 'himawari'],
+  execution: ['bo', 'kazama'],
+  specialist: ['aichan', 'bunta', 'masao'],
+  advisor: ['hiroshi', 'nene', 'misae', 'actionkamen'],
+  exploration: ['shiro', 'masumi'],
+  utility: ['ume'],
 } as const;
 
 // ============================================================

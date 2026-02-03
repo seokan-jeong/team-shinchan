@@ -1,42 +1,42 @@
 ---
 name: autopilot
-description: 사용자 개입 없이 요구사항 분석부터 검증까지 자율적으로 완료합니다. "자동으로", "알아서", "autopilot" 요청 시 사용합니다.
+description: Autonomously completes from requirements analysis to verification without user intervention. Used for "auto", "automatically", "autopilot" requests.
 user-invocable: true
 ---
 
 # Autopilot Skill
 
-## 기능
+## Features
 
-- 봉미선(Metis)이 요구사항 자동 분석
-- 유리(Planner)가 작업 계획 수립
-- 짱구(Orchestrator)가 에이전트들에게 작업 분배
-- 여러 에이전트가 동시에 병렬 실행
-- 액션가면(Reviewer)이 결과 검증
-- 문제 발견 시 자동 수정
+- Misae(Metis) auto-analyzes requirements
+- Nene(Planner) creates work plan
+- Shinnosuke(Orchestrator) distributes tasks to agents
+- Multiple agents execute in parallel
+- Action Kamen(Reviewer) verifies results
+- Auto-fixes on issues found
 
-## 에이전트 협업 흐름
+## Agent Collaboration Flow
 
-1. **봉미선** → 요구사항 분석
-2. **유리** → 계획 수립
-3. **짱구** → 작업 분배
-4. **맹구/수지/흑곰** → 병렬 실행
-5. **액션가면** → 검증
+1. **Misae** → Requirements analysis
+2. **Nene** → Plan creation
+3. **Shinnosuke** → Task distribution
+4. **Bo/Aichan/Bunta** → Parallel execution
+5. **Action Kamen** → Verification
 
-## 워크플로우 체크리스트
+## Workflow Checklist
 
 ```
-[ ] 요구사항 분석 (봉미선)
-[ ] 작업 계획 수립 (유리)
-[ ] 작업 분배 (짱구)
-[ ] 병렬 실행 (전문가들)
-[ ] 품질 검증 (액션가면)
-[ ] 자동 수정 (필요 시)
+[ ] Requirements analysis (Misae)
+[ ] Work plan creation (Nene)
+[ ] Task distribution (Shinnosuke)
+[ ] Parallel execution (Specialists)
+[ ] Quality verification (Action Kamen)
+[ ] Auto-fix (if needed)
 ```
 
-## 완료 알림
+## Completion Notification
 
-모든 작업이 완료되면:
-- 완료된 작업 목록 표시
-- 변경된 파일 목록 표시
-- 다음 단계 제안
+When all tasks complete:
+- Show completed task list
+- Show modified files list
+- Suggest next steps

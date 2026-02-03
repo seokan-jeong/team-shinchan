@@ -1,44 +1,44 @@
 ---
 name: ultrawork
-description: 병렬 에이전트 실행으로 작업을 빠르게 완료합니다. "빠르게", "병렬로", "ulw" 요청 시 사용합니다.
+description: Complete tasks quickly with parallel agent execution. Used for "fast", "parallel", "ulw" requests.
 user-invocable: true
 ---
 
 # Ultrawork Skill
 
-## 기능
+## Features
 
-- 독립적인 작업을 여러 에이전트가 동시에 처리
-- 전문 에이전트에게 즉시 작업 라우팅
-- 긴 작업은 백그라운드 실행
-- 모든 작업 완료 및 검증까지 지속
+- Multiple agents process independent tasks simultaneously
+- Immediate routing to specialized agents
+- Long tasks run in background
+- Continues until all tasks complete and verify
 
-## 에이전트 라우팅
+## Agent Routing
 
-| 도메인 | Haiku | Sonnet | Opus |
+| Domain | Haiku | Sonnet | Opus |
 |--------|-------|--------|------|
-| 분석 | 흰둥이 | 봉미선 | 신형만 |
-| 실행 | - | 맹구 | 철수 |
-| 프론트엔드 | - | 수지 | - |
-| 백엔드 | - | 흑곰 | - |
-| DevOps | - | 훈이 | - |
-| 리뷰 | - | - | 액션가면 |
+| Analysis | Shiro | Misae | Hiroshi |
+| Execution | - | Bo | Kazama |
+| Frontend | - | Aichan | - |
+| Backend | - | Bunta | - |
+| DevOps | - | Masao | - |
+| Review | - | - | Action Kamen |
 
-## 워크플로우 체크리스트
+## Workflow Checklist
 
 ```
-[ ] 작업 분석 및 분해
-[ ] 독립 작업 병렬 할당
-[ ] 순차 작업 대기열 설정
-[ ] 모든 작업 완료 대기
-[ ] 결과 통합 및 검증
+[ ] Analyze and decompose tasks
+[ ] Assign independent tasks in parallel
+[ ] Queue sequential tasks
+[ ] Wait for all tasks to complete
+[ ] Integrate results and verify
 ```
 
-## 완료 조건
+## Completion Criteria
 
-- TODO 리스트: 남은 작업 없음
-- 기능: 요청된 모든 기능 동작
-- 테스트: 모든 테스트 통과
-- 에러: 해결되지 않은 에러 없음
+- TODO list: No remaining tasks
+- Features: All requested features work
+- Tests: All tests pass
+- Errors: No unresolved errors
 
-**하나라도 충족되지 않으면 계속 작업!**
+**If any criteria not met → continue working!**

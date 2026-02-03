@@ -1,32 +1,32 @@
 ---
 name: forget
-description: 특정 메모리를 삭제합니다. 더 이상 유효하지 않거나 잘못된 학습 내용을 제거할 때 사용합니다.
+description: Delete specific memories. Use to remove outdated or incorrect learnings.
 user-invocable: true
 ---
 
 # Forget Skill
 
-## 기능
+## Features
 
-- 메모리 ID로 특정 메모리 삭제
-- 삭제 전 내용 확인 표시
-- 사용자 확인 후 삭제 실행
+- Delete specific memory by ID
+- Show content before deletion
+- Execute after user confirmation
 
-## 사용법
+## Usage
 
 ```
 /forget <memory-id>
-/forget all          # 전체 삭제 (확인 필요)
+/forget all          # Delete all (confirmation required)
 ```
 
-## 동작 순서
+## Operation Sequence
 
-1. 메모리 ID로 파일 찾기
-2. 삭제 전 내용 확인 표시
-3. 사용자 확인 요청
-4. 삭제 완료 메시지
+1. Find file by memory ID
+2. Show content before deletion
+3. Request user confirmation
+4. Deletion complete message
 
-## 주의사항
+## Caution
 
-- 삭제된 메모리는 복구할 수 없습니다
-- `all` 옵션은 신중하게 사용하세요
+- Deleted memories cannot be recovered
+- Use `all` option carefully

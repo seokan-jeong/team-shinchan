@@ -1,4 +1,4 @@
-// Team-Seokan 타입 정의
+// Team-Shinchan 타입 정의
 
 // ============================================================
 // 에이전트 타입
@@ -11,21 +11,21 @@ export type AgentCost = 'FREE' | 'CHEAP' | 'EXPENSIVE';
 export type ModelTier = 'opus' | 'sonnet' | 'haiku';
 
 export type BuiltinAgentName =
-  | 'jjangu'      // 짱구 (Orchestrator)
-  | 'jjanga'      // 짱아 (Atlas)
-  | 'maenggu'     // 맹구 (Executor)
-  | 'cheolsu'     // 철수 (Hephaestus)
-  | 'suji'        // 수지 (Frontend)
-  | 'heukgom'     // 흑곰 (Backend)
-  | 'hooni'       // 훈이 (DevOps)
-  | 'shinhyungman' // 신형만 (Oracle)
-  | 'yuri'        // 유리 (Planner)
-  | 'bongmisun'   // 봉미선 (Metis)
-  | 'actiongamen' // 액션가면 (Reviewer)
-  | 'heendungi'   // 흰둥이 (Explorer)
-  | 'chaesunga'   // 채성아 (Librarian)
-  | 'namiri'      // 나미리 (Multimodal)
-  | 'yiseul';     // 이슬 (Moderator) - 토론 진행자
+  | 'shinnosuke'   // 신노스케 (Orchestrator)
+  | 'himawari'     // 히마와리 (Atlas)
+  | 'bo'           // 보 (Executor)
+  | 'kazama'       // 카자마 (Hephaestus)
+  | 'aichan'       // 아이짱 (Frontend)
+  | 'bunta'        // 분타 (Backend)
+  | 'masao'        // 마사오 (DevOps)
+  | 'hiroshi'      // 히로시 (Oracle)
+  | 'nene'         // 네네 (Planner)
+  | 'misae'        // 미사에 (Metis)
+  | 'actionkamen'  // 액션카멘 (Reviewer)
+  | 'shiro'        // 시로 (Explorer)
+  | 'masumi'       // 마스미 (Librarian)
+  | 'ume'          // 우메 (Multimodal)
+  | 'midori';      // 미도리 (Moderator) - 토론 진행자
 
 export interface AgentPromptMetadata {
   name: BuiltinAgentName;

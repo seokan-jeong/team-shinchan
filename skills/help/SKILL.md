@@ -1,72 +1,72 @@
 ---
 name: help
-description: Team-Seokan 플러그인의 에이전트, 스킬, 메모리 시스템 사용법을 안내합니다. 도움이 필요할 때 사용합니다.
+description: Guide for using Team-Shinchan plugin's agents, skills, and memory system. Use when you need help.
 user-invocable: true
 ---
 
 # Help Skill
 
-## 에이전트 팀
+## Agent Team
 
-### 오케스트레이션
+### Orchestration
 
-| 캐릭터 | 역할 | 설명 |
-|--------|------|------|
-| 짱구 | Orchestrator | 작업 분석 및 위임 |
-| 짱아 | Atlas | 복잡한 작업 분해 |
-| 이슬 | Moderator | 토론 진행 및 중재 |
+| Character | Role | Description |
+|-----------|------|-------------|
+| Shinnosuke | Orchestrator | Task analysis and delegation |
+| Himawari | Atlas | Complex task decomposition |
+| Midori | Moderator | Discussion facilitation |
 
-### 실행
+### Execution
 
-| 캐릭터 | 역할 | 설명 |
-|--------|------|------|
-| 맹구 | Executor | 코드 작성/수정 |
-| 철수 | Hephaestus | 복잡한 구현 |
+| Character | Role | Description |
+|-----------|------|-------------|
+| Bo | Executor | Code writing/modification |
+| Kazama | Hephaestus | Complex implementation |
 
-### 전문가
+### Specialists
 
-| 캐릭터 | 역할 | 설명 |
-|--------|------|------|
-| 수지 | Frontend | UI/UX 개발 |
-| 흑곰 | Backend | 서버/API 개발 |
-| 훈이 | DevOps | 인프라/배포 |
+| Character | Role | Description |
+|-----------|------|-------------|
+| Aichan | Frontend | UI/UX development |
+| Bunta | Backend | Server/API development |
+| Masao | DevOps | Infrastructure/deployment |
 
-### 조언 (읽기 전용)
+### Advisors (Read-only)
 
-| 캐릭터 | 역할 | 설명 |
-|--------|------|------|
-| 신형만 | Oracle | 아키텍처 조언 |
-| 유리 | Planner | 전략적 계획 |
-| 봉미선 | Metis | 요구사항 분석 |
-| 액션가면 | Reviewer | 코드 리뷰 |
+| Character | Role | Description |
+|-----------|------|-------------|
+| Hiroshi | Oracle | Architecture advice |
+| Nene | Planner | Strategic planning |
+| Misae | Metis | Requirements analysis |
+| Action Kamen | Reviewer | Code review |
 
-### 탐색 (읽기 전용)
+### Exploration (Read-only)
 
-| 캐릭터 | 역할 | 설명 |
-|--------|------|------|
-| 흰둥이 | Explorer | 빠른 코드 탐색 |
-| 채성아 | Librarian | 문서 검색 |
-| 나미리 | Multimodal | 이미지 분석 |
+| Character | Role | Description |
+|-----------|------|-------------|
+| Shiro | Explorer | Fast code search |
+| Masumi | Librarian | Documentation search |
+| Ume | Multimodal | Image analysis |
 
-## 스킬 목록
+## Skills List
 
-| 스킬 | 트리거 | 설명 |
-|------|--------|------|
-| `/ultrawork` | 빠르게, 병렬, ulw | 병렬 실행 |
-| `/ralph` | 끝까지, 완료할 때까지 | 완료까지 반복 |
-| `/autopilot` | 자동으로, 알아서 | 자율 실행 |
-| `/plan` | 계획, 설계 | 계획 수립 |
-| `/analyze` | 분석, 디버깅 | 심층 분석 |
-| `/deepsearch` | 찾아줘, 검색 | 코드 탐색 |
-| `/debate` | 토론, 의견, 비교 | 에이전트 토론 |
-| `/memories` | - | 메모리 조회 |
-| `/learn` | - | 학습 추가 |
-| `/forget` | - | 메모리 삭제 |
+| Skill | Trigger | Description |
+|-------|---------|-------------|
+| `/ultrawork` | fast, parallel, ulw | Parallel execution |
+| `/ralph` | until done, complete | Loop until complete |
+| `/autopilot` | auto, automatically | Autonomous execution |
+| `/plan` | plan, design | Planning |
+| `/analyze` | analyze, debug | Deep analysis |
+| `/deepsearch` | find, search | Code search |
+| `/debate` | debate, opinion, compare | Agent debate |
+| `/memories` | - | View memories |
+| `/learn` | - | Add learning |
+| `/forget` | - | Delete memory |
 
-## 메모리 시스템
+## Memory System
 
-Team-Seokan은 사용할수록 똑똑해집니다:
-- 자동으로 패턴, 선호도, 실수를 학습
-- 학습된 내용을 다음 작업에 활용
-- `/memories`로 학습 내용 확인
-- `/learn`으로 수동 학습 추가
+Team-Shinchan gets smarter with use:
+- Automatically learns patterns, preferences, mistakes
+- Applies learnings to future tasks
+- `/memories` to view learnings
+- `/learn` to manually add learnings

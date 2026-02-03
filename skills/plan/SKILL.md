@@ -1,37 +1,37 @@
 ---
 name: plan
-description: 유리(Planner)와 함께 체계적인 작업 계획을 수립합니다. "계획해줘", "설계해줘", "plan" 요청 시 사용합니다.
+description: Create systematic work plans with Nene(Planner). Used for "plan", "design" requests.
 user-invocable: true
 ---
 
 # Plan Skill
 
-## 기능
+## Features
 
-- 유리(Planner)가 인터뷰를 통해 요구사항 명확화
-- 봉미선(Metis)이 숨겨진 요구사항과 위험 요소 분석
-- 테스트 가능한 수용 기준 포함 계획서 작성
-- 액션가면(Reviewer)이 계획 검토
+- Nene(Planner) clarifies requirements through interview
+- Misae(Metis) analyzes hidden requirements and risks
+- Creates plan with testable acceptance criteria
+- Action Kamen(Reviewer) reviews plan
 
-## 계획 프로세스
+## Planning Process
 
-1. **요구사항 인터뷰**: 목표, 제약 조건, 우선순위 파악
-2. **분석**: 숨겨진 요구사항 및 위험 요소 식별
-3. **계획 작성**: 구현 단계, 파일 참조, 검증 단계 포함
-4. **검토**: 액션가면이 피드백 제공
+1. **Requirements Interview**: Identify goals, constraints, priorities
+2. **Analysis**: Identify hidden requirements and risks
+3. **Plan Writing**: Include implementation steps, file references, verification steps
+4. **Review**: Action Kamen provides feedback
 
-## 워크플로우 체크리스트
+## Workflow Checklist
 
 ```
-[ ] 요구사항 인터뷰 완료
-[ ] 봉미선 분석 완료
-[ ] 계획서 초안 작성
-[ ] 액션가면 검토 통과
+[ ] Complete requirements interview
+[ ] Complete Misae analysis
+[ ] Draft plan document
+[ ] Pass Action Kamen review
 ```
 
-## 계획서 품질 기준
+## Plan Quality Criteria
 
-- 80% 이상의 주장이 파일/라인 참조 포함
-- 90% 이상의 수용 기준이 테스트 가능
-- 모호한 용어 없음
-- 모든 위험 요소에 대응 방안 존재
+- 80%+ of claims include file/line references
+- 90%+ of acceptance criteria are testable
+- No ambiguous terms
+- All risks have mitigation plans

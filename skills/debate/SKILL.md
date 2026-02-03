@@ -1,51 +1,51 @@
 ---
 name: debate
-description: 여러 전문가 에이전트가 토론하여 최적의 해결책을 도출합니다. "토론해줘", "장단점 비교", "의견 모아줘" 등의 요청 시 사용합니다.
+description: Specialized agents debate to find optimal solutions. Used for "debate", "pros and cons", "gather opinions" requests.
 user-invocable: true
 ---
 
 # Debate Skill
 
-## 기능
+## Features
 
-- 주제에 적합한 전문가 에이전트를 자동 소집
-- 최대 3라운드의 구조화된 토론 진행
-- 신형만(Oracle)이 의견 종합하여 최종안 도출
-- 액션가면(Reviewer)이 합의안 검증
+- Auto-summons expert agents based on topic
+- Conducts structured discussions up to 3 rounds
+- Hiroshi(Oracle) synthesizes final recommendation
+- Action Kamen(Reviewer) verifies consensus
 
-## 토론 패턴
+## Discussion Patterns
 
-| 패턴 | 설명 | 적합한 상황 |
-|------|------|------------|
-| 라운드 테이블 | 순차적 의견 제시 후 상호 피드백 | 일반적인 의사결정 |
-| 변증법 | 정(Thesis) ↔ 반(Antithesis) → 합(Synthesis) | 대립되는 의견 조율 |
-| 전문가 패널 | 도메인별 관점 제시 | 다분야 관련 주제 |
+| Pattern | Description | Best For |
+|---------|-------------|----------|
+| Round Table | Sequential opinions with mutual feedback | General decisions |
+| Dialectic | Thesis ↔ Antithesis → Synthesis | Opposing viewpoints |
+| Expert Panel | Domain-specific perspectives | Multi-domain topics |
 
-## 참여자 자동 선정
+## Automatic Participant Selection
 
-| 주제 | 소집 에이전트 |
-|------|--------------|
-| UI, 프론트엔드 | 수지, 신형만 |
-| API, 백엔드, DB | 흑곰, 신형만 |
-| 배포, 인프라 | 훈이, 신형만 |
-| 아키텍처, 설계 | 신형만, 유리, 봉미선 |
-| 전체 시스템 | 수지, 흑곰, 훈이, 신형만 |
+| Topic | Summoned Agents |
+|-------|-----------------|
+| UI, Frontend | Aichan, Hiroshi |
+| API, Backend, DB | Bunta, Hiroshi |
+| Deploy, Infrastructure | Masao, Hiroshi |
+| Architecture, Design | Hiroshi, Nene, Misae |
+| Full System | Aichan, Bunta, Masao, Hiroshi |
 
-## 워크플로우 체크리스트
+## Workflow Checklist
 
 ```
-[ ] Phase 1: 문제 정의 및 패널 소집
-[ ] Phase 2: 의견 수집 (병렬 실행)
-[ ] Phase 3: 토론 라운드 (최대 3회)
-[ ] Phase 4: 합의 도출 (신형만)
-[ ] Phase 5: 검증 (액션가면)
+[ ] Phase 1: Define problem and summon panel
+[ ] Phase 2: Collect opinions (parallel)
+[ ] Phase 3: Discussion rounds (max 3)
+[ ] Phase 4: Reach consensus (Hiroshi)
+[ ] Phase 5: Verify (Action Kamen)
 ```
 
-## 토론 규칙
+## Discussion Rules
 
-- 최대 라운드: 3회
-- 발언 제한: 각 에이전트 최대 500토큰
-- 합의 실패 시: 투표로 결정 또는 에스컬레이션
-- 중재자 개입: 평행선일 때 이슬(Moderator)이 중재
+- Max rounds: 3
+- Token limit: 500 tokens per agent per turn
+- No consensus: Vote or escalate
+- Moderator intervention: Midori(Moderator) mediates deadlocks
 
-상세 워크플로우는 [WORKFLOW.md](./WORKFLOW.md) 참조
+See [WORKFLOW.md](./WORKFLOW.md) for detailed workflow

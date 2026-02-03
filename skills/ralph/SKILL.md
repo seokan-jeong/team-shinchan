@@ -1,43 +1,43 @@
 ---
 name: ralph
-description: 작업이 완전히 완료될 때까지 끈기있게 반복 실행합니다. "끝까지", "완료할 때까지", "dont stop" 요청 시 사용합니다.
+description: Persistently loops until task is fully complete. Used for "until done", "complete it", "dont stop" requests.
 user-invocable: true
 ---
 
 # Ralph Skill
 
-## 기능
+## Features
 
-- 작업 완료까지 무한 반복 시도
-- 에러 발생 시 자동 복구 시도
-- TODO 리스트로 진행 상황 추적
-- 액션가면(Reviewer)의 최종 검증
+- Infinite retry until task completion
+- Auto-recovery on errors
+- Progress tracking via TODO list
+- Final verification by Action Kamen(Reviewer)
 
-## Ralph 루프
+## Ralph Loop
 
-1. TODO 리스트 확인
-2. 다음 작업 수행
-3. 결과 검증
-4. 실패 시 → 원인 분석 → 재시도
-5. 성공 시 → 다음 작업으로
-6. 모든 작업 완료 → 최종 검증
-7. 검증 실패 → 수정 후 재검증
+1. Check TODO list
+2. Execute next task
+3. Verify result
+4. On failure → analyze cause → retry
+5. On success → next task
+6. All tasks done → final verification
+7. Verification failed → fix and re-verify
 
-## 워크플로우 체크리스트
+## Workflow Checklist
 
 ```
-[ ] 작업 목록 초기화
-[ ] 현재 작업 수행
-[ ] 작업 결과 검증
-[ ] 모든 작업 완료
-[ ] 액션가면 최종 검증
+[ ] Initialize task list
+[ ] Execute current task
+[ ] Verify task result
+[ ] Complete all tasks
+[ ] Action Kamen final verification
 ```
 
-## 완료 조건
+## Completion Criteria
 
-다음 모든 조건 충족 시에만 완료:
-- TODO 리스트의 모든 항목 완료
-- 빌드/테스트 통과
-- 액션가면의 리뷰 승인
+Complete only when ALL conditions met:
+- All TODO list items completed
+- Build/tests pass
+- Action Kamen review approved
 
-**조건 미충족 시 자동으로 계속 작업**
+**Auto-continues if criteria not met**

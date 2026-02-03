@@ -1,95 +1,95 @@
-# Debate 워크플로우 상세
+# Debate Workflow Details
 
-## Phase 1: 문제 정의 및 패널 소집
+## Phase 1: Problem Definition and Panel Assembly
 
-이슬(Moderator)가 주제를 분석하고 적합한 전문가를 소집합니다.
+Midori(Moderator) analyzes the topic and summons appropriate experts.
 
-**수행 작업:**
-1. 토론 주제 명확화
-2. 키워드 기반 참여자 자동 선정
-3. 토론 규칙 안내
+**Tasks:**
+1. Clarify discussion topic
+2. Auto-select participants based on keywords
+3. Announce discussion rules
 
-## Phase 2: 의견 수집
+## Phase 2: Opinion Collection
 
-각 에이전트가 독립적으로 의견을 제시합니다.
+Each agent independently presents their opinion.
 
-**병렬 실행 예시:**
+**Parallel Execution Example:**
 ```
-Task(subagent_type="team-seokan:suji", prompt="주제: [topic]\n전문적 의견을 제시해주세요.")
-Task(subagent_type="team-seokan:heukgom", prompt="주제: [topic]\n전문적 의견을 제시해주세요.")
+Task(subagent_type="team-shinchan:aichan", prompt="Topic: [topic]\nPlease provide your expert opinion.")
+Task(subagent_type="team-shinchan:bunta", prompt="Topic: [topic]\nPlease provide your expert opinion.")
 ```
 
-**의견 포함 사항:**
-- 핵심 의견
-- 장점
-- 단점
-- 권장 사항
+**Opinion Contents:**
+- Core opinion
+- Pros
+- Cons
+- Recommendations
 
-## Phase 3: 토론 라운드
+## Phase 3: Discussion Rounds
 
-수집된 의견을 공유하고 상호 피드백합니다.
+Share collected opinions and provide mutual feedback.
 
-**라운드별 진행:**
-1. Round 1: 초기 의견에 대한 반론/동의
-2. Round 2: 논점 정리 및 조율
-3. Round 3: 최종 입장 정리
+**Round Progression:**
+1. Round 1: Rebuttals/agreements on initial opinions
+2. Round 2: Consolidate issues and adjust positions
+3. Round 3: Finalize positions
 
-**조기 종료 조건:**
-- 모든 참여자 합의 도달
-- 주요 쟁점 해소
+**Early Termination Conditions:**
+- All participants reach consensus
+- Major issues resolved
 
-## Phase 4: 합의 도출
+## Phase 4: Consensus Building
 
-신형만(Oracle)이 모든 의견을 종합합니다.
+Hiroshi(Oracle) synthesizes all opinions.
 
-**종합 내용:**
-- 각 의견의 핵심 요약
-- 공통점과 차이점 분석
-- 최적 해결책 제시
-- 트레이드오프 설명
+**Synthesis Contents:**
+- Summary of each opinion
+- Analysis of commonalities and differences
+- Optimal solution proposal
+- Trade-off explanation
 
-## Phase 5: 검증
+## Phase 5: Verification
 
-액션가면(Reviewer)이 합의안을 검토합니다.
+Action Kamen(Reviewer) reviews the consensus.
 
-**검증 기준:**
-- 모든 요구사항 충족 여부
-- 기술적 실현 가능성
-- 잠재적 위험 요소
+**Verification Criteria:**
+- All requirements met
+- Technical feasibility
+- Potential risks
 
-**결과:**
-- ✅ 승인: 합의안 확정
-- ❌ 수정 필요: 피드백 반영 후 재토론
+**Results:**
+- ✅ Approved: Consensus finalized
+- ❌ Revision needed: Feedback applied and re-debate
 
-## 출력 형식
+## Output Format
 
 ```markdown
-## 토론 결과
+## Discussion Result
 
-### 주제
-[토론 주제]
+### Topic
+[Discussion topic]
 
-### 참여자
-- 에이전트A (역할)
-- 에이전트B (역할)
+### Participants
+- Agent A (Role)
+- Agent B (Role)
 
-### 의견 요약
-| 에이전트 | 핵심 의견 | 장점 | 단점 |
-|----------|-----------|------|------|
+### Opinion Summary
+| Agent | Core Opinion | Pros | Cons |
+|-------|--------------|------|------|
 | A | ... | ... | ... |
 | B | ... | ... | ... |
 
-### 토론 하이라이트
+### Discussion Highlights
 - Round 1: ...
 - Round 2: ...
 
-### 합의안
-[최종 합의된 방안]
+### Consensus
+[Final agreed solution]
 
-### 근거
-- 이유 1
-- 이유 2
+### Rationale
+- Reason 1
+- Reason 2
 
-### 검증 결과
-✅ 승인 / ❌ 수정 필요
+### Verification Result
+✅ Approved / ❌ Revision needed
 ```

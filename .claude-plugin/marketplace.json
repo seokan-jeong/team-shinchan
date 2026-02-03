@@ -1,29 +1,29 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "team-seokan",
+  "name": "team-shinchan",
   "metadata": {
-    "description": "짱구 캐릭터 기반 멀티 에이전트 오케스트레이션 시스템. 15개 전문 에이전트 + 토론 시스템 + 자기학습 메모리 시스템을 제공합니다."
+    "description": "Shinchan character-based multi-agent orchestration system. Provides 15 specialist agents + debate system + self-learning memory system."
   },
-  "description": "15개 짱구 캐릭터 에이전트 + 토론 시스템 + 자기학습 메모리 시스템",
+  "description": "15 Shinchan character agents + Debate system + Self-learning memory system",
   "owner": {
     "name": "seokan",
     "email": "kd04199@gmail.com"
   },
   "plugins": [
     {
-      "name": "team-seokan",
+      "name": "team-shinchan",
       "version": "2.1.0",
-      "description": "15개 짱구 캐릭터 에이전트 + 토론 시스템 + 자기학습 메모리 시스템",
+      "description": "15 Shinchan character agents + Debate system + Self-learning memory system",
       "category": "productivity",
       "source": "./",
-      "homepage": "https://github.com/seokan-jeong/team-seokan",
+      "homepage": "https://github.com/seokan-jeong/team-shinchan",
       "tags": [
         "multi-agent",
         "orchestration",
         "self-learning",
         "memory",
         "reflection",
-        "korean"
+        "shinchan"
       ]
     }
   ]

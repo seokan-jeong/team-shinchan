@@ -1,40 +1,40 @@
 ---
 name: analyze
-description: 신형만(Oracle)과 함께 코드, 버그, 성능, 아키텍처를 심층 분석합니다. "분석해줘", "디버깅", "왜 안돼" 요청 시 사용합니다.
+description: Deep analysis of code, bugs, performance, architecture with Hiroshi(Oracle). Used for "analyze", "debug", "why isn't it working" requests.
 user-invocable: true
 ---
 
 # Analyze Skill
 
-## 기능
+## Features
 
-- 코드 구조, 의존성, 복잡도 분석
-- 에러 원인 추적 및 스택 트레이스 분석
-- 성능 병목 지점 식별 및 최적화 방안 제안
-- 전체 아키텍처 파악 및 개선 방안 제안
+- Analyze code structure, dependencies, complexity
+- Trace error causes and stack traces
+- Identify performance bottlenecks and suggest optimizations
+- Understand overall architecture and suggest improvements
 
-## 분석 유형
+## Analysis Types
 
-| 유형 | 분석 내용 |
-|------|----------|
-| 코드 분석 | 구조, 의존성, 복잡도 |
-| 버그 분석 | 에러 원인, 스택 트레이스, 재현 조건 |
-| 성능 분석 | 병목 지점, 메모리, 최적화 방안 |
-| 아키텍처 분석 | 전체 구조, 개선 방안, 트레이드오프 |
+| Type | Analysis Contents |
+|------|-------------------|
+| Code Analysis | Structure, dependencies, complexity |
+| Bug Analysis | Error causes, stack traces, reproduction conditions |
+| Performance Analysis | Bottlenecks, memory, optimization strategies |
+| Architecture Analysis | Overall structure, improvements, trade-offs |
 
-## 워크플로우 체크리스트
+## Workflow Checklist
 
 ```
-[ ] 분석 대상 및 유형 파악
-[ ] 관련 코드/로그 수집
-[ ] 신형만(Oracle) 분석 수행
-[ ] 결과 정리 및 권장 사항 도출
+[ ] Identify analysis target and type
+[ ] Collect related code/logs
+[ ] Perform Hiroshi(Oracle) analysis
+[ ] Organize results and derive recommendations
 ```
 
-## 분석 결과
+## Analysis Results
 
-분석 완료 시 제공:
-- 현재 상태 요약
-- 발견된 문제점
-- 권장 해결 방안
-- 관련 파일 및 라인 참조
+Provided on completion:
+- Current state summary
+- Discovered issues
+- Recommended solutions
+- Related file and line references

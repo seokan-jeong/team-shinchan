@@ -1,10 +1,10 @@
 {
-  "name": "team-seokan",
+  "name": "team-shinchan",
   "version": "2.1.0",
-  "description": "15개 짱구 캐릭터 에이전트 + 토론 시스템 + 자기학습 메모리 시스템",
+  "description": "15 Shinchan character agents + Debate system + Self-learning memory system",
   "main": "dist/index.js",
   "author": "seokan",
-  "homepage": "https://github.com/seokan/team-seokan",
+  "homepage": "https://github.com/seokan/team-shinchan",
   "claude": {
     "minVersion": "1.0.0"
   },
@@ -25,20 +25,20 @@
     "enableTodoEnforcer": true,
     "enableIntentGate": true,
     "enableReviewerCheck": true,
-    "language": "ko"
+    "language": "en"
   },
   "features": {
     "memory": {
-      "description": "사용할수록 똑똑해지는 자기학습 시스템",
-      "storage": ["~/.team-seokan/memories/", ".team-seokan/memories/"],
+      "description": "Self-learning system that gets smarter with use",
+      "storage": ["~/.team-shinchan/memories/", ".team-shinchan/memories/"],
       "categories": ["preference", "pattern", "context", "mistake", "decision", "convention", "insight"]
     },
     "reflection": {
-      "description": "작업 완료 후 자동 회고",
+      "description": "Automatic reflection after task completion",
       "depths": ["simple", "standard", "deep"]
     },
     "bootstrap": {
-      "description": "프로젝트 첫 실행 시 자동 분석",
+      "description": "Automatic analysis on first project run",
       "includes": ["conventions", "patterns", "best-practices"]
     }
   }

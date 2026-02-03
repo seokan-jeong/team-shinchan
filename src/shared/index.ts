@@ -1,5 +1,5 @@
 /**
- * Team-Seokan 공유 유틸리티
+ * Team-Shinchan 공유 유틸리티
  */
 
 import type { ModelTier, BuiltinAgentName } from '../types';
@@ -23,39 +23,39 @@ export function createEnvContext(): string {
 // ============================================================
 
 export const AGENT_DISPLAY_NAMES: Record<BuiltinAgentName, string> = {
-  jjangu: '짱구',
-  jjanga: '짱아',
-  yiseul: '이슬',
-  maenggu: '맹구',
-  cheolsu: '철수',
-  suji: '수지',
-  heukgom: '흑곰',
-  hooni: '훈이',
-  shinhyungman: '신형만',
-  yuri: '유리',
-  bongmisun: '봉미선',
-  actiongamen: '액션가면',
-  heendungi: '흰둥이',
-  chaesunga: '채성아',
-  namiri: '나미리',
+  shinnosuke: 'Shinnosuke',
+  himawari: 'Himawari',
+  midori: 'Midori',
+  bo: 'Bo',
+  kazama: 'Kazama',
+  aichan: 'Aichan',
+  bunta: 'Bunta',
+  masao: 'Masao',
+  hiroshi: 'Hiroshi',
+  nene: 'Nene',
+  misae: 'Misae',
+  actionkamen: 'Action Kamen',
+  shiro: 'Shiro',
+  masumi: 'Masumi',
+  ume: 'Ume',
 };
 
 export const AGENT_ROLES: Record<BuiltinAgentName, string> = {
-  jjangu: 'Orchestrator',
-  jjanga: 'Atlas',
-  yiseul: 'Moderator',
-  maenggu: 'Executor',
-  cheolsu: 'Hephaestus',
-  suji: 'Frontend',
-  heukgom: 'Backend',
-  hooni: 'DevOps',
-  shinhyungman: 'Oracle',
-  yuri: 'Planner',
-  bongmisun: 'Metis',
-  actiongamen: 'Reviewer',
-  heendungi: 'Explorer',
-  chaesunga: 'Librarian',
-  namiri: 'Multimodal',
+  shinnosuke: 'Orchestrator',
+  himawari: 'Atlas',
+  midori: 'Moderator',
+  bo: 'Executor',
+  kazama: 'Hephaestus',
+  aichan: 'Frontend',
+  bunta: 'Backend',
+  masao: 'DevOps',
+  hiroshi: 'Oracle',
+  nene: 'Planner',
+  misae: 'Metis',
+  actionkamen: 'Reviewer',
+  shiro: 'Explorer',
+  masumi: 'Librarian',
+  ume: 'Multimodal',
 };
 
 export function getAgentDisplayName(name: BuiltinAgentName): string {
@@ -149,7 +149,7 @@ export function unique<T>(array: T[]): T[] {
 
 export function log(category: string, message: string, data?: unknown): void {
   const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] [Team-Seokan:${category}] ${message}`);
+  console.log(`[${timestamp}] [Team-Shinchan:${category}] ${message}`);
   if (data) {
     console.log(JSON.stringify(data, null, 2));
   }
@@ -157,7 +157,7 @@ export function log(category: string, message: string, data?: unknown): void {
 
 export function logError(category: string, message: string, error?: unknown): void {
   const timestamp = new Date().toISOString();
-  console.error(`[${timestamp}] [Team-Seokan:${category}] ERROR: ${message}`);
+  console.error(`[${timestamp}] [Team-Shinchan:${category}] ERROR: ${message}`);
   if (error) {
     console.error(error);
   }
@@ -165,7 +165,7 @@ export function logError(category: string, message: string, error?: unknown): vo
 
 export function logWarning(category: string, message: string): void {
   const timestamp = new Date().toISOString();
-  console.warn(`[${timestamp}] [Team-Seokan:${category}] WARNING: ${message}`);
+  console.warn(`[${timestamp}] [Team-Shinchan:${category}] WARNING: ${message}`);
 }
 
 // ============================================================

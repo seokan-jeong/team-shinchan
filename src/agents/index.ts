@@ -1,51 +1,51 @@
 /**
- * Team-Seokan 에이전트 시스템
+ * Team-Shinchan Agent System
  */
 
 import type { AgentConfig, PluginSettings, BuiltinAgentName } from '../types';
 import { AGENT_MODEL_MAP, READ_ONLY_AGENTS } from '../config';
 
-// 에이전트 생성 함수들
-import { createJjanguAgent } from './jjangu';
-import { createJjangaAgent } from './jjanga';
-import { createMaengguAgent } from './maenggu';
-import { createCheolsuAgent } from './cheolsu';
-import { createSujiAgent } from './suji';
-import { createHeukgomAgent } from './heukgom';
-import { createHooniAgent } from './hooni';
-import { createShinhyungmanAgent } from './shinhyungman';
-import { createYuriAgent } from './yuri';
-import { createBongmisunAgent } from './bongmisun';
-import { createActiongamenAgent } from './actiongamen';
-import { createHeendungiAgent } from './heendungi';
-import { createChaesungaAgent } from './chaesunga';
-import { createNamiriAgent } from './namiri';
-import { createYiseulAgent } from './yiseul';
+// Agent factory functions
+import { createShinnosukeAgent } from './shinnosuke';
+import { createHimawariAgent } from './himawari';
+import { createBoAgent } from './bo';
+import { createKazamaAgent } from './kazama';
+import { createAichanAgent } from './aichan';
+import { createBuntaAgent } from './bunta';
+import { createMasaoAgent } from './masao';
+import { createHiroshiAgent } from './hiroshi';
+import { createNeneAgent } from './nene';
+import { createMisaeAgent } from './misae';
+import { createActionKamenAgent } from './actionkamen';
+import { createShiroAgent } from './shiro';
+import { createMasumiAgent } from './masumi';
+import { createUmeAgent } from './ume';
+import { createMidoriAgent } from './midori';
 
 // ============================================================
-// 에이전트 팩토리 맵
+// Agent Factory Map
 // ============================================================
 
 const AGENT_FACTORIES: Record<BuiltinAgentName, (settings: PluginSettings) => AgentConfig> = {
-  jjangu: createJjanguAgent,
-  jjanga: createJjangaAgent,
-  maenggu: createMaengguAgent,
-  cheolsu: createCheolsuAgent,
-  suji: createSujiAgent,
-  heukgom: createHeukgomAgent,
-  hooni: createHooniAgent,
-  shinhyungman: createShinhyungmanAgent,
-  yuri: createYuriAgent,
-  bongmisun: createBongmisunAgent,
-  actiongamen: createActiongamenAgent,
-  heendungi: createHeendungiAgent,
-  chaesunga: createChaesungaAgent,
-  namiri: createNamiriAgent,
-  yiseul: createYiseulAgent,
+  shinnosuke: createShinnosukeAgent,
+  himawari: createHimawariAgent,
+  bo: createBoAgent,
+  kazama: createKazamaAgent,
+  aichan: createAichanAgent,
+  bunta: createBuntaAgent,
+  masao: createMasaoAgent,
+  hiroshi: createHiroshiAgent,
+  nene: createNeneAgent,
+  misae: createMisaeAgent,
+  actionkamen: createActionKamenAgent,
+  shiro: createShiroAgent,
+  masumi: createMasumiAgent,
+  ume: createUmeAgent,
+  midori: createMidoriAgent,
 };
 
 // ============================================================
-// 모든 내장 에이전트 생성
+// Create all builtin agents
 // ============================================================
 
 export async function createBuiltinAgents(settings: PluginSettings): Promise<AgentConfig[]> {
@@ -54,14 +54,14 @@ export async function createBuiltinAgents(settings: PluginSettings): Promise<Age
   for (const [name, factory] of Object.entries(AGENT_FACTORIES)) {
     const agentName = name as BuiltinAgentName;
 
-    // 비활성화된 에이전트 건너뛰기
+    // Skip disabled agents
     if (settings.agentOverrides?.[agentName]?.disabled) {
       continue;
     }
 
     const agent = factory(settings);
 
-    // 오버라이드 적용
+    // Apply overrides
     if (settings.agentOverrides?.[agentName]) {
       const override = settings.agentOverrides[agentName];
       if (override.model) {
@@ -85,7 +85,7 @@ export async function createBuiltinAgents(settings: PluginSettings): Promise<Age
 }
 
 // ============================================================
-// 에이전트 조회
+// Agent lookup
 // ============================================================
 
 export function getAgentByName(
@@ -104,23 +104,23 @@ export function getAgentModel(name: BuiltinAgentName, settings: PluginSettings):
 }
 
 // ============================================================
-// 내보내기
+// Exports
 // ============================================================
 
 export {
-  createJjanguAgent,
-  createJjangaAgent,
-  createMaengguAgent,
-  createCheolsuAgent,
-  createSujiAgent,
-  createHeukgomAgent,
-  createHooniAgent,
-  createShinhyungmanAgent,
-  createYuriAgent,
-  createBongmisunAgent,
-  createActiongamenAgent,
-  createHeendungiAgent,
-  createChaesungaAgent,
-  createNamiriAgent,
-  createYiseulAgent,
+  createShinnosukeAgent,
+  createHimawariAgent,
+  createBoAgent,
+  createKazamaAgent,
+  createAichanAgent,
+  createBuntaAgent,
+  createMasaoAgent,
+  createHiroshiAgent,
+  createNeneAgent,
+  createMisaeAgent,
+  createActionKamenAgent,
+  createShiroAgent,
+  createMasumiAgent,
+  createUmeAgent,
+  createMidoriAgent,
 };

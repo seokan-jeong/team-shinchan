@@ -1,44 +1,44 @@
 ---
 name: deepsearch
-description: 흰둥이(Explorer)와 채성아(Librarian)가 코드베이스를 심층 탐색합니다. "찾아줘", "어디있어", "검색해줘" 요청 시 사용합니다.
+description: Deep codebase exploration with Shiro(Explorer) and Masumi(Librarian). Used for "find", "where is", "search" requests.
 user-invocable: true
 ---
 
 # Deepsearch Skill
 
-## 기능
+## Features
 
-- 흰둥이(Explorer): 빠른 파일명/키워드 검색
-- 채성아(Librarian): 코드 내용 분석 및 의존성 추적
-- 파일, 함수, 클래스, 문서, 패턴 검색 지원
+- Shiro(Explorer): Fast filename/keyword search
+- Masumi(Librarian): Code content analysis and dependency tracking
+- Supports searching files, functions, classes, docs, patterns
 
-## 탐색 단계
+## Search Stages
 
-1. **빠른 탐색 (흰둥이)**: 파일명 패턴 매칭, 키워드 검색, 디렉토리 구조 파악
-2. **심층 탐색 (채성아)**: 코드 내용 분석, 관련 문서 검색, 의존성 추적
+1. **Quick Search (Shiro)**: Filename pattern matching, keyword search, directory structure
+2. **Deep Search (Masumi)**: Code content analysis, related doc search, dependency tracking
 
-## 검색 대상
+## Search Targets
 
-| 대상 | 설명 |
-|------|------|
-| 파일 | 파일명, 경로로 검색 |
-| 함수 | 함수명, 시그니처로 검색 |
-| 클래스 | 클래스명, 상속 관계로 검색 |
-| 문서 | README, 주석, 문서 검색 |
-| 패턴 | 코드 패턴으로 검색 |
+| Target | Description |
+|--------|-------------|
+| Files | Search by filename, path |
+| Functions | Search by function name, signature |
+| Classes | Search by class name, inheritance |
+| Docs | README, comments, documentation |
+| Patterns | Search by code patterns |
 
-## 워크플로우 체크리스트
+## Workflow Checklist
 
 ```
-[ ] 검색 키워드/대상 파악
-[ ] 흰둥이 빠른 탐색 수행
-[ ] 필요 시 채성아 심층 탐색
-[ ] 결과 정리 및 제공
+[ ] Identify search keywords/targets
+[ ] Perform Shiro quick search
+[ ] Perform Masumi deep search if needed
+[ ] Organize and provide results
 ```
 
-## 결과 형식
+## Result Format
 
-- 파일 경로 및 라인 번호
-- 관련 코드 스니펫
-- 컨텍스트 설명
-- 관련 파일 목록
+- File paths and line numbers
+- Related code snippets
+- Context explanation
+- Related file list

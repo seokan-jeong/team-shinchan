@@ -1,7 +1,7 @@
 {
-  "name": "team-seokan",
+  "name": "team-shinchan",
   "version": "2.1.0",
-  "description": "짱구 캐릭터 기반 멀티 에이전트 오케스트레이션 시스템 for Claude Code",
+  "description": "Shinchan character-based multi-agent orchestration system for Claude Code",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -10,14 +10,15 @@
     "test": "bun test",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
-    "install-plugin": "bun run build && cp -r dist ~/.claude/plugins/team-seokan/"
+    "install-plugin": "bun run build && cp -r dist ~/.claude/plugins/team-shinchan/"
   },
   "keywords": [
     "claude-code",
     "plugin",
     "multi-agent",
     "orchestration",
-    "team-seokan"
+    "team-shinchan",
+    "shinchan"
   ],
   "author": "seokan",
   "license": "MIT",

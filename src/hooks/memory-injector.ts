@@ -36,6 +36,7 @@ export function createMemoryInjectorHook(context: PluginContext): HookConfig {
     event: 'PreToolUse',
     description: '에이전트 실행 전 학습된 메모리를 주입합니다.',
     enabled: true,
+    priority: 80,
 
     handler: async ({
       toolName,
@@ -44,7 +45,7 @@ export function createMemoryInjectorHook(context: PluginContext): HookConfig {
     }): Promise<HookResult> => {
       // Task 도구만 처리
       if (toolName !== 'Task') {
-        return { shouldContinue: true };
+        return { continue: true };
       }
 
       const input = toolInput as Record<string, unknown>;
@@ -52,41 +53,38 @@ export function createMemoryInjectorHook(context: PluginContext): HookConfig {
       const prompt = input.prompt as string;
 
       if (!subagentType || !prompt) {
-        return { shouldContinue: true };
+        return { continue: true };
       }
 
       // 에이전트 이름 추출
       const agentName = extractAgentName(subagentType);
 
       if (!agentName) {
-        return { shouldContinue: true };
+        return { continue: true };
       }
 
       try {
         // 캐시된 컨텍스트 가져오기
-        const context = await getCachedAgentContext(agentName, prompt);
+        const memoryContext = await getCachedAgentContext(agentName, prompt);
 
-        if (!context || context.trim() === '') {
-          return { shouldContinue: true };
+        if (!memoryContext || memoryContext.trim() === '') {
+          return { continue: true };
         }
 
-        // 프롬프트에 컨텍스트 주입
-        const enhancedPrompt = prompt + '\n\n' + context;
-
         // 세션 상태에 마지막 에이전트 기록
-        sessionState.lastAgent = agentName;
-        sessionState.taskStartTime = Date.now();
+        if (sessionState) {
+          (sessionState as any).lastAgent = agentName;
+          (sessionState as any).taskStartTime = Date.now();
+        }
 
+        // 메모리 컨텍스트를 inject로 주입
         return {
-          shouldContinue: true,
-          modifiedInput: {
-            ...input,
-            prompt: enhancedPrompt,
-          },
+          continue: true,
+          inject: memoryContext,
         };
       } catch (error) {
         console.error('Memory injection error:', error);
-        return { shouldContinue: true };
+        return { continue: true };
       }
     },
   };
@@ -101,6 +99,7 @@ export function createMemoryInitHook(pluginContext: PluginContext): HookConfig {
     event: 'SessionStart',
     description: '세션 시작 시 메모리 시스템을 초기화합니다.',
     enabled: true,
+    priority: 100,
 
     handler: async ({ sessionState }): Promise<HookResult> => {
       try {
@@ -108,24 +107,25 @@ export function createMemoryInitHook(pluginContext: PluginContext): HookConfig {
         contextCache.invalidate();
 
         // 부트스트랩 체크 (첫 실행 시)
-        const isFirstRun = !sessionState.memoryInitialized;
+        const state = sessionState as any;
+        const isFirstRun = !state?.memoryInitialized;
 
-        if (isFirstRun) {
-          sessionState.memoryInitialized = true;
+        if (isFirstRun && state) {
+          state.memoryInitialized = true;
 
           // 프로젝트 분석 플래그 설정
-          sessionState.shouldRunBootstrap = true;
+          state.shouldRunBootstrap = true;
         }
 
         return {
-          shouldContinue: true,
+          continue: true,
           message: isFirstRun
             ? '🧠 메모리 시스템 초기화됨'
             : undefined,
         };
       } catch (error) {
         console.error('Memory init error:', error);
-        return { shouldContinue: true };
+        return { continue: true };
       }
     },
   };

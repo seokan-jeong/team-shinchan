@@ -115,12 +115,12 @@ export function stripXmlTags(str: string): string {
 // 키워드 매칭
 // ============================================================
 
-export function matchKeywords(text: string, keywords: string[]): boolean {
+export function matchKeywords(text: string, keywords: readonly string[]): boolean {
   const lowerText = text.toLowerCase();
   return keywords.some((keyword) => lowerText.includes(keyword.toLowerCase()));
 }
 
-export function findMatchedKeyword(text: string, keywords: string[]): string | undefined {
+export function findMatchedKeyword(text: string, keywords: readonly string[]): string | undefined {
   const lowerText = text.toLowerCase();
   return keywords.find((keyword) => lowerText.includes(keyword.toLowerCase()));
 }

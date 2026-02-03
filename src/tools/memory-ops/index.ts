@@ -11,55 +11,61 @@ import type { MemoryCategory, MemoryScope, MemoryOwner } from '../../features/me
 export function createMemoryOpsTool(context: PluginContext): ToolConfig {
   return {
     name: 'memory_ops',
-    displayName: 'Memory Operations',
-    description: '메모리를 읽고, 쓰고, 검색합니다.',
-    parameters: {
-      type: 'object',
-      properties: {
-        operation: {
-          type: 'string',
-          enum: ['read', 'write', 'search', 'reinforce', 'contradict'],
-          description: '수행할 작업 (read: 메모리 읽기, write: 메모리 쓰기, search: 검색, reinforce: 강화, contradict: 반박)',
-        },
-        // read 파라미터
-        memoryId: {
-          type: 'string',
-          description: '(read/reinforce/contradict) 메모리 ID',
-        },
-        // write 파라미터
-        content: {
-          type: 'string',
-          description: '(write) 저장할 내용',
-        },
-        category: {
-          type: 'string',
-          enum: ['preference', 'pattern', 'context', 'mistake', 'decision', 'convention', 'insight'],
-          description: '(write) 메모리 카테고리',
-        },
-        scope: {
-          type: 'string',
-          enum: ['global', 'project'],
-          description: '(write) 메모리 범위 (기본: project)',
-        },
-        tags: {
-          type: 'array',
-          items: { type: 'string' },
-          description: '(write) 태그 목록',
-        },
-        // search 파라미터
-        keyword: {
-          type: 'string',
-          description: '(search) 검색 키워드',
-        },
-        limit: {
-          type: 'number',
-          description: '(search) 최대 결과 수 (기본: 5)',
-        },
+    description: '메모리를 읽고, 쓰고, 검색합니다. (read: 읽기, write: 쓰기, search: 검색, reinforce: 강화, contradict: 반박)',
+    parameters: [
+      {
+        name: 'operation',
+        type: 'string',
+        description: '수행할 작업: read, write, search, reinforce, contradict',
+        required: true,
       },
-      required: ['operation'],
-    },
+      {
+        name: 'memoryId',
+        type: 'string',
+        description: '(read/reinforce/contradict) 메모리 ID',
+        required: false,
+      },
+      {
+        name: 'content',
+        type: 'string',
+        description: '(write) 저장할 내용',
+        required: false,
+      },
+      {
+        name: 'category',
+        type: 'string',
+        description: '(write) 메모리 카테고리: preference, pattern, context, mistake, decision, convention, insight',
+        required: false,
+      },
+      {
+        name: 'scope',
+        type: 'string',
+        description: '(write) 메모리 범위: global, project (기본: project)',
+        required: false,
+        default: 'project',
+      },
+      {
+        name: 'tags',
+        type: 'array',
+        description: '(write) 태그 목록',
+        required: false,
+      },
+      {
+        name: 'keyword',
+        type: 'string',
+        description: '(search) 검색 키워드',
+        required: false,
+      },
+      {
+        name: 'limit',
+        type: 'number',
+        description: '(search) 최대 결과 수 (기본: 5)',
+        required: false,
+        default: 5,
+      },
+    ],
 
-    handler: async ({ params, sessionState }): Promise<ToolResult> => {
+    handler: async (params: Record<string, unknown>): Promise<ToolResult> => {
       const manager = getMemoryManager();
       await manager.initialize();
 
@@ -69,12 +75,12 @@ export function createMemoryOpsTool(context: PluginContext): ToolConfig {
         case 'read': {
           const memoryId = params.memoryId as string;
           if (!memoryId) {
-            return { success: false, output: 'memoryId가 필요합니다.' };
+            return { success: false, error: 'memoryId가 필요합니다.' };
           }
 
           const memory = await manager.read(memoryId);
           if (!memory) {
-            return { success: false, output: `ID ${memoryId}의 메모리를 찾을 수 없습니다.` };
+            return { success: false, error: `ID ${memoryId}의 메모리를 찾을 수 없습니다.` };
           }
 
           return {
@@ -94,13 +100,13 @@ export function createMemoryOpsTool(context: PluginContext): ToolConfig {
         case 'write': {
           const content = params.content as string;
           if (!content) {
-            return { success: false, output: 'content가 필요합니다.' };
+            return { success: false, error: 'content가 필요합니다.' };
           }
 
           const learning = createSimpleLearning(content, {
             category: params.category as MemoryCategory,
             scope: (params.scope as MemoryScope) || 'project',
-            owner: sessionState.lastAgent as MemoryOwner,
+            owner: (context.sessionState?.lastAgent as MemoryOwner) || undefined,
             tags: params.tags as string[],
             source: 'agent-memory-ops',
           });
@@ -146,12 +152,12 @@ export function createMemoryOpsTool(context: PluginContext): ToolConfig {
         case 'reinforce': {
           const memoryId = params.memoryId as string;
           if (!memoryId) {
-            return { success: false, output: 'memoryId가 필요합니다.' };
+            return { success: false, error: 'memoryId가 필요합니다.' };
           }
 
           const reinforced = await manager.reinforce(memoryId);
           if (!reinforced) {
-            return { success: false, output: `ID ${memoryId}의 메모리를 찾을 수 없습니다.` };
+            return { success: false, error: `ID ${memoryId}의 메모리를 찾을 수 없습니다.` };
           }
 
           return {
@@ -169,12 +175,12 @@ export function createMemoryOpsTool(context: PluginContext): ToolConfig {
         case 'contradict': {
           const memoryId = params.memoryId as string;
           if (!memoryId) {
-            return { success: false, output: 'memoryId가 필요합니다.' };
+            return { success: false, error: 'memoryId가 필요합니다.' };
           }
 
           const contradicted = await manager.contradict(memoryId);
           if (!contradicted) {
-            return { success: false, output: `ID ${memoryId}의 메모리를 찾을 수 없습니다.` };
+            return { success: false, error: `ID ${memoryId}의 메모리를 찾을 수 없습니다.` };
           }
 
           return {
@@ -192,7 +198,7 @@ export function createMemoryOpsTool(context: PluginContext): ToolConfig {
         default:
           return {
             success: false,
-            output: `알 수 없는 operation: ${operation}`,
+            error: `알 수 없는 operation: ${operation}`,
           };
       }
     },

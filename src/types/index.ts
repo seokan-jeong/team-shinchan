@@ -172,6 +172,12 @@ export interface SessionState {
   autopilotActive: boolean;
   todos: TodoItem[];
   backgroundTasks: BackgroundTask[];
+  // v2.0 메모리 시스템
+  lastAgent?: BuiltinAgentName;
+  taskStartTime?: number;
+  memoryInitialized?: boolean;
+  shouldRunBootstrap?: boolean;
+  lastAgentOutput?: string;
 }
 
 export interface TodoItem {

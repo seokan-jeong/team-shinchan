@@ -88,6 +88,7 @@ export function createImplicitFeedbackHook(context: PluginContext): HookConfig {
     event: 'PostToolUse',
     description: '사용자의 수정/거부 행동에서 암묵적 피드백을 감지합니다.',
     enabled: true,
+    priority: 40,
 
     handler: async ({
       toolName,
@@ -97,22 +98,24 @@ export function createImplicitFeedbackHook(context: PluginContext): HookConfig {
     }): Promise<HookResult> => {
       let userAction: UserAction | null = null;
 
+      const state = sessionState as Record<string, unknown> | undefined;
+
       // Edit 도구 사용 시
-      if (toolName === 'Edit') {
+      if (toolName === 'Edit' && state) {
         userAction = extractEditFeedback(
           toolInput as Record<string, unknown>,
           toolOutput as string,
-          sessionState
+          state
         );
       }
 
       // Bash 도구에서 undo 감지
-      if (toolName === 'Bash') {
-        userAction = detectUndoAction(toolInput as Record<string, unknown>, sessionState);
+      if (toolName === 'Bash' && state) {
+        userAction = detectUndoAction(toolInput as Record<string, unknown>, state);
       }
 
       if (!userAction) {
-        return { shouldContinue: true };
+        return { continue: true };
       }
 
       try {
@@ -120,14 +123,14 @@ export function createImplicitFeedbackHook(context: PluginContext): HookConfig {
         const feedback = detectImplicitFeedback(userAction);
 
         if (!feedback) {
-          return { shouldContinue: true };
+          return { continue: true };
         }
 
         // 학습 추출
         const extraction = extractLearningFromFeedback(feedback);
 
         if (extraction.learnings.length === 0) {
-          return { shouldContinue: true };
+          return { continue: true };
         }
 
         // 학습 저장
@@ -148,12 +151,12 @@ export function createImplicitFeedbackHook(context: PluginContext): HookConfig {
         }
 
         return {
-          shouldContinue: true,
+          continue: true,
           message: `💡 암묵적 피드백 학습됨: ${extraction.learnings[0]?.title || ''}`,
         };
       } catch (error) {
         console.error('Implicit feedback error:', error);
-        return { shouldContinue: true };
+        return { continue: true };
       }
     },
   };

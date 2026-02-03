@@ -64,13 +64,15 @@ function mergeSettings(
   defaults: PluginSettings,
   overrides: Partial<PluginSettings>
 ): PluginSettings {
+  // agentOverrides 병합 (undefined 허용)
+  const mergedAgentOverrides = overrides.agentOverrides
+    ? { ...defaults.agentOverrides, ...overrides.agentOverrides }
+    : defaults.agentOverrides;
+
   return {
     ...defaults,
     ...overrides,
-    agentOverrides: {
-      ...defaults.agentOverrides,
-      ...overrides.agentOverrides,
-    },
+    agentOverrides: mergedAgentOverrides,
     disabledHooks: [
       ...(defaults.disabledHooks || []),
       ...(overrides.disabledHooks || []),

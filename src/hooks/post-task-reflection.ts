@@ -3,7 +3,7 @@
  * 작업 완료 후 자동 회고 실행
  */
 
-import type { HookConfig, PluginContext, HookResult } from '../types';
+import type { HookConfig, PluginContext, HookResult, SessionState } from '../types';
 import { reflect, summarizeReflection } from '../features/reflection';
 import { getMemoryManager } from '../features/memory';
 import type { TaskResult, CodeChange } from '../features/learning';
@@ -15,7 +15,7 @@ function parseTaskResult(
   toolName: string,
   toolInput: Record<string, unknown>,
   toolOutput: string,
-  sessionState: { currentTask?: string; taskStartTime?: number }
+  sessionState?: SessionState
 ): TaskResult | null {
   // Task 도구 결과만 처리
   if (toolName !== 'Task') {
@@ -59,7 +59,7 @@ function parseTaskResult(
   }));
 
   // 작업 시간 계산
-  const duration = sessionState.taskStartTime
+  const duration = sessionState?.taskStartTime
     ? Date.now() - sessionState.taskStartTime
     : 0;
 
@@ -82,6 +82,7 @@ export function createPostTaskReflectionHook(context: PluginContext): HookConfig
     event: 'PostToolUse',
     description: '작업 완료 후 자동 회고를 실행합니다.',
     enabled: true,
+    priority: 50,
 
     handler: async ({
       toolName,
@@ -91,7 +92,7 @@ export function createPostTaskReflectionHook(context: PluginContext): HookConfig
     }): Promise<HookResult> => {
       // Task 도구가 아니면 스킵
       if (toolName !== 'Task') {
-        return { shouldContinue: true };
+        return { continue: true };
       }
 
       try {
@@ -103,7 +104,7 @@ export function createPostTaskReflectionHook(context: PluginContext): HookConfig
         );
 
         if (!taskResult) {
-          return { shouldContinue: true };
+          return { continue: true };
         }
 
         // 회고 실행
@@ -121,7 +122,7 @@ export function createPostTaskReflectionHook(context: PluginContext): HookConfig
         const summary = summarizeReflection(reflection);
 
         return {
-          shouldContinue: true,
+          continue: true,
           message: `
 <reflection>
 ${summary}
@@ -130,7 +131,7 @@ ${summary}
         };
       } catch (error) {
         console.error('Reflection error:', error);
-        return { shouldContinue: true };
+        return { continue: true };
       }
     },
   };

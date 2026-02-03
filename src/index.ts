@@ -118,14 +118,15 @@ export async function TeamSeokanPlugin(ctx: unknown): Promise<PluginInstance> {
       },
 
       // 도구 실행 전
-      'tool.execute.before': async (toolName, input) => {
+      'tool.execute.before': async (toolName: unknown, input: unknown) => {
         // 훅 실행
+        const name = toolName as string;
         for (const hook of pluginContext.hooks.values()) {
           if (hook.event === 'tool.execute.before') {
-            if (!hook.matchTools || hook.matchTools.includes(toolName)) {
+            if (!hook.matchTools || hook.matchTools.includes(name)) {
               await hook.handler({
                 event: 'tool.execute.before',
-                toolName,
+                toolName: name,
                 toolInput: input,
                 sessionState: pluginContext.sessionState,
               });
@@ -135,14 +136,15 @@ export async function TeamSeokanPlugin(ctx: unknown): Promise<PluginInstance> {
       },
 
       // 도구 실행 후
-      'tool.execute.after': async (toolName, input, output) => {
+      'tool.execute.after': async (toolName: unknown, input: unknown, output: unknown) => {
         // 훅 실행
+        const name = toolName as string;
         for (const hook of pluginContext.hooks.values()) {
           if (hook.event === 'tool.execute.after') {
-            if (!hook.matchTools || hook.matchTools.includes(toolName)) {
+            if (!hook.matchTools || hook.matchTools.includes(name)) {
               await hook.handler({
                 event: 'tool.execute.after',
-                toolName,
+                toolName: name,
                 toolInput: input,
                 toolOutput: output,
                 sessionState: pluginContext.sessionState,

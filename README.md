@@ -182,31 +182,113 @@ No commands needed - just say:
 
 ## Integrated Workflow
 
-When you start a task, Team-Shinchan follows this workflow:
+Team-Shinchan follows a 4-stage workflow for every non-trivial task.
+
+### Overview
 
 ```
-┌─────────────────────────────────────┐
-│  Stage 1: Requirements              │
-│  └─ Nene interviews, Midori debates │
-└─────────────────┬───────────────────┘
-                  ↓
-┌─────────────────────────────────────┐
-│  Stage 2: Planning                  │
-│  └─ Nene plans, Shiro analyzes      │
-└─────────────────┬───────────────────┘
-                  ↓
-┌─────────────────────────────────────┐
-│  Stage 3: Execution                 │
-│  └─ Bo/Aichan/Bunta + Action Kamen  │
-└─────────────────┬───────────────────┘
-                  ↓
-┌─────────────────────────────────────┐
-│  Stage 4: Completion                │
-│  └─ Masumi documents, final review  │
-└─────────────────────────────────────┘
+User Request
+     │
+     ▼
+┌─────────────────────────────────────────────────────────┐
+│ Stage 1: REQUIREMENTS                                   │
+│ "What exactly do we need to build?"                     │
+│                                                         │
+│ 👧 Nene: Interviews user for clarity                    │
+│ 👩 Misae: Discovers hidden requirements                 │
+│ 🌿 Midori: Moderates debate (if design decision needed) │
+│                                                         │
+│ 📄 Output: shinchan-docs/{id}/REQUESTS.md               │
+└─────────────────────┬───────────────────────────────────┘
+                      ▼
+┌─────────────────────────────────────────────────────────┐
+│ Stage 2: PLANNING                                       │
+│ "How should we break this down?"                        │
+│                                                         │
+│ 👧 Nene: Breaks into phases with acceptance criteria    │
+│ 🐕 Shiro: Analyzes codebase impact                      │
+│                                                         │
+│ 📄 Output: shinchan-docs/{id}/PROGRESS.md               │
+└─────────────────────┬───────────────────────────────────┘
+                      ▼
+┌─────────────────────────────────────────────────────────┐
+│ Stage 3: EXECUTION (per phase)                          │
+│ "Build it right."                                       │
+│                                                         │
+│ For each phase:                                         │
+│ ├─ 🐕 Shiro: Impact analysis                            │
+│ ├─ 🌿 Midori: Debate if needed                          │
+│ ├─ 🔨 Implementation:                                   │
+│ │   ├─ 👩 Aichan (Frontend/UI)                          │
+│ │   ├─ 👨 Bunta (Backend/API)                           │
+│ │   ├─ 👦 Masao (DevOps/Infra)                          │
+│ │   └─ 💪 Bo (General code)                             │
+│ └─ 🦸 Action Kamen: Code review (MANDATORY)             │
+│                                                         │
+│ 📄 Output: Phase retrospective in PROGRESS.md           │
+└─────────────────────┬───────────────────────────────────┘
+                      ▼
+┌─────────────────────────────────────────────────────────┐
+│ Stage 4: COMPLETION (automatic)                         │
+│ "Document and verify."                                  │
+│                                                         │
+│ 📚 Masumi: Writes RETROSPECTIVE.md                      │
+│ 📚 Masumi: Writes IMPLEMENTATION.md                     │
+│ 🦸 Action Kamen: Final verification                     │
+│                                                         │
+│ 📄 Output: Complete documentation package               │
+└─────────────────────────────────────────────────────────┘
 ```
 
-All documentation saved to `shinchan-docs/{task-id}/`
+### When Debate Triggers
+
+| Situation | Debate? |
+|-----------|---------|
+| 2+ valid implementation approaches | ✅ Yes |
+| Architecture change | ✅ Yes |
+| Breaking existing patterns | ✅ Yes |
+| Performance vs Readability tradeoff | ✅ Yes |
+| Simple CRUD operation | ❌ No |
+| Clear bug fix | ❌ No |
+
+### Document Structure
+
+Every task creates a documentation folder:
+
+```
+shinchan-docs/
+└── ISSUE-123/              # or feature-auth-001/
+    ├── REQUESTS.md         # What we're building
+    ├── PROGRESS.md         # Phase-by-phase progress
+    ├── RETROSPECTIVE.md    # What we learned
+    └── IMPLEMENTATION.md   # Technical details
+```
+
+### Example: "Add OAuth2 Login"
+
+```
+📋 Stage 1: Requirements
+   Nene: "Which providers? Google, GitHub?"
+   User: "Google only for now"
+   Midori: "JWT vs Session?" → Debate triggered
+   → REQUESTS.md created
+
+📋 Stage 2: Planning
+   Nene: "3 phases: Backend API, Frontend UI, Integration"
+   Shiro: "Impacts: auth/, components/, api/"
+   → PROGRESS.md created
+
+📋 Stage 3: Execution
+   Phase 1: Bunta implements OAuth API
+   Phase 2: Aichan builds login UI
+   Phase 3: Bo integrates and tests
+   Action Kamen: Reviews each phase
+
+📋 Stage 4: Completion
+   Masumi: Documents the implementation
+   Action Kamen: Final approval
+   → Complete!
+```
 
 ---
 

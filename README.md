@@ -210,9 +210,35 @@ All documentation saved to `shinchan-docs/{task-id}/`
 
 ---
 
-## Memory System
+## Self-Learning System
 
-Team-Shinchan learns from every interaction:
+Team-Shinchan gets smarter with every interaction through automatic retrospection.
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                   Learning Cycle                         │
+└─────────────────────────────────────────────────────────┘
+
+Task Complete ──→ Auto-Retrospective ──→ Save Learning
+                         │
+                         ↓
+                  .team-shinchan/learnings.md
+                         │
+                         ↓
+New Session ────→ Load Learnings ────→ Apply to Work
+```
+
+### Automatic Learning
+
+After every significant task, Team-Shinchan:
+1. **Reflects** on what worked and what didn't
+2. **Extracts** patterns, mistakes, and insights
+3. **Saves** learnings to `.team-shinchan/learnings.md`
+4. **Applies** learnings in future sessions
+
+### Manual Commands
 
 ```bash
 # View what's been learned
@@ -225,11 +251,15 @@ Team-Shinchan learns from every interaction:
 /team-shinchan:forget
 ```
 
-**Learns automatically:**
-- Coding preferences & patterns
-- Architecture decisions
-- Project conventions
-- Common mistakes & solutions
+### What Gets Learned
+
+| Category | Example |
+|----------|---------|
+| **Preferences** | "User prefers Zustand over Redux" |
+| **Patterns** | "Use early returns for validation" |
+| **Conventions** | "This project uses pnpm, not npm" |
+| **Mistakes** | "Always null-check before .map()" |
+| **Decisions** | "JWT with refresh token rotation" |
 
 ---
 

@@ -6,27 +6,79 @@ user-invocable: true
 
 # Forget Skill
 
-## Features
-
-- Delete specific memory by ID
-- Show content before deletion
-- Execute after user confirmation
+**Remove outdated or incorrect learnings from memory.**
 
 ## Usage
 
+```bash
+/team-shinchan:forget                    # Interactive mode
+/team-shinchan:forget "Redux"            # Remove learnings containing "Redux"
+/team-shinchan:forget --all              # Clear all learnings (with confirmation)
 ```
-/forget <memory-id>
-/forget all          # Delete all (confirmation required)
+
+## Process
+
+### Interactive Mode (`/forget`)
+
+```
+🗑️ [Forget] Current learnings:
+
+1. [preference] Use Zustand over Redux
+2. [pattern] Early returns for validation
+3. [convention] Use pnpm, not npm
+4. [mistake] Always null-check before .map()
+
+Which learning to remove? (Enter number or keyword)
 ```
 
-## Operation Sequence
+### Keyword Mode (`/forget "Redux"`)
 
-1. Find file by memory ID
-2. Show content before deletion
-3. Request user confirmation
-4. Deletion complete message
+```
+🗑️ [Forget] Searching for: "Redux"
 
-## Caution
+Found 1 matching learning:
+• [preference] Use Zustand over Redux
 
-- Deleted memories cannot be recovered
-- Use `all` option carefully
+Remove this learning? (y/n)
+```
+
+If confirmed:
+```
+✅ Removed: "Use Zustand over Redux"
+
+📁 Updated: .team-shinchan/learnings.md
+```
+
+### Clear All Mode (`/forget --all`)
+
+```
+⚠️ [Forget] WARNING: This will delete ALL learnings!
+
+Current count: 15 learnings
+
+Are you sure? Type "DELETE ALL" to confirm:
+```
+
+If confirmed:
+```
+✅ Cleared all learnings.
+
+📁 Reset: .team-shinchan/learnings.md
+💡 Start fresh with /team-shinchan:learn or just work!
+```
+
+## When to Use
+
+| Situation | Action |
+|-----------|--------|
+| Learning is outdated | `/forget "old pattern"` |
+| Learning was wrong | `/forget "incorrect thing"` |
+| Project changed direction | `/forget --all` (careful!) |
+| Too many irrelevant learnings | Selective `/forget` |
+
+## Important
+
+- **Be careful** - Removed learnings cannot be recovered
+- Prefer selective removal over `--all`
+- Learnings file is simply edited (sections removed)
+- After forgetting, the system adapts on next session

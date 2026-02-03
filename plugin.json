@@ -1,7 +1,7 @@
 {
   "name": "team-seokan",
-  "version": "0.1.0",
-  "description": "짱구 캐릭터 기반 멀티 에이전트 오케스트레이션 시스템",
+  "version": "2.0.0",
+  "description": "짱구 캐릭터 기반 멀티 에이전트 오케스트레이션 시스템 - 자기학습, 회고, 개선 기능 포함",
   "main": "dist/index.js",
   "author": "seokan",
   "homepage": "https://github.com/seokan/team-seokan",
@@ -13,7 +13,8 @@
     "hooks": true,
     "tools": true,
     "skills": true,
-    "mcp": true
+    "mcp": true,
+    "memory": true
   },
   "settings": {
     "defaultModel": "sonnet",
@@ -25,5 +26,20 @@
     "enableIntentGate": true,
     "enableReviewerCheck": true,
     "language": "ko"
+  },
+  "features": {
+    "memory": {
+      "description": "사용할수록 똑똑해지는 자기학습 시스템",
+      "storage": ["~/.team-seokan/memories/", ".team-seokan/memories/"],
+      "categories": ["preference", "pattern", "context", "mistake", "decision", "convention", "insight"]
+    },
+    "reflection": {
+      "description": "작업 완료 후 자동 회고",
+      "depths": ["simple", "standard", "deep"]
+    },
+    "bootstrap": {
+      "description": "프로젝트 첫 실행 시 자동 분석",
+      "includes": ["conventions", "patterns", "best-practices"]
+    }
   }
 }

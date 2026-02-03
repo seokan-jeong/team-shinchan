@@ -1,6 +1,6 @@
 {
   "name": "team-shinchan",
-  "version": "2.6.1",
+  "version": "2.7.0",
   "description": "Shinchan character-based multi-agent orchestration system for Claude Code",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

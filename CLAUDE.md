@@ -306,7 +306,7 @@ Task(
 | `/team-shinchan:autopilot` | Full autonomous | Hands-off execution |
 | `/team-shinchan:ralph` | Persistent loop | Must complete |
 | `/team-shinchan:ultrawork` | Parallel execution | Speed priority |
-| `/team-shinchan:docs-work` | Explicit docs workflow | Issue-based work |
+| `/team-shinchan:start` | Start new task | Begin integrated workflow |
 | `/team-shinchan:learn` | Add to memory | Remember patterns |
 | `/team-shinchan:memories` | View memories | Check learnings |
 | `/team-shinchan:forget` | Delete memory | Remove outdated |

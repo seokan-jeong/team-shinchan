@@ -73,6 +73,63 @@ Rule 6: ALWAYS use Task tool to invoke team-shinchan agents (NEVER work directly
 
 ---
 
+## PART 1.5: Skill Execution Rules (NEW)
+
+### 🚨 스킬 호출 = 에이전트 소환
+
+**스킬이 호출되면 해당 에이전트를 Task 도구로 즉시 소환해야 합니다.**
+
+| 스킬 | 소환할 에이전트 | 모델 |
+|------|----------------|------|
+| `/team-shinchan:start` | Shinnosuke | opus |
+| `/team-shinchan:autopilot` | Shinnosuke | opus |
+| `/team-shinchan:ralph` | Kazama | opus |
+| `/team-shinchan:ultrawork` | Shinnosuke | opus |
+| `/team-shinchan:plan` | Nene | opus |
+| `/team-shinchan:analyze` | Hiroshi | opus |
+| `/team-shinchan:deepsearch` | Shiro + Masumi | haiku/sonnet |
+| `/team-shinchan:debate` | Midori | opus |
+
+### ⛔ 절대 금지
+
+```
+스킬 호출 시 절대 하지 말아야 할 것:
+
+1. ❌ 스킬 설명만 출력하고 끝내기
+2. ❌ 직접 Glob/Grep으로 코드 탐색
+3. ❌ 직접 Read로 파일 읽기
+4. ❌ 직접 Edit/Write로 코드 수정
+5. ❌ Task 호출 없이 작업 진행
+```
+
+### ✅ 올바른 패턴
+
+```typescript
+// /team-shinchan:start 호출 시
+// ❌ 잘못된 예시
+"start 스킬이 호출되었습니다. 워크플로우를 설명하면..."
+
+// ✅ 올바른 예시
+Task(
+  subagent_type="team-shinchan:shinnosuke",
+  model="opus",
+  prompt="..."
+)
+```
+
+### Stage 체크포인트 강제
+
+```
+/team-shinchan:start 호출 후 워크플로우:
+
+Stage 1 → REQUESTS.md 없으면 Stage 2 진행 불가
+Stage 2 → PROGRESS.md 없으면 Stage 3 진행 불가
+Stage 3 → 모든 Phase 완료 전 Stage 4 진행 불가
+Stage 4 → Action Kamen 검증 필수
+```
+
+---
+
 ## PART 2: Integrated Main Workflow
 
 **This is THE workflow for all non-trivial tasks.**

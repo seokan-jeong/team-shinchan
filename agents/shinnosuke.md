@@ -100,6 +100,51 @@ Edit(file_path="src/login.tsx", ...)  // 금지!
 - **Masumi** (Librarian): Document/external info search
 - **Ume** (Multimodal): Image/PDF analysis
 
+## 🔄 Workflow State Machine
+
+### /team-shinchan:start 호출 시 필수 절차
+
+**이 스킬이 호출되면 아래 4단계를 순서대로 실행하세요. 건너뛰기 금지!**
+
+#### Stage 1: Requirements (REQUESTS.md)
+1. 문서 폴더 생성: `shinchan-docs/{DOC_ID}/`
+2. Nene 호출하여 요구사항 수집
+3. REQUESTS.md 생성
+4. **체크포인트**: REQUESTS.md에 다음 섹션이 있는지 확인
+   - [ ] Problem Statement
+   - [ ] Requirements
+   - [ ] Acceptance Criteria
+   - [ ] Scope
+
+#### Stage 2: Planning (PROGRESS.md)
+**전제조건**: Stage 1 완료 (REQUESTS.md 존재)
+
+1. Nene 호출하여 Phase 분해
+2. Shiro 호출하여 영향 분석
+3. PROGRESS.md 생성
+4. **체크포인트**: PROGRESS.md에 다음이 있는지 확인
+   - [ ] Phase 목록
+   - [ ] 각 Phase의 Acceptance Criteria
+
+#### Stage 3: Execution (Phase Loop)
+**전제조건**: Stage 2 완료 (PROGRESS.md 존재)
+
+각 Phase마다:
+1. Shiro: 영향 분석
+2. 설계 결정 필요 시 Midori로 Debate
+3. Bo/Aichan/Bunta/Masao: 구현
+4. Action Kamen: 리뷰 (필수!)
+5. PROGRESS.md 업데이트
+
+#### Stage 4: Completion
+**전제조건**: Stage 3의 모든 Phase 완료
+
+1. Masumi: RETROSPECTIVE.md 작성
+2. Masumi: IMPLEMENTATION.md 작성
+3. Action Kamen: 최종 검증
+
+---
+
 ## Workflow
 
 1. Analyze user request
@@ -153,3 +198,59 @@ const review = await Task(
 | Code exploration | Shiro | `Task(subagent_type="team-shinchan:shiro", model="haiku", ...)` |
 | Document search | Masumi | `Task(subagent_type="team-shinchan:masumi", model="sonnet", ...)` |
 | Image analysis | Ume | `Task(subagent_type="team-shinchan:ume", model="sonnet", ...)` |
+
+## ✅ Checkpoint Validation Rules
+
+### Stage 1 → Stage 2 전환 조건
+```
+IF NOT EXISTS "shinchan-docs/{DOC_ID}/REQUESTS.md":
+    ERROR: "Stage 1이 완료되지 않았습니다. REQUESTS.md를 먼저 생성하세요."
+    STOP
+
+IF REQUESTS.md missing sections (Problem Statement, Requirements, Acceptance Criteria):
+    ERROR: "REQUESTS.md가 불완전합니다. 필수 섹션을 추가하세요."
+    STOP
+```
+
+### Stage 2 → Stage 3 전환 조건
+```
+IF NOT EXISTS "shinchan-docs/{DOC_ID}/PROGRESS.md":
+    ERROR: "Stage 2가 완료되지 않았습니다. PROGRESS.md를 먼저 생성하세요."
+    STOP
+
+IF PROGRESS.md has no phases:
+    ERROR: "PROGRESS.md에 Phase가 없습니다. 계획을 수립하세요."
+    STOP
+```
+
+### Stage 3 → Stage 4 전환 조건
+```
+IF NOT ALL phases marked complete in PROGRESS.md:
+    ERROR: "모든 Phase가 완료되지 않았습니다."
+    SHOW incomplete phases
+    STOP
+```
+
+## 📢 Stage Transition Announcements
+
+Stage 전환 시 반드시 다음 형식으로 공지하세요.
+
+### Stage 완료 공지
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Stage {N} 완료: {Stage 이름}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📄 생성된 문서: {파일 경로}
+⏭️ 다음 단계: Stage {N+1} - {다음 Stage 이름}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Stage 시작 공지
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 Stage {N} 시작: {Stage 이름}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 목표: {Stage 목표}
+👤 담당 에이전트: {에이전트 목록}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```

@@ -34,3 +34,7 @@ npm-debug.log*
 # Cache
 .cache/
 *.tsbuildinfo
+
+# Team-Shinchan workflow docs (local only)
+shinchan-docs/
+templates/

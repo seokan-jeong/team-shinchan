@@ -4,40 +4,74 @@ description: Start a new task with the integrated workflow. Creates documentatio
 user-invocable: true
 ---
 
-# Start Skill
+# 🚨 IMMEDIATE ACTION REQUIRED
 
-**Explicitly start the Team-Shinchan integrated workflow for a new task.**
+**이 스킬이 실행되면 아래 액션을 즉시 수행하세요. 설명만 출력하지 마세요.**
+
+**이 스킬의 유일한 목적: Shinnosuke 오케스트레이터 에이전트를 Task 도구로 소환하는 것입니다.**
 
 ---
 
-## ⚠️ MANDATORY: Agent Invocation
+## ✅ STEP 1: Task 도구 호출 (필수)
 
-**이 스킬 실행 시 반드시 다음을 수행하세요:**
+**지금 바로 다음 Task를 호출하세요:**
 
-```
-1. Task 도구를 호출합니다
-2. subagent_type: "team-shinchan:shinnosuke"
-3. model: "opus"
-4. prompt: 사용자의 요청 + 컨텍스트 전달
-```
-
-**예시:**
 ```typescript
 Task(
   subagent_type="team-shinchan:shinnosuke",
   model="opus",
-  prompt="사용자 요청: [요청 내용]\n\n/team-shinchan:start 스킬이 실행되었습니다. 통합 워크플로우를 시작하세요."
+  prompt="[전체 컨텍스트를 여기에 포함]\n\n/team-shinchan:start가 호출되었습니다. 통합 워크플로우를 시작하세요.\n\n사용자 요청: [args에서 전달된 내용 또는 이전 사용자 메시지 내용]\n\n다음 단계:\n1. 문서 ID 생성 (ISSUE-xxx 또는 {branch}-{index})\n2. shinchan-docs/{DOC_ID}/ 폴더 생성\n3. Stage 1 시작: Requirements 수집 (Nene 호출)\n4. 필요시 Debate 트리거 (Midori 호출)\n5. REQUESTS.md 작성"
 )
 ```
 
-**❌ 절대 하지 마세요:**
-- 직접 코드 탐색/수정
-- Explore 에이전트 사용
-- 문서만 출력하고 끝내기
+**파라미터 설정 가이드:**
+- `subagent_type`: 반드시 `"team-shinchan:shinnosuke"` (변경 금지)
+- `model`: 반드시 `"opus"` (복잡한 오케스트레이션 작업이므로)
+- `prompt`: 위 템플릿 사용, `[전체 컨텍스트]`와 `[사용자 요청]` 부분만 실제 값으로 대체
 
-**✅ 반드시 하세요:**
-- Shinnosuke 에이전트를 Task 도구로 소환
-- Shinnosuke가 Nene, Shiro, Bo 등을 순차적으로 호출하도록 위임
+---
+
+## ✅ STEP 2: 완료 확인
+
+Task 호출 후 Shinnosuke 에이전트의 응답을 기다리세요.
+
+Shinnosuke가:
+- 문서 폴더를 생성하고
+- Nene를 호출하여 요구사항을 수집하고
+- 필요시 Midori를 통해 Debate를 진행하고
+- REQUESTS.md를 작성할 것입니다
+
+**당신은 더 이상 직접 작업하지 마세요.**
+
+---
+
+## ⛔ 금지사항 (절대 위반 금지)
+
+- ❌ **이 스킬 내용을 출력만 하고 끝내기** (가장 흔한 실수)
+- ❌ **Task 호출 없이 직접 코드 탐색/수정하기**
+- ❌ **Explore 에이전트를 사용하기**
+- ❌ **다른 team-shinchan 에이전트를 직접 호출하기** (Shinnosuke가 할 일)
+- ❌ **"통합 워크플로우를 시작하겠습니다"라고 말만 하기**
+
+---
+
+## ✅ 체크리스트
+
+실행 전 다음을 확인하세요:
+
+- [ ] Task 도구를 호출했는가?
+- [ ] subagent_type이 "team-shinchan:shinnosuke"인가?
+- [ ] model이 "opus"인가?
+- [ ] prompt에 사용자 요청이 포함되었는가?
+- [ ] 위 Task 호출 외에 다른 작업을 하지 않았는가?
+
+모두 체크되면 완료입니다.
+
+---
+
+## 📚 참고 정보 (실행 후 참조용)
+
+아래 정보는 Task 호출 후 참조하세요. 실행 전에 읽을 필요 없습니다.
 
 ---
 

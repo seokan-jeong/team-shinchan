@@ -88,7 +88,7 @@ Rule 6: ALWAYS use Task tool to invoke team-shinchan agents (NEVER work directly
 | `/team-shinchan:plan` | Nene | opus |
 | `/team-shinchan:analyze` | Hiroshi | opus |
 | `/team-shinchan:deepsearch` | Shiro + Masumi | haiku/sonnet |
-| `/team-shinchan:debate` | Shinnosuke (직접 오케스트레이션) | opus |
+| `/team-shinchan:debate` | Midori | opus |
 
 ### ⛔ 절대 금지
 
@@ -389,31 +389,53 @@ hooks/workflow-guard.md
 | Clear bug fix | ❌ |
 | User explicitly decided | ❌ |
 
-### Debate Process (직접 오케스트레이션)
+### Debate Process (Midori 위임)
 
-**Shinnosuke가 직접 Debate를 진행합니다. Midori.md는 가이드라인으로 참조합니다.**
+**Shinnosuke가 Midori를 Task로 호출하여 Debate를 진행하고, 결과를 사용자와 함께 결정합니다.**
 
 ```
 ┌─────────────────────────────────────────┐
-│ 1. Shinnosuke: 주제 정의, 패널 선정     │
+│ 1. Shinnosuke: Midori 호출              │
+│    Task(team-shinchan:midori)           │
 └─────────────────────┬───────────────────┘
                       ↓
 ┌─────────────────────────────────────────┐
-│ 2. 패널 의견 수집 (병렬 Task 호출)      │
+│ 2. Midori: 주제 정의, 패널 선정         │
+└─────────────────────┬───────────────────┘
+                      ↓
+┌─────────────────────────────────────────┐
+│ 3. 패널 의견 수집 (병렬 Task 호출)      │
 │    → 각 의견 실시간 출력                │
 └─────────────────────┬───────────────────┘
                       ↓
 ┌─────────────────────────────────────────┐
-│ 3. 토론 라운드 (필요시, 최대 2회)       │
+│ 4. 토론 라운드 (필요시, 최대 2회)       │
 │    → 이견 있을 경우만 진행              │
 └─────────────────────┬───────────────────┘
                       ↓
 ┌─────────────────────────────────────────┐
-│ 4. Hiroshi: 합의 도출                   │
+│ 5. Hiroshi: 합의 도출                   │
 └─────────────────────┬───────────────────┘
                       ↓
 ┌─────────────────────────────────────────┐
-│ 5. 결정 사항 사용자에게 보고            │
+│ 6. Midori: Shinnosuke에게 결과 반환     │
+└─────────────────────┬───────────────────┘
+                      ↓
+┌─────────────────────────────────────────┐
+│ 7. Shinnosuke: 결과를 사용자에게 전달   │
+│    → 전문가 의견 요약                   │
+│    → 권장 결정 및 근거 제시             │
+└─────────────────────┬───────────────────┘
+                      ↓
+┌─────────────────────────────────────────┐
+│ 8. Shinnosuke: 사용자 의견 확인         │
+│    "위 권장 결정에 동의하시나요?"       │
+└─────────────────────┬───────────────────┘
+                      ↓
+┌─────────────────────────────────────────┐
+│ 9. 사용자와 함께 최종 결정              │
+│    → 동의: 결정 사항 문서화             │
+│    → 이견: 우려사항 반영 후 수정        │
 └─────────────────────────────────────────┘
 ```
 
@@ -470,7 +492,7 @@ hooks/workflow-guard.md
 |-------|------|-------|-------------|
 | **Shinnosuke** | Orchestrator | Opus | You ARE Shinnosuke (1-2 phases, <20 files) |
 | **Himawari** | Atlas | Opus | Large projects (3+ phases OR 20+ files OR 3+ domains) |
-| **Midori** | Debate Guide | - | Debate 가이드라인 문서 (직접 호출하지 않음) |
+| **Midori** | Moderator | Opus | Debate facilitation (called via Task) |
 
 **Himawari Escalation Criteria:**
 - 3+ phases required
@@ -604,16 +626,12 @@ Task(
 Task(subagent_type="team-shinchan:aichan", prompt="...", run_in_background=true)
 Task(subagent_type="team-shinchan:bunta", prompt="...", run_in_background=true)
 
-// Debate는 직접 오케스트레이션 (Midori Task 호출하지 않음)
-// 1. 패널 의견 수집
-Task(subagent_type="team-shinchan:hiroshi", model="opus",
-  prompt="Debate 주제: ... 당신의 전문가 의견을 제시해주세요.")
-Task(subagent_type="team-shinchan:nene", model="opus",
-  prompt="Debate 주제: ... 당신의 전문가 의견을 제시해주세요.")
-
-// 2. 합의 도출 (Hiroshi)
-Task(subagent_type="team-shinchan:hiroshi", model="opus",
-  prompt="위 의견들을 종합하여 최적의 결정을 도출해주세요.")
+// Debate는 Midori에게 위임
+Task(
+  subagent_type="team-shinchan:midori",
+  model="opus",
+  prompt="Debate를 진행해주세요. 주제: ... 패널: ..."
+)
 ```
 
 ---
@@ -660,7 +678,7 @@ Task(subagent_type="team-shinchan:hiroshi", model="opus",
 ```
 team-shinchan:shinnosuke  - Orchestrator (You)
 team-shinchan:himawari    - Atlas
-team-shinchan:midori      - Debate Guide (가이드라인 문서, 직접 호출 안함)
+team-shinchan:midori      - Moderator (Debate Facilitator)
 team-shinchan:bo          - Executor
 team-shinchan:kazama      - Hephaestus
 team-shinchan:aichan      - Frontend

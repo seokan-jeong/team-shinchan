@@ -112,33 +112,89 @@ Action Kamen(Reviewer) reviews the consensus.
 
 ---
 
-**Delegating to Midori(Moderator) for facilitation...**`,
+**Midori가 Debate를 진행합니다.**`,
                 inject: `<debate-mode>
-Debate session is active.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💭 EXECUTE IMMEDIATELY: Debate Process
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-## Debate Rules
-- Max rounds: 3
-- Each statement: Max 500 tokens
-- No consensus: Vote to decide
+## Step 1: Call Midori to Conduct Debate
 
-## Debate Process
+You MUST immediately delegate this debate to Midori using the Task tool.
 
-### Step 1: Collect Opinions (Parallel)
-Request opinions from the following agents simultaneously:
-${participants.map(p => `- Task(subagent_type="team-shinchan:${p}", prompt="Topic: ${topic}\n\nPlease provide your expert opinion on this topic. Include pros, cons, and recommendations.")`).join('\n')}
+Task(
+  subagent_type="team-shinchan:midori",
+  model="opus",
+  prompt="Debate를 진행해주세요.
 
-### Step 2: Feedback Rounds
-Share collected opinions with each agent and request mutual feedback.
+## 주제
+${topic}
 
-### Step 3: Consensus Building
-Task(subagent_type="team-shinchan:hiroshi", prompt="Please synthesize the following opinions and propose the optimal solution: [opinions]")
+## 패널
+${participants.map(p => `- ${AGENT_DISPLAY_NAMES[p]} (${AGENT_ROLES[p]})`).join('\n')}
 
-### Step 4: Verification
-Task(subagent_type="team-shinchan:actionkamen", prompt="Please review the following consensus: [consensus]")
+## 진행 방식
+1. Debate 시작 공지 출력
+2. 각 패널로부터 의견 수집 (병렬 Task 호출)
+3. 각 의견 실시간 출력
+4. Hiroshi에게 합의 도출 요청
+5. 최종 결정 사항 출력
 
-## Debate Facilitation
-Midori(Moderator) will facilitate the debate.
-Task(subagent_type="team-shinchan:midori", prompt="Debate topic: ${topic}\nParticipants: ${participants.join(', ')}\n\nPlease facilitate the debate and reach consensus.")
+## 출력 형식
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💭 Debate 진행 중
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 주제: {주제}
+👥 패널: {패널 목록}
+
+🎤 Round 1: 의견 수집
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[각 에이전트 의견]
+
+✅ 권장 결정
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 결정: {결정}
+📝 근거: {근거}
+
+IMPORTANT: 즉시 Debate를 실행하고 결과를 Shinnosuke에게 반환하세요."
+)
+
+## Step 2: Relay Results to User
+
+After receiving Midori's result, you MUST present it to the user in this format:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💭 Debate 결과
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 주제: ${topic}
+
+🎤 전문가 의견:
+[Summarize each panelist's opinion concisely]
+- [${participants[0] ? AGENT_DISPLAY_NAMES[participants[0]] : 'Agent'}]: {의견 요약}
+- [${participants[1] ? AGENT_DISPLAY_NAMES[participants[1]] : 'Agent'}]: {의견 요약}
+
+✅ 권장 결정: {Midori가 제시한 결론}
+📝 근거: {결정 근거}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+## Step 3: Ask for User's Decision
+
+After presenting the results, ask the user:
+
+"위 권장 결정에 동의하시나요? 다른 의견이나 추가로 고려할 사항이 있으시면 말씀해주세요."
+
+## Step 4: Finalize Decision
+
+- If user agrees: Document the decision and proceed
+- If user has concerns: Address them and refine the decision
+- Never proceed without user confirmation
+
+CRITICAL:
+- Use the Task tool to call team-shinchan:midori
+- Wait for Midori's complete response
+- Present results clearly to user
+- Get user confirmation before proceeding
+- DO NOT make final decisions without user input
 </debate-mode>`,
             };
         },

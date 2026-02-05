@@ -1,21 +1,21 @@
 /**
- * interactive_bash - 대화형 bash 세션
+ * interactive_bash - Interactive bash session
  */
 export function createInteractiveBashTool(context) {
     return {
         name: 'interactive_bash',
-        description: '대화형 bash 세션을 시작합니다. 사용자 입력이 필요한 명령에 사용합니다.',
+        description: 'Start an interactive bash session. Use for commands requiring user input.',
         parameters: [
             {
                 name: 'command',
                 type: 'string',
-                description: '실행할 명령',
+                description: 'Command to execute',
                 required: true,
             },
             {
                 name: 'timeout',
                 type: 'number',
-                description: '타임아웃 (밀리초)',
+                description: 'Timeout (milliseconds)',
                 required: false,
                 default: 30000,
             },
@@ -28,8 +28,8 @@ export function createInteractiveBashTool(context) {
                 output: {
                     command,
                     timeout,
-                    note: '대화형 bash 세션은 tmux를 통해 관리됩니다.',
-                    instruction: `Bash 도구를 사용하세요: Bash(command="${command}", timeout=${timeout})`,
+                    note: 'Interactive bash sessions are managed through tmux.',
+                    instruction: `Use the Bash tool: Bash(command="${command}", timeout=${timeout})`,
                 },
             };
         },

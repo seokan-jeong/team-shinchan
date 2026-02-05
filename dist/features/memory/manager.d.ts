@@ -1,11 +1,11 @@
 /**
  * Memory Manager
- * 메모리 시스템의 메인 인터페이스
+ * Main interface for memory system
  */
 import type { MemoryEntry, CreateMemoryInput, UpdateMemoryInput, MemoryQuery, MemorySearchResult, MemorySummary } from './types';
 import { MemoryStorage } from './storage';
 /**
- * 메모리 매니저 클래스
+ * Memory Manager Class
  */
 export declare class MemoryManager {
     private storage;
@@ -13,35 +13,35 @@ export declare class MemoryManager {
     private cacheExpiry;
     constructor(storage?: MemoryStorage);
     /**
-     * 초기화
+     * Initialize
      */
     initialize(): Promise<void>;
     /**
-     * 메모리 로드 (캐시 적용)
+     * Load Memories (with cache)
      */
     loadMemories(force?: boolean): Promise<void>;
     /**
-     * 모든 메모리 가져오기 (글로벌 + 프로젝트 병합)
+     * Get All Memories (merge global + project)
      */
     getAllMemories(): MemoryEntry[];
     /**
-     * 메모리 생성
+     * Create Memory
      */
     create(input: CreateMemoryInput): Promise<MemoryEntry>;
     /**
-     * 메모리 읽기
+     * Read Memory
      */
     read(id: string): Promise<MemoryEntry | null>;
     /**
-     * 메모리 업데이트
+     * Update Memory
      */
     update(id: string, input: UpdateMemoryInput): Promise<MemoryEntry | null>;
     /**
-     * 메모리 삭제
+     * Delete Memory
      */
     delete(id: string): Promise<boolean>;
     /**
-     * 메모리 검색
+     * Search Memories
      */
     search(query: MemoryQuery, context?: {
         keywords?: string[];
@@ -50,30 +50,30 @@ export declare class MemoryManager {
         recentTags?: string[];
     }): Promise<MemorySearchResult>;
     /**
-     * 메모리 강화
+     * Reinforce Memory
      */
     reinforce(id: string): Promise<MemoryEntry | null>;
     /**
-     * 메모리 반박
+     * Contradict Memory
      */
     contradict(id: string): Promise<MemoryEntry | null>;
     /**
-     * 유사 메모리 찾기
+     * Find Similar Memories
      */
     findSimilar(id: string, limit?: number): Promise<MemoryEntry[]>;
     /**
-     * 메모리 요약 생성
+     * Generate Memory Summary
      */
     generateSummary(query?: MemoryQuery, maxTokens?: number): Promise<MemorySummary>;
     /**
-     * 감쇠 처리 (배치)
+     * Process Decay (Batch)
      */
     processDecay(): Promise<{
         removed: number;
         remaining: number;
     }>;
     /**
-     * 통계
+     * Get Statistics
      */
     getStats(): Promise<{
         total: number;
@@ -85,15 +85,15 @@ export declare class MemoryManager {
         topTags: [string, number][];
     }>;
     /**
-     * 키워드로 잊기 (forget)
+     * Forget by Keyword
      */
     forget(keyword: string): Promise<number>;
     /**
-     * 캐시 무효화
+     * Invalidate Cache
      */
     private invalidateCache;
     /**
-     * 백업
+     * Create Backup
      */
     backup(): Promise<string>;
 }

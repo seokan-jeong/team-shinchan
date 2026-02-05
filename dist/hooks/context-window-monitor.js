@@ -1,43 +1,43 @@
 /**
- * 컨텍스트 윈도우 모니터링 훅
- * 컨텍스트 사용량을 추적하고 경고
+ * Context Window Monitoring Hook
+ * Tracks context usage and provides warnings
  */
 export function createContextWindowMonitorHook(context) {
     return {
         name: 'context-window-monitor',
         event: 'chat.message',
-        description: '컨텍스트 윈도우 사용량을 모니터링합니다.',
+        description: 'Monitors context window usage.',
         enabled: true,
         priority: 60,
         handler: async (hookContext) => {
             const state = context.sessionState;
             const threshold = context.settings.contextWarningThreshold;
-            // 메시지 카운트 증가
+            // Increment message count
             state.messageCount++;
-            // 경고 임계값 확인
+            // Check warning threshold
             if (state.messageCount === threshold) {
                 return {
                     continue: true,
-                    message: `⚠️ **컨텍스트 경고**
+                    message: `⚠️ **Context Warning**
 
-메시지 수가 ${threshold}개에 도달했습니다.
-긴 세션에서는 컨텍스트가 압축될 수 있습니다.
+Message count has reached ${threshold}.
+Context may be compacted in long sessions.
 
-중요한 정보는 TODO나 파일에 저장하는 것을 권장합니다.`,
+It is recommended to save important information in TODOs or files.`,
                 };
             }
-            // 심각한 경고 (임계값의 1.5배)
+            // Critical warning (1.5x threshold)
             if (state.messageCount === Math.floor(threshold * 1.5)) {
                 return {
                     continue: true,
-                    message: `🚨 **컨텍스트 심각 경고**
+                    message: `🚨 **Critical Context Warning**
 
-메시지 수가 ${state.messageCount}개입니다.
-곧 컨텍스트 압축이 발생할 수 있습니다.
+Message count is ${state.messageCount}.
+Context compaction may occur soon.
 
-- 중요한 컨텍스트는 파일에 저장하세요
-- 완료된 작업은 정리하세요
-- 필요시 새 세션을 시작하세요`,
+- Save important context to files
+- Clean up completed tasks
+- Start a new session if necessary`,
                 };
             }
             return { continue: true };

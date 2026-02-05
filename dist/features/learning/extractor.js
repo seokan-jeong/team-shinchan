@@ -1,9 +1,9 @@
 /**
  * Learning Extractor
- * 상호작용에서 학습 포인트 추출
+ * Extract learning points from interactions
  */
 /**
- * 코딩 스타일 패턴 감지
+ * Detect coding style patterns
  */
 const codingStylePatterns = [
     {
@@ -15,28 +15,28 @@ const codingStylePatterns = [
         extract: (result) => {
             const patterns = [];
             for (const change of result.codeChanges) {
-                // 파일명 패턴 분석
+                // Analyze filename patterns
                 const fileName = change.filePath.split('/').pop() || '';
                 if (fileName.includes('.component.')) {
-                    patterns.push('컴포넌트 파일: *.component.{ext} 패턴');
+                    patterns.push('Component file: *.component.{ext} pattern');
                 }
                 if (fileName.includes('.service.')) {
-                    patterns.push('서비스 파일: *.service.{ext} 패턴');
+                    patterns.push('Service file: *.service.{ext} pattern');
                 }
                 if (fileName.includes('.test.') || fileName.includes('.spec.')) {
-                    patterns.push('테스트 파일: *.test.{ext} 또는 *.spec.{ext} 패턴');
+                    patterns.push('Test file: *.test.{ext} or *.spec.{ext} pattern');
                 }
                 if (fileName.match(/^[A-Z]/)) {
-                    patterns.push('PascalCase 파일명 사용');
+                    patterns.push('Using PascalCase filenames');
                 }
                 if (fileName.match(/^[a-z]+(-[a-z]+)*\./)) {
-                    patterns.push('kebab-case 파일명 사용');
+                    patterns.push('Using kebab-case filenames');
                 }
             }
             if (patterns.length === 0)
                 return null;
             return {
-                title: '파일 네이밍 컨벤션',
+                title: 'File Naming Convention',
                 content: [...new Set(patterns)].join('\n'),
                 category: 'convention',
                 scope: 'project',
@@ -63,8 +63,8 @@ const codingStylePatterns = [
             if (folders.size === 0)
                 return null;
             return {
-                title: '프로젝트 폴더 구조',
-                content: `사용된 폴더:\n${[...folders].map((f) => `- ${f}`).join('\n')}`,
+                title: 'Project Folder Structure',
+                content: `Folders used:\n${[...folders].map((f) => `- ${f}`).join('\n')}`,
                 category: 'context',
                 scope: 'project',
                 confidence: 0.7,
@@ -75,7 +75,7 @@ const codingStylePatterns = [
     },
 ];
 /**
- * 작업 패턴 감지
+ * Detect task patterns
  */
 const taskPatterns = [
     {
@@ -87,8 +87,8 @@ const taskPatterns = [
             if (!taskType)
                 return null;
             return {
-                title: `자주 하는 작업: ${taskType}`,
-                content: `${taskType} 작업 완료. 설명: ${result.description}`,
+                title: `Frequent task: ${taskType}`,
+                content: `${taskType} task completed. Description: ${result.description}`,
                 category: 'pattern',
                 scope: 'global',
                 confidence: 0.5,
@@ -104,8 +104,8 @@ const taskPatterns = [
         extract: (result) => {
             const taskType = detectTaskType(result.description);
             return {
-                title: `${result.agent} 에이전트 작업 성공`,
-                content: `${result.agent}가 "${result.description}" 작업을 성공적으로 완료함.${taskType ? ` 작업 유형: ${taskType}` : ''}`,
+                title: `${result.agent} agent task success`,
+                content: `${result.agent} successfully completed "${result.description}" task.${taskType ? ` Task type: ${taskType}` : ''}`,
                 category: 'pattern',
                 scope: 'global',
                 owner: result.agent,
@@ -117,7 +117,7 @@ const taskPatterns = [
     },
 ];
 /**
- * 실수/수정 패턴 감지
+ * Detect mistake/correction patterns
  */
 const mistakePatterns = [
     {
@@ -126,8 +126,8 @@ const mistakePatterns = [
         detect: (result) => result.errors.length > 0 && result.success,
         extract: (result) => {
             return {
-                title: '에러 복구 경험',
-                content: `발생한 에러:\n${result.errors.map((e) => `- ${e}`).join('\n')}\n\n해결됨.`,
+                title: 'Error Recovery Experience',
+                content: `Errors occurred:\n${result.errors.map((e) => `- ${e}`).join('\n')}\n\nResolved.`,
                 category: 'mistake',
                 scope: 'project',
                 confidence: 0.7,
@@ -142,8 +142,8 @@ const mistakePatterns = [
         detect: (result) => !result.success,
         extract: (result) => {
             return {
-                title: '실패한 접근 방식',
-                content: `작업 "${result.description}"이 실패함.\n에러: ${result.errors.join(', ') || '알 수 없음'}`,
+                title: 'Failed Approach',
+                content: `Task "${result.description}" failed.\nError: ${result.errors.join(', ') || 'Unknown'}`,
                 category: 'mistake',
                 scope: 'project',
                 confidence: 0.6,
@@ -154,20 +154,20 @@ const mistakePatterns = [
     },
 ];
 /**
- * 작업 유형 감지
+ * Detect task type
  */
 function detectTaskType(description) {
     const lower = description.toLowerCase();
     const typePatterns = [
-        [/컴포넌트|component|ui|버튼|button|모달|modal/i, 'UI 컴포넌트'],
-        [/api|엔드포인트|endpoint|rest|graphql/i, 'API'],
-        [/테스트|test|spec/i, '테스트'],
-        [/리팩토|refactor/i, '리팩토링'],
-        [/버그|bug|fix|수정/i, '버그 수정'],
-        [/스타일|style|css|tailwind/i, '스타일링'],
-        [/배포|deploy|ci|cd/i, '배포'],
-        [/문서|doc|readme/i, '문서화'],
-        [/설정|config|설치/i, '설정'],
+        [/component|ui|button|modal/i, 'UI Component'],
+        [/api|endpoint|rest|graphql/i, 'API'],
+        [/test|spec/i, 'Testing'],
+        [/refactor/i, 'Refactoring'],
+        [/bug|fix/i, 'Bug Fix'],
+        [/style|css|tailwind/i, 'Styling'],
+        [/deploy|ci|cd/i, 'Deployment'],
+        [/doc|readme/i, 'Documentation'],
+        [/config|install/i, 'Configuration'],
     ];
     for (const [pattern, type] of typePatterns) {
         if (pattern.test(lower)) {
@@ -177,7 +177,7 @@ function detectTaskType(description) {
     return null;
 }
 /**
- * 모든 패턴
+ * All patterns
  */
 const allPatterns = [
     ...codingStylePatterns,
@@ -185,7 +185,7 @@ const allPatterns = [
     ...mistakePatterns,
 ];
 /**
- * 학습 추출 실행
+ * Execute learning extraction
  */
 export function extractLearnings(result) {
     const learnings = [];
@@ -199,7 +199,7 @@ export function extractLearnings(result) {
             }
         }
     }
-    // 추출 신뢰도 계산
+    // Calculate extraction confidence
     const extractionConfidence = result.success ? 0.8 : 0.5;
     return {
         learnings,
@@ -209,13 +209,13 @@ export function extractLearnings(result) {
     };
 }
 /**
- * 간단한 학습 생성 (명시적 학습용)
+ * Create simple learning (for explicit learning)
  */
 export function createSimpleLearning(content, options = {}) {
-    // 제목 자동 생성 (첫 줄 또는 첫 50자)
+    // Auto-generate title (first line or first 50 characters)
     const firstLine = content.split('\n')[0];
     const title = firstLine.length > 50 ? firstLine.slice(0, 47) + '...' : firstLine;
-    // 카테고리 자동 감지
+    // Auto-detect category
     const category = options.category || detectCategory(content);
     return {
         title,
@@ -229,36 +229,36 @@ export function createSimpleLearning(content, options = {}) {
     };
 }
 /**
- * 카테고리 자동 감지
+ * Auto-detect category
  */
 function detectCategory(content) {
     const lower = content.toLowerCase();
-    if (/선호|prefer|좋아|싫어|always|never/i.test(lower)) {
+    if (/prefer|like|dislike|always|never/i.test(lower)) {
         return 'preference';
     }
-    if (/패턴|pattern|반복|workflow/i.test(lower)) {
+    if (/pattern|repeat|workflow/i.test(lower)) {
         return 'pattern';
     }
-    if (/아키텍처|구조|기술 스택|framework/i.test(lower)) {
+    if (/architecture|structure|tech stack|framework/i.test(lower)) {
         return 'context';
     }
-    if (/실수|mistake|에러|error|주의/i.test(lower)) {
+    if (/mistake|error|caution/i.test(lower)) {
         return 'mistake';
     }
-    if (/결정|decision|선택|chose/i.test(lower)) {
+    if (/decision|choice|chose/i.test(lower)) {
         return 'decision';
     }
-    if (/컨벤션|convention|규칙|rule/i.test(lower)) {
+    if (/convention|rule/i.test(lower)) {
         return 'convention';
     }
     return 'insight';
 }
 /**
- * 태그 자동 추출
+ * Auto-extract tags
  */
 function extractTags(content) {
     const tags = [];
-    // 기술 키워드
+    // Tech keywords
     const techKeywords = [
         'react', 'vue', 'angular', 'typescript', 'javascript',
         'python', 'go', 'rust', 'java', 'node',
@@ -273,7 +273,7 @@ function extractTags(content) {
             tags.push(keyword);
         }
     }
-    // 해시태그 추출
+    // Extract hashtags
     const hashtagMatches = content.match(/#\w+/g);
     if (hashtagMatches) {
         tags.push(...hashtagMatches.map((t) => t.slice(1)));
@@ -281,11 +281,11 @@ function extractTags(content) {
     return [...new Set(tags)].slice(0, 10);
 }
 /**
- * 코드 변경에서 학습 추출
+ * Extract learning from code changes
  */
 export function extractFromCodeChanges(changes) {
     const learnings = [];
-    // 언어별 그룹화
+    // Group by language
     const byLanguage = new Map();
     for (const change of changes) {
         const lang = change.language || 'unknown';
@@ -293,12 +293,12 @@ export function extractFromCodeChanges(changes) {
         existing.push(change);
         byLanguage.set(lang, existing);
     }
-    // 언어별 패턴 분석
+    // Analyze patterns by language
     for (const [language, langChanges] of byLanguage) {
         if (langChanges.length >= 2) {
             learnings.push({
-                title: `${language} 코드 작업 패턴`,
-                content: `${language} 파일 ${langChanges.length}개 작업. 파일: ${langChanges.map((c) => c.filePath.split('/').pop()).join(', ')}`,
+                title: `${language} Code Work Pattern`,
+                content: `Worked on ${langChanges.length} ${language} files. Files: ${langChanges.map((c) => c.filePath.split('/').pop()).join(', ')}`,
                 category: 'pattern',
                 scope: 'project',
                 confidence: 0.5,

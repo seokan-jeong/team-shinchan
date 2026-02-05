@@ -4,31 +4,31 @@ description: Start a new task with the integrated workflow
 
 # ⚠️ EXECUTE IMMEDIATELY - DO NOT JUST DESCRIBE
 
-**이 커맨드가 호출되면 즉시 다음을 실행하세요:**
+**When this command is invoked, immediately execute the following:**
 
-## 1. 즉시 실행: DOC_ID 결정
+## 1. Execute Immediately: Determine DOC_ID
 
 ```bash
-# 브랜치 확인
+# Check current branch
 git branch --show-current
 
-# 기존 폴더 확인
-ls shinchan-docs/ 2>/dev/null || echo "폴더 없음"
+# Check existing folders
+ls shinchan-docs/ 2>/dev/null || echo "No folder exists"
 ```
 
-DOC_ID 규칙:
-- args에 `ISSUE-xxx`가 있으면 → `ISSUE-xxx`
-- 없으면 → `{branch}-{next_index}` (예: `main-004`)
+DOC_ID Rules:
+- If `ISSUE-xxx` exists in args → `ISSUE-xxx`
+- Otherwise → `{branch}-{next_index}` (e.g., `main-004`)
 
-## 2. 즉시 실행: 폴더 생성
+## 2. Execute Immediately: Create Folder
 
 ```bash
 mkdir -p shinchan-docs/{DOC_ID}
 ```
 
-## 3. 즉시 실행: WORKFLOW_STATE.yaml 생성
+## 3. Execute Immediately: Create WORKFLOW_STATE.yaml
 
-Write 도구로 `shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml` 생성:
+Use Write tool to create `shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml`:
 
 ```yaml
 version: 1
@@ -46,7 +46,7 @@ stage_rules:
   requirements:
     allowed_tools: [Read, Glob, Grep, Task, AskUserQuestion]
     blocked_tools: [Edit, Write, TodoWrite, Bash]
-    interpretation: "모든 사용자 요청은 요구사항으로 해석"
+    interpretation: "All user requests are interpreted as requirements"
 
 history:
   - timestamp: "{ISO timestamp}"
@@ -54,51 +54,51 @@ history:
     agent: shinnosuke
 ```
 
-## 4. 즉시 출력: 시작 메시지
+## 4. Output Immediately: Start Message
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 Team-Shinchan 워크플로우 시작
+🚀 Team-Shinchan Workflow Started
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📁 문서 ID: {DOC_ID}
-📂 폴더: shinchan-docs/{DOC_ID}/
+📁 Document ID: {DOC_ID}
+📂 Folder: shinchan-docs/{DOC_ID}/
 📄 WORKFLOW_STATE.yaml ✅
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📋 Stage 1: Requirements
-👤 담당: Nene
+👤 Owner: Nene
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-## 5. 즉시 실행: Nene 호출
+## 5. Execute Immediately: Invoke Nene
 
 ```typescript
 Task(
   subagent_type="team-shinchan:nene",
   model="opus",
-  prompt="Stage 1 요구사항 수집을 시작합니다.
+  prompt="Starting Stage 1 requirements gathering.
 
 DOC_ID: {DOC_ID}
-사용자 요청: {args}
+User request: {args}
 
-REQUESTS.md를 작성하고 사용자와 인터뷰하세요.
-'~해줘' 요청은 모두 요구사항으로 기록하세요 (구현 아님).
+Write REQUESTS.md and interview the user.
+Record all '~do this' requests as requirements (not implementation).
 
-첫 질문: '어떤 문제를 해결하고 싶으신가요?'"
+First question: 'What problem do you want to solve?'"
 )
 ```
 
 ---
 
-## ⛔ 금지
+## ⛔ Prohibited
 
-- ❌ 위 단계를 설명만 하는 것
-- ❌ WORKFLOW_STATE.yaml 생성 없이 진행
-- ❌ Nene 호출 없이 직접 진행
+- ❌ Only describing the above steps
+- ❌ Proceeding without creating WORKFLOW_STATE.yaml
+- ❌ Proceeding directly without invoking Nene
 
-## 사용법
+## Usage
 
 ```bash
-/team-shinchan:start                    # 자동 ID 생성
-/team-shinchan:start ISSUE-123          # 이슈 ID 사용
-/team-shinchan:start "Add user auth"    # 설명과 함께 시작
+/team-shinchan:start                    # Auto-generate ID
+/team-shinchan:start ISSUE-123          # Use issue ID
+/team-shinchan:start "Add user auth"    # Start with description
 ```

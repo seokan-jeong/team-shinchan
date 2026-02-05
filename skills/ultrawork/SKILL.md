@@ -12,38 +12,38 @@ user-invocable: true
 Task(
   subagent_type="team-shinchan:shinnosuke",
   model="opus",
-  prompt=`/team-shinchan:ultrawork가 호출되었습니다.
+  prompt=`/team-shinchan:ultrawork has been invoked.
 
-## 병렬 실행 모드
+## Parallel Execution Mode
 
-최대 병렬 실행으로 빠르게 완료하세요:
+Complete quickly with maximum parallelization:
 
-1. 작업을 독립적인 단위로 분해
-2. 각 단위를 적절한 에이전트에게 병렬 할당
-   - run_in_background=true 사용
-   - 에이전트 라우팅:
-     | 도메인 | Haiku | Sonnet | Opus |
+1. Break tasks into independent units
+2. Assign each unit to appropriate agents in parallel
+   - Use run_in_background=true
+   - Agent routing:
+     | Domain | Haiku | Sonnet | Opus |
      |--------|-------|--------|------|
-     | 분석 | Shiro | Misae | Hiroshi |
-     | 실행 | - | Bo | Kazama |
+     | Analysis | Shiro | Misae | Hiroshi |
+     | Execution | - | Bo | Kazama |
      | Frontend | - | Aichan | - |
      | Backend | - | Bunta | - |
      | DevOps | - | Masao | - |
-     | 검증 | - | - | Action Kamen |
-3. 순차적 작업은 큐에 대기
-4. 모든 작업 완료 대기
-5. 결과 통합 및 Action Kamen 검증
+     | Verification | - | - | Action Kamen |
+3. Queue sequential tasks
+4. Wait for all tasks to complete
+5. Integrate results and Action Kamen verification
 
-## 완료 조건
+## Completion Conditions
 
-- TODO 리스트 전체 완료
-- 모든 기능 정상 동작
-- 테스트 통과
-- 에러 없음
+- All TODO list items completed
+- All features working properly
+- Tests pass
+- No errors
 
-**조건 미충족 시 계속 작업!**
+**If conditions not met, keep working!**
 
-사용자 요청: ${args || '(병렬 처리할 작업)'}
+User request: ${args || '(Tasks to process in parallel)'}
 `
 )
 ```

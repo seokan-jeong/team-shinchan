@@ -1,5 +1,5 @@
 /**
- * Plan 스킬 - 계획 세션
+ * Plan Skill - Planning Session
  */
 import type { SkillConfig, PluginContext } from '../../../types';
 export declare function createPlanSkill(context: PluginContext): SkillConfig;

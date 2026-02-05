@@ -1,5 +1,5 @@
 /**
- * interactive_bash - 대화형 bash 세션
+ * interactive_bash - Interactive Bash Session
  */
 import type { ToolConfig, PluginContext } from '../../types';
 export declare function createInteractiveBashTool(context: PluginContext): ToolConfig;

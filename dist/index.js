@@ -543,16 +543,16 @@ function mergeSettings(defaults, overrides) {
   };
 }
 var SKILL_TRIGGERS = {
-  ultrawork: ["ulw", "ultrawork", "병렬", "빠르게", "parallel"],
-  ralph: ["ralph", "끝까지", "완료할 때까지", "dont stop", "don't stop"],
-  autopilot: ["autopilot", "자동으로", "알아서", "auto"],
-  plan: ["plan", "계획", "설계", "planning"],
-  analyze: ["analyze", "분석", "디버깅", "왜 안", "debug", "investigate"],
-  deepsearch: ["deepsearch", "깊은검색", "찾아줘", "search"],
-  debate: ["debate", "토론", "의견", "논의", "장단점", "비교", "어떤 방법"],
+  ultrawork: ["ulw", "ultrawork", "parallel", "fast", "parallel"],
+  ralph: ["ralph", "until done", "until complete", "dont stop", "don't stop"],
+  autopilot: ["autopilot", "automatically", "auto", "auto"],
+  plan: ["plan", "planning", "design", "planning"],
+  analyze: ["analyze", "analysis", "debugging", "why not", "debug", "investigate"],
+  deepsearch: ["deepsearch", "deep search", "find", "search"],
+  debate: ["debate", "discussion", "opinion", "discuss", "pros and cons", "compare", "which method"],
   "git-master": ["commit", "push", "merge", "rebase", "git"],
-  "frontend-ui-ux": ["UI", "UX", "컴포넌트", "스타일", "CSS", "component"],
-  cancel: ["cancel", "취소", "중단", "stop", "멈춰"]
+  "frontend-ui-ux": ["UI", "UX", "component", "style", "CSS", "component"],
+  cancel: ["cancel", "cancel", "stop", "stop", "stop"]
 };
 
 // src/agents/shinnosuke.ts
@@ -686,7 +686,7 @@ function createHimawariAgent(settings) {
       cost: "EXPENSIVE",
       model: "opus",
       description: "Master Orchestrator - Large project coordination",
-      delegationTriggers: ["대규모", "large", "complex", "복잡한"],
+      delegationTriggers: ["large-scale", "large", "complex", "complex"],
       isReadOnly: false
     }
   };
@@ -733,7 +733,7 @@ function createBoAgent(settings) {
       cost: "CHEAP",
       model: "sonnet",
       description: "Task Executor - Code writing and modification",
-      delegationTriggers: ["구현", "코드", "작성", "수정", "implement", "code", "write"],
+      delegationTriggers: ["implement", "code", "write", "modify", "implement", "code", "write"],
       isReadOnly: false
     }
   };
@@ -778,7 +778,7 @@ function createKazamaAgent(settings) {
       cost: "EXPENSIVE",
       model: "opus",
       description: "Autonomous Deep Worker - Complex long-running tasks",
-      delegationTriggers: ["복잡한", "장시간", "complex", "refactor", "리팩토링"],
+      delegationTriggers: ["complex", "long-running", "complex", "refactor", "refactoring"],
       isReadOnly: false
     }
   };
@@ -825,7 +825,7 @@ function createAichanAgent(settings) {
       cost: "CHEAP",
       model: "sonnet",
       description: "Frontend Specialist - UI/UX development",
-      delegationTriggers: ["UI", "UX", "프론트", "frontend", "컴포넌트", "component", "CSS", "스타일"],
+      delegationTriggers: ["UI", "UX", "frontend", "frontend", "component", "component", "CSS", "style"],
       isReadOnly: false
     }
   };
@@ -872,7 +872,7 @@ function createBuntaAgent(settings) {
       cost: "CHEAP",
       model: "sonnet",
       description: "Backend Specialist - API and database development",
-      delegationTriggers: ["API", "백엔드", "backend", "DB", "database", "서버", "server"],
+      delegationTriggers: ["API", "backend", "backend", "DB", "database", "server", "server"],
       isReadOnly: false
     }
   };
@@ -919,7 +919,7 @@ function createMasaoAgent(settings) {
       cost: "CHEAP",
       model: "sonnet",
       description: "DevOps Specialist - Infrastructure and deployment",
-      delegationTriggers: ["배포", "deploy", "CI", "CD", "Docker", "인프라", "infra", "k8s"],
+      delegationTriggers: ["deploy", "deploy", "CI", "CD", "Docker", "infrastructure", "infra", "k8s"],
       isReadOnly: false
     }
   };
@@ -970,7 +970,7 @@ function createHiroshiAgent(settings) {
       cost: "EXPENSIVE",
       model: "opus",
       description: "Senior Advisor - Strategic advice and debugging",
-      delegationTriggers: ["조언", "advice", "전략", "strategy", "디버깅", "debug", "왜 안돼"],
+      delegationTriggers: ["advice", "advice", "strategy", "strategy", "debugging", "debug", "why not working"],
       disallowedTools: ["Edit", "Write", "NotebookEdit"],
       isReadOnly: true
     }
@@ -1023,7 +1023,7 @@ function createNeneAgent(settings) {
       cost: "EXPENSIVE",
       model: "opus",
       description: "Strategic Planner - Creates implementation plans",
-      delegationTriggers: ["계획", "plan", "설계", "design"],
+      delegationTriggers: ["planning", "plan", "design", "design"],
       disallowedTools: ["Edit", "Write", "NotebookEdit"],
       isReadOnly: true
     }
@@ -1070,7 +1070,7 @@ function createMisaeAgent(settings) {
       cost: "CHEAP",
       model: "sonnet",
       description: "Pre-Planning Analyst - Discovers hidden requirements",
-      delegationTriggers: ["분석", "analyze", "확인", "고려사항"],
+      delegationTriggers: ["analysis", "analyze", "check", "considerations"],
       disallowedTools: ["Edit", "Write", "NotebookEdit"],
       isReadOnly: true
     }
@@ -1128,7 +1128,7 @@ function createActionKamenAgent(settings) {
       cost: "EXPENSIVE",
       model: "opus",
       description: "Reviewer - Verifies and approves work",
-      delegationTriggers: ["검토", "review", "리뷰", "확인", "verify"],
+      delegationTriggers: ["review", "review", "review", "check", "verify"],
       disallowedTools: ["Edit", "Write", "NotebookEdit"],
       isReadOnly: true
     }
@@ -1174,7 +1174,7 @@ function createShiroAgent(settings) {
       cost: "FREE",
       model: "haiku",
       description: "Fast Explorer - Quick codebase search",
-      delegationTriggers: ["찾아줘", "find", "어디있어", "search", "검색"],
+      delegationTriggers: ["find", "find", "where is", "search", "search"],
       disallowedTools: ["Edit", "Write", "NotebookEdit"],
       isReadOnly: true
     }
@@ -1220,7 +1220,7 @@ function createMasumiAgent(settings) {
       cost: "CHEAP",
       model: "sonnet",
       description: "Librarian - Documentation and info search",
-      delegationTriggers: ["문서", "docs", "API 문서", "documentation"],
+      delegationTriggers: ["documentation", "docs", "API documentation", "documentation"],
       disallowedTools: ["Edit", "Write", "NotebookEdit"],
       isReadOnly: true
     }
@@ -1266,7 +1266,7 @@ function createUmeAgent(settings) {
       cost: "CHEAP",
       model: "sonnet",
       description: "Multimodal Analyst - Image and PDF analysis",
-      delegationTriggers: ["이미지", "image", "PDF", "스크린샷", "screenshot"],
+      delegationTriggers: ["image", "image", "PDF", "screenshot", "screenshot"],
       allowedTools: ["Read", "Glob", "WebFetch"],
       isReadOnly: true
     }
@@ -1332,7 +1332,7 @@ function createMidoriAgent(settings) {
       cost: "EXPENSIVE",
       model: "opus",
       description: "Discussion Moderator - Facilitates debates and consensus",
-      delegationTriggers: ["토론", "debate", "의견", "논의", "장단점", "비교"],
+      delegationTriggers: ["debate", "debate", "opinion", "discussion", "pros and cons", "compare"],
       disallowedTools: ["Edit", "Write", "NotebookEdit"],
       isReadOnly: true
     }
@@ -1456,7 +1456,7 @@ function createTodoContinuationEnforcerHook(context) {
   return {
     name: "todo-continuation-enforcer",
     event: "Stop",
-    description: "TODO가 완료되지 않으면 세션 종료를 방지합니다.",
+    description: "Prevents session termination if TODOs are not completed.",
     enabled: true,
     priority: 100,
     handler: async (hookContext) => {
@@ -1471,26 +1471,26 @@ function createTodoContinuationEnforcerHook(context) {
         retryCount = 0;
         return {
           continue: true,
-          message: `⚠️ 최대 재시도 횟수(${maxRetries})에 도달했습니다. 미완료 TODO가 있지만 종료를 허용합니다.`
+          message: `⚠️ Maximum retry count (${maxRetries}) reached. Allowing termination despite incomplete TODOs.`
         };
       }
       retryCount++;
       const todoList = [
-        ...inProgressTodo ? [`\uD83D\uDD04 진행 중: ${inProgressTodo.content}`] : [],
-        ...pendingTodos.map((t) => `⏳ 대기 중: ${t.content}`)
+        ...inProgressTodo ? [`\uD83D\uDD04 In Progress: ${inProgressTodo.content}`] : [],
+        ...pendingTodos.map((t) => `⏳ Pending: ${t.content}`)
       ].join(`
 `);
       return {
         continue: false,
-        message: `\uD83D\uDEAB **TODO 강제 실행**
+        message: `\uD83D\uDEAB **TODO Enforcement**
 
-미완료 작업이 있어 종료할 수 없습니다. (시도 ${retryCount}/${maxRetries})
+Cannot terminate due to incomplete tasks. (Attempt ${retryCount}/${maxRetries})
 
 ${todoList}
 
-계속 진행하거나, \`/cancel\`로 명시적으로 취소하세요.`,
+Continue working or explicitly cancel with \`/cancel\`.`,
         inject: `<system-reminder>
-미완료 TODO가 있습니다. 작업을 계속하세요.
+Incomplete TODOs exist. Continue working.
 ${todoList}
 </system-reminder>`
       };
@@ -1503,7 +1503,7 @@ function createContextWindowMonitorHook(context) {
   return {
     name: "context-window-monitor",
     event: "chat.message",
-    description: "컨텍스트 윈도우 사용량을 모니터링합니다.",
+    description: "Monitors context window usage.",
     enabled: true,
     priority: 60,
     handler: async (hookContext) => {
@@ -1513,25 +1513,25 @@ function createContextWindowMonitorHook(context) {
       if (state.messageCount === threshold) {
         return {
           continue: true,
-          message: `⚠️ **컨텍스트 경고**
+          message: `⚠️ **Context Warning**
 
-메시지 수가 ${threshold}개에 도달했습니다.
-긴 세션에서는 컨텍스트가 압축될 수 있습니다.
+Message count has reached ${threshold}.
+In long sessions, context may be compressed.
 
-중요한 정보는 TODO나 파일에 저장하는 것을 권장합니다.`
+It is recommended to save important information in TODOs or files.`
         };
       }
       if (state.messageCount === Math.floor(threshold * 1.5)) {
         return {
           continue: true,
-          message: `\uD83D\uDEA8 **컨텍스트 심각 경고**
+          message: `\uD83D\uDEA8 **Context Critical Warning**
 
-메시지 수가 ${state.messageCount}개입니다.
-곧 컨텍스트 압축이 발생할 수 있습니다.
+Message count is at ${state.messageCount}.
+Context compression may occur soon.
 
-- 중요한 컨텍스트는 파일에 저장하세요
-- 완료된 작업은 정리하세요
-- 필요시 새 세션을 시작하세요`
+- Save important context to files
+- Clean up completed work
+- Start a new session if needed`
         };
       }
       return { continue: true };
@@ -1544,7 +1544,7 @@ function createPreemptiveCompactionHook(context) {
   return {
     name: "preemptive-compaction",
     event: "chat.message",
-    description: "컨텍스트가 가득 차기 전에 선제적으로 압축을 제안합니다.",
+    description: "Suggests preemptive compaction before context is full.",
     enabled: true,
     priority: 50,
     handler: async () => ({ continue: true })
@@ -1556,7 +1556,7 @@ function createToolOutputTruncatorHook(context) {
   return {
     name: "tool-output-truncator",
     event: "tool.execute.after",
-    description: "너무 긴 도구 출력을 잘라냅니다.",
+    description: "Truncates excessively long tool outputs.",
     enabled: true,
     priority: 40,
     handler: async () => ({ continue: true })
@@ -1568,7 +1568,7 @@ function createEmptyTaskResponseDetectorHook(context) {
   return {
     name: "empty-task-response-detector",
     event: "tool.execute.after",
-    description: "빈 작업 응답을 감지하고 재시도를 권장합니다.",
+    description: "Detects empty task responses and recommends retry.",
     enabled: true,
     priority: 45,
     handler: async () => ({ continue: true })
@@ -1580,7 +1580,7 @@ function createCommentCheckerHook(context) {
   return {
     name: "comment-checker",
     event: "tool.execute.after",
-    description: "과도한 주석 사용을 감지하고 경고합니다.",
+    description: "Detects excessive comment usage and warns.",
     enabled: true,
     priority: 30,
     matchTools: ["Edit", "Write"],
@@ -1593,7 +1593,7 @@ function createEditErrorRecoveryHook(context) {
   return {
     name: "edit-error-recovery",
     event: "tool.execute.after",
-    description: "편집 오류 발생 시 복구를 시도합니다.",
+    description: "Attempts recovery when edit errors occur.",
     enabled: true,
     priority: 55,
     matchTools: ["Edit"],
@@ -1652,7 +1652,7 @@ function createKeywordDetectorHook(context) {
   return {
     name: "keyword-detector",
     event: "UserPromptSubmit",
-    description: "사용자 메시지에서 키워드를 감지하여 적절한 스킬을 추천합니다.",
+    description: "Detects keywords in user messages to recommend appropriate skills.",
     enabled: true,
     priority: 80,
     handler: async (hookContext) => {
@@ -1678,24 +1678,24 @@ function createKeywordDetectorHook(context) {
       });
       const topSkill = prioritized[0];
       const skillMessages = {
-        ultrawork: "\uD83D\uDE80 **Ultrawork** 모드를 활성화합니다. 병렬 실행으로 빠르게 처리합니다.",
-        ralph: "\uD83D\uDD04 **Ralph** 모드를 활성화합니다. 작업이 완료될 때까지 계속합니다.",
-        autopilot: "\uD83E\uDD16 **Autopilot** 모드를 활성화합니다. 자율적으로 작업을 수행합니다.",
-        plan: "\uD83D\uDCCB **Plan** 세션을 시작합니다. 요구사항을 파악하겠습니다.",
-        analyze: "\uD83D\uDD0D **Analyze** 모드를 활성화합니다. 심층 분석을 수행합니다.",
-        deepsearch: "\uD83D\uDD0E **Deepsearch** 모드를 활성화합니다. 코드베이스를 깊이 탐색합니다.",
-        "git-master": "\uD83C\uDF3F **Git-Master** 모드를 활성화합니다.",
-        "frontend-ui-ux": "\uD83C\uDFA8 **Frontend-UI-UX** 모드를 활성화합니다.",
-        cancel: "⏹️ 현재 모드를 취소합니다."
+        ultrawork: "\uD83D\uDE80 **Ultrawork** mode activated. Processing quickly with parallel execution.",
+        ralph: "\uD83D\uDD04 **Ralph** mode activated. Continuing until task completion.",
+        autopilot: "\uD83E\uDD16 **Autopilot** mode activated. Performing tasks autonomously.",
+        plan: "\uD83D\uDCCB **Plan** session started. Gathering requirements.",
+        analyze: "\uD83D\uDD0D **Analyze** mode activated. Performing deep analysis.",
+        deepsearch: "\uD83D\uDD0E **Deepsearch** mode activated. Exploring codebase deeply.",
+        "git-master": "\uD83C\uDF3F **Git-Master** mode activated.",
+        "frontend-ui-ux": "\uD83C\uDFA8 **Frontend-UI-UX** mode activated.",
+        cancel: "⏹️ Canceling current mode."
       };
       return {
         continue: true,
         modified: true,
-        message: skillMessages[topSkill.skill] || `스킬 '${topSkill.skill}'을 감지했습니다.`,
+        message: skillMessages[topSkill.skill] || `Skill '${topSkill.skill}' detected.`,
         inject: `<intent-gate>
-감지된 키워드: "${topSkill.keyword}"
-추천 스킬: ${topSkill.skill}
-자동 활성화: 예
+Detected keyword: "${topSkill.keyword}"
+Recommended skill: ${topSkill.skill}
+Auto-activation: Yes
 </intent-gate>`
       };
     }
@@ -1707,7 +1707,7 @@ function createRulesInjectorHook(context) {
   return {
     name: "rules-injector",
     event: "chat.message",
-    description: "Team-Seokan 규칙을 컨텍스트에 주입합니다.",
+    description: "Injects Team-Shinchan rules into context.",
     enabled: true,
     priority: 20,
     handler: async () => ({ continue: true })
@@ -1719,7 +1719,7 @@ function createDirectoryAgentsInjectorHook(context) {
   return {
     name: "directory-agents-injector",
     event: "chat.message",
-    description: "현재 디렉토리의 AGENTS.md를 컨텍스트에 주입합니다.",
+    description: "Injects current directory's AGENTS.md into context.",
     enabled: true,
     priority: 15,
     handler: async () => ({ continue: true })
@@ -1731,7 +1731,7 @@ function createStopContinuationGuardHook(context) {
   return {
     name: "stop-continuation-guard",
     event: "Stop",
-    description: "실행 중인 배경 작업이 있으면 경고합니다.",
+    description: "Warns if background tasks are running.",
     enabled: true,
     priority: 85,
     handler: async (hookContext) => {
@@ -1743,12 +1743,12 @@ function createStopContinuationGuardHook(context) {
 `);
       return {
         continue: true,
-        message: `⚠️ **배경 작업 실행 중**
+        message: `⚠️ **Background Tasks Running**
 
-다음 배경 작업이 아직 실행 중입니다:
+The following background tasks are still running:
 ${taskList}
 
-결과를 확인하려면 \`session_manager(action="list_tasks")\`를 사용하세요.`
+Use \`session_manager(action="list_tasks")\` to check results.`
       };
     }
   };
@@ -1761,7 +1761,7 @@ function createReviewerCheckHook(context) {
   return {
     name: "reviewer-check",
     event: "tool.execute.after",
-    description: "코드 변경 후 액션가면(Reviewer)에게 검증을 권장합니다.",
+    description: "Recommends verification by Action Kamen (Reviewer) after code changes.",
     enabled: true,
     priority: 70,
     matchTools: ["Edit", "Write"],
@@ -1771,15 +1771,15 @@ function createReviewerCheckHook(context) {
         editCount = 0;
         return {
           continue: true,
-          message: `\uD83D\uDCCB **검증 권장**
+          message: `\uD83D\uDCCB **Verification Recommended**
 
-${editThreshold}번의 코드 변경이 있었습니다.
-액션가면(Reviewer)에게 검증을 권장합니다.
+${editThreshold} code changes have been made.
+Verification by Action Kamen (Reviewer) is recommended.
 
-\`delegate_task(agent="actiongamen", task="최근 변경사항을 검토해주세요")\``,
+\`delegate_task(agent="actionkamen", task="Review recent changes")\``,
           inject: `<reviewer-reminder>
-여러 코드 변경이 있었습니다.
-액션가면(Reviewer)에게 검증을 위임하는 것을 고려하세요.
+Multiple code changes have been made.
+Consider delegating verification to Action Kamen (Reviewer).
 </reviewer-reminder>`
         };
       }
@@ -1793,7 +1793,7 @@ function createRalphLoopHook(context) {
   return {
     name: "ralph-loop",
     event: "Stop",
-    description: "Ralph 모드가 활성화되면 작업 완료까지 계속 실행합니다.",
+    description: "Continues execution until task completion when Ralph mode is active.",
     enabled: true,
     priority: 90,
     handler: async (hookContext) => {
@@ -1804,23 +1804,23 @@ function createRalphLoopHook(context) {
       if (hasPendingOrInProgressTodos(state)) {
         return {
           continue: false,
-          message: `\uD83D\uDD04 **Ralph Loop 활성화**
+          message: `\uD83D\uDD04 **Ralph Loop Active**
 
-작업이 아직 완료되지 않았습니다. 계속 진행합니다.
+Task is not yet complete. Continuing work.
 
-Ralph를 중단하려면 \`/cancel-ralph\`를 사용하세요.`,
+Use \`/cancel-ralph\` to stop Ralph.`,
           inject: `<system-reminder>
-Ralph Loop가 활성화되어 있습니다.
-모든 TODO가 완료될 때까지 작업을 계속하세요.
+Ralph Loop is active.
+Continue working until all TODOs are complete.
 </system-reminder>`
         };
       }
       state.ralphLoopActive = false;
       return {
         continue: true,
-        message: `✅ **Ralph Loop 완료**
+        message: `✅ **Ralph Loop Complete**
 
-모든 작업이 완료되었습니다. Ralph 모드를 종료합니다.`
+All tasks completed. Exiting Ralph mode.`
       };
     }
   };
@@ -1839,25 +1839,25 @@ var codingStylePatterns = [
       for (const change of result.codeChanges) {
         const fileName = change.filePath.split("/").pop() || "";
         if (fileName.includes(".component.")) {
-          patterns.push("컴포넌트 파일: *.component.{ext} 패턴");
+          patterns.push("Component files: *.component.{ext} pattern");
         }
         if (fileName.includes(".service.")) {
-          patterns.push("서비스 파일: *.service.{ext} 패턴");
+          patterns.push("Service files: *.service.{ext} pattern");
         }
         if (fileName.includes(".test.") || fileName.includes(".spec.")) {
-          patterns.push("테스트 파일: *.test.{ext} 또는 *.spec.{ext} 패턴");
+          patterns.push("Test files: *.test.{ext} or *.spec.{ext} pattern");
         }
         if (fileName.match(/^[A-Z]/)) {
-          patterns.push("PascalCase 파일명 사용");
+          patterns.push("Using PascalCase file names");
         }
         if (fileName.match(/^[a-z]+(-[a-z]+)*\./)) {
-          patterns.push("kebab-case 파일명 사용");
+          patterns.push("Using kebab-case file names");
         }
       }
       if (patterns.length === 0)
         return null;
       return {
-        title: "파일 네이밍 컨벤션",
+        title: "File Naming Convention",
         content: [...new Set(patterns)].join(`
 `),
         category: "convention",
@@ -1885,8 +1885,8 @@ var codingStylePatterns = [
       if (folders.size === 0)
         return null;
       return {
-        title: "프로젝트 폴더 구조",
-        content: `사용된 폴더:
+        title: "Project Folder Structure",
+        content: `Used folders:
 ${[...folders].map((f) => `- ${f}`).join(`
 `)}`,
         category: "context",
@@ -1908,8 +1908,8 @@ var taskPatterns = [
       if (!taskType)
         return null;
       return {
-        title: `자주 하는 작업: ${taskType}`,
-        content: `${taskType} 작업 완료. 설명: ${result.description}`,
+        title: `Common Task: ${taskType}`,
+        content: `${taskType} task completed. Description: ${result.description}`,
         category: "pattern",
         scope: "global",
         confidence: 0.5,
@@ -1925,8 +1925,8 @@ var taskPatterns = [
     extract: (result) => {
       const taskType = detectTaskType(result.description);
       return {
-        title: `${result.agent} 에이전트 작업 성공`,
-        content: `${result.agent}가 "${result.description}" 작업을 성공적으로 완료함.${taskType ? ` 작업 유형: ${taskType}` : ""}`,
+        title: `${result.agent} Agent Task Success`,
+        content: `${result.agent} successfully completed "${result.description}" task.${taskType ? ` Task type: ${taskType}` : ""}`,
         category: "pattern",
         scope: "global",
         owner: result.agent,
@@ -1944,12 +1944,12 @@ var mistakePatterns = [
     detect: (result) => result.errors.length > 0 && result.success,
     extract: (result) => {
       return {
-        title: "에러 복구 경험",
-        content: `발생한 에러:
+        title: "Error Recovery Experience",
+        content: `Errors occurred:
 ${result.errors.map((e) => `- ${e}`).join(`
 `)}
 
-해결됨.`,
+Resolved.`,
         category: "mistake",
         scope: "project",
         confidence: 0.7,
@@ -1964,9 +1964,9 @@ ${result.errors.map((e) => `- ${e}`).join(`
     detect: (result) => !result.success,
     extract: (result) => {
       return {
-        title: "실패한 접근 방식",
-        content: `작업 "${result.description}"이 실패함.
-에러: ${result.errors.join(", ") || "알 수 없음"}`,
+        title: "Failed Approach",
+        content: `Task "${result.description}" failed.
+Error: ${result.errors.join(", ") || "Unknown"}`,
         category: "mistake",
         scope: "project",
         confidence: 0.6,
@@ -1979,15 +1979,15 @@ ${result.errors.map((e) => `- ${e}`).join(`
 function detectTaskType(description) {
   const lower = description.toLowerCase();
   const typePatterns = [
-    [/컴포넌트|component|ui|버튼|button|모달|modal/i, "UI 컴포넌트"],
-    [/api|엔드포인트|endpoint|rest|graphql/i, "API"],
-    [/테스트|test|spec/i, "테스트"],
-    [/리팩토|refactor/i, "리팩토링"],
-    [/버그|bug|fix|수정/i, "버그 수정"],
-    [/스타일|style|css|tailwind/i, "스타일링"],
-    [/배포|deploy|ci|cd/i, "배포"],
-    [/문서|doc|readme/i, "문서화"],
-    [/설정|config|설치/i, "설정"]
+    [/component|ui|button|modal/i, "UI Component"],
+    [/api|endpoint|rest|graphql/i, "API"],
+    [/test|spec/i, "Testing"],
+    [/refactor/i, "Refactoring"],
+    [/bug|fix/i, "Bug Fix"],
+    [/style|css|tailwind/i, "Styling"],
+    [/deploy|ci|cd/i, "Deployment"],
+    [/doc|readme/i, "Documentation"],
+    [/config|setup/i, "Configuration"]
   ];
   for (const [pattern, type] of typePatterns) {
     if (pattern.test(lower)) {
@@ -2039,22 +2039,22 @@ function createSimpleLearning(content, options = {}) {
 }
 function detectCategory(content) {
   const lower = content.toLowerCase();
-  if (/선호|prefer|좋아|싫어|always|never/i.test(lower)) {
+  if (/prefer|like|dislike|always|never/i.test(lower)) {
     return "preference";
   }
-  if (/패턴|pattern|반복|workflow/i.test(lower)) {
+  if (/pattern|repeat|workflow/i.test(lower)) {
     return "pattern";
   }
-  if (/아키텍처|구조|기술 스택|framework/i.test(lower)) {
+  if (/architecture|structure|tech stack|framework/i.test(lower)) {
     return "context";
   }
-  if (/실수|mistake|에러|error|주의/i.test(lower)) {
+  if (/mistake|error|bug|caution/i.test(lower)) {
     return "mistake";
   }
-  if (/결정|decision|선택|chose/i.test(lower)) {
+  if (/decision|choice|chose/i.test(lower)) {
     return "decision";
   }
-  if (/컨벤션|convention|규칙|rule/i.test(lower)) {
+  if (/convention|rule/i.test(lower)) {
     return "convention";
   }
   return "insight";
@@ -2108,143 +2108,143 @@ function extractTags(content) {
 // src/features/learning/categorizer.ts
 var categoryKeywords = {
   preference: [
-    "선호",
     "prefer",
-    "좋아",
+    "prefer",
     "like",
-    "싫어",
+    "like",
     "dislike",
-    "항상",
+    "dislike",
     "always",
-    "절대",
+    "always",
     "never",
-    "보통",
+    "never",
     "usually",
-    "스타일",
+    "usually",
     "style",
-    "방식",
+    "style",
     "way",
-    "습관",
+    "way",
+    "habit",
     "habit"
   ],
   pattern: [
-    "패턴",
     "pattern",
-    "반복",
+    "pattern",
     "repeat",
-    "워크플로우",
+    "repeat",
     "workflow",
-    "자주",
+    "workflow",
     "often",
-    "매번",
+    "often",
     "every time",
-    "일반적으로",
+    "every time",
     "typically",
-    "프로세스",
+    "typically",
     "process",
-    "순서",
+    "process",
     "sequence",
-    "단계",
+    "sequence",
+    "step",
     "step"
   ],
   context: [
-    "아키텍처",
     "architecture",
-    "구조",
+    "architecture",
     "structure",
-    "기술 스택",
+    "structure",
     "tech stack",
-    "프레임워크",
+    "tech stack",
     "framework",
-    "라이브러리",
+    "framework",
     "library",
-    "의존성",
+    "library",
     "dependency",
-    "설정",
+    "dependency",
     "config",
-    "환경",
+    "config",
     "environment",
-    "인프라",
+    "environment",
+    "infrastructure",
     "infrastructure"
   ],
   mistake: [
-    "실수",
     "mistake",
-    "에러",
+    "mistake",
     "error",
-    "버그",
+    "error",
     "bug",
-    "주의",
+    "bug",
     "caution",
-    "조심",
+    "caution",
     "careful",
-    "피해야",
+    "careful",
     "avoid",
-    "문제",
+    "avoid",
     "problem",
-    "이슈",
+    "problem",
     "issue",
-    "오류",
+    "issue",
+    "fault",
     "fault"
   ],
   decision: [
-    "결정",
     "decision",
-    "선택",
+    "decision",
     "choice",
-    "채택",
+    "choice",
     "adopt",
-    "이유",
+    "adopt",
     "reason",
-    "왜냐하면",
+    "reason",
     "because",
-    "근거",
+    "because",
     "rationale",
-    "트레이드오프",
+    "rationale",
     "tradeoff",
-    "대안",
+    "tradeoff",
     "alternative",
-    "비교",
+    "alternative",
+    "compare",
     "compare"
   ],
   convention: [
-    "컨벤션",
     "convention",
-    "규칙",
+    "convention",
     "rule",
-    "가이드라인",
+    "rule",
     "guideline",
-    "표준",
+    "guideline",
     "standard",
-    "형식",
+    "standard",
     "format",
-    "명명",
+    "format",
     "naming",
-    "린트",
+    "naming",
     "lint",
-    "포맷",
+    "lint",
     "format",
-    "코드 스타일",
+    "format",
+    "code style",
     "code style"
   ],
   insight: [
-    "발견",
     "discover",
-    "알게 됨",
+    "discover",
     "learned",
-    "흥미로운",
+    "learned",
     "interesting",
-    "참고",
+    "interesting",
     "note",
-    "팁",
+    "note",
     "tip",
-    "트릭",
+    "tip",
     "trick",
-    "최적화",
+    "trick",
     "optimize",
-    "개선",
+    "optimize",
     "improve",
-    "효율",
+    "improve",
+    "efficient",
     "efficient"
   ]
 };
@@ -2359,8 +2359,8 @@ function generateSimpleReflection(result) {
   const learnings = [];
   if (result.success) {
     learnings.push({
-      title: `성공: ${result.description.slice(0, 50)}`,
-      content: `${result.agent} 에이전트가 작업 완료.`,
+      title: `Success: ${result.description.slice(0, 50)}`,
+      content: `${result.agent} agent completed task.`,
       category: "pattern",
       scope: "project",
       owner: result.agent,
@@ -2370,8 +2370,8 @@ function generateSimpleReflection(result) {
     });
   } else {
     learnings.push({
-      title: `실패: ${result.description.slice(0, 50)}`,
-      content: `작업 실패. 에러: ${result.errors.slice(0, 2).join(", ")}`,
+      title: `Failed: ${result.description.slice(0, 50)}`,
+      content: `Task failed. Error: ${result.errors.slice(0, 2).join(", ")}`,
       category: "mistake",
       scope: "project",
       owner: result.agent,
@@ -2396,15 +2396,15 @@ function generateStandardReflection(result) {
   const learnings = classifyBatch(extraction.learnings);
   const improvements = [];
   if (result.errors.length > 0) {
-    improvements.push(`에러 방지: ${result.errors[0]}`);
+    improvements.push(`Error prevention: ${result.errors[0]}`);
   }
   if (result.duration > 10 * 60 * 1000) {
-    improvements.push("작업 시간 단축 방법 모색");
+    improvements.push("Explore ways to reduce task time");
   }
   const confirmedPatterns = [];
   if (result.success && result.codeChanges.length > 0) {
     const languages = [...new Set(result.codeChanges.map((c) => c.language))];
-    confirmedPatterns.push(`${languages.join(", ")} 작업 패턴`);
+    confirmedPatterns.push(`${languages.join(", ")} task pattern`);
   }
   return {
     taskId: result.taskId,
@@ -2423,8 +2423,8 @@ function generateDeepReflection(result) {
   const learnings = [...baseLearnings];
   if (result.codeChanges.length > 0) {
     learnings.push({
-      title: "아키텍처 결정",
-      content: `파일 구조 분석:
+      title: "Architecture Decision",
+      content: `File structure analysis:
 ${result.codeChanges.map((c) => `- ${c.filePath}: ${c.changeType} (${c.linesAdded}+ / ${c.linesRemoved}-)`).join(`
 `)}`,
       category: "decision",
@@ -2436,8 +2436,8 @@ ${result.codeChanges.map((c) => `- ${c.filePath}: ${c.changeType} (${c.linesAdde
   }
   if (result.errors.length > 0) {
     learnings.push({
-      title: "에러 패턴 분석",
-      content: `발생한 에러 유형:
+      title: "Error Pattern Analysis",
+      content: `Error types occurred:
 ${result.errors.map((e) => `- ${categorizeError(e)}`).join(`
 `)}`,
       category: "mistake",
@@ -2449,27 +2449,27 @@ ${result.errors.map((e) => `- ${categorizeError(e)}`).join(`
   }
   const improvements = [];
   if (result.errors.length > 0) {
-    improvements.push(`에러 패턴 인식 및 사전 방지`);
-    improvements.push(`테스트 케이스 추가: ${result.errors.length}개 에러 커버`);
+    improvements.push(`Recognize error patterns and prevent proactively`);
+    improvements.push(`Add test cases: ${result.errors.length}errors covered`);
   }
   if (result.duration > 20 * 60 * 1000) {
-    improvements.push("작업 분할 고려: 더 작은 단위로 나누기");
+    improvements.push("Consider task division: break into smaller units");
   }
   if (result.codeChanges.filter((c) => c.changeType === "modify").length > 3) {
-    improvements.push("리팩토링 기회: 관련 코드 그룹화");
+    improvements.push("Refactoring opportunity: group related code");
   }
   const confirmedPatterns = [];
   if (result.success) {
-    confirmedPatterns.push(`${result.agent} 에이전트 효과적인 작업 유형`);
+    confirmedPatterns.push(`${result.agent} agent effective task type`);
     const changeTypes = [...new Set(result.codeChanges.map((c) => c.changeType))];
     if (changeTypes.length > 0) {
-      confirmedPatterns.push(`작업 유형: ${changeTypes.join(", ")}`);
+      confirmedPatterns.push(`Task type: ${changeTypes.join(", ")}`);
     }
   }
   if (result.context && Object.keys(result.context).length > 0) {
     learnings.push({
-      title: "작업 컨텍스트",
-      content: `중요 컨텍스트: ${JSON.stringify(result.context, null, 2)}`,
+      title: "Task Context",
+      content: `Important context: ${JSON.stringify(result.context, null, 2)}`,
       category: "context",
       scope: "project",
       confidence: 0.6,
@@ -2491,21 +2491,21 @@ ${result.errors.map((e) => `- ${categorizeError(e)}`).join(`
 function categorizeError(error) {
   const lower = error.toLowerCase();
   if (lower.includes("type") || lower.includes("typescript")) {
-    return `타입 에러: ${error.slice(0, 100)}`;
+    return `Type error: ${error.slice(0, 100)}`;
   }
   if (lower.includes("syntax") || lower.includes("parse")) {
-    return `구문 에러: ${error.slice(0, 100)}`;
+    return `Syntax error: ${error.slice(0, 100)}`;
   }
   if (lower.includes("not found") || lower.includes("undefined") || lower.includes("null")) {
-    return `참조 에러: ${error.slice(0, 100)}`;
+    return `Reference error: ${error.slice(0, 100)}`;
   }
   if (lower.includes("permission") || lower.includes("access")) {
-    return `권한 에러: ${error.slice(0, 100)}`;
+    return `Permission error: ${error.slice(0, 100)}`;
   }
   if (lower.includes("network") || lower.includes("fetch") || lower.includes("http")) {
-    return `네트워크 에러: ${error.slice(0, 100)}`;
+    return `Network error: ${error.slice(0, 100)}`;
   }
-  return `기타 에러: ${error.slice(0, 100)}`;
+  return `Other error: ${error.slice(0, 100)}`;
 }
 function reflect(result, options = {}) {
   const factors = {
@@ -2531,26 +2531,26 @@ function reflect(result, options = {}) {
 }
 function summarizeReflection(reflection) {
   const lines = [];
-  lines.push(`## 회고: ${reflection.taskDescription}`);
-  lines.push(`- 결과: ${reflection.success ? "✅ 성공" : "❌ 실패"}`);
-  lines.push(`- 깊이: ${reflection.depth}`);
+  lines.push(`## Reflection: ${reflection.taskDescription}`);
+  lines.push(`- Result: ${reflection.success ? "✅ Success" : "❌ Failed"}`);
+  lines.push(`- Depth: ${reflection.depth}`);
   if (reflection.learnings.length > 0) {
     lines.push(`
-### 학습 (${reflection.learnings.length}개)`);
+### Learnings (${reflection.learnings.length}items)`);
     for (const learning of reflection.learnings.slice(0, 5)) {
       lines.push(`- [${learning.category}] ${learning.title}`);
     }
   }
   if (reflection.improvements.length > 0) {
     lines.push(`
-### 개선점`);
+### Improvements`);
     for (const improvement of reflection.improvements) {
       lines.push(`- ${improvement}`);
     }
   }
   if (reflection.confirmedPatterns.length > 0) {
     lines.push(`
-### 확인된 패턴`);
+### Confirmed Patterns`);
     for (const pattern of reflection.confirmedPatterns) {
       lines.push(`- ${pattern}`);
     }
@@ -2576,34 +2576,34 @@ function memoryToMarkdown(memory) {
   const sources = memory.sources.length > 0 ? memory.sources.join(", ") : "unknown";
   return `## [${memory.createdAt.toISOString().split("T")[0]}] ${memory.title}
 - **ID**: ${memory.id}
-- **내용**: ${memory.content}
-- **카테고리**: ${memory.category}
-- **신뢰도**: ${memory.confidence.toFixed(2)}
-- **출처**: ${sources}
-- **태그**: ${tags}
-- **감쇠**: ${memory.decayFactor.toFixed(2)}
-- **강화 횟수**: ${memory.reinforcementCount}
-- **반박 횟수**: ${memory.contradictionCount}
-- **접근 횟수**: ${memory.accessCount}
-- **마지막 접근**: ${memory.lastAccessedAt.toISOString()}
-- **업데이트**: ${memory.updatedAt.toISOString()}
+- *Content*: ${memory.content}
+- *Category*: ${memory.category}
+- *Confidence*: ${memory.confidence.toFixed(2)}
+- *Source*: ${sources}
+- *Tags*: ${tags}
+- *Decay*: ${memory.decayFactor.toFixed(2)}
+- *Reinforcement Count*: ${memory.reinforcementCount}
+- *Contradiction Count*: ${memory.contradictionCount}
+- *Access Count*: ${memory.accessCount}
+- *Last Accessed*: ${memory.lastAccessedAt.toISOString()}
+- *Updated*: ${memory.updatedAt.toISOString()}
 `;
 }
 function markdownToMemory(markdown, scope) {
   try {
     const idMatch = markdown.match(/- \*\*ID\*\*: (.+)/);
     const titleMatch = markdown.match(/## \[.+\] (.+)/);
-    const contentMatch = markdown.match(/- \*\*내용\*\*: (.+)/);
-    const categoryMatch = markdown.match(/- \*\*카테고리\*\*: (.+)/);
-    const confidenceMatch = markdown.match(/- \*\*신뢰도\*\*: (.+)/);
-    const sourcesMatch = markdown.match(/- \*\*출처\*\*: (.+)/);
-    const tagsMatch = markdown.match(/- \*\*태그\*\*: (.+)/);
-    const decayMatch = markdown.match(/- \*\*감쇠\*\*: (.+)/);
-    const reinforcementMatch = markdown.match(/- \*\*강화 횟수\*\*: (.+)/);
-    const contradictionMatch = markdown.match(/- \*\*반박 횟수\*\*: (.+)/);
-    const accessCountMatch = markdown.match(/- \*\*접근 횟수\*\*: (.+)/);
-    const lastAccessMatch = markdown.match(/- \*\*마지막 접근\*\*: (.+)/);
-    const updatedMatch = markdown.match(/- \*\*업데이트\*\*: (.+)/);
+    const contentMatch = markdown.match(/- \*\*content\*\*: (.+)/);
+    const categoryMatch = markdown.match(/- \*\*Category\*\*: (.+)/);
+    const confidenceMatch = markdown.match(/- \*\*Confidence\*\*: (.+)/);
+    const sourcesMatch = markdown.match(/- \*\*Source\*\*: (.+)/);
+    const tagsMatch = markdown.match(/- \*\*Tags\*\*: (.+)/);
+    const decayMatch = markdown.match(/- \*\*Decay\*\*: (.+)/);
+    const reinforcementMatch = markdown.match(/- \*\*Reinforcement Count\*\*: (.+)/);
+    const contradictionMatch = markdown.match(/- \*\*Contradiction Count\*\*: (.+)/);
+    const accessCountMatch = markdown.match(/- \*\*Access Count\*\*: (.+)/);
+    const lastAccessMatch = markdown.match(/- \*\*Last Accessed\*\*: (.+)/);
+    const updatedMatch = markdown.match(/- \*\*Updated\*\*: (.+)/);
     const dateMatch = markdown.match(/## \[(\d{4}-\d{2}-\d{2})\]/);
     if (!idMatch || !titleMatch || !contentMatch) {
       return null;
@@ -2726,8 +2726,8 @@ class MemoryStorage {
 
 `);
     const header = `# Team-Seokan Memories
-> 자동 생성된 메모리 파일입니다. 직접 수정하지 마세요.
-> 마지막 업데이트: ${new Date().toISOString()}
+> Auto-generated memory file. Do not edit directly.
+> Last updated: ${new Date().toISOString()}
 
 ---
 
@@ -2967,25 +2967,25 @@ function detectConflict(existing, incoming) {
         existing,
         incoming,
         type: "duplicate",
-        description: `기존 메모리와 거의 동일한 내용입니다. (유사도: ${(overallSimilarity * 100).toFixed(1)}%)`
+        description: `Content is almost identical to existing memory. (Similarity: ${(overallSimilarity * 100).toFixed(1)}%)`
       };
     }
     return {
       existing,
       incoming,
       type: "update",
-      description: `기존 메모리의 업데이트로 보입니다. (유사도: ${(overallSimilarity * 100).toFixed(1)}%)`
+      description: `Appears to be an update of existing memory. (Similarity: ${(overallSimilarity * 100).toFixed(1)}%)`
     };
   }
   if (overallSimilarity > 0.5 && titleSimilarity > 0.6) {
-    const contradictionIndicators = ["아니", "않", "반대", "대신", "말고", "not", "don't", "instead"];
+    const contradictionIndicators = ["no", "not", "opposite", "instead", "rather", "not", "don't", "instead"];
     const hasContradiction = contradictionIndicators.some((indicator) => incoming.content.toLowerCase().includes(indicator) || existing.content.toLowerCase().includes(indicator));
     if (hasContradiction) {
       return {
         existing,
         incoming,
         type: "contradiction",
-        description: `기존 메모리와 상충되는 내용일 수 있습니다. (유사도: ${(overallSimilarity * 100).toFixed(1)}%)`
+        description: `May contradict existing memory. (Similarity: ${(overallSimilarity * 100).toFixed(1)}%)`
       };
     }
   }
@@ -2997,7 +2997,7 @@ function resolveConflict(conflict) {
     case "duplicate":
       return {
         action: "keep_existing",
-        reason: "중복된 내용이므로 기존 메모리를 유지하고 강화합니다."
+        reason: "Duplicate content, so keeping and reinforcing existing memory."
       };
     case "update":
       const existingEffectiveConfidence = calculateEffectiveConfidence(existing);
@@ -3005,24 +3005,24 @@ function resolveConflict(conflict) {
       if (incomingConfidence >= existingEffectiveConfidence) {
         return {
           action: "replace",
-          reason: `새 메모리의 신뢰도(${incomingConfidence.toFixed(2)})가 기존(${existingEffectiveConfidence.toFixed(2)})보다 높거나 같으므로 교체합니다.`
+          reason: `New memory confidence(${incomingConfidence.toFixed(2)})than existing(${existingEffectiveConfidence.toFixed(2)})or higher, so replacing.`
         };
       } else {
         return {
           action: "merge",
           mergedMemory: mergeMemories(existing, incoming),
-          reason: `기존 메모리의 신뢰도가 더 높으므로 정보를 병합합니다.`
+          reason: `Existing memory has higher confidence, so merging information.`
         };
       }
     case "contradiction":
       return {
         action: "replace",
-        reason: "최신 우선 원칙에 따라 새 메모리로 교체합니다. 기존 메모리는 반박으로 처리됩니다."
+        reason: "Replacing with new memory per recency principle. Existing memory treated as contradiction."
       };
     default:
       return {
         action: "keep_both",
-        reason: "충돌 유형을 판단할 수 없어 둘 다 유지합니다."
+        reason: "Cannot determine conflict type, keeping both."
       };
   }
 }
@@ -3041,7 +3041,7 @@ function mergeMemories(existing, incoming) {
     ...existing,
     content: `${existing.content}
 
-[업데이트 ${now.toISOString().split("T")[0]}]
+[Updated ${now.toISOString().split("T")[0]}]
 ${incoming.content}`,
     tags: mergedTags,
     sources: mergedSources,
@@ -3543,7 +3543,7 @@ function parseTaskResult(toolName, toolInput, toolOutput, sessionState) {
   const taskId = `task-${Date.now()}`;
   const description = toolInput.prompt || toolInput.description || "";
   const agent = toolInput.subagent_type?.replace("team-seokan:", "") || "shared";
-  const success = !toolOutput.toLowerCase().includes("error") && !toolOutput.toLowerCase().includes("failed") && !toolOutput.toLowerCase().includes("실패");
+  const success = !toolOutput.toLowerCase().includes("error") && !toolOutput.toLowerCase().includes("failed") && !toolOutput.toLowerCase().includes("failed");
   const errors = [];
   const errorMatches = toolOutput.match(/error:?\s*(.+?)(?:\n|$)/gi);
   if (errorMatches) {
@@ -3579,7 +3579,7 @@ function createPostTaskReflectionHook(context) {
   return {
     name: "post-task-reflection",
     event: "PostToolUse",
-    description: "작업 완료 후 자동 회고를 실행합니다.",
+    description: "Executes automatic reflection after task completion.",
     enabled: true,
     priority: 50,
     handler: async ({
@@ -3721,7 +3721,7 @@ function detectImplicitFeedback(action) {
             original: action.context.originalContent,
             modified: action.context.modifiedContent,
             agent: action.context.agent || "shared",
-            context: `${action.context.taskDescription || ""} - ${analysis.changeType} 변경`,
+            context: `${action.context.taskDescription || ""} - ${analysis.changeType} change`,
             timestamp: action.timestamp
           };
         }
@@ -3733,7 +3733,7 @@ function detectImplicitFeedback(action) {
         type: "rejection",
         original: action.context.originalContent || "",
         agent: action.context.agent || "shared",
-        context: action.context.taskDescription || "사용자가 변경을 거부함",
+        context: action.context.taskDescription || "User rejected changes",
         timestamp: action.timestamp
       };
     case "accept":
@@ -3741,7 +3741,7 @@ function detectImplicitFeedback(action) {
         type: "acceptance",
         original: action.context.originalContent || "",
         agent: action.context.agent || "shared",
-        context: action.context.taskDescription || "사용자가 변경을 승인함",
+        context: action.context.taskDescription || "User approved changes",
         timestamp: action.timestamp
       };
     case "retry":
@@ -3749,7 +3749,7 @@ function detectImplicitFeedback(action) {
         type: "correction",
         original: action.context.errorMessage || action.context.originalContent || "",
         agent: action.context.agent || "shared",
-        context: "사용자가 재시도를 요청함",
+        context: "User requested retry",
         timestamp: action.timestamp
       };
   }
@@ -3765,8 +3765,8 @@ function extractLearningFromFeedback(feedback) {
         const analysis = analyzeChange(feedback.original, feedback.modified);
         if (analysis.changeType === "style") {
           learnings.push({
-            title: "코딩 스타일 선호",
-            content: `사용자가 코드 스타일을 수정함. 변경된 요소: ${analysis.changedElements.join(", ")}`,
+            title: "Coding Style Preference",
+            content: `User modified code style. Changed elements: ${analysis.changedElements.join(", ")}`,
             category: "preference",
             scope: "global",
             owner: feedback.agent,
@@ -3776,8 +3776,8 @@ function extractLearningFromFeedback(feedback) {
           });
         } else if (analysis.changeType === "naming") {
           learnings.push({
-            title: "네이밍 선호",
-            content: `사용자가 변수/함수명을 수정함.`,
+            title: "Naming Preference",
+            content: `User modified variable/function names.`,
             category: "preference",
             scope: "project",
             owner: feedback.agent,
@@ -3787,8 +3787,8 @@ function extractLearningFromFeedback(feedback) {
           });
         } else if (analysis.changeType === "logic") {
           learnings.push({
-            title: "로직 수정",
-            content: `사용자가 ${feedback.agent} 에이전트의 로직을 수정함. 컨텍스트: ${feedback.context}`,
+            title: "Logic Modification",
+            content: `User ${feedback.agent} agent logic modified. Context: ${feedback.context}`,
             category: "mistake",
             scope: "project",
             owner: feedback.agent,
@@ -3802,8 +3802,8 @@ function extractLearningFromFeedback(feedback) {
     }
     case "rejection":
       learnings.push({
-        title: "거부된 접근 방식",
-        content: `사용자가 ${feedback.agent} 에이전트의 제안을 거부함. 컨텍스트: ${feedback.context}`,
+        title: "Rejected Approach",
+        content: `User ${feedback.agent} agent proposal rejected. Context: ${feedback.context}`,
         category: "mistake",
         scope: "global",
         owner: feedback.agent,
@@ -3814,8 +3814,8 @@ function extractLearningFromFeedback(feedback) {
       break;
     case "acceptance":
       learnings.push({
-        title: "승인된 접근 방식",
-        content: `사용자가 ${feedback.agent} 에이전트의 작업을 승인함. 컨텍스트: ${feedback.context}`,
+        title: "Approved Approach",
+        content: `User ${feedback.agent} agent work approved. Context: ${feedback.context}`,
         category: "pattern",
         scope: "global",
         owner: feedback.agent,
@@ -3826,8 +3826,8 @@ function extractLearningFromFeedback(feedback) {
       break;
     case "correction":
       learnings.push({
-        title: "수정 필요했던 작업",
-        content: `재시도가 요청됨. 원래 결과: ${feedback.original}`,
+        title: "Task Requiring Modification",
+        content: `Retry requested. Original Result: ${feedback.original}`,
         category: "mistake",
         scope: "project",
         owner: feedback.agent,
@@ -3863,7 +3863,7 @@ function extractEditFeedback(toolInput, toolOutput, sessionState) {
         originalContent: oldString,
         modifiedContent: newString,
         agent: lastAgent,
-        taskDescription: `${filePath} 수정`
+        taskDescription: `${filePath} modification`
       }
     };
   }
@@ -3884,7 +3884,7 @@ function detectUndoAction(toolInput, sessionState) {
         timestamp: new Date,
         context: {
           agent: sessionState.lastAgent,
-          taskDescription: `명령 실행: ${command}`
+          taskDescription: `Command execution: ${command}`
         }
       };
     }
@@ -3895,7 +3895,7 @@ function createImplicitFeedbackHook(context) {
   return {
     name: "implicit-feedback",
     event: "PostToolUse",
-    description: "사용자의 수정/거부 행동에서 암묵적 피드백을 감지합니다.",
+    description: "Detects implicit feedback from user modification/rejection actions.",
     enabled: true,
     priority: 40,
     handler: async ({
@@ -3937,7 +3937,7 @@ function createImplicitFeedbackHook(context) {
         }
         return {
           continue: true,
-          message: `\uD83D\uDCA1 암묵적 피드백 학습됨: ${extraction.learnings[0]?.title || ""}`
+          message: `\uD83D\uDCA1 Implicit feedback learned: ${extraction.learnings[0]?.title || ""}`
         };
       } catch (error) {
         console.error("Implicit feedback error:", error);
@@ -4008,7 +4008,7 @@ function generateSummary(memories, maxTokens) {
   const lines = [];
   const includedIds = [];
   let currentTokens = 0;
-  const header = `## 학습된 컨텍스트
+  const header = `## Learned Context
 `;
   currentTokens += estimateTokens(header);
   for (const memory of memories) {
@@ -4067,7 +4067,7 @@ async function generateAgentContext(agent, task) {
     includeCategories: agentCategories[agent] || [],
     maxTokens: 400
   });
-  if (injection.summary.trim() === "## 학습된 컨텍스트") {
+  if (injection.summary.trim() === "## Learned Context") {
     return "";
   }
   return `
@@ -4078,19 +4078,19 @@ ${injection.summary}
 }
 function extractKeywords(text) {
   const stopWords = new Set([
-    "이",
-    "그",
-    "저",
-    "것",
-    "를",
-    "을",
-    "에",
-    "의",
-    "가",
-    "는",
-    "은",
-    "와",
-    "과",
+    "this",
+    "that",
+    "that",
+    "thing",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
     "the",
     "a",
     "an",
@@ -4196,7 +4196,7 @@ function createMemoryInjectorHook(context) {
   return {
     name: "memory-injector",
     event: "PreToolUse",
-    description: "에이전트 실행 전 학습된 메모리를 주입합니다.",
+    description: "Injects learned memory before agent execution.",
     enabled: true,
     priority: 80,
     handler: async ({
@@ -4241,7 +4241,7 @@ function createMemoryInitHook(pluginContext) {
   return {
     name: "memory-init",
     event: "SessionStart",
-    description: "세션 시작 시 메모리 시스템을 초기화합니다.",
+    description: "Initializes memory system at session start.",
     enabled: true,
     priority: 100,
     handler: async ({ sessionState }) => {
@@ -4255,7 +4255,7 @@ function createMemoryInitHook(pluginContext) {
         }
         return {
           continue: true,
-          message: isFirstRun ? "\uD83E\uDDE0 메모리 시스템 초기화됨" : undefined
+          message: isFirstRun ? "\uD83E\uDDE0 Memory system initialized" : undefined
         };
       } catch (error) {
         console.error("Memory init error:", error);
@@ -4301,46 +4301,46 @@ function createBuiltinHooks(settings, context) {
 function createDelegateTaskTool(context) {
   return {
     name: "delegate_task",
-    description: `에이전트에게 작업을 위임합니다.
+    description: `Delegates tasks to agents.
 
-사용 가능한 에이전트:
-- jjangu (짱구): 오케스트레이터
-- jjanga (짱아): 마스터 오케스트레이터
-- maenggu (맹구): 코드 작성/수정
-- cheolsu (철수): 복잡한 장시간 작업
-- suji (수지): UI/UX 프론트엔드
-- heukgom (흑곰): API/DB 백엔드
-- hooni (훈이): DevOps 인프라
-- shinhyungman (신형만): 전략 조언
-- yuri (유리): 계획 수립
-- bongmisun (봉미선): 사전 분석
-- actiongamen (액션가면): 코드 검증
-- heendungi (흰둥이): 코드 탐색
-- chaesunga (채성아): 문서 검색
-- namiri (나미리): 이미지/PDF 분석`,
+Available agents:
+- jjangu (Shinnosuke): Orchestrator
+- jjanga (Himawari): Master Orchestrator
+- maenggu (Bo): Code writing/modification
+- cheolsu (Kazama): Complex long-running tasks
+- suji (Aichan): UI/UX Frontend
+- heukgom (Bunta): API/DB Backend
+- hooni (Masao): DevOps Infrastructure
+- shinhyungman (Hiroshi): Strategic advice
+- yuri (Nene): Planning
+- bongmisun (Misae): Pre-analysis
+- actiongamen (Action Kamen): Code verification
+- heendungi (Shiro): Code exploration
+- chaesunga (Masumi): Documentation search
+- namiri (Ume): Image/PDF analysis`,
     parameters: [
       {
         name: "agent",
         type: "string",
-        description: "위임할 에이전트 이름 (예: maenggu, heendungi)",
+        description: "Agent name to delegate (e.g.: maenggu, heendungi)",
         required: true
       },
       {
         name: "task",
         type: "string",
-        description: "수행할 작업 설명",
+        description: "Task description to perform",
         required: true
       },
       {
         name: "context",
         type: "string",
-        description: "추가 컨텍스트 정보",
+        description: "Additional context information",
         required: false
       },
       {
         name: "run_in_background",
         type: "boolean",
-        description: "배경에서 실행할지 여부",
+        description: "Whether to run in background",
         required: false,
         default: false
       }
@@ -4354,7 +4354,7 @@ function createDelegateTaskTool(context) {
       if (!agent) {
         return {
           success: false,
-          error: `에이전트 '${agentName}'을 찾을 수 없습니다.`
+          error: `Cannot find agent '${agentName}'.`
         };
       }
       if (runInBackground) {
@@ -4363,7 +4363,7 @@ function createDelegateTaskTool(context) {
         if (runningTasks.length >= maxConcurrent) {
           return {
             success: false,
-            error: `최대 동시 실행 수(${maxConcurrent})에 도달했습니다.`
+            error: `Maximum concurrent execution count(${maxConcurrent})reached.`
           };
         }
       }
@@ -4388,18 +4388,18 @@ function createDelegateTaskTool(context) {
 function createCallTeamAgentTool(context) {
   return {
     name: "call_team_agent",
-    description: "특정 Team-Seokan 에이전트를 직접 호출합니다.",
+    description: "Directly invokes specific Team-Shinchan agent.",
     parameters: [
       {
         name: "agent",
         type: "string",
-        description: "호출할 에이전트 이름",
+        description: "Agent name to invoke",
         required: true
       },
       {
         name: "message",
         type: "string",
-        description: "에이전트에게 전달할 메시지",
+        description: "Message to pass to agent",
         required: true
       }
     ],
@@ -4410,7 +4410,7 @@ function createCallTeamAgentTool(context) {
       if (!agent) {
         return {
           success: false,
-          error: `에이전트 '${agentName}'을 찾을 수 없습니다.`
+          error: `Cannot find agent '${agentName}'.`
         };
       }
       return {
@@ -4432,24 +4432,24 @@ function createCallTeamAgentTool(context) {
 function createBackgroundTaskTool(context) {
   return {
     name: "background_task",
-    description: "배경에서 에이전트 작업을 실행합니다. 메인 작업을 차단하지 않습니다.",
+    description: "Executes agent task in background. Does not block main task.",
     parameters: [
       {
         name: "agent",
         type: "string",
-        description: "실행할 에이전트 이름",
+        description: "Agent name to execute",
         required: true
       },
       {
         name: "task",
         type: "string",
-        description: "수행할 작업",
+        description: "Task to perform",
         required: true
       },
       {
         name: "description",
         type: "string",
-        description: "작업 설명 (추적용)",
+        description: "Task description (for tracking)",
         required: false
       }
     ],
@@ -4461,14 +4461,14 @@ function createBackgroundTaskTool(context) {
       if (!agent) {
         return {
           success: false,
-          error: `에이전트 '${agentName}'을 찾을 수 없습니다.`
+          error: `Cannot find agent '${agentName}'.`
         };
       }
       const maxConcurrent = context.settings.maxConcurrentAgents;
       if (!canStartNewBackgroundTask(context.sessionState, maxConcurrent)) {
         return {
           success: false,
-          error: `최대 동시 실행 수(${maxConcurrent})에 도달했습니다. 기존 작업이 완료될 때까지 기다려주세요.`
+          error: `Maximum concurrent execution count(${maxConcurrent})reached. Please wait until existing tasks complete.`
         };
       }
       const backgroundTask = addBackgroundTask(context.sessionState, agentName, description);
@@ -4491,18 +4491,18 @@ function createBackgroundTaskTool(context) {
 function createLookAtTool(context) {
   return {
     name: "look_at",
-    description: "파일이나 이미지를 조회합니다. 나미리(Multimodal) 에이전트가 분석할 수 있습니다.",
+    description: "Looks up files or images. Ume (Multimodal) agent can analyze.",
     parameters: [
       {
         name: "path",
         type: "string",
-        description: "조회할 파일 경로",
+        description: "File path to look up",
         required: true
       },
       {
         name: "analyze",
         type: "boolean",
-        description: "이미지인 경우 나미리에게 분석 요청",
+        description: "Request analysis from Ume for images",
         required: false,
         default: false
       }
@@ -4519,8 +4519,8 @@ function createLookAtTool(context) {
           output: {
             path: path2,
             type: isImage ? "image" : "pdf",
-            recommendation: "나미리(Multimodal) 에이전트에게 분석을 위임하세요.",
-            instruction: `delegate_task(agent="namiri", task="이 ${isImage ? "이미지" : "PDF"}를 분석해주세요: ${path2}")`
+            recommendation: "Delegate analysis to Ume (Multimodal) agent.",
+            instruction: `delegate_task(agent="namiri", task="Analyze this ${isImage ? "image" : "PDF"}: ${path2}")`
           }
         };
       }
@@ -4529,7 +4529,7 @@ function createLookAtTool(context) {
         output: {
           path: path2,
           type: isImage ? "image" : isPdf ? "pdf" : "file",
-          instruction: `Read 도구를 사용하여 파일을 읽으세요.`
+          instruction: `Use the Read tool to read the file.`
         }
       };
     }
@@ -4540,30 +4540,30 @@ function createLookAtTool(context) {
 function createSkillTool(context) {
   return {
     name: "skill",
-    description: `Team-Seokan 스킬을 실행합니다.
+    description: `Executes Team-Shinchan skills.
 
-사용 가능한 스킬:
-- ultrawork: 병렬 실행 모드
-- ralph: 완료까지 반복 실행
-- autopilot: 자율 실행 모드
-- plan: 계획 세션 시작
-- analyze: 분석 모드
-- deepsearch: 심층 검색
-- git-master: Git 전문 모드
-- frontend-ui-ux: UI/UX 전문 모드
-- help: 도움말
-- cancel: 현재 모드 취소`,
+Available skills:
+- ultrawork: Parallel execution mode
+- ralph: Repeat execution until complete
+- autopilot: Autonomous execution mode
+- plan: Start planning session
+- analyze: Analysis mode
+- deepsearch: Deep search
+- git-master: Git Expert mode
+- frontend-ui-ux: UI/UX Expert mode
+- help: Help
+- cancel: Cancel current mode`,
     parameters: [
       {
         name: "name",
         type: "string",
-        description: "실행할 스킬 이름",
+        description: "Skill name to execute",
         required: true
       },
       {
         name: "args",
         type: "string",
-        description: "스킬에 전달할 인자",
+        description: "Arguments to pass to skill",
         required: false
       }
     ],
@@ -4574,7 +4574,7 @@ function createSkillTool(context) {
       if (!skill) {
         return {
           success: false,
-          error: `스킬 '${skillName}'을 찾을 수 없습니다.`
+          error: `Cannot find skill '${skillName}'.`
         };
       }
       const result = await skill.handler({
@@ -4591,18 +4591,18 @@ function createSkillTool(context) {
 function createSlashcommandTool(context) {
   return {
     name: "slashcommand",
-    description: "Team-Seokan 슬래시 명령을 실행합니다.",
+    description: "Executes Team-Shinchan slash commands.",
     parameters: [
       {
         name: "command",
         type: "string",
-        description: "실행할 명령 (예: team-seokan:help)",
+        description: "Command to execute (e.g.: team-seokan:help)",
         required: true
       },
       {
         name: "args",
         type: "string",
-        description: "명령 인자",
+        description: "Command arguments",
         required: false
       }
     ],
@@ -4621,7 +4621,7 @@ function createSlashcommandTool(context) {
       }
       return {
         success: false,
-        error: `명령 '${command}'을 찾을 수 없습니다.`
+        error: `Cannot find command '${command}'.`
       };
     }
   };
@@ -4631,18 +4631,18 @@ function createSlashcommandTool(context) {
 function createInteractiveBashTool(context) {
   return {
     name: "interactive_bash",
-    description: "대화형 bash 세션을 시작합니다. 사용자 입력이 필요한 명령에 사용합니다.",
+    description: "Starts interactive bash session. Use for commands requiring user input.",
     parameters: [
       {
         name: "command",
         type: "string",
-        description: "실행할 명령",
+        description: "Command to execute",
         required: true
       },
       {
         name: "timeout",
         type: "number",
-        description: "타임아웃 (밀리초)",
+        description: "Timeout (milliseconds)",
         required: false,
         default: 30000
       }
@@ -4655,8 +4655,8 @@ function createInteractiveBashTool(context) {
         output: {
           command,
           timeout,
-          note: "대화형 bash 세션은 tmux를 통해 관리됩니다.",
-          instruction: `Bash 도구를 사용하세요: Bash(command="${command}", timeout=${timeout})`
+          note: "Interactive bash session is managed through tmux.",
+          instruction: `Use the Bash tool: Bash(command="${command}", timeout=${timeout})`
         }
       };
     }
@@ -4667,24 +4667,24 @@ function createInteractiveBashTool(context) {
 function createAstGrepTool(context) {
   return {
     name: "ast_grep",
-    description: "AST(Abstract Syntax Tree) 기반으로 코드 패턴을 검색합니다. 정확한 코드 구조 매칭에 유용합니다.",
+    description: "Searches code patterns based on AST (Abstract Syntax Tree). Useful for precise code structure matching.",
     parameters: [
       {
         name: "pattern",
         type: "string",
-        description: "검색할 AST 패턴",
+        description: "AST pattern to search",
         required: true
       },
       {
         name: "language",
         type: "string",
-        description: "대상 언어 (typescript, javascript, python 등)",
+        description: "Target language (typescript, javascript, python, etc.)",
         required: true
       },
       {
         name: "path",
         type: "string",
-        description: "검색할 경로",
+        description: "Path to search",
         required: false,
         default: "."
       }
@@ -4699,7 +4699,7 @@ function createAstGrepTool(context) {
           pattern,
           language,
           path: path2,
-          instruction: `ast-grep CLI를 사용하세요: sg --pattern "${pattern}" --lang ${language} ${path2}`
+          instruction: `Use ast-grep CLI: sg --pattern "${pattern}" --lang ${language} ${path2}`
         }
       };
     }
@@ -4710,12 +4710,12 @@ function createAstGrepTool(context) {
 function createLspDiagnosticsTool(context) {
   return {
     name: "lsp_diagnostics",
-    description: "LSP를 사용하여 파일 또는 디렉토리의 타입 에러와 린트 오류를 확인합니다.",
+    description: "Uses LSP to check type errors and lint errors in files or directories.",
     parameters: [
       {
         name: "path",
         type: "string",
-        description: "진단할 파일 또는 디렉토리 경로",
+        description: "File or directory path to diagnose",
         required: true
       }
     ],
@@ -4725,8 +4725,8 @@ function createLspDiagnosticsTool(context) {
         success: true,
         output: {
           path: path2,
-          note: "TypeScript 프로젝트의 경우 tsc --noEmit을 사용합니다.",
-          instruction: `Bash(command="npx tsc --noEmit", description="TypeScript 타입 체크")`
+          note: "Use tsc --noEmit for TypeScript projects.",
+          instruction: `Bash(command="npx tsc --noEmit", description="TypeScript type check")`
         }
       };
     }
@@ -4735,30 +4735,30 @@ function createLspDiagnosticsTool(context) {
 function createLspRenameTool(context) {
   return {
     name: "lsp_rename",
-    description: "LSP를 사용하여 심볼 이름을 프로젝트 전체에서 안전하게 변경합니다.",
+    description: "Uses LSP to safely rename symbols across the entire project.",
     parameters: [
       {
         name: "file",
         type: "string",
-        description: "심볼이 정의된 파일",
+        description: "File where symbol is defined",
         required: true
       },
       {
         name: "line",
         type: "number",
-        description: "심볼의 라인 번호",
+        description: "Line number of symbol",
         required: true
       },
       {
         name: "column",
         type: "number",
-        description: "심볼의 컬럼 번호",
+        description: "Column number of symbol",
         required: true
       },
       {
         name: "newName",
         type: "string",
-        description: "새 이름",
+        description: "New name",
         required: true
       }
     ],
@@ -4773,7 +4773,7 @@ function createLspRenameTool(context) {
           file,
           position: { line, column },
           newName,
-          note: "IDE의 리팩토링 기능 또는 ts-morph를 사용하여 안전하게 이름을 변경하세요."
+          note: "Use IDE refactoring features or ts-morph to safely rename."
         }
       };
     }
@@ -4782,24 +4782,24 @@ function createLspRenameTool(context) {
 function createLspReferencesTool(context) {
   return {
     name: "lsp_references",
-    description: "LSP를 사용하여 심볼의 모든 참조를 찾습니다.",
+    description: "Uses LSP to find all references to a symbol.",
     parameters: [
       {
         name: "file",
         type: "string",
-        description: "심볼이 정의된 파일",
+        description: "File where symbol is defined",
         required: true
       },
       {
         name: "line",
         type: "number",
-        description: "심볼의 라인 번호",
+        description: "Line number of symbol",
         required: true
       },
       {
         name: "column",
         type: "number",
-        description: "심볼의 컬럼 번호",
+        description: "Column number of symbol",
         required: true
       }
     ],
@@ -4812,7 +4812,7 @@ function createLspReferencesTool(context) {
         output: {
           file,
           position: { line, column },
-          instruction: `Grep 도구로 심볼 이름을 검색하거나, 흰둥이(Explorer)에게 위임하세요.`
+          instruction: `Search symbol name with Grep tool, or delegate to Shiro (Explorer).`
         }
       };
     }
@@ -4823,18 +4823,18 @@ function createLspReferencesTool(context) {
 function createSessionManagerTool(context) {
   return {
     name: "session_manager",
-    description: "Team-Seokan 세션 상태를 조회하고 관리합니다.",
+    description: "Queries and manages Team-Shinchan session state.",
     parameters: [
       {
         name: "action",
         type: "string",
-        description: "수행할 액션: status, list_tasks, cancel_task",
+        description: "Action to perform: status, list_tasks, cancel_task",
         required: true
       },
       {
         name: "task_id",
         type: "string",
-        description: "작업 ID (cancel_task 시 필요)",
+        description: "Task ID (required for cancel_task)",
         required: false
       }
     ],
@@ -4870,7 +4870,7 @@ function createSessionManagerTool(context) {
           if (!taskId) {
             return {
               success: false,
-              error: "task_id가 필요합니다."
+              error: "task_id is required."
             };
           }
           const task = context.sessionState.backgroundTasks.find((t) => t.id === taskId);
@@ -4885,7 +4885,7 @@ function createSessionManagerTool(context) {
         default:
           return {
             success: false,
-            error: `알 수 없는 액션: ${action}`
+            error: `Unknown action: ${action}`
           };
       }
     }
@@ -4896,55 +4896,55 @@ function createSessionManagerTool(context) {
 function createMemoryOpsTool(context) {
   return {
     name: "memory_ops",
-    description: "메모리를 읽고, 쓰고, 검색합니다. (read: 읽기, write: 쓰기, search: 검색, reinforce: 강화, contradict: 반박)",
+    description: "Reads, writes, and searches memory. (read: read, write: write, search: search, reinforce: reinforce, contradict: contradict)",
     parameters: [
       {
         name: "operation",
         type: "string",
-        description: "수행할 작업: read, write, search, reinforce, contradict",
+        description: "Task to perform: read, write, search, reinforce, contradict",
         required: true
       },
       {
         name: "memoryId",
         type: "string",
-        description: "(read/reinforce/contradict) 메모리 ID",
+        description: "(read/reinforce/contradict) Memory ID",
         required: false
       },
       {
         name: "content",
         type: "string",
-        description: "(write) 저장할 내용",
+        description: "(write) Content to save",
         required: false
       },
       {
         name: "category",
         type: "string",
-        description: "(write) 메모리 카테고리: preference, pattern, context, mistake, decision, convention, insight",
+        description: "(write) Memory category: preference, pattern, context, mistake, decision, convention, insight",
         required: false
       },
       {
         name: "scope",
         type: "string",
-        description: "(write) 메모리 범위: global, project (기본: project)",
+        description: "(write) Memory scope: global, project (default: project)",
         required: false,
         default: "project"
       },
       {
         name: "tags",
         type: "array",
-        description: "(write) 태그 목록",
+        description: "(write) Tags list",
         required: false
       },
       {
         name: "keyword",
         type: "string",
-        description: "(search) 검색 키워드",
+        description: "(search) search keyword",
         required: false
       },
       {
         name: "limit",
         type: "number",
-        description: "(search) 최대 결과 수 (기본: 5)",
+        description: "(search) Maximum number of results (default: 5)",
         required: false,
         default: 5
       }
@@ -4957,11 +4957,11 @@ function createMemoryOpsTool(context) {
         case "read": {
           const memoryId = params.memoryId;
           if (!memoryId) {
-            return { success: false, error: "memoryId가 필요합니다." };
+            return { success: false, error: "memoryId is required." };
           }
           const memory = await manager.read(memoryId);
           if (!memory) {
-            return { success: false, error: `ID ${memoryId}의 메모리를 찾을 수 없습니다.` };
+            return { success: false, error: `ID ${memoryId} memory not found.` };
           }
           return {
             success: true,
@@ -4979,7 +4979,7 @@ function createMemoryOpsTool(context) {
         case "write": {
           const content = params.content;
           if (!content) {
-            return { success: false, error: "content가 필요합니다." };
+            return { success: false, error: "content is required." };
           }
           const learning = createSimpleLearning(content, {
             category: params.category,
@@ -4994,7 +4994,7 @@ function createMemoryOpsTool(context) {
             output: JSON.stringify({
               id: memory.id,
               title: memory.title,
-              message: "메모리가 저장되었습니다."
+              message: "Memory has been saved."
             })
           };
         }
@@ -5024,11 +5024,11 @@ function createMemoryOpsTool(context) {
         case "reinforce": {
           const memoryId = params.memoryId;
           if (!memoryId) {
-            return { success: false, error: "memoryId가 필요합니다." };
+            return { success: false, error: "memoryId is required." };
           }
           const reinforced = await manager.reinforce(memoryId);
           if (!reinforced) {
-            return { success: false, error: `ID ${memoryId}의 메모리를 찾을 수 없습니다.` };
+            return { success: false, error: `ID ${memoryId} memory not found.` };
           }
           return {
             success: true,
@@ -5037,18 +5037,18 @@ function createMemoryOpsTool(context) {
               title: reinforced.title,
               newConfidence: reinforced.confidence,
               reinforcementCount: reinforced.reinforcementCount,
-              message: "메모리가 강화되었습니다."
+              message: "Memory has been reinforced."
             })
           };
         }
         case "contradict": {
           const memoryId = params.memoryId;
           if (!memoryId) {
-            return { success: false, error: "memoryId가 필요합니다." };
+            return { success: false, error: "memoryId is required." };
           }
           const contradicted = await manager.contradict(memoryId);
           if (!contradicted) {
-            return { success: false, error: `ID ${memoryId}의 메모리를 찾을 수 없습니다.` };
+            return { success: false, error: `ID ${memoryId} memory not found.` };
           }
           return {
             success: true,
@@ -5057,14 +5057,14 @@ function createMemoryOpsTool(context) {
               title: contradicted.title,
               newConfidence: contradicted.confidence,
               contradictionCount: contradicted.contradictionCount,
-              message: "메모리가 반박 처리되었습니다."
+              message: "Memory has been marked as contradicted."
             })
           };
         }
         default:
           return {
             success: false,
-            error: `알 수 없는 operation: ${operation}`
+            error: `Unknown operation: ${operation}`
           };
       }
     }
@@ -5095,33 +5095,33 @@ function createUltraworkSkill(context) {
   return {
     name: "ultrawork",
     displayName: "Ultrawork",
-    description: "병렬 실행 모드를 활성화하여 여러 에이전트를 동시에 실행합니다.",
-    triggers: ["ulw", "ultrawork", "병렬", "빠르게", "parallel"],
+    description: "Activates parallel execution mode to run multiple agents simultaneously.",
+    triggers: ["ulw", "ultrawork", "parallel", "quickly", "parallel"],
     autoActivate: true,
     handler: async ({ args, sessionState }) => {
       activateUltrawork(sessionState);
       return {
         success: true,
-        output: `\uD83D\uDE80 **Ultrawork 모드 활성화**
+        output: `\uD83D\uDE80 **Ultrawork Mode Activated**
 
-병렬 실행 모드가 활성화되었습니다.
+Parallel execution mode has been activated.
 
-## 활성화된 기능
-- 여러 에이전트 동시 실행
-- 배경 작업 자동 활용
-- 독립적인 작업 병렬 처리
+## Activated Features
+- Run multiple agents simultaneously
+- Automatically utilize background tasks
+- Process independent tasks in parallel
 
-## 사용 방법
-독립적인 작업들은 자동으로 병렬 실행됩니다.
-순차적 의존성이 있는 작업은 순서대로 실행됩니다.
+## Usage
+Independent tasks are automatically executed in parallel.
+Tasks with sequential dependencies are executed in order.
 
-최대 동시 실행: ${context.settings.maxConcurrentAgents}개
+Maximum concurrent execution: ${context.settings.maxConcurrentAgents} units
 
-Ultrawork를 비활성화하려면 \`/cancel-ultrawork\`를 사용하세요.`,
+To deactivate Ultrawork \`/cancel-ultrawork\`use .`,
         inject: `<ultrawork-mode>
-Ultrawork 모드가 활성화되었습니다.
-병렬 실행 가능한 작업은 동시에 처리하세요.
-최대 동시 에이전트: ${context.settings.maxConcurrentAgents}개
+Ultrawork mode has been activated.
+Process parallelizable tasks concurrently.
+Maximum concurrent agents: ${context.settings.maxConcurrentAgents} units
 </ultrawork-mode>`
       };
     }
@@ -5133,30 +5133,30 @@ function createRalphSkill(context) {
   return {
     name: "ralph",
     displayName: "Ralph",
-    description: "작업이 완료될 때까지 반복 실행합니다.",
-    triggers: ["ralph", "끝까지", "완료할 때까지", "dont stop", "don't stop"],
+    description: "Repeats execution until task completion.",
+    triggers: ["ralph", "until done", "until complete", "dont stop", "don't stop"],
     autoActivate: true,
     handler: async ({ args, sessionState }) => {
       activateRalphLoop(sessionState);
       return {
         success: true,
-        output: `\uD83D\uDD04 **Ralph 모드 활성화**
+        output: `\uD83D\uDD04 **Ralph Mode Activated**
 
-작업 완료까지 반복 실행 모드가 활성화되었습니다.
+Task repeat until complete mode has been activated.
 
-## 동작 방식
-- 모든 TODO가 완료될 때까지 자동 계속
-- 중단 시도 시 미완료 작업 알림
-- 최대 재시도: ${context.settings.maxRetries}회
+## How It Works
+- Automatically continue until all TODOs are complete
+- Notify of incomplete tasks when stopping
+- Maximum retries: ${context.settings.maxRetries}times
 
-## 현재 작업
-${args || "작업 내용을 입력하세요"}
+## Current Task
+${args || "Enter task content"}
 
-Ralph를 중단하려면 \`/cancel-ralph\`를 사용하세요.`,
+To stop Ralph \`/cancel-ralph\`use .`,
         inject: `<ralph-mode>
-Ralph 모드가 활성화되었습니다.
-모든 TODO가 완료될 때까지 작업을 계속하세요.
-미완료 작업이 있으면 자동으로 재시작됩니다.
+Ralph mode has been activated.
+Continue working until all TODOs are complete.
+Automatically restarts if incomplete tasks exist.
 </ralph-mode>`
       };
     }
@@ -5168,8 +5168,8 @@ function createAutopilotSkill(context) {
   return {
     name: "autopilot",
     displayName: "Autopilot",
-    description: "자율 실행 모드 - Ralph + Ultrawork 결합",
-    triggers: ["autopilot", "자동으로", "알아서", "auto"],
+    description: "Autonomous execution mode - Ralph + Ultrawork combined",
+    triggers: ["autopilot", "automatically", "automatically", "auto"],
     autoActivate: true,
     handler: async ({ args, sessionState }) => {
       activateAutopilot(sessionState);
@@ -5177,31 +5177,31 @@ function createAutopilotSkill(context) {
       activateUltrawork(sessionState);
       return {
         success: true,
-        output: `\uD83E\uDD16 **Autopilot 모드 활성화**
+        output: `\uD83E\uDD16 **Autopilot Mode Activated**
 
-완전 자율 실행 모드가 활성화되었습니다.
+Full autonomous execution mode has been activated.
 
-## 활성화된 기능
-- ✅ Ralph: 작업 완료까지 반복
-- ✅ Ultrawork: 병렬 실행
-- ✅ 자동 에이전트 위임
-- ✅ 자동 검증 요청
+## Activated Features
+- ✅ Ralph: Repeat until task completion
+- ✅ Ultrawork: Parallel execution
+- ✅ Automatic agent delegation
+- ✅ Automatic verification request
 
-## 작업 내용
-${args || "작업 내용을 입력하세요"}
+## Task Content
+${args || "Enter task content"}
 
-## 동작 방식
-1. 요구사항 분석 (봉미선)
-2. 계획 수립 (유리)
-3. 구현 (맹구/전문가)
-4. 검증 (액션가면)
-5. 완료까지 반복
+## How It Works
+1. Requirements analysis (Misae)
+2. Planning (Nene)
+3. Implementation (Bo/specialist)
+4. Verification (Action Kamen)
+5. Repeat until complete
 
-Autopilot을 중단하려면 \`/cancel-autopilot\`를 사용하세요.`,
+To stop Autopilot \`/cancel-autopilot\`use .`,
         inject: `<autopilot-mode>
-Autopilot 모드가 활성화되었습니다.
-자율적으로 작업을 완료하세요.
-Ralph + Ultrawork가 함께 활성화되었습니다.
+Autopilot mode has been activated.
+Complete tasks autonomously.
+Ralph + Ultrawork have been activated together.
 </autopilot-mode>`
       };
     }
@@ -5213,33 +5213,33 @@ function createPlanSkill(context) {
   return {
     name: "plan",
     displayName: "Plan",
-    description: "계획 세션을 시작하여 요구사항을 정리합니다.",
-    triggers: ["plan", "계획", "설계", "planning"],
+    description: "Starts planning session to organize requirements.",
+    triggers: ["plan", "planning", "design", "planning"],
     autoActivate: true,
     handler: async ({ args, sessionState }) => {
       sessionState.activeSkill = "plan";
       return {
         success: true,
-        output: `\uD83D\uDCCB **계획 세션 시작**
+        output: `\uD83D\uDCCB **Start planning session**
 
-유리(Planner)와 함께 계획을 수립합니다.
+Nene(Planner) establishes planning with.
 
-## 프로젝트/작업
-${args || "계획할 내용을 설명해주세요"}
+## Project/Task
+${args || "planning content to describe"}
 
-## 진행 방식
-1. **요구사항 수집**: 목표, 제약조건, 우선순위 파악
-2. **분석**: 봉미선(Metis)이 숨은 요구사항 분석
-3. **계획 작성**: 단계별 작업 분해
-4. **검토**: 액션가면(Reviewer) 검토
+## Process
+1. **Requirements gathering**: Identify goals, constraints, priorities
+2. **analysis**: Misae(Metis) analyzes hidden requirements
+3. *Write planning*: Break down work by stage
+4. **Review**: Action Kamen(Reviewer) Review
 
-## 질문
-계획을 수립하기 위해 몇 가지 질문을 드리겠습니다.
+## Questions
+Will ask a few questions to establish planning.
 
-유리(Planner)에게 위임합니다...`,
+Nene(Planner)Delegating to ...`,
         inject: `<plan-mode>
-계획 세션이 시작되었습니다.
-유리(Planner)에게 위임하여 체계적인 계획을 수립하세요.
+planning  session has started.
+Nene(Planner)Delegate to establish systematic planning.
 delegate_task(agent="yuri", task="...")
 </plan-mode>`
       };
@@ -5252,30 +5252,30 @@ function createAnalyzeSkill(context) {
   return {
     name: "analyze",
     displayName: "Analyze",
-    description: "심층 분석 모드를 활성화합니다.",
-    triggers: ["analyze", "분석", "디버깅", "왜 안", "debug", "investigate"],
+    description: "Activates deep analysis mode.",
+    triggers: ["analyze", "analysis", "debugging", "why not", "debug", "investigate"],
     autoActivate: true,
     handler: async ({ args, sessionState }) => {
       sessionState.activeSkill = "analyze";
       return {
         success: true,
-        output: `\uD83D\uDD0D **분석 모드 활성화**
+        output: `\uD83D\uDD0D **Analysis mode Activated**
 
-신형만(Oracle)과 함께 심층 분석을 수행합니다.
+Hiroshi(Oracle)Performs deep analysis with .
 
-## 분석 대상
-${args || "분석할 내용을 설명해주세요"}
+## Analysis Target
+${args || "analysis content to describe"}
 
-## 분석 접근법
-1. **현상 파악**: 문제 상황 정확히 이해
-2. **원인 추적**: 근본 원인 식별
-3. **영향 분석**: 관련 코드/기능 파악
-4. **해결 방안**: 옵션 및 추천 제시
+## Analysis Approach
+1. *Understand situation*: Accurately understand the problem situation
+2. *Track cause*: Identify root cause
+3. *Impact analysis*: Identify related code/features
+4. *Solution*: Present options and recommendations
 
-신형만(Oracle)에게 위임합니다...`,
+Hiroshi(Oracle)Delegating to ...`,
         inject: `<analyze-mode>
-분석 모드가 활성화되었습니다.
-신형만(Oracle)에게 위임하여 심층 분석을 수행하세요.
+Analysis mode has been activated.
+Hiroshi(Oracle)Delegate to perform deep analysis.
 delegate_task(agent="shinhyungman", task="...")
 </analyze-mode>`
       };
@@ -5288,29 +5288,29 @@ function createDeepsearchSkill(context) {
   return {
     name: "deepsearch",
     displayName: "Deepsearch",
-    description: "코드베이스를 깊이 탐색합니다.",
-    triggers: ["deepsearch", "깊은검색", "찾아줘", "search"],
+    description: "Explores codebase deeply.",
+    triggers: ["deepsearch", "deep search", "find", "search"],
     autoActivate: true,
     handler: async ({ args, sessionState }) => {
       sessionState.activeSkill = "deepsearch";
       return {
         success: true,
-        output: `\uD83D\uDD0E **Deepsearch 모드 활성화**
+        output: `\uD83D\uDD0E **Deepsearch Mode Activated**
 
-흰둥이(Explorer)와 채성아(Librarian)가 함께 심층 검색을 수행합니다.
+Shiro(Explorer) and Masumi(Librarian) perform deep search together.
 
-## 검색 대상
-${args || "검색할 내용을 설명해주세요"}
+## Search Target
+${args || "search content to describe"}
 
-## 검색 전략
-1. **코드 탐색**: 흰둥이가 코드베이스 탐색
-2. **문서 검색**: 채성아가 문서/외부 정보 검색
-3. **결과 종합**: 발견한 정보 정리
+## Search Strategy
+1. **Code exploration**: Shiro explores codebase
+2. **Documentation search**: Masumi searches documentation/external information
+3. **Compile results**: Organize discovered information
 
-병렬로 검색을 시작합니다...`,
+Starting search in parallel...`,
         inject: `<deepsearch-mode>
-Deepsearch 모드가 활성화되었습니다.
-흰둥이(Explorer)와 채성아(Librarian)에게 병렬로 위임하세요.
+Deepsearch mode has been activated.
+Shiro(Explorer)and Masumi(Librarian). Delegate in parallel.
 </deepsearch-mode>`
       };
     }
@@ -5322,23 +5322,23 @@ function createGitMasterSkill(context) {
   return {
     name: "git-master",
     displayName: "Git-Master",
-    description: "Git 작업 전문 모드를 활성화합니다.",
+    description: "Activates Git expert mode.",
     triggers: ["commit", "push", "merge", "rebase", "git"],
     autoActivate: false,
     handler: async ({ args, sessionState }) => {
       sessionState.activeSkill = "git-master";
       return {
         success: true,
-        output: `\uD83C\uDF3F **Git-Master 모드 활성화**
+        output: `\uD83C\uDF3F **Git-Master Mode Activated**
 
-Git 작업 전문 모드입니다.
+Git expert mode.
 
-## Git 가이드라인
-- 원자적 커밋 (하나의 목적, 하나의 커밋)
-- 명확한 커밋 메시지
-- 브랜치 전략 준수
+## Git Guidelines
+- Atomic commits (one purpose, one commit)
+- Clear commit messages
+- Follow branch strategy
 
-## 커밋 메시지 형식
+## Commit Message Format
 \`\`\`
 <type>: <subject>
 
@@ -5347,13 +5347,13 @@ Git 작업 전문 모드입니다.
 Co-Authored-By: Team-Seokan <noreply@team-seokan.dev>
 \`\`\`
 
-## 타입
-- feat: 새 기능
-- fix: 버그 수정
-- refactor: 리팩토링
-- docs: 문서
-- test: 테스트
-- chore: 기타`
+## Type
+- feat: New feature
+- fix: Bug fix
+- refactor: Refactoring
+- docs: Documentation
+- test: Testing
+- chore: Other`
       };
     }
   };
@@ -5364,30 +5364,30 @@ function createFrontendUiUxSkill(context) {
   return {
     name: "frontend-ui-ux",
     displayName: "Frontend-UI-UX",
-    description: "UI/UX 작업 전문 모드를 활성화합니다.",
-    triggers: ["UI", "UX", "컴포넌트", "스타일", "CSS", "component"],
+    description: "Activates UI/UX expert mode.",
+    triggers: ["UI", "UX", "component", "style", "CSS", "component"],
     autoActivate: false,
     handler: async ({ args, sessionState }) => {
       sessionState.activeSkill = "frontend-ui-ux";
       return {
         success: true,
-        output: `\uD83C\uDFA8 **Frontend-UI-UX 모드 활성화**
+        output: `\uD83C\uDFA8 **Frontend-UI-UX Mode Activated**
 
-수지(Frontend)와 함께 UI/UX 작업을 수행합니다.
+Aichan(Frontend)Performs UI/UX work with .
 
-## UI/UX 원칙
-- 사용자 중심 설계
-- 접근성 (a11y) 고려
-- 반응형 디자인
-- 일관된 디자인 시스템
+## UI/UX Principles
+- User-centered design
+- Consider accessibility (a11y)
+- Responsive design
+- Consistent design system
 
-## 작업 내용
-${args || "UI/UX 작업 내용을 설명해주세요"}
+## Task Content
+${args || "UI/UX task content to describe"}
 
-수지(Frontend)에게 위임합니다...`,
+Aichan(Frontend)Delegating to ...`,
         inject: `<frontend-ui-ux-mode>
-Frontend-UI-UX 모드가 활성화되었습니다.
-수지(Frontend)에게 위임하여 UI/UX 작업을 수행하세요.
+Frontend-UI-UX mode has been activated.
+Delegate to Aichan (Frontend) to perform UI/UX tasks.
 delegate_task(agent="suji", task="...")
 </frontend-ui-ux-mode>`
       };
@@ -5400,62 +5400,62 @@ function createHelpSkill(context) {
   return {
     name: "help",
     displayName: "Help",
-    description: "Team-Seokan 사용법을 안내합니다.",
-    triggers: ["help", "도움말", "사용법"],
+    description: "Guides Team-Shinchan usage.",
+    triggers: ["help", "Help", "usage"],
     autoActivate: false,
     handler: async () => {
       return {
         success: true,
-        output: `# \uD83C\uDFAD Team-Seokan 도움말
+        output: `# \uD83C\uDFAD Team-Seokan Help
 
-## 에이전트 팀 (14명)
+## Agent Team (14 members)
 
-### 오케스트레이션
-- **짱구**: 메인 오케스트레이터
-- **짱아**: 대규모 프로젝트 조율
+### Orchestration
+- **Shinnosuke**: Main Orchestrator
+- **Himawari**: Large project coordination
 
-### 실행
-- **맹구**: 코드 작성/수정
-- **철수**: 복잡한 장시간 작업
+### Execution
+- **Bo**: Code writing/modification
+- **Kazama**: Complex long-running tasks
 
-### 전문가
-- **수지**: UI/UX 프론트엔드
-- **흑곰**: API/DB 백엔드
-- **훈이**: DevOps 인프라
+### specialist
+- **Aichan**: UI/UX Frontend
+- **Bunta**: API/DB Backend
+- **Masao**: DevOps Infrastructure
 
-### 조언 (읽기 전용)
-- **신형만**: 전략 조언/디버깅
-- **유리**: 계획 수립
-- **봉미선**: 사전 분석
-- **액션가면**: 검증/리뷰
+### Advisory (read only)
+- **Hiroshi**: Strategic advice/debugging
+- **Nene**: Planning
+- **Misae**: Pre-analysis
+- **Action Kamen**: Verification/review
 
-### 탐색 (읽기 전용)
-- **흰둥이**: 코드 탐색
-- **채성아**: 문서 검색
-- **나미리**: 이미지/PDF 분석
+### Exploration (read only)
+- **Shiro**: Code exploration
+- **Masumi**: Documentation search
+- **Ume**: Image/PDF analysis
 
-## 스킬
+## Skills
 
-| 스킬 | 트리거 | 설명 |
+| Skills | Trigger | Description |
 |------|--------|------|
-| ultrawork | ulw, 병렬 | 병렬 실행 모드 |
-| ralph | 끝까지 | 완료까지 반복 |
-| autopilot | 자동으로 | 자율 실행 |
-| plan | 계획 | 계획 세션 |
-| analyze | 분석 | 심층 분석 |
-| deepsearch | 찾아줘 | 심층 검색 |
+| ultrawork | ulw, parallel | Parallel execution mode |
+| ralph | until done | Repeat until complete |
+| autopilot | automatically | Autonomous execution |
+| plan | planning | planning session |
+| analyze | analysis | Deep analysis |
+| deepsearch | find | Deep search |
 
-## 사용 예시
+## Usage Examples
 
 \`\`\`
-# 에이전트 위임
-delegate_task(agent="maenggu", task="버튼 컴포넌트 추가")
+# Agent delegation
+delegate_task(agent="maenggu", task="Add button component")
 
-# 스킬 실행
-/team-seokan:ultrawork 빠르게 처리해줘
+# Skills Execution
+/team-seokan:ultrawork process quickly
 
-# 배경 실행
-background_task(agent="heendungi", task="API 엔드포인트 찾기")
+# Background Execution
+background_task(agent="heendungi", task="Find API endpoints")
 \`\`\``
       };
     }
@@ -5467,8 +5467,8 @@ function createCancelSkill(context) {
   return {
     name: "cancel",
     displayName: "Cancel",
-    description: "활성화된 모드를 취소합니다.",
-    triggers: ["cancel", "취소", "중단", "stop", "멈춰"],
+    description: "Cancels activated modes.",
+    triggers: ["cancel", "cancel", "stop", "stop", "stop"],
     autoActivate: true,
     handler: async ({ args, sessionState }) => {
       const cancelTarget = args?.toLowerCase() || "all";
@@ -5490,25 +5490,25 @@ function createCancelSkill(context) {
           deactivateAutopilot(sessionState);
           deactivateRalphLoop(sessionState);
           deactivateUltrawork(sessionState);
-          cancelled.push("Autopilot (Ralph + Ultrawork 포함)");
+          cancelled.push("Autopilot (Ralph + Ultrawork including)");
         }
       }
       sessionState.activeSkill = undefined;
       if (cancelled.length === 0) {
         return {
           success: true,
-          output: `ℹ️ 취소할 활성 모드가 없습니다.`
+          output: `ℹ️ cancelNo active modes to cancel.`
         };
       }
       return {
         success: true,
-        output: `⏹️ **모드 취소됨**
+        output: `⏹️ **Modes Cancelled**
 
-다음 모드가 취소되었습니다:
+Following modes have been cancelled:
 ${cancelled.map((c) => `- ${c}`).join(`
 `)}
 
-일반 모드로 돌아갑니다.`
+Returning to normal mode.`
       };
     }
   };
@@ -5521,10 +5521,10 @@ function formatMemory(memory, index) {
   const date = memory.createdAt.toISOString().split("T")[0];
   const tags = memory.tags.length > 0 ? memory.tags.map((t) => `#${t}`).join(" ") : "";
   return `### ${index + 1}. ${memory.title}
-- **카테고리**: ${memory.category}
-- **신뢰도**: ${confidenceStr} (${(confidence * 100).toFixed(0)}%)
-- **생성일**: ${date}
-- **태그**: ${tags || "없음"}
+- *Category*: ${memory.category}
+- *Confidence*: ${confidenceStr} (${(confidence * 100).toFixed(0)}%)
+- **Created**: ${date}
+- *Tags*: ${tags || "None"}
 
 > ${memory.content}
 `;
@@ -5532,14 +5532,14 @@ function formatMemory(memory, index) {
 function formatCategorySummary(stats, avgConfidence) {
   const lines = [];
   for (const [category, count] of stats) {
-    lines.push(`- ${category}: ${count}개`);
+    lines.push(`- ${category}: ${count}items`);
   }
-  return `## \uD83D\uDCCA 메모리 통계
+  return `## \uD83D\uDCCA Memory Statistics
 
-**총 메모리 수**: ${Array.from(stats.values()).reduce((a, b) => a + b, 0)}개
-**평균 신뢰도**: ${(avgConfidence * 100).toFixed(1)}%
+**Total Memory Count**: ${Array.from(stats.values()).reduce((a, b) => a + b, 0)}items
+**Average Confidence**: ${(avgConfidence * 100).toFixed(1)}%
 
-### 카테고리별
+### CategoryBy
 ${lines.join(`
 `)}
 `;
@@ -5548,8 +5548,8 @@ function createMemoriesSkill(context) {
   return {
     name: "memories",
     displayName: "Memories",
-    description: "학습된 메모리를 조회합니다.",
-    triggers: ["memories", "기억", "학습 내용", "what did you learn"],
+    description: "Queries learned memory.",
+    triggers: ["memories", "memory", "learning content", "what did you learn"],
     autoActivate: false,
     handler: async ({ args, sessionState }) => {
       try {
@@ -5574,10 +5574,10 @@ function createMemoriesSkill(context) {
             break;
           }
         }
-        if (lowerArgs.includes("stats") || lowerArgs.includes("통계")) {
+        if (lowerArgs.includes("stats") || lowerArgs.includes("stats")) {
           showStats = true;
         }
-        const limitMatch = lowerArgs.match(/(\d+)개?/);
+        const limitMatch = lowerArgs.match(/(\d+)items?/);
         if (limitMatch) {
           limit = parseInt(limitMatch[1], 10);
         }
@@ -5585,16 +5585,16 @@ function createMemoriesSkill(context) {
           const stats = await manager.getStats();
           return {
             success: true,
-            output: `# \uD83E\uDDE0 Team-Seokan 메모리 통계
+            output: `# \uD83E\uDDE0 Team-Seokan Memory Statistics
 
 ${formatCategorySummary(stats.byCategory, stats.averageConfidence)}
 
-### 에이전트별
-${Array.from(stats.byOwner.entries()).map(([owner, count]) => `- ${owner}: ${count}개`).join(`
+### By Agent
+${Array.from(stats.byOwner.entries()).map(([owner, count]) => `- ${owner}: ${count}items`).join(`
 `)}
 
-### 인기 태그
-${stats.topTags.slice(0, 5).map(([tag, count]) => `- #${tag}: ${count}회`).join(`
+### Popular Tags
+${stats.topTags.slice(0, 5).map(([tag, count]) => `- #${tag}: ${count}times`).join(`
 `)}
 `
           };
@@ -5608,11 +5608,11 @@ ${stats.topTags.slice(0, 5).map(([tag, count]) => `- #${tag}: ${count}회`).join
         if (result.memories.length === 0) {
           return {
             success: true,
-            output: `# \uD83E\uDDE0 학습된 메모리
+            output: `# \uD83E\uDDE0 Learned Memory
 
-아직 학습된 메모리가 없습니다.
+No learned memories yet.
 
-작업을 수행하면서 자동으로 학습하거나, \`/learn "내용"\`으로 직접 가르칠 수 있습니다.`
+Learn automatically while performing tasks, or \`/learn "content"\`to teach directly.`
           };
         }
         const memoryList = result.memories.map((m, i) => formatMemory(m, i)).join(`
@@ -5621,22 +5621,22 @@ ${stats.topTags.slice(0, 5).map(([tag, count]) => `- #${tag}: ${count}회`).join
 `);
         return {
           success: true,
-          output: `# \uD83E\uDDE0 학습된 메모리 (${result.total}개 중 ${result.memories.length}개)
+          output: `# \uD83E\uDDE0 Learned Memory (${result.total}items out of ${result.memories.length}items)
 
-${category ? `**필터**: ${category}` : ""}
+${category ? `**Filter**: ${category}` : ""}
 
 ${memoryList}
 
 ---
-\uD83D\uDCA1 더 보려면: \`/memories 20개\`
-\uD83D\uDCA1 카테고리별: \`/memories preference\`
-\uD83D\uDCA1 통계 보기: \`/memories stats\`
+\uD83D\uDCA1 To see more: \`/memories 20 items\`
+\uD83D\uDCA1 By category: \`/memories preference\`
+\uD83D\uDCA1 View stats: \`/memories stats\`
 `
         };
       } catch (error) {
         return {
           success: false,
-          output: `❌ 메모리 조회 실패: ${error}`
+          output: `❌ Memory query failed: ${error}`
         };
       }
     }
@@ -5648,23 +5648,23 @@ function createForgetSkill(context) {
   return {
     name: "forget",
     displayName: "Forget",
-    description: "특정 메모리를 삭제합니다.",
-    triggers: ["forget", "잊어", "삭제", "delete memory"],
+    description: "Deletes specific memory.",
+    triggers: ["forget", "forget", "delete", "delete memory"],
     autoActivate: false,
     handler: async ({ args, sessionState }) => {
       if (!args || args.trim() === "") {
         return {
           success: false,
-          output: `# ❌ 삭제 대상 필요
+          output: `# ❌ delete Target Required
 
-\`/forget "키워드"\` 형식으로 삭제할 메모리를 지정해주세요.
+\`/forget "keyword"\` format to specify memory to delete.
 
-**사용법:**
-- \`/forget 네이밍\` - "네이밍" 관련 메모리 삭제
-- \`/forget preference\` - 모든 선호도 메모리 삭제
-- \`/forget all\` - 모든 메모리 삭제 (주의!)
+**Usage:**
+- \`/forget naming\` - "naming" related memory deletion
+- \`/forget preference\` - Delete all preference memories
+- \`/forget all\` - Delete all memories (caution!)
 
-\uD83D\uDCA1 먼저 \`/memories\`로 현재 학습 내용을 확인하세요.`
+\uD83D\uDCA1 First \`/memories\`to check current learned contents.`
         };
       }
       try {
@@ -5680,36 +5680,36 @@ function createForgetSkill(context) {
           }
           return {
             success: true,
-            output: `# \uD83D\uDDD1️ 전체 메모리 삭제
+            output: `# \uD83D\uDDD1️ Full Memory Deletion
 
-**${totalBefore}개**의 메모리가 모두 삭제되었습니다.
+**${totalBefore}items**items have been deleted.
 
-학습이 초기화되었습니다. 새로운 작업부터 다시 학습을 시작합니다.`
+Learning has been reset. Will start learning from new tasks.`
           };
         }
         const deletedCount = await manager.forget(keyword);
         if (deletedCount === 0) {
           return {
             success: true,
-            output: `# ℹ️ 삭제 대상 없음
+            output: `# ℹ️ No Deletion Target
 
-"${keyword}"와 관련된 메모리를 찾을 수 없습니다.
+"${keyword}" related memory not found.
 
-\uD83D\uDCA1 \`/memories\`로 현재 학습 내용을 확인하세요.`
+\uD83D\uDCA1 \`/memories\`to check current learned contents.`
           };
         }
         return {
           success: true,
-          output: `# \uD83D\uDDD1️ 메모리 삭제 완료
+          output: `# \uD83D\uDDD1️ Memory Deletion Complete
 
-**${deletedCount}개**의 "${keyword}" 관련 메모리가 삭제되었습니다.
+**${deletedCount}items** "${keyword}"  related items have been deleted.
 
-이 내용은 더 이상 에이전트의 행동에 영향을 주지 않습니다.`
+This content will no longer affect agent behavior.`
         };
       } catch (error) {
         return {
           success: false,
-          output: `❌ 메모리 삭제 실패: ${error}`
+          output: `❌ Memory deletion failed: ${error}`
         };
       }
     }
@@ -5757,33 +5757,33 @@ function createLearnSkill(context) {
   return {
     name: "learn",
     displayName: "Learn",
-    description: "명시적으로 새로운 내용을 학습합니다.",
-    triggers: ["learn", "배워", "기억해", "remember this"],
+    description: "Explicitly learns new contents.",
+    triggers: ["learn", "learn", "remember", "remember this"],
     autoActivate: false,
     handler: async ({ args, sessionState }) => {
       if (!args || args.trim() === "") {
         return {
           success: false,
-          output: `# ❌ 학습 내용 필요
+          output: `# ❌ Learning Content Required
 
-\`/learn "내용"\` 형식으로 학습할 내용을 입력해주세요.
+\`/learn "content"\` format to enter content to learn.
 
-**사용법:**
+**Usage:**
 \`\`\`
-/learn 나는 컴포넌트에 항상 .component.tsx 확장자를 사용해
+/learn I always use .component.tsx use extension
 
-/learn API 에러는 항상 한국어로 표시해줘 #preference #api
+/learn API errors always display in Korean #preference #api
 
-/learn --category=convention 변수명은 camelCase로 작성
+/learn --category=convention variable names in camelCase
 
-/learn --project --category=context 이 프로젝트는 Next.js 14 사용
+/learn --project --category=context This project uses Next.js 14
 \`\`\`
 
-**옵션:**
-- \`#tag\` - 태그 추가
-- \`--category=xxx\` - 카테고리 지정 (preference, pattern, convention, etc.)
-- \`--global\` - 모든 프로젝트에 적용
-- \`--project\` - 현재 프로젝트에만 적용 (기본값)`
+**Options:**
+- \`#tag\` - Tags add
+- \`--category=xxx\` - Category specify (preference, pattern, convention, etc.)
+- \`--global\` - Apply to all projects
+- \`--project\` - Apply to current project only (default)`
         };
       }
       try {
@@ -5793,7 +5793,7 @@ function createLearnSkill(context) {
         if (!content) {
           return {
             success: false,
-            output: "❌ 학습할 내용이 비어있습니다."
+            output: "❌ Learning content is empty."
           };
         }
         const learning = createSimpleLearning(content, {
@@ -5806,25 +5806,25 @@ function createLearnSkill(context) {
         const memory = await manager.create(learning);
         return {
           success: true,
-          output: `# ✅ 학습 완료!
+          output: `# ✅ Learning Complete!
 
-**제목**: ${memory.title}
-**카테고리**: ${memory.category}
-**스코프**: ${memory.scope === "global" ? "글로벌 (모든 프로젝트)" : "프로젝트 전용"}
-**태그**: ${memory.tags.length > 0 ? memory.tags.map((t) => `#${t}`).join(" ") : "없음"}
+**Title**: ${memory.title}
+*Category*: ${memory.category}
+**Scope**: ${memory.scope === "global" ? "Global (all projects)" : "Project-specific"}
+*Tags*: ${memory.tags.length > 0 ? memory.tags.map((t) => `#${t}`).join(" ") : "None"}
 
 > ${memory.content}
 
 ---
-이 내용은 앞으로 에이전트의 행동에 반영됩니다.
+This content will be reflected in agent behavior going forward.
 
-\uD83D\uDCA1 학습 내용 확인: \`/memories\`
-\uD83D\uDCA1 학습 삭제: \`/forget "${memory.title.slice(0, 10)}..."\``
+\uD83D\uDCA1 Check learned contents: \`/memories\`
+\uD83D\uDCA1 Delete learning: \`/forget "${memory.title.slice(0, 10)}..."\``
         };
       } catch (error) {
         return {
           success: false,
-          output: `❌ 학습 실패: ${error}`
+          output: `❌ Learning failed: ${error}`
         };
       }
     }
@@ -5842,19 +5842,19 @@ var DEBATE_PARTICIPANTS = {
 };
 function analyzeTopicForParticipants(topic) {
   const lowerTopic = topic.toLowerCase();
-  if (/ui|ux|프론트|frontend|컴포넌트|component|react|css|스타일/.test(lowerTopic)) {
+  if (/ui|ux|front|frontend|component|component|react|css|style/.test(lowerTopic)) {
     return DEBATE_PARTICIPANTS.frontend;
   }
-  if (/api|백엔드|backend|db|database|서버|server|graphql|rest/.test(lowerTopic)) {
+  if (/api|Backend|backend|db|database|server|server|graphql|rest/.test(lowerTopic)) {
     return DEBATE_PARTICIPANTS.backend;
   }
-  if (/배포|deploy|인프라|infra|devops|ci|cd|docker|k8s/.test(lowerTopic)) {
+  if (/deploy|deploy|Infrastructure|infra|devops|ci|cd|docker|k8s/.test(lowerTopic)) {
     return DEBATE_PARTICIPANTS.devops;
   }
-  if (/아키텍처|architecture|설계|design|구조|시스템/.test(lowerTopic)) {
+  if (/architecture|architecture|design|design|structure|system/.test(lowerTopic)) {
     return DEBATE_PARTICIPANTS.architecture;
   }
-  if (/전체|풀스택|fullstack|통합/.test(lowerTopic)) {
+  if (/entire|fullstack|fullstack|integration/.test(lowerTopic)) {
     return DEBATE_PARTICIPANTS.fullstack;
   }
   return DEBATE_PARTICIPANTS.default;
@@ -5898,7 +5898,7 @@ function createDebateSkill(context) {
     name: "debate",
     displayName: "Debate",
     description: "Find optimal solutions through agent debates.",
-    triggers: ["debate", "토론", "의견", "논의", "장단점", "비교"],
+    triggers: ["debate", "debate", "opinion", "discussion", "pros and cons", "comparison"],
     autoActivate: true,
     handler: async ({ args, sessionState }) => {
       const topic = args || "Please enter a debate topic";
@@ -5937,7 +5937,7 @@ Action Kamen(Reviewer) reviews the consensus.
 
 ---
 
-**Midori가 Debate를 진행합니다.**`,
+**Midori conducts the debate.**`,
         inject: `<debate-mode>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💭 EXECUTE IMMEDIATELY: Debate Process
@@ -5950,38 +5950,38 @@ You MUST immediately delegate this debate to Midori using the Task tool.
 Task(
   subagent_type="team-shinchan:midori",
   model="opus",
-  prompt="Debate를 진행해주세요.
+  prompt="Please conduct the debate.
 
-## 주제
+## Topic
 ${topic}
 
-## 패널
+## Panel
 ${participants.map(p => `- ${AGENT_DISPLAY_NAMES2[p]} (${AGENT_ROLES2[p]})`).join('\n')}
 
-## 진행 방식
-1. Debate 시작 공지 출력
-2. 각 패널로부터 의견 수집 (병렬 Task 호출)
-3. 각 의견 실시간 출력
-4. Hiroshi에게 합의 도출 요청
-5. 최종 결정 사항 출력
+## Process
+1. Output debate start announcement
+2. Collect opinions from each panel (parallel Task calls)
+3. Real-time output of each opinion
+4. Request consensus from Hiroshi
+5. Output final decision
 
-## 출력 형식
+## Output Format
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💭 Debate 진행 중
+💭 Debate in Progress
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 주제: {주제}
-👥 패널: {패널 목록}
+📋 Topic: {Topic}
+👥 Panel: {Panel list}
 
-🎤 Round 1: 의견 수집
+🎤 Round 1: Opinion Collection
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[각 에이전트 의견]
+[Each agent opinion]
 
-✅ 권장 결정
+✅ Recommended Decision
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 결정: {결정}
-📝 근거: {근거}
+📋 Decision: {decision}
+📝 Rationale: {rationale}
 
-IMPORTANT: 즉시 Debate를 실행하고 결과를 Shinnosuke에게 반환하세요."
+IMPORTANT: Execute debate immediately and return results to Shinnosuke."
 )
 
 ## Step 2: Relay Results to User
@@ -5989,23 +5989,23 @@ IMPORTANT: 즉시 Debate를 실행하고 결과를 Shinnosuke에게 반환하세
 After receiving Midori's result, you MUST present it to the user in this format:
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💭 Debate 결과
+💭 Debate Result
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 주제: ${topic}
+📋 Topic: ${topic}
 
-🎤 전문가 의견:
+🎤 Expert opinions:
 [Summarize each panelist's opinion concisely]
-${participants.map(p => `- [${AGENT_DISPLAY_NAMES2[p]}]: {의견 요약}`).join('\n')}
+${participants.map(p => `- [${AGENT_DISPLAY_NAMES2[p]}]: {opinion summary}`).join('\n')}
 
-✅ 권장 결정: {Midori가 제시한 결론}
-📝 근거: {결정 근거}
+✅ Recommended Decision: {Conclusion presented by Midori}
+📝 Rationale: {decision rationale}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ## Step 3: Ask for User's Decision
 
 After presenting the results, ask the user:
 
-"위 권장 결정에 동의하시나요? 다른 의견이나 추가로 고려할 사항이 있으시면 말씀해주세요."
+"Do you agree with the above recommended decision? Please let me know if you have other opinions or additional considerations."
 
 ## Step 4: Finalize Decision
 
@@ -6077,11 +6077,11 @@ async function TeamSeokanPlugin(ctx) {
       pluginContext.skills.set(skill.name, skill);
     }
   }
-  console.log(`[Team-Seokan] 플러그인 초기화 완료`);
-  console.log(`[Team-Seokan] 에이전트: ${pluginContext.agents.size}개`);
-  console.log(`[Team-Seokan] 훅: ${pluginContext.hooks.size}개`);
-  console.log(`[Team-Seokan] 도구: ${pluginContext.tools.size}개`);
-  console.log(`[Team-Seokan] 스킬: ${pluginContext.skills.size}개`);
+  console.log(`[Team-Seokan] Plugin initialization complete`);
+  console.log(`[Team-Seokan] Agents: ${pluginContext.agents.size}items`);
+  console.log(`[Team-Seokan] Hooks: ${pluginContext.hooks.size}items`);
+  console.log(`[Team-Seokan] Tools: ${pluginContext.tools.size}items`);
+  console.log(`[Team-Seokan] Skills: ${pluginContext.skills.size}items`);
   return {
     name: "team-seokan",
     version: "0.1.0",
@@ -6093,15 +6093,15 @@ async function TeamSeokanPlugin(ctx) {
     handlers: {
       "session.created": async (event) => {
         pluginContext.sessionState = createSessionState();
-        console.log("[Team-Seokan] 새 세션 시작");
+        console.log("[Team-Seokan] New session started");
       },
       "session.deleted": async (event) => {
-        console.log("[Team-Seokan] 세션 종료");
+        console.log("[Team-Seokan] Session terminated");
       },
       "chat.message": async (message) => {
         pluginContext.sessionState.messageCount++;
         if (pluginContext.sessionState.messageCount >= settings.contextWarningThreshold) {
-          console.log("[Team-Seokan] ⚠️ 컨텍스트 사용량 경고");
+          console.log("[Team-Seokan] ⚠️ Context usage warning");
         }
       },
       "tool.execute.before": async (toolName, input) => {
@@ -6136,7 +6136,7 @@ async function TeamSeokanPlugin(ctx) {
         }
       },
       error: async (error) => {
-        console.error("[Team-Seokan] 에러:", error);
+        console.error("[Team-Seokan] Error:", error);
       }
     },
     config: {

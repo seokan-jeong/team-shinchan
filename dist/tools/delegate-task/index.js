@@ -1,49 +1,49 @@
 /**
- * delegate_task - 에이전트에게 작업 위임
+ * delegate_task - Delegate task to agent
  */
 export function createDelegateTaskTool(context) {
     return {
         name: 'delegate_task',
-        description: `에이전트에게 작업을 위임합니다.
+        description: `Delegate a task to an agent.
 
-사용 가능한 에이전트:
-- jjangu (짱구): 오케스트레이터
-- jjanga (짱아): 마스터 오케스트레이터
-- maenggu (맹구): 코드 작성/수정
-- cheolsu (철수): 복잡한 장시간 작업
-- suji (수지): UI/UX 프론트엔드
-- heukgom (흑곰): API/DB 백엔드
-- hooni (훈이): DevOps 인프라
-- shinhyungman (신형만): 전략 조언
-- yuri (유리): 계획 수립
-- bongmisun (봉미선): 사전 분석
-- actiongamen (액션가면): 코드 검증
-- heendungi (흰둥이): 코드 탐색
-- chaesunga (채성아): 문서 검색
-- namiri (나미리): 이미지/PDF 분석`,
+Available agents:
+- jjangu (Shinnosuke): Orchestrator
+- jjanga (Himawari): Master Orchestrator
+- maenggu (Bo): Code Writing/Modification
+- cheolsu (Kazama): Complex Long-term Tasks
+- suji (Aichan): UI/UX Frontend
+- heukgom (Bunta): API/DB Backend
+- hooni (Masao): DevOps Infrastructure
+- shinhyungman (Hiroshi): Strategic Advice
+- yuri (Nene): Planning
+- bongmisun (Misae): Pre-analysis
+- actiongamen (Action Kamen): Code Verification
+- heendungi (Shiro): Code Exploration
+- chaesunga (Masumi): Document Search
+- namiri (Ume): Image/PDF Analysis`,
         parameters: [
             {
                 name: 'agent',
                 type: 'string',
-                description: '위임할 에이전트 이름 (예: maenggu, heendungi)',
+                description: 'Name of the agent to delegate to (e.g., maenggu, heendungi)',
                 required: true,
             },
             {
                 name: 'task',
                 type: 'string',
-                description: '수행할 작업 설명',
+                description: 'Description of the task to perform',
                 required: true,
             },
             {
                 name: 'context',
                 type: 'string',
-                description: '추가 컨텍스트 정보',
+                description: 'Additional context information',
                 required: false,
             },
             {
                 name: 'run_in_background',
                 type: 'boolean',
-                description: '배경에서 실행할지 여부',
+                description: 'Whether to run in background',
                 required: false,
                 default: false,
             },
@@ -53,26 +53,26 @@ export function createDelegateTaskTool(context) {
             const task = params.task;
             const additionalContext = params.context;
             const runInBackground = params.run_in_background;
-            // 에이전트 존재 확인
+            // Check agent existence
             const agent = context.agents.get(agentName);
             if (!agent) {
                 return {
                     success: false,
-                    error: `에이전트 '${agentName}'을 찾을 수 없습니다.`,
+                    error: `Agent '${agentName}' not found.`,
                 };
             }
-            // 배경 실행 제한 확인
+            // Check background execution limit
             if (runInBackground) {
                 const maxConcurrent = context.settings.maxConcurrentAgents;
                 const runningTasks = context.sessionState.backgroundTasks.filter((t) => t.status === 'running');
                 if (runningTasks.length >= maxConcurrent) {
                     return {
                         success: false,
-                        error: `최대 동시 실행 수(${maxConcurrent})에 도달했습니다.`,
+                        error: `Maximum concurrent execution limit (${maxConcurrent}) reached.`,
                     };
                 }
             }
-            // 위임 결과 반환
+            // Return delegation result
             return {
                 success: true,
                 output: {
@@ -83,7 +83,7 @@ export function createDelegateTaskTool(context) {
                     context: additionalContext,
                     runInBackground,
                     model: agent.metadata.model,
-                    // 실제로는 여기서 Task tool을 호출하도록 구성
+                    // In practice, configure to call Task tool here
                     instruction: `Task(subagent_type="team-seokan:${agentName}", model="${agent.metadata.model}", prompt="${task}")`,
                 },
             };

@@ -1,5 +1,5 @@
 /**
- * ast_grep - AST 기반 코드 검색
+ * ast_grep - AST-Based Code Search
  */
 import type { ToolConfig, PluginContext } from '../../types';
 export declare function createAstGrepTool(context: PluginContext): ToolConfig;

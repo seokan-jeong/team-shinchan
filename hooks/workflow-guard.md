@@ -86,9 +86,9 @@ To proceed to next stage, complete:
 In Stage 1, if the user message contains implementation-like requests AND the agent tries to use Edit/Write/TodoWrite:
 
 **User patterns that should NOT trigger implementation:**
-- "~해줘" → Add to requirements
-- "~하고 싶어" → Add to requirements
-- "기능 추가해줘" → Add to requirements (NOT implement)
+- "Please do ~" / "Do this for me" → Add to requirements
+- "I want to ~" → Add to requirements
+- "Add this feature" → Add to requirements (NOT implement)
 
 **Block with message:**
 ```

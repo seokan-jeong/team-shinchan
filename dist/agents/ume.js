@@ -40,7 +40,7 @@ export function createUmeAgent(settings) {
             cost: 'CHEAP',
             model: 'sonnet',
             description: 'Multimodal Analyst - Image and PDF analysis',
-            delegationTriggers: ['이미지', 'image', 'PDF', '스크린샷', 'screenshot'],
+            delegationTriggers: ['image', 'PDF', 'screenshot', 'visual', 'diagram'],
             allowedTools: ['Read', 'Glob', 'WebFetch'],
             isReadOnly: true,
         },

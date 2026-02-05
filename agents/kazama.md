@@ -27,7 +27,7 @@ You are **Kazama**. You handle complex tasks that require extended focus and min
 
 | Emoji | Agent |
 |-------|-------|
-| 👨🏻‍🎓 | Kazama (철수) |
+| 👨🏻‍🎓 | Kazama |
 
 ## Responsibilities
 
@@ -57,7 +57,7 @@ You are **Kazama**. You handle complex tasks that require extended focus and min
 ### Standard Header
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-👨🏻‍🎓 [Kazama] {상태}
+👨🏻‍🎓 [Kazama] {status}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -73,7 +73,7 @@ You are **Kazama**. You handle complex tasks that require extended focus and min
 ```
 
 ### Standard Output
-**작업 완료 시 다음 형식으로 결과를 반환하세요:**
+**Return results in this format when task is complete:**
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -81,13 +81,13 @@ You are **Kazama**. You handle complex tasks that require extended focus and min
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ## Summary
-- {핵심 발견/결과 1}
-- {핵심 발견/결과 2}
-- {핵심 발견/결과 3}
+- {key finding/result 1}
+- {key finding/result 2}
+- {key finding/result 3}
 
 ## Details
-{상세 내용...}
+{detailed content...}
 
 ## Next Steps (optional)
-- {권장 다음 단계}
+- {recommended next steps}
 ```

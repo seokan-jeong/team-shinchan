@@ -13,19 +13,19 @@ const DEBATE_PARTICIPANTS = {
 // Analyze topic for participant selection
 function analyzeTopicForParticipants(topic) {
     const lowerTopic = topic.toLowerCase();
-    if (/ui|ux|프론트|frontend|컴포넌트|component|react|css|스타일/.test(lowerTopic)) {
+    if (/ui|ux|frontend|component|react|css|style/.test(lowerTopic)) {
         return DEBATE_PARTICIPANTS.frontend;
     }
-    if (/api|백엔드|backend|db|database|서버|server|graphql|rest/.test(lowerTopic)) {
+    if (/api|backend|db|database|server|graphql|rest/.test(lowerTopic)) {
         return DEBATE_PARTICIPANTS.backend;
     }
-    if (/배포|deploy|인프라|infra|devops|ci|cd|docker|k8s/.test(lowerTopic)) {
+    if (/deploy|infra|devops|ci|cd|docker|k8s/.test(lowerTopic)) {
         return DEBATE_PARTICIPANTS.devops;
     }
-    if (/아키텍처|architecture|설계|design|구조|시스템/.test(lowerTopic)) {
+    if (/architecture|design|system/.test(lowerTopic)) {
         return DEBATE_PARTICIPANTS.architecture;
     }
-    if (/전체|풀스택|fullstack|통합/.test(lowerTopic)) {
+    if (/fullstack|full-stack|integrated/.test(lowerTopic)) {
         return DEBATE_PARTICIPANTS.fullstack;
     }
     return DEBATE_PARTICIPANTS.default;
@@ -71,7 +71,7 @@ export function createDebateSkill(context) {
         name: 'debate',
         displayName: 'Debate',
         description: 'Find optimal solutions through agent debates.',
-        triggers: ['debate', '토론', '의견', '논의', '장단점', '비교'],
+        triggers: ['debate', 'discuss', 'opinions', 'pros and cons', 'compare'],
         autoActivate: true,
         handler: async ({ args, sessionState }) => {
             const topic = args || 'Please enter a debate topic';
@@ -112,7 +112,7 @@ Action Kamen(Reviewer) reviews the consensus.
 
 ---
 
-**Midori가 Debate를 진행합니다.**`,
+**Midori will conduct the Debate.**`,
                 inject: `<debate-mode>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💭 EXECUTE IMMEDIATELY: Debate Process
@@ -125,38 +125,38 @@ You MUST immediately delegate this debate to Midori using the Task tool.
 Task(
   subagent_type="team-shinchan:midori",
   model="opus",
-  prompt="Debate를 진행해주세요.
+  prompt="Please conduct a Debate.
 
-## 주제
+## Topic
 ${topic}
 
-## 패널
+## Panel
 ${participants.map(p => `- ${AGENT_DISPLAY_NAMES[p]} (${AGENT_ROLES[p]})`).join('\n')}
 
-## 진행 방식
-1. Debate 시작 공지 출력
-2. 각 패널로부터 의견 수집 (병렬 Task 호출)
-3. 각 의견 실시간 출력
-4. Hiroshi에게 합의 도출 요청
-5. 최종 결정 사항 출력
+## Process
+1. Output debate start announcement
+2. Collect opinions from each panel member (parallel Task calls)
+3. Output each opinion in real-time
+4. Request consensus from Hiroshi
+5. Output final decision
 
-## 출력 형식
+## Output Format
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💭 Debate 진행 중
+💭 Debate in Progress
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 주제: {주제}
-👥 패널: {패널 목록}
+📋 Topic: {topic}
+👥 Panel: {panel list}
 
-🎤 Round 1: 의견 수집
+🎤 Round 1: Opinion Collection
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[각 에이전트 의견]
+[Each agent's opinion]
 
-✅ 권장 결정
+✅ Recommended Decision
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 결정: {결정}
-📝 근거: {근거}
+📋 Decision: {decision}
+📝 Rationale: {rationale}
 
-IMPORTANT: 즉시 Debate를 실행하고 결과를 Shinnosuke에게 반환하세요."
+IMPORTANT: Execute the Debate immediately and return the result to Shinnosuke."
 )
 
 ## Step 2: Relay Results to User
@@ -164,24 +164,24 @@ IMPORTANT: 즉시 Debate를 실행하고 결과를 Shinnosuke에게 반환하세
 After receiving Midori's result, you MUST present it to the user in this format:
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💭 Debate 결과
+💭 Debate Results
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 주제: ${topic}
+📋 Topic: ${topic}
 
-🎤 전문가 의견:
+🎤 Expert Opinions:
 [Summarize each panelist's opinion concisely]
-- [${participants[0] ? AGENT_DISPLAY_NAMES[participants[0]] : 'Agent'}]: {의견 요약}
-- [${participants[1] ? AGENT_DISPLAY_NAMES[participants[1]] : 'Agent'}]: {의견 요약}
+- [${participants[0] ? AGENT_DISPLAY_NAMES[participants[0]] : 'Agent'}]: {opinion summary}
+- [${participants[1] ? AGENT_DISPLAY_NAMES[participants[1]] : 'Agent'}]: {opinion summary}
 
-✅ 권장 결정: {Midori가 제시한 결론}
-📝 근거: {결정 근거}
+✅ Recommended Decision: {conclusion from Midori}
+📝 Rationale: {decision rationale}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ## Step 3: Ask for User's Decision
 
 After presenting the results, ask the user:
 
-"위 권장 결정에 동의하시나요? 다른 의견이나 추가로 고려할 사항이 있으시면 말씀해주세요."
+"Do you agree with the above recommended decision? If you have different opinions or additional considerations, please let me know."
 
 ## Step 4: Finalize Decision
 

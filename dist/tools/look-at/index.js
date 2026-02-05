@@ -1,21 +1,21 @@
 /**
- * look_at - 파일/이미지 조회
+ * look_at - View file/image
  */
 export function createLookAtTool(context) {
     return {
         name: 'look_at',
-        description: '파일이나 이미지를 조회합니다. 나미리(Multimodal) 에이전트가 분석할 수 있습니다.',
+        description: 'View a file or image. Ume (Multimodal) agent can analyze it.',
         parameters: [
             {
                 name: 'path',
                 type: 'string',
-                description: '조회할 파일 경로',
+                description: 'File path to view',
                 required: true,
             },
             {
                 name: 'analyze',
                 type: 'boolean',
-                description: '이미지인 경우 나미리에게 분석 요청',
+                description: 'Request analysis from Ume for images',
                 required: false,
                 default: false,
             },
@@ -23,10 +23,10 @@ export function createLookAtTool(context) {
         handler: async (params) => {
             const path = params.path;
             const analyze = params.analyze;
-            // 이미지 파일 확장자 확인
+            // Check image file extension
             const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'];
             const isImage = imageExtensions.some((ext) => path.toLowerCase().endsWith(ext));
-            // PDF 확인
+            // Check PDF
             const isPdf = path.toLowerCase().endsWith('.pdf');
             if ((isImage || isPdf) && analyze) {
                 return {
@@ -34,8 +34,8 @@ export function createLookAtTool(context) {
                     output: {
                         path,
                         type: isImage ? 'image' : 'pdf',
-                        recommendation: '나미리(Multimodal) 에이전트에게 분석을 위임하세요.',
-                        instruction: `delegate_task(agent="namiri", task="이 ${isImage ? '이미지' : 'PDF'}를 분석해주세요: ${path}")`,
+                        recommendation: 'Delegate analysis to Ume (Multimodal) agent.',
+                        instruction: `delegate_task(agent="namiri", task="Please analyze this ${isImage ? 'image' : 'PDF'}: ${path}")`,
                     },
                 };
             }
@@ -44,7 +44,7 @@ export function createLookAtTool(context) {
                 output: {
                     path,
                     type: isImage ? 'image' : isPdf ? 'pdf' : 'file',
-                    instruction: `Read 도구를 사용하여 파일을 읽으세요.`,
+                    instruction: `Use the Read tool to read the file.`,
                 },
             };
         },

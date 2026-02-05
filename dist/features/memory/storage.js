@@ -1,49 +1,49 @@
 /**
  * Memory Storage
- * 파일 기반 메모리 저장소
+ * File-based memory storage
  */
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 /**
- * 메모리를 마크다운 형식으로 변환
+ * Convert memory to markdown format
  */
 export function memoryToMarkdown(memory) {
     const tags = memory.tags.length > 0 ? memory.tags.map((t) => `#${t}`).join(' ') : '';
     const sources = memory.sources.length > 0 ? memory.sources.join(', ') : 'unknown';
     return `## [${memory.createdAt.toISOString().split('T')[0]}] ${memory.title}
 - **ID**: ${memory.id}
-- **내용**: ${memory.content}
-- **카테고리**: ${memory.category}
-- **신뢰도**: ${memory.confidence.toFixed(2)}
-- **출처**: ${sources}
-- **태그**: ${tags}
-- **감쇠**: ${memory.decayFactor.toFixed(2)}
-- **강화 횟수**: ${memory.reinforcementCount}
-- **반박 횟수**: ${memory.contradictionCount}
-- **접근 횟수**: ${memory.accessCount}
-- **마지막 접근**: ${memory.lastAccessedAt.toISOString()}
-- **업데이트**: ${memory.updatedAt.toISOString()}
+- **Content**: ${memory.content}
+- **Category**: ${memory.category}
+- **Confidence**: ${memory.confidence.toFixed(2)}
+- **Source**: ${sources}
+- **Tags**: ${tags}
+- **Decay**: ${memory.decayFactor.toFixed(2)}
+- **Reinforcement Count**: ${memory.reinforcementCount}
+- **Contradiction Count**: ${memory.contradictionCount}
+- **Access Count**: ${memory.accessCount}
+- **Last Accessed**: ${memory.lastAccessedAt.toISOString()}
+- **Updated**: ${memory.updatedAt.toISOString()}
 `;
 }
 /**
- * 마크다운에서 메모리 파싱
+ * Parse memory from markdown
  */
 export function markdownToMemory(markdown, scope) {
     try {
         const idMatch = markdown.match(/- \*\*ID\*\*: (.+)/);
         const titleMatch = markdown.match(/## \[.+\] (.+)/);
-        const contentMatch = markdown.match(/- \*\*내용\*\*: (.+)/);
-        const categoryMatch = markdown.match(/- \*\*카테고리\*\*: (.+)/);
-        const confidenceMatch = markdown.match(/- \*\*신뢰도\*\*: (.+)/);
-        const sourcesMatch = markdown.match(/- \*\*출처\*\*: (.+)/);
-        const tagsMatch = markdown.match(/- \*\*태그\*\*: (.+)/);
-        const decayMatch = markdown.match(/- \*\*감쇠\*\*: (.+)/);
-        const reinforcementMatch = markdown.match(/- \*\*강화 횟수\*\*: (.+)/);
-        const contradictionMatch = markdown.match(/- \*\*반박 횟수\*\*: (.+)/);
-        const accessCountMatch = markdown.match(/- \*\*접근 횟수\*\*: (.+)/);
-        const lastAccessMatch = markdown.match(/- \*\*마지막 접근\*\*: (.+)/);
-        const updatedMatch = markdown.match(/- \*\*업데이트\*\*: (.+)/);
+        const contentMatch = markdown.match(/- \*\*Content\*\*: (.+)/);
+        const categoryMatch = markdown.match(/- \*\*Category\*\*: (.+)/);
+        const confidenceMatch = markdown.match(/- \*\*Confidence\*\*: (.+)/);
+        const sourcesMatch = markdown.match(/- \*\*Source\*\*: (.+)/);
+        const tagsMatch = markdown.match(/- \*\*Tags\*\*: (.+)/);
+        const decayMatch = markdown.match(/- \*\*Decay\*\*: (.+)/);
+        const reinforcementMatch = markdown.match(/- \*\*Reinforcement Count\*\*: (.+)/);
+        const contradictionMatch = markdown.match(/- \*\*Contradiction Count\*\*: (.+)/);
+        const accessCountMatch = markdown.match(/- \*\*Access Count\*\*: (.+)/);
+        const lastAccessMatch = markdown.match(/- \*\*Last Accessed\*\*: (.+)/);
+        const updatedMatch = markdown.match(/- \*\*Updated\*\*: (.+)/);
         const dateMatch = markdown.match(/## \[(\d{4}-\d{2}-\d{2})\]/);
         if (!idMatch || !titleMatch || !contentMatch) {
             return null;
@@ -81,7 +81,7 @@ export function markdownToMemory(markdown, scope) {
     }
 }
 /**
- * 경로 확장 (~ 처리)
+ * Expand path (handle ~)
  */
 export function expandPath(filePath) {
     if (filePath.startsWith('~')) {
@@ -90,13 +90,13 @@ export function expandPath(filePath) {
     return filePath;
 }
 /**
- * 단일 학습 파일 이름 반환
+ * Get learning file name
  */
 export function getLearningFileName() {
     return 'learnings.md';
 }
 /**
- * 메모리 저장소 클래스
+ * Memory Storage class
  */
 export class MemoryStorage {
     config;
@@ -115,20 +115,20 @@ export class MemoryStorage {
         this.projectPath = this.config.projectPath;
     }
     /**
-     * 디렉토리 초기화
+     * Initialize directories
      */
     async initialize() {
-        // 글로벌 메모리 디렉토리 생성
+        // Create global memory directory
         await this.ensureDirectory(this.globalPath);
         await this.ensureDirectory(path.join(this.globalPath, 'agents'));
-        // 프로젝트 메모리 디렉토리 생성 (프로젝트 루트에 있을 때만)
+        // Create project memory directory (only when in project root)
         if (fs.existsSync(this.projectPath) || fs.existsSync('.git') || fs.existsSync('package.json')) {
             await this.ensureDirectory(this.projectPath);
             await this.ensureDirectory(path.join(this.projectPath, 'agents'));
         }
     }
     /**
-     * 디렉토리 존재 확인 및 생성
+     * Ensure directory exists
      */
     async ensureDirectory(dirPath) {
         if (!fs.existsSync(dirPath)) {
@@ -136,13 +136,13 @@ export class MemoryStorage {
         }
     }
     /**
-     * 스코프에 따른 기본 경로 반환
+     * Get base path by scope
      */
     getBasePath(scope) {
         return scope === 'global' ? this.globalPath : this.projectPath;
     }
     /**
-     * 메모리 파일 경로 반환
+     * Get memory file path
      */
     getMemoryFilePath(scope, owner = 'shared') {
         const basePath = this.getBasePath(scope);
@@ -154,7 +154,7 @@ export class MemoryStorage {
         }
     }
     /**
-     * 파일에서 메모리 로드
+     * Load memories from file
      */
     async loadFromFile(filePath, scope) {
         const fullPath = expandPath(filePath);
@@ -181,14 +181,14 @@ export class MemoryStorage {
         }
     }
     /**
-     * 파일에 메모리 저장 (카테고리별 섹션으로)
+     * Save memories to file (organized by category sections)
      */
     async saveToFile(filePath, memories) {
         const fullPath = expandPath(filePath);
         const dirPath = path.dirname(fullPath);
         await this.ensureDirectory(dirPath);
 
-        // 카테고리별로 그룹화
+        // Group by category
         const categories = ['preference', 'pattern', 'context', 'mistake', 'decision', 'convention', 'insight'];
         const categoryNames = {
             preference: 'Preferences',
@@ -201,8 +201,8 @@ export class MemoryStorage {
         };
 
         const header = `# Team-Shinchan Learnings
-> 자동 생성된 메모리 파일입니다. 직접 수정하지 마세요.
-> 마지막 업데이트: ${new Date().toISOString()}
+> Auto-generated memory file. Do not edit manually.
+> Last updated: ${new Date().toISOString()}
 
 `;
 
@@ -221,18 +221,18 @@ export class MemoryStorage {
         fs.writeFileSync(fullPath, content, 'utf-8');
     }
     /**
-     * 모든 메모리 로드 (글로벌 + 프로젝트, 단일 learnings.md 파일에서)
+     * Load all memories (global + project, from single learnings.md file)
      */
     async loadAllMemories() {
         const globalMemories = [];
         const projectMemories = [];
 
-        // 글로벌 메모리 로드 (learnings.md에서)
+        // Load global memories (from learnings.md)
         const globalFilePath = this.getMemoryFilePath('global');
         const globalLearnings = await this.loadFromFile(globalFilePath, 'global');
         globalMemories.push(...globalLearnings);
 
-        // 글로벌 에이전트별 메모리 로드
+        // Load global agent-specific memories
         const agentsDir = path.join(this.globalPath, 'agents');
         if (fs.existsSync(agentsDir)) {
             const agentFiles = fs.readdirSync(agentsDir).filter((f) => f.endsWith('.md'));
@@ -242,13 +242,13 @@ export class MemoryStorage {
             }
         }
 
-        // 프로젝트 메모리 로드 (learnings.md에서)
+        // Load project memories (from learnings.md)
         if (fs.existsSync(this.projectPath)) {
             const projectFilePath = this.getMemoryFilePath('project');
             const projectLearnings = await this.loadFromFile(projectFilePath, 'project');
             projectMemories.push(...projectLearnings);
 
-            // 프로젝트 에이전트별 메모리 로드
+            // Load project agent-specific memories
             const projectAgentsDir = path.join(this.projectPath, 'agents');
             if (fs.existsSync(projectAgentsDir)) {
                 const agentFiles = fs.readdirSync(projectAgentsDir).filter((f) => f.endsWith('.md'));
@@ -262,12 +262,12 @@ export class MemoryStorage {
         return { global: globalMemories, project: projectMemories };
     }
     /**
-     * 메모리 저장 (단일 learnings.md 파일에)
+     * Save memory (to single learnings.md file)
      */
     async saveMemory(memory) {
         const filePath = this.getMemoryFilePath(memory.scope, memory.owner);
         const existingMemories = await this.loadFromFile(filePath, memory.scope);
-        // 기존 메모리 업데이트 또는 추가
+        // Update existing memory or add new
         const index = existingMemories.findIndex((m) => m.id === memory.id);
         if (index >= 0) {
             existingMemories[index] = memory;
@@ -278,7 +278,7 @@ export class MemoryStorage {
         await this.saveToFile(filePath, existingMemories);
     }
     /**
-     * 메모리 삭제 (단일 learnings.md 파일에서)
+     * Delete memory (from single learnings.md file)
      */
     async deleteMemory(memoryId, scope) {
         const { global: globalMemories, project: projectMemories } = await this.loadAllMemories();
@@ -294,13 +294,13 @@ export class MemoryStorage {
         return true;
     }
     /**
-     * 백업 생성
+     * Create backup
      */
     async createBackup() {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const backupDir = path.join(this.globalPath, 'backups', timestamp);
         await this.ensureDirectory(backupDir);
-        // 글로벌 메모리 백업
+        // Backup global memories
         const files = fs.readdirSync(this.globalPath).filter((f) => f.endsWith('.md'));
         for (const file of files) {
             const src = path.join(this.globalPath, file);
@@ -310,14 +310,14 @@ export class MemoryStorage {
         return backupDir;
     }
     /**
-     * 설정 반환
+     * Get configuration
      */
     getConfig() {
         return { ...this.config };
     }
 }
 /**
- * 기본 저장소 인스턴스
+ * Default storage instance
  */
 let defaultStorage = null;
 export function getDefaultStorage() {

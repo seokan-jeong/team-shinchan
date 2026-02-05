@@ -1,27 +1,27 @@
 /**
- * ast_grep - AST 기반 코드 검색
+ * ast_grep - AST-based code search
  */
 export function createAstGrepTool(context) {
     return {
         name: 'ast_grep',
-        description: 'AST(Abstract Syntax Tree) 기반으로 코드 패턴을 검색합니다. 정확한 코드 구조 매칭에 유용합니다.',
+        description: 'Search code patterns based on AST (Abstract Syntax Tree). Useful for precise code structure matching.',
         parameters: [
             {
                 name: 'pattern',
                 type: 'string',
-                description: '검색할 AST 패턴',
+                description: 'AST pattern to search',
                 required: true,
             },
             {
                 name: 'language',
                 type: 'string',
-                description: '대상 언어 (typescript, javascript, python 등)',
+                description: 'Target language (typescript, javascript, python, etc.)',
                 required: true,
             },
             {
                 name: 'path',
                 type: 'string',
-                description: '검색할 경로',
+                description: 'Path to search',
                 required: false,
                 default: '.',
             },
@@ -36,7 +36,7 @@ export function createAstGrepTool(context) {
                     pattern,
                     language,
                     path,
-                    instruction: `ast-grep CLI를 사용하세요: sg --pattern "${pattern}" --lang ${language} ${path}`,
+                    instruction: `Use ast-grep CLI: sg --pattern "${pattern}" --lang ${language} ${path}`,
                 },
             };
         },

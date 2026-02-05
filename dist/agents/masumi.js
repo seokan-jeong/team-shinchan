@@ -40,7 +40,7 @@ export function createMasumiAgent(settings) {
             cost: 'CHEAP',
             model: 'sonnet',
             description: 'Librarian - Documentation and info search',
-            delegationTriggers: ['문서', 'docs', 'API 문서', 'documentation'],
+            delegationTriggers: ['docs', 'documentation', 'API docs', 'reference', 'manual'],
             disallowedTools: ['Edit', 'Write', 'NotebookEdit'],
             isReadOnly: true,
         },

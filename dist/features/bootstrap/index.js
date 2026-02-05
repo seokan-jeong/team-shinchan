@@ -1,6 +1,6 @@
 /**
  * Bootstrap System
- * 프로젝트 초기 분석 및 베스트 프랙티스
+ * Project initial analysis and best practices
  */
 export { detectProjectType, analyzeStructure, detectConventions, runBootstrapAnalysis, } from './analyzer';
 export { getBestPractices, getBestPracticesByCategory, summarizeBestPractices, getDefaultBestPractices, } from './best-practices';

@@ -1,13 +1,13 @@
 /**
- * 중단 보호 훅
- * 실행 중인 배경 작업이 있으면 경고
+ * Stop Continuation Guard Hook
+ * Warns if background tasks are running
  */
 import { getRunningBackgroundTasks } from '../features/session-state';
 export function createStopContinuationGuardHook(context) {
     return {
         name: 'stop-continuation-guard',
         event: 'Stop',
-        description: '실행 중인 배경 작업이 있으면 경고합니다.',
+        description: 'Warns if background tasks are running.',
         enabled: true,
         priority: 85,
         handler: async (hookContext) => {
@@ -19,13 +19,13 @@ export function createStopContinuationGuardHook(context) {
                 .map((t) => `- ${t.agentName}: ${t.description}`)
                 .join('\n');
             return {
-                continue: true, // 경고만 하고 통과
-                message: `⚠️ **배경 작업 실행 중**
+                continue: true, // Warning only, allow continuation
+                message: `⚠️ **Background Tasks Running**
 
-다음 배경 작업이 아직 실행 중입니다:
+The following background tasks are still running:
 ${taskList}
 
-결과를 확인하려면 \`session_manager(action="list_tasks")\`를 사용하세요.`,
+Use \`session_manager(action="list_tasks")\` to check results.`,
             };
         },
     };

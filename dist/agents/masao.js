@@ -41,7 +41,7 @@ export function createMasaoAgent(settings) {
             cost: 'CHEAP',
             model: 'sonnet',
             description: 'DevOps Specialist - Infrastructure and deployment',
-            delegationTriggers: ['배포', 'deploy', 'CI', 'CD', 'Docker', '인프라', 'infra', 'k8s'],
+            delegationTriggers: ['deploy', 'deployment', 'CI', 'CD', 'Docker', 'infra', 'infrastructure', 'k8s'],
             isReadOnly: false,
         },
     };

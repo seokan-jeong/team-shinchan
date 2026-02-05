@@ -1,10 +1,10 @@
 /**
  * Bootstrap Analyzer
- * 프로젝트 초기 분석 및 컨벤션 감지
+ * Initial project analysis and convention detection
  */
 import type { CreateMemoryInput, BootstrapResult } from '../memory/types';
 /**
- * 프로젝트 정보
+ * Project Information
  */
 export interface ProjectInfo {
     name: string;
@@ -16,7 +16,7 @@ export interface ProjectInfo {
     hasDocs: boolean;
 }
 /**
- * 파일 구조 분석
+ * File Structure Analysis
  */
 export interface StructureAnalysis {
     sourceDir: string | null;
@@ -26,19 +26,19 @@ export interface StructureAnalysis {
     patterns: string[];
 }
 /**
- * 프로젝트 유형 감지
+ * Detect Project Type
  */
 export declare function detectProjectType(rootPath: string): ProjectInfo;
 /**
- * 구조 분석
+ * Analyze Structure
  */
 export declare function analyzeStructure(rootPath: string): StructureAnalysis;
 /**
- * 컨벤션 감지
+ * Detect Conventions
  */
 export declare function detectConventions(rootPath: string): CreateMemoryInput[];
 /**
- * 전체 부트스트랩 분석 실행
+ * Run Complete Bootstrap Analysis
  */
 export declare function runBootstrapAnalysis(rootPath: string): BootstrapResult;
 //# sourceMappingURL=analyzer.d.ts.map

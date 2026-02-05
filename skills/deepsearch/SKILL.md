@@ -9,34 +9,34 @@ user-invocable: true
 **Do not read further. Execute these Tasks NOW:**
 
 ```typescript
-// Step 1: 빠른 검색 (Shiro)
+// Step 1: Fast Search (Shiro)
 Task(
   subagent_type="team-shinchan:shiro",
   model="haiku",
-  prompt=`/team-shinchan:deepsearch가 호출되었습니다.
+  prompt=`/team-shinchan:deepsearch has been invoked.
 
-## 코드베이스 탐색 요청
+## Codebase Exploration Request
 
-빠른 검색을 수행하세요:
-- 파일명 패턴 매칭
-- 키워드 검색
-- 디렉토리 구조 파악
+Perform fast search:
+- File name pattern matching
+- Keyword search
+- Directory structure analysis
 
-검색 대상: ${args || '(검색할 내용)'}
+Search target: ${args || '(What to search)'}
 `
 )
 
-// Step 2: 필요시 심층 검색 (Masumi)
-// Shiro 결과가 불충분하면 추가 호출
+// Step 2: Deep Search if needed (Masumi)
+// Call additionally if Shiro results are insufficient
 Task(
   subagent_type="team-shinchan:masumi",
   model="sonnet",
-  prompt=`Shiro 검색 결과를 바탕으로 심층 분석을 수행하세요:
-- 코드 내용 분석
-- 관련 문서 검색
-- 의존성 추적
+  prompt=`Perform deep analysis based on Shiro search results:
+- Code content analysis
+- Related documentation search
+- Dependency tracking
 
-검색 대상: ${args || '(검색할 내용)'}
+Search target: ${args || '(What to search)'}
 `
 )
 ```

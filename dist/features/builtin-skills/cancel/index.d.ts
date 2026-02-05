@@ -1,5 +1,5 @@
 /**
- * Cancel 스킬 - 현재 모드 취소
+ * Cancel Skill - Cancel Current Mode
  */
 import type { SkillConfig, PluginContext } from '../../../types';
 export declare function createCancelSkill(context: PluginContext): SkillConfig;

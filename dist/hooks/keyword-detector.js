@@ -1,6 +1,6 @@
 /**
- * 키워드 감지 훅 (의도 게이트)
- * 사용자 메시지에서 키워드를 감지하여 적절한 스킬/에이전트 추천
+ * Keyword Detector Hook (Intent Gate)
+ * Detects keywords in user messages and recommends appropriate skills/agents
  */
 import { SKILL_TRIGGERS } from '../config';
 import { findMatchedKeyword } from '../shared';
@@ -8,7 +8,7 @@ export function createKeywordDetectorHook(context) {
     return {
         name: 'keyword-detector',
         event: 'UserPromptSubmit',
-        description: '사용자 메시지에서 키워드를 감지하여 적절한 스킬을 추천합니다.',
+        description: 'Detects keywords in user messages and recommends appropriate skills.',
         enabled: true,
         priority: 80,
         handler: async (hookContext) => {
@@ -16,7 +16,7 @@ export function createKeywordDetectorHook(context) {
             if (!message) {
                 return { continue: true };
             }
-            // 각 스킬의 트리거 키워드 확인
+            // Check trigger keywords for each skill
             const detectedSkills = [];
             for (const [skillName, triggers] of Object.entries(SKILL_TRIGGERS)) {
                 const matchedKeyword = findMatchedKeyword(message, triggers);
@@ -27,7 +27,7 @@ export function createKeywordDetectorHook(context) {
             if (detectedSkills.length === 0) {
                 return { continue: true };
             }
-            // 우선순위가 높은 스킬 선택
+            // Select high-priority skill
             const priorityOrder = ['cancel', 'ultrawork', 'ralph', 'autopilot', 'plan', 'analyze'];
             const prioritized = detectedSkills.sort((a, b) => {
                 const aIdx = priorityOrder.indexOf(a.skill);
@@ -35,26 +35,26 @@ export function createKeywordDetectorHook(context) {
                 return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx);
             });
             const topSkill = prioritized[0];
-            // 스킬 자동 활성화 메시지 생성
+            // Generate skill auto-activation messages
             const skillMessages = {
-                ultrawork: '🚀 **Ultrawork** 모드를 활성화합니다. 병렬 실행으로 빠르게 처리합니다.',
-                ralph: '🔄 **Ralph** 모드를 활성화합니다. 작업이 완료될 때까지 계속합니다.',
-                autopilot: '🤖 **Autopilot** 모드를 활성화합니다. 자율적으로 작업을 수행합니다.',
-                plan: '📋 **Plan** 세션을 시작합니다. 요구사항을 파악하겠습니다.',
-                analyze: '🔍 **Analyze** 모드를 활성화합니다. 심층 분석을 수행합니다.',
-                deepsearch: '🔎 **Deepsearch** 모드를 활성화합니다. 코드베이스를 깊이 탐색합니다.',
-                'git-master': '🌿 **Git-Master** 모드를 활성화합니다.',
-                'frontend-ui-ux': '🎨 **Frontend-UI-UX** 모드를 활성화합니다.',
-                cancel: '⏹️ 현재 모드를 취소합니다.',
+                ultrawork: '🚀 Activating **Ultrawork** mode. Processing quickly with parallel execution.',
+                ralph: '🔄 Activating **Ralph** mode. Continuing until task completion.',
+                autopilot: '🤖 Activating **Autopilot** mode. Performing tasks autonomously.',
+                plan: '📋 Starting **Plan** session. Analyzing requirements.',
+                analyze: '🔍 Activating **Analyze** mode. Performing deep analysis.',
+                deepsearch: '🔎 Activating **Deepsearch** mode. Deeply exploring codebase.',
+                'git-master': '🌿 Activating **Git-Master** mode.',
+                'frontend-ui-ux': '🎨 Activating **Frontend-UI-UX** mode.',
+                cancel: '⏹️ Canceling current mode.',
             };
             return {
                 continue: true,
                 modified: true,
-                message: skillMessages[topSkill.skill] || `스킬 '${topSkill.skill}'을 감지했습니다.`,
+                message: skillMessages[topSkill.skill] || `Detected skill '${topSkill.skill}'.`,
                 inject: `<intent-gate>
-감지된 키워드: "${topSkill.keyword}"
-추천 스킬: ${topSkill.skill}
-자동 활성화: 예
+Detected keyword: "${topSkill.keyword}"
+Recommended skill: ${topSkill.skill}
+Auto-activation: Yes
 </intent-gate>`,
             };
         },

@@ -4,102 +4,102 @@ description: Specialized agents debate to find optimal solutions. Used for "deba
 user-invocable: true
 ---
 
-# EXECUTE IMMEDIATELY - Midori에게 위임
+# EXECUTE IMMEDIATELY - Delegate to Midori
 
-**Midori를 Task 도구로 호출하여 Debate를 진행하세요.**
+**Invoke Midori using the Task tool to proceed with Debate.**
 
 ---
 
-## 🔔 자동 트리거 조건 (Auto-Trigger)
+## 🔔 Auto-Trigger Conditions
 
-**Shinnosuke가 다음 상황을 감지하면 즉시 Debate를 시작합니다:**
+**Shinnosuke starts Debate immediately when detecting the following situations:**
 
-| 상황 | Auto-Debate | 예시 |
+| Situation | Auto-Debate | Example |
 |------|------------|------|
-| 2+ 구현 접근법 존재 | ✅ | REST vs GraphQL, Monolith vs Microservices |
-| 아키텍처 변경 | ✅ | DB 스키마 재설계, 레이어 구조 변경 |
-| 기존 패턴 깨뜨림 | ✅ | 기존 컨벤션과 다른 방식 제안 |
-| 성능 vs 가독성 트레이드오프 | ✅ | 최적화 vs 유지보수성 |
-| 보안에 민감한 결정 | ✅ | 인증 방식, 데이터 암호화 방식 |
-| Simple CRUD | ❌ | 단순 CRUD 엔드포인트 |
-| Clear bug fix | ❌ | 명확한 버그 수정 |
-| User explicitly decided | ❌ | 사용자가 이미 결정함 |
+| 2+ implementation approaches exist | ✅ | REST vs GraphQL, Monolith vs Microservices |
+| Architecture change | ✅ | DB schema redesign, layer structure change |
+| Breaking existing patterns | ✅ | Proposing different approach from existing conventions |
+| Performance vs Readability tradeoff | ✅ | Optimization vs Maintainability |
+| Security-sensitive decisions | ✅ | Authentication method, data encryption approach |
+| Simple CRUD | ❌ | Simple CRUD endpoints |
+| Clear bug fix | ❌ | Obvious bug fix |
+| User explicitly decided | ❌ | User has already decided |
 
-### 자동 트리거 시 동작
+### Auto-Trigger Behavior
 
-1. **즉시 Debate 시작 공지**
+1. **Immediately announce Debate start**
    ```
-   ⚠️ 설계 결정 필요: [감지된 상황]
-   → Debate 자동 시작
+   ⚠️ Design decision needed: [detected situation]
+   → Starting Debate automatically
    ```
 
-2. **수동 호출과 동일한 프로세스 실행**
-   - 아래 Step 1~3과 동일하게 진행
-   - 차이점: 사용자가 명시적으로 호출하지 않았으므로 배경 설명 추가
+2. **Execute same process as manual invocation**
+   - Proceed with Steps 1-3 below
+   - Difference: Add background explanation since user didn't explicitly invoke
 
-3. **결정 사항을 REQUESTS.md에 기록**
-   - Stage 1: 요구사항에 결정 사항 추가
-   - Stage 2+: PROGRESS.md의 해당 Phase에 기록
+3. **Record decision in REQUESTS.md**
+   - Stage 1: Add decision to requirements
+   - Stage 2+: Record in corresponding Phase in PROGRESS.md
 
 ---
 
-## Step 1: Midori 호출
+## Step 1: Invoke Midori
 
 ```typescript
 Task(
   subagent_type="team-shinchan:midori",
   model="opus",
-  prompt="Debate를 진행해주세요.
+  prompt="Please proceed with Debate.
 
-## 주제
-{토론 주제}
+## Topic
+{discussion topic}
 
-## 패널
-{패널 목록}
+## Panel
+{panel list}
 
-## 진행 방식
-1. Debate 시작 공지
-2. 패널 의견 수집 (병렬 Task)
-3. 의견 실시간 출력
-4. Hiroshi 합의 도출
-5. 최종 결정 보고"
+## Procedure
+1. Announce Debate start
+2. Collect panel opinions (parallel Tasks)
+3. Output opinions in real-time
+4. Hiroshi derives consensus
+5. Report final decision"
 )
 ```
 
-## Step 2: 결과를 사용자에게 전달
+## Step 2: Deliver Results to User
 
-Midori로부터 결과를 받으면 다음 형식으로 사용자에게 정리해서 전달:
+When receiving results from Midori, deliver to user in the following format:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💭 Debate 결과
+💭 Debate Results
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 주제: {주제}
+📋 Topic: {topic}
 
-🎤 전문가 의견:
-- [Hiroshi]: {의견 요약}
-- [Nene]: {의견 요약}
+🎤 Expert Opinions:
+- [Hiroshi]: {opinion summary}
+- [Nene]: {opinion summary}
 
-✅ 권장 결정: {Midori의 결론}
-📝 근거: {근거}
+✅ Recommended Decision: {Midori's conclusion}
+📝 Rationale: {reasoning}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-## Step 3: 사용자 의견 확인
+## Step 3: Confirm User Opinion
 
-결과를 전달한 후 사용자에게 질문:
+After delivering results, ask the user:
 
-"위 권장 결정에 동의하시나요? 다른 의견이나 추가로 고려할 사항이 있으시면 말씀해주세요."
+"Do you agree with the recommended decision? If you have other opinions or additional considerations, please let me know."
 
-## Step 4: 최종 결정
+## Step 4: Final Decision
 
-- 사용자 동의 시: 결정 사항 문서화 후 진행
-- 사용자 이견 시: 우려사항 반영하여 결정 수정
-- **사용자 확인 없이는 절대 진행하지 않음**
+- If user agrees: Document decision and proceed
+- If user disagrees: Revise decision reflecting concerns
+- **Never proceed without user confirmation**
 
-## 패널 선정 기준
+## Panel Selection Criteria
 
-| 주제 | 패널 |
+| Topic | Panel |
 |------|------|
 | UI/Frontend | Aichan, Hiroshi |
 | API/Backend | Bunta, Hiroshi |
@@ -108,75 +108,75 @@ Midori로부터 결과를 받으면 다음 형식으로 사용자에게 정리�
 
 ---
 
-## 📖 자동 트리거 예시
+## 📖 Auto-Trigger Examples
 
-### 예시 1: 2+ 구현 접근법 감지
+### Example 1: Detecting 2+ Implementation Approaches
 
 ```
-[Shinnosuke가 분석 중...]
-감지: 인증 구현에 JWT와 Session 두 가지 접근법 가능
+[Shinnosuke analyzing...]
+Detected: JWT and Session both possible for authentication implementation
 
-⚠️ 설계 결정 필요: 인증 방식 선택 (JWT vs Session)
-→ Debate 자동 시작
+⚠️ Design decision needed: Choose authentication method (JWT vs Session)
+→ Starting Debate automatically
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💭 Debate 시작 (자동)
+💭 Debate Started (auto)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 주제: 인증 방식 선택
-👥 패널: Hiroshi, Bunta
-🎯 목표: JWT와 Session 중 최적 선택
+📋 Topic: Authentication method selection
+👥 Panel: Hiroshi, Bunta
+🎯 Goal: Choose optimal between JWT and Session
 
-[이후 일반 Debate 프로세스 진행...]
+[Regular Debate process follows...]
 ```
 
-### 예시 2: 아키텍처 변경 감지
+### Example 2: Detecting Architecture Change
 
 ```
-[Bo가 제안...]
-"User 테이블에 roles 필드를 추가하는 대신, 별도 Role 테이블 생성을 제안합니다."
+[Bo proposes...]
+"Instead of adding roles field to User table, I propose creating separate Role table."
 
-[Shinnosuke 감지]
-감지: DB 스키마 변경 → 아키텍처 영향 검토 필요
+[Shinnosuke detects]
+Detected: DB schema change → Architecture impact review needed
 
-⚠️ 설계 결정 필요: Role 관리 방식 (단일 테이블 vs 정규화)
-→ Debate 자동 시작
+⚠️ Design decision needed: Role management approach (single table vs normalization)
+→ Starting Debate automatically
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💭 Debate 시작 (자동)
+💭 Debate Started (auto)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 주제: Role 관리 DB 설계
-👥 패널: Hiroshi, Bunta, Nene
-🎯 목표: 확장성과 유지보수성 고려한 최적 스키마 결정
+📋 Topic: Role management DB design
+👥 Panel: Hiroshi, Bunta, Nene
+🎯 Goal: Determine optimal schema considering scalability and maintainability
 ```
 
-### 예시 3: 성능 vs 가독성 트레이드오프
+### Example 3: Performance vs Readability Tradeoff
 
 ```
-[Action Kamen 리뷰 중...]
-"현재 코드는 가독성이 좋으나 N+1 쿼리 문제 존재. 최적화하면 복잡도 증가."
+[Action Kamen reviewing...]
+"Current code has good readability but N+1 query issue exists. Optimization increases complexity."
 
-[Shinnosuke 감지]
-감지: 성능 최적화 vs 코드 가독성 트레이드오프
+[Shinnosuke detects]
+Detected: Performance optimization vs code readability tradeoff
 
-⚠️ 설계 결정 필요: 쿼리 최적화 수준 결정
-→ Debate 자동 시작
+⚠️ Design decision needed: Determine query optimization level
+→ Starting Debate automatically
 ```
 
 ---
 
-## ⚙️ Shinnosuke의 자동 감지 로직
+## ⚙️ Shinnosuke's Auto-Detection Logic
 
-**Shinnosuke는 다음 신호를 감지합니다:**
+**Shinnosuke detects the following signals:**
 
-| 신호 | 감지 방법 |
+| Signal | Detection Method |
 |------|----------|
-| 2+ 접근법 언급 | "A 또는 B", "vs", "방법1/방법2" 등의 표현 |
-| 아키텍처 키워드 | "schema change", "layer", "structure", "architecture" |
-| 패턴 위반 | Action Kamen이 "기존 패턴과 다름" 경고 |
-| 트레이드오프 언급 | "but", "however", "trade-off", "at the cost of" |
-| 보안 키워드 | "auth", "security", "encryption", "permission" |
+| 2+ approaches mentioned | Expressions like "A or B", "vs", "method1/method2" |
+| Architecture keywords | "schema change", "layer", "structure", "architecture" |
+| Pattern violations | Action Kamen warns "differs from existing pattern" |
+| Tradeoff mentions | "but", "however", "trade-off", "at the cost of" |
+| Security keywords | "auth", "security", "encryption", "permission" |
 
-**자동 감지 후 즉시:**
-1. 상황 공지
-2. Debate 시작 (위 프로세스와 동일)
-3. 결정 사항 문서화
+**After auto-detection, immediately:**
+1. Announce situation
+2. Start Debate (same as above process)
+3. Document decision

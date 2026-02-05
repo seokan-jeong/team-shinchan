@@ -46,7 +46,7 @@ export function createHiroshiAgent(settings) {
             cost: 'EXPENSIVE',
             model: 'opus',
             description: 'Senior Advisor - Strategic advice and debugging',
-            delegationTriggers: ['조언', 'advice', '전략', 'strategy', '디버깅', 'debug', '왜 안돼'],
+            delegationTriggers: ['advice', 'strategy', 'debug', 'why not working', 'consultation'],
             disallowedTools: ['Edit', 'Write', 'NotebookEdit'],
             isReadOnly: true,
         },

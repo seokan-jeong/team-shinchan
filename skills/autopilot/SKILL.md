@@ -12,27 +12,27 @@ user-invocable: true
 Task(
   subagent_type="team-shinchan:shinnosuke",
   model="opus",
-  prompt=`/team-shinchan:autopilot이 호출되었습니다.
+  prompt=`/team-shinchan:autopilot has been invoked.
 
-## 자율 실행 모드
+## Autonomous Execution Mode
 
-사용자 개입 없이 자율적으로 완료하세요:
+Complete autonomously without user intervention:
 
-1. WORKFLOW_STATE.yaml 생성 (stage: requirements)
-2. Misae로 요구사항 자동 분석
-3. Nene로 계획 수립 (REQUESTS.md, PROGRESS.md)
-4. 적절한 에이전트에게 작업 분배 (Bo/Aichan/Bunta/Masao)
-5. Action Kamen 검증
-6. 문제 발견 시 자동 수정
+1. Create WORKFLOW_STATE.yaml (stage: requirements)
+2. Auto-analyze requirements with Misae
+3. Create plan with Nene (REQUESTS.md, PROGRESS.md)
+4. Distribute tasks to appropriate agents (Bo/Aichan/Bunta/Masao)
+5. Action Kamen verification
+6. Auto-fix issues when discovered
 
-## Stage 규칙 준수
+## Stage Rule Compliance
 
-- requirements Stage: 요구사항 수집만 (코드 수정 금지)
-- planning Stage: 계획 수립만 (코드 수정 금지)
-- execution Stage: 구현 진행
-- completion Stage: 문서화 및 검증
+- requirements Stage: Only requirements gathering (no code modification)
+- planning Stage: Only planning (no code modification)
+- execution Stage: Implementation proceeds
+- completion Stage: Documentation and verification
 
-사용자 요청: ${args || '(요청 내용 분석 필요)'}
+User request: ${args || '(Request content analysis needed)'}
 `
 )
 ```

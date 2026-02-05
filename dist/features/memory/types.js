@@ -1,9 +1,9 @@
 /**
  * Memory System Types
- * 에이전트 학습 및 메모리 시스템의 타입 정의
+ * Type definitions for agent learning and memory system
  */
 /**
- * 기본 설정
+ * Default configuration
  */
 export const DEFAULT_MEMORY_CONFIG = {
     globalPath: '~/.team-shinchan',
@@ -14,19 +14,19 @@ export const DEFAULT_MEMORY_CONFIG = {
     autoBackup: true,
 };
 /**
- * 기본 감쇠 설정
+ * Default decay configuration
  */
 export const DECAY_CONFIG = {
-    /** 일일 감쇠율 */
+    /** Daily decay rate */
     dailyDecayRate: 0.01,
-    /** 반박 시 감쇠 가속 */
+    /** Decay acceleration on contradiction */
     contradictionDecayMultiplier: 2.0,
-    /** 접근 시 감쇠 회복 */
+    /** Decay recovery on access */
     accessRecoveryRate: 0.05,
-    /** 강화 시 신뢰도 증가 */
+    /** Confidence boost on reinforcement */
     reinforcementBoost: 0.1,
-    /** 최대 신뢰도 */
+    /** Maximum confidence */
     maxConfidence: 1.0,
-    /** 최소 신뢰도 */
+    /** Minimum confidence */
     minConfidence: 0.0,
 };

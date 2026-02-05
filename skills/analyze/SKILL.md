@@ -12,27 +12,27 @@ user-invocable: true
 Task(
   subagent_type="team-shinchan:hiroshi",
   model="opus",
-  prompt=`/team-shinchan:analyze가 호출되었습니다.
+  prompt=`/team-shinchan:analyze has been invoked.
 
-## 심층 분석 요청
+## Deep Analysis Request
 
-다음 유형의 분석을 수행하세요:
+Perform the following types of analysis:
 
-| 유형 | 분석 내용 |
+| Type | Analysis Content |
 |------|----------|
-| 코드 분석 | 구조, 의존성, 복잡도 |
-| 버그 분석 | 오류 원인, 스택 트레이스, 재현 조건 |
-| 성능 분석 | 병목점, 메모리, 최적화 전략 |
-| 아키텍처 분석 | 전체 구조, 개선점, 트레이드오프 |
+| Code Analysis | Structure, dependencies, complexity |
+| Bug Analysis | Error cause, stack trace, reproduction conditions |
+| Performance Analysis | Bottlenecks, memory, optimization strategies |
+| Architecture Analysis | Overall structure, improvements, tradeoffs |
 
-## 결과 포함 항목
+## Result Requirements
 
-- 현재 상태 요약
-- 발견된 이슈
-- 권장 솔루션
-- 관련 파일 및 라인 참조
+- Current state summary
+- Issues discovered
+- Recommended solutions
+- Related file and line references
 
-사용자 요청: ${args || '(분석할 대상을 설명해주세요)'}
+User request: ${args || '(Please describe what to analyze)'}
 `
 )
 ```

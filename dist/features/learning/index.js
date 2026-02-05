@@ -1,6 +1,6 @@
 /**
  * Learning System
- * 학습 추출 및 분류 시스템
+ * Learning extraction and classification system
  */
 // Extractor
 export { extractLearnings, createSimpleLearning, extractFromCodeChanges, } from './extractor';

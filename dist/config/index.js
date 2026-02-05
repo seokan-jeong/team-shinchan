@@ -1,11 +1,11 @@
 /**
- * Team-Shinchan 설정 시스템
+ * Team-Shinchan Config System
  */
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { homedir } from 'os';
 // ============================================================
-// 기본 설정
+// Default Settings
 // ============================================================
 export function createDefaultSettings() {
     return {
@@ -24,11 +24,11 @@ export function createDefaultSettings() {
     };
 }
 // ============================================================
-// 설정 로드
+// Load Config
 // ============================================================
 export async function loadPluginConfig() {
     const defaultSettings = createDefaultSettings();
-    // 설정 파일 경로들
+    // Config file paths
     const configPaths = [
         join(process.cwd(), '.team-shinchan', 'config.json'),
         join(process.cwd(), 'team-shinchan.config.json'),
@@ -41,17 +41,17 @@ export async function loadPluginConfig() {
             return mergeSettings(defaultSettings, userConfig);
         }
         catch {
-            // 파일이 없으면 다음 경로 시도
+            // If file doesn't exist, try next path
             continue;
         }
     }
     return defaultSettings;
 }
 // ============================================================
-// 설정 병합
+// Merge Settings
 // ============================================================
 function mergeSettings(defaults, overrides) {
-    // agentOverrides 병합 (undefined 허용)
+    // Merge agentOverrides (allow undefined)
     const mergedAgentOverrides = overrides.agentOverrides
         ? { ...defaults.agentOverrides, ...overrides.agentOverrides }
         : defaults.agentOverrides;
@@ -70,32 +70,32 @@ function mergeSettings(defaults, overrides) {
     };
 }
 // ============================================================
-// 에이전트별 모델 설정
+// Agent Model Configuration
 // ============================================================
 export const AGENT_MODEL_MAP = {
-    // 오케스트레이션 (Opus)
+    // Orchestration (Opus)
     shinnosuke: 'opus',
     himawari: 'opus',
-    midori: 'opus', // 토론 진행자
-    // 실행 (Sonnet/Opus)
+    midori: 'opus', // Debate moderator
+    // Execution (Sonnet/Opus)
     bo: 'sonnet',
     kazama: 'opus',
-    // 전문가 (Sonnet)
+    // Specialists (Sonnet)
     aichan: 'sonnet',
     bunta: 'sonnet',
     masao: 'sonnet',
-    // 조언/계획 (Opus/Sonnet)
+    // Advisory/Planning (Opus/Sonnet)
     hiroshi: 'opus',
     nene: 'opus',
     misae: 'sonnet',
     actionkamen: 'opus',
-    // 탐색/유틸리티 (Haiku/Sonnet)
+    // Exploration/Utility (Haiku/Sonnet)
     shiro: 'haiku',
     masumi: 'sonnet',
     ume: 'sonnet',
 };
 // ============================================================
-// 읽기 전용 에이전트 목록
+// Read-only Agent List
 // ============================================================
 export const READ_ONLY_AGENTS = [
     'hiroshi', // Oracle
@@ -106,7 +106,7 @@ export const READ_ONLY_AGENTS = [
     'masumi', // Librarian
 ];
 // ============================================================
-// 에이전트 카테고리
+// Agent Categories
 // ============================================================
 export const AGENT_CATEGORIES = {
     orchestration: ['shinnosuke', 'himawari'],
@@ -117,17 +117,17 @@ export const AGENT_CATEGORIES = {
     utility: ['ume'],
 };
 // ============================================================
-// 스킬 트리거 키워드
+// Skill Trigger Keywords
 // ============================================================
 export const SKILL_TRIGGERS = {
-    ultrawork: ['ulw', 'ultrawork', '병렬', '빠르게', 'parallel'],
-    ralph: ['ralph', '끝까지', '완료할 때까지', 'dont stop', "don't stop"],
-    autopilot: ['autopilot', '자동으로', '알아서', 'auto'],
-    plan: ['plan', '계획', '설계', 'planning'],
-    analyze: ['analyze', '분석', '디버깅', '왜 안', 'debug', 'investigate'],
-    deepsearch: ['deepsearch', '깊은검색', '찾아줘', 'search'],
-    debate: ['debate', '토론', '의견', '논의', '장단점', '비교', '어떤 방법'],
+    ultrawork: ['ulw', 'ultrawork', 'parallel', 'fast', 'parallel'],
+    ralph: ['ralph', 'until done', 'until complete', 'dont stop', "don't stop"],
+    autopilot: ['autopilot', 'automatically', 'on its own', 'auto'],
+    plan: ['plan', 'planning', 'design', 'planning'],
+    analyze: ['analyze', 'analysis', 'debugging', 'why not', 'debug', 'investigate'],
+    deepsearch: ['deepsearch', 'deep search', 'find', 'search'],
+    debate: ['debate', 'discussion', 'opinion', 'discuss', 'pros and cons', 'compare', 'which method'],
     'git-master': ['commit', 'push', 'merge', 'rebase', 'git'],
-    'frontend-ui-ux': ['UI', 'UX', '컴포넌트', '스타일', 'CSS', 'component'],
-    cancel: ['cancel', '취소', '중단', 'stop', '멈춰'],
+    'frontend-ui-ux': ['UI', 'UX', 'component', 'style', 'CSS', 'component'],
+    cancel: ['cancel', 'cancel', 'stop', 'stop', 'halt'],
 };

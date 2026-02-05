@@ -1,5 +1,5 @@
 /**
- * Team-Shinchan 설정 시스템
+ * Team-Shinchan Config System
  */
 import type { PluginSettings, ModelTier, BuiltinAgentName } from '../types';
 export declare function createDefaultSettings(): PluginSettings;
@@ -15,15 +15,15 @@ export declare const AGENT_CATEGORIES: {
     readonly utility: readonly ["ume"];
 };
 export declare const SKILL_TRIGGERS: {
-    readonly ultrawork: readonly ["ulw", "ultrawork", "병렬", "빠르게", "parallel"];
-    readonly ralph: readonly ["ralph", "끝까지", "완료할 때까지", "dont stop", "don't stop"];
-    readonly autopilot: readonly ["autopilot", "자동으로", "알아서", "auto"];
-    readonly plan: readonly ["plan", "계획", "설계", "planning"];
-    readonly analyze: readonly ["analyze", "분석", "디버깅", "왜 안", "debug", "investigate"];
-    readonly deepsearch: readonly ["deepsearch", "깊은검색", "찾아줘", "search"];
-    readonly debate: readonly ["debate", "토론", "의견", "논의", "장단점", "비교", "어떤 방법"];
+    readonly ultrawork: readonly ["ulw", "ultrawork", "parallel", "fast", "parallel"];
+    readonly ralph: readonly ["ralph", "until done", "until complete", "dont stop", "don't stop"];
+    readonly autopilot: readonly ["autopilot", "automatically", "on its own", "auto"];
+    readonly plan: readonly ["plan", "planning", "design", "planning"];
+    readonly analyze: readonly ["analyze", "analysis", "debugging", "why not", "debug", "investigate"];
+    readonly deepsearch: readonly ["deepsearch", "deep search", "find", "search"];
+    readonly debate: readonly ["debate", "discussion", "opinion", "discuss", "pros and cons", "compare", "which method"];
     readonly 'git-master': readonly ["commit", "push", "merge", "rebase", "git"];
-    readonly 'frontend-ui-ux': readonly ["UI", "UX", "컴포넌트", "스타일", "CSS", "component"];
-    readonly cancel: readonly ["cancel", "취소", "중단", "stop", "멈춰"];
+    readonly 'frontend-ui-ux': readonly ["UI", "UX", "component", "style", "CSS", "component"];
+    readonly cancel: readonly ["cancel", "cancel", "stop", "stop", "halt"];
 };
 //# sourceMappingURL=index.d.ts.map

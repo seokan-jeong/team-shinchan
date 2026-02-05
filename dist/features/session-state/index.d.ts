@@ -1,5 +1,5 @@
 /**
- * Team-Seokan 세션 상태 관리
+ * Team-Shinchan Session State Management
  */
 import type { SessionState, TodoItem, BackgroundTask, BuiltinAgentName } from '../../types';
 export declare function createSessionState(): SessionState;

@@ -1,10 +1,10 @@
 /**
- * Memories 스킬 - 학습된 메모리 조회
+ * Memories Skill - View Learned Memories
  */
 import { getMemoryManager } from '../../memory';
 import { calculateEffectiveConfidence } from '../../memory/decay';
 /**
- * 메모리를 읽기 쉬운 형식으로 포맷
+ * Format memory in readable format
  */
 function formatMemory(memory, index) {
     const confidence = calculateEffectiveConfidence(memory);
@@ -12,28 +12,28 @@ function formatMemory(memory, index) {
     const date = memory.createdAt.toISOString().split('T')[0];
     const tags = memory.tags.length > 0 ? memory.tags.map((t) => `#${t}`).join(' ') : '';
     return `### ${index + 1}. ${memory.title}
-- **카테고리**: ${memory.category}
-- **신뢰도**: ${confidenceStr} (${(confidence * 100).toFixed(0)}%)
-- **생성일**: ${date}
-- **태그**: ${tags || '없음'}
+- **Category**: ${memory.category}
+- **Confidence**: ${confidenceStr} (${(confidence * 100).toFixed(0)}%)
+- **Created**: ${date}
+- **Tags**: ${tags || 'None'}
 
 > ${memory.content}
 `;
 }
 /**
- * 카테고리별 요약
+ * Category summary
  */
 function formatCategorySummary(stats, avgConfidence) {
     const lines = [];
     for (const [category, count] of stats) {
-        lines.push(`- ${category}: ${count}개`);
+        lines.push(`- ${category}: ${count} items`);
     }
-    return `## 📊 메모리 통계
+    return `## 📊 Memory Statistics
 
-**총 메모리 수**: ${Array.from(stats.values()).reduce((a, b) => a + b, 0)}개
-**평균 신뢰도**: ${(avgConfidence * 100).toFixed(1)}%
+**Total Memories**: ${Array.from(stats.values()).reduce((a, b) => a + b, 0)} items
+**Average Confidence**: ${(avgConfidence * 100).toFixed(1)}%
 
-### 카테고리별
+### By Category
 ${lines.join('\n')}
 `;
 }
@@ -41,20 +41,20 @@ export function createMemoriesSkill(context) {
     return {
         name: 'memories',
         displayName: 'Memories',
-        description: '학습된 메모리를 조회합니다.',
-        triggers: ['memories', '기억', '학습 내용', 'what did you learn'],
+        description: 'Views learned memories.',
+        triggers: ['memories', 'learnings', 'what did you learn'],
         autoActivate: false,
         handler: async ({ args, sessionState }) => {
             try {
                 const manager = getMemoryManager();
                 await manager.initialize();
-                // 인자 파싱
+                // Parse arguments
                 const lowerArgs = (args || '').toLowerCase();
-                // 필터 옵션
+                // Filter options
                 let category;
                 let limit = 10;
                 let showStats = false;
-                // 카테고리 필터
+                // Category filter
                 const categories = [
                     'preference', 'pattern', 'context', 'mistake',
                     'decision', 'convention', 'insight',
@@ -65,35 +65,35 @@ export function createMemoriesSkill(context) {
                         break;
                     }
                 }
-                // 통계 모드
-                if (lowerArgs.includes('stats') || lowerArgs.includes('통계')) {
+                // Statistics mode
+                if (lowerArgs.includes('stats')) {
                     showStats = true;
                 }
-                // 개수 제한
-                const limitMatch = lowerArgs.match(/(\d+)개?/);
+                // Limit count
+                const limitMatch = lowerArgs.match(/(\d+)/);
                 if (limitMatch) {
                     limit = parseInt(limitMatch[1], 10);
                 }
-                // 통계 모드
+                // Statistics mode
                 if (showStats) {
                     const stats = await manager.getStats();
                     return {
                         success: true,
-                        output: `# 🧠 Team-Seokan 메모리 통계
+                        output: `# 🧠 Team-Shinchan Memory Statistics
 
 ${formatCategorySummary(stats.byCategory, stats.averageConfidence)}
 
-### 에이전트별
+### By Agent
 ${Array.from(stats.byOwner.entries())
-                            .map(([owner, count]) => `- ${owner}: ${count}개`)
+                            .map(([owner, count]) => `- ${owner}: ${count} items`)
                             .join('\n')}
 
-### 인기 태그
-${stats.topTags.slice(0, 5).map(([tag, count]) => `- #${tag}: ${count}회`).join('\n')}
+### Popular Tags
+${stats.topTags.slice(0, 5).map(([tag, count]) => `- #${tag}: ${count} times`).join('\n')}
 `,
                     };
                 }
-                // 메모리 검색
+                // Search memories
                 const result = await manager.search({
                     categories: category ? [category] : undefined,
                     sortBy: 'confidence',
@@ -103,11 +103,11 @@ ${stats.topTags.slice(0, 5).map(([tag, count]) => `- #${tag}: ${count}회`).join
                 if (result.memories.length === 0) {
                     return {
                         success: true,
-                        output: `# 🧠 학습된 메모리
+                        output: `# 🧠 Learned Memories
 
-아직 학습된 메모리가 없습니다.
+No learned memories yet.
 
-작업을 수행하면서 자동으로 학습하거나, \`/learn "내용"\`으로 직접 가르칠 수 있습니다.`,
+Memories are automatically learned during tasks, or you can teach directly with \`/learn "content"\`.`,
                     };
                 }
                 const memoryList = result.memories
@@ -115,23 +115,23 @@ ${stats.topTags.slice(0, 5).map(([tag, count]) => `- #${tag}: ${count}회`).join
                     .join('\n---\n\n');
                 return {
                     success: true,
-                    output: `# 🧠 학습된 메모리 (${result.total}개 중 ${result.memories.length}개)
+                    output: `# 🧠 Learned Memories (${result.memories.length} of ${result.total})
 
-${category ? `**필터**: ${category}` : ''}
+${category ? `**Filter**: ${category}` : ''}
 
 ${memoryList}
 
 ---
-💡 더 보려면: \`/memories 20개\`
-💡 카테고리별: \`/memories preference\`
-💡 통계 보기: \`/memories stats\`
+💡 To see more: \`/memories 20\`
+💡 By category: \`/memories preference\`
+💡 View stats: \`/memories stats\`
 `,
                 };
             }
             catch (error) {
                 return {
                     success: false,
-                    output: `❌ 메모리 조회 실패: ${error}`,
+                    output: `❌ Memory retrieval failed: ${error}`,
                 };
             }
         },

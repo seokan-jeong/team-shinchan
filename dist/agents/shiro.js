@@ -40,7 +40,7 @@ export function createShiroAgent(settings) {
             cost: 'FREE',
             model: 'haiku',
             description: 'Fast Explorer - Quick codebase search',
-            delegationTriggers: ['찾아줘', 'find', '어디있어', 'search', '검색'],
+            delegationTriggers: ['find', 'search', 'locate', 'where is', 'look for'],
             disallowedTools: ['Edit', 'Write', 'NotebookEdit'],
             isReadOnly: true,
         },

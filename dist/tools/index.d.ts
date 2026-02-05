@@ -1,5 +1,5 @@
 /**
- * Team-Seokan 도구 시스템
+ * Team-Seokan Tool System
  */
 import type { ToolConfig, PluginContext } from '../types';
 import { createDelegateTaskTool } from './delegate-task';

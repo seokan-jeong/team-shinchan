@@ -1,35 +1,35 @@
 /**
- * Analyze 스킬 - 분석 모드
+ * Analyze Skill - Analysis Mode
  */
 export function createAnalyzeSkill(context) {
     return {
         name: 'analyze',
         displayName: 'Analyze',
-        description: '심층 분석 모드를 활성화합니다.',
-        triggers: ['analyze', '분석', '디버깅', '왜 안', 'debug', 'investigate'],
+        description: 'Activates deep analysis mode.',
+        triggers: ['analyze', 'analysis', 'debug', 'investigate'],
         autoActivate: true,
         handler: async ({ args, sessionState }) => {
             sessionState.activeSkill = 'analyze';
             return {
                 success: true,
-                output: `🔍 **분석 모드 활성화**
+                output: `🔍 **Analysis Mode Activated**
 
-신형만(Oracle)과 함께 심층 분석을 수행합니다.
+Performing deep analysis with Hiroshi (Oracle).
 
-## 분석 대상
-${args || '분석할 내용을 설명해주세요'}
+## Analysis Target
+${args || 'Please describe what needs to be analyzed'}
 
-## 분석 접근법
-1. **현상 파악**: 문제 상황 정확히 이해
-2. **원인 추적**: 근본 원인 식별
-3. **영향 분석**: 관련 코드/기능 파악
-4. **해결 방안**: 옵션 및 추천 제시
+## Analysis Approach
+1. **Phenomenon Identification**: Accurately understand the problem situation
+2. **Root Cause Tracking**: Identify the root cause
+3. **Impact Analysis**: Identify related code/features
+4. **Solution Options**: Present options and recommendations
 
-신형만(Oracle)에게 위임합니다...`,
+Delegating to Hiroshi (Oracle)...`,
                 inject: `<analyze-mode>
-분석 모드가 활성화되었습니다.
-신형만(Oracle)에게 위임하여 심층 분석을 수행하세요.
-delegate_task(agent="shinhyungman", task="...")
+Analysis mode is activated.
+Delegate to Hiroshi (Oracle) to perform deep analysis.
+delegate_task(agent="hiroshi", task="...")
 </analyze-mode>`,
             };
         },

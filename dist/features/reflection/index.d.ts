@@ -1,6 +1,6 @@
 /**
  * Reflection System
- * 작업 완료 후 자동 회고
+ * Automatic reflection after task completion
  */
 export { reflect, reflectBatch, summarizeReflection, calculateComplexity, determineDepth, type ReflectionDepth, } from './engine';
 //# sourceMappingURL=index.d.ts.map

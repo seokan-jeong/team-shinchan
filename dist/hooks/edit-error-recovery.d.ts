@@ -1,5 +1,5 @@
 /**
- * 편집 오류 복구 훅
+ * Edit Error Recovery Hook
  */
 import type { HookConfig, PluginContext } from '../types';
 export declare function createEditErrorRecoveryHook(context: PluginContext): HookConfig;

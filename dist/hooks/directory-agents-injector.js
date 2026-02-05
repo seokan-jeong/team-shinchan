@@ -1,11 +1,11 @@
 /**
- * 디렉토리 AGENTS.md 주입 훅
+ * Directory AGENTS.md Injector Hook
  */
 export function createDirectoryAgentsInjectorHook(context) {
     return {
         name: 'directory-agents-injector',
         event: 'chat.message',
-        description: '현재 디렉토리의 AGENTS.md를 컨텍스트에 주입합니다.',
+        description: 'Injects the current directory\'s AGENTS.md into context.',
         enabled: true,
         priority: 15,
         handler: async () => ({ continue: true }),

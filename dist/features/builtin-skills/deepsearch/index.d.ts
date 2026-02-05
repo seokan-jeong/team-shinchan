@@ -1,5 +1,5 @@
 /**
- * Deepsearch 스킬 - 심층 검색
+ * Deepsearch Skill - Deep Search
  */
 import type { SkillConfig, PluginContext } from '../../../types';
 export declare function createDeepsearchSkill(context: PluginContext): SkillConfig;

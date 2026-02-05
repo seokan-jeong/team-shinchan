@@ -1,5 +1,5 @@
 /**
- * Learn 스킬 - 명시적 학습
+ * Learn Skill - Explicit Learning
  */
 import type { SkillConfig, PluginContext } from '../../../types';
 export declare function createLearnSkill(context: PluginContext): SkillConfig;

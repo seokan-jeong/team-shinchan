@@ -1,5 +1,5 @@
 /**
- * Team-Seokan 훅 시스템
+ * Team-Seokan Hook System
  */
 import type { HookConfig, PluginSettings, PluginContext } from '../types';
 import { createTodoContinuationEnforcerHook } from './todo-continuation-enforcer';

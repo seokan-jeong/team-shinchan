@@ -1,10 +1,10 @@
 /**
  * Implicit Feedback Detection
- * 사용자의 암묵적 피드백 감지 및 학습 변환
+ * Detect and convert user implicit feedback into learnings
  */
 import type { ImplicitFeedback, MemoryOwner, LearningExtraction } from '../memory/types';
 /**
- * 사용자 행동 타입
+ * User Action Type
  */
 export interface UserAction {
     type: 'edit' | 'undo' | 'reject' | 'accept' | 'modify' | 'retry';
@@ -19,19 +19,19 @@ export interface UserAction {
     };
 }
 /**
- * 암묵적 피드백 감지
+ * Detect Implicit Feedback
  */
 export declare function detectImplicitFeedback(action: UserAction): ImplicitFeedback | null;
 /**
- * 피드백에서 학습 추출
+ * Extract Learning from Feedback
  */
 export declare function extractLearningFromFeedback(feedback: ImplicitFeedback): LearningExtraction;
 /**
- * 피드백 배치 처리
+ * Process Feedback Batch
  */
 export declare function processFeedbackBatch(actions: UserAction[]): LearningExtraction;
 /**
- * 수정 패턴 분석
+ * Analyze Modification Patterns
  */
 export declare function analyzeModificationPatterns(feedbacks: ImplicitFeedback[]): Map<string, number>;
 //# sourceMappingURL=implicit.d.ts.map

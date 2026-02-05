@@ -1,9 +1,9 @@
 /**
- * Team-Seokan 세션 상태 관리
+ * Team-Seokan Session State Management
  */
 import { randomUUID } from 'crypto';
 // ============================================================
-// 세션 상태 생성
+// Session State Creation
 // ============================================================
 export function createSessionState() {
     return {
@@ -21,7 +21,7 @@ export function createSessionState() {
     };
 }
 // ============================================================
-// TODO 관리
+// TODO Management
 // ============================================================
 export function addTodo(state, content, activeForm) {
     const todo = {
@@ -54,7 +54,7 @@ export function getInProgressTodo(state) {
     return state.todos.find((t) => t.status === 'in_progress');
 }
 // ============================================================
-// 배경 작업 관리
+// Background Task Management
 // ============================================================
 export function addBackgroundTask(state, agentName, description) {
     const task = {
@@ -83,7 +83,7 @@ export function canStartNewBackgroundTask(state, maxConcurrent) {
     return getRunningBackgroundTasks(state).length < maxConcurrent;
 }
 // ============================================================
-// 스킬/에이전트 상태
+// Skill/Agent State
 // ============================================================
 export function setActiveAgent(state, agentName) {
     state.activeAgent = agentName;
@@ -110,7 +110,7 @@ export function deactivateAutopilot(state) {
     state.autopilotActive = false;
 }
 // ============================================================
-// 컨텍스트 관리
+// Context Management
 // ============================================================
 export function incrementMessageCount(state) {
     state.messageCount++;
@@ -122,7 +122,7 @@ export function isContextWarning(state, threshold) {
     return state.messageCount >= threshold;
 }
 // ============================================================
-// 상태 직렬화
+// State Serialization
 // ============================================================
 export function serializeState(state) {
     return JSON.stringify(state, null, 2);

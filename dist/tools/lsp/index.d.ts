@@ -1,5 +1,5 @@
 /**
- * LSP 도구들 - Language Server Protocol 기반 도구
+ * LSP Tools - Language Server Protocol Based Tools
  */
 import type { ToolConfig, PluginContext } from '../../types';
 export declare function createLspDiagnosticsTool(context: PluginContext): ToolConfig;

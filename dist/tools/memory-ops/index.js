@@ -1,61 +1,61 @@
 /**
  * Memory Operations Tool
- * 에이전트가 메모리를 읽고 쓸 수 있는 도구
+ * Tool for agents to read and write memory
  */
 import { getMemoryManager } from '../../features/memory';
 import { createSimpleLearning } from '../../features/learning';
 export function createMemoryOpsTool(context) {
     return {
         name: 'memory_ops',
-        description: '메모리를 읽고, 쓰고, 검색합니다. (read: 읽기, write: 쓰기, search: 검색, reinforce: 강화, contradict: 반박)',
+        description: 'Read, write, and search memory. (read: read, write: write, search: search, reinforce: reinforce, contradict: contradict)',
         parameters: [
             {
                 name: 'operation',
                 type: 'string',
-                description: '수행할 작업: read, write, search, reinforce, contradict',
+                description: 'Operation to perform: read, write, search, reinforce, contradict',
                 required: true,
             },
             {
                 name: 'memoryId',
                 type: 'string',
-                description: '(read/reinforce/contradict) 메모리 ID',
+                description: '(read/reinforce/contradict) Memory ID',
                 required: false,
             },
             {
                 name: 'content',
                 type: 'string',
-                description: '(write) 저장할 내용',
+                description: '(write) Content to save',
                 required: false,
             },
             {
                 name: 'category',
                 type: 'string',
-                description: '(write) 메모리 카테고리: preference, pattern, context, mistake, decision, convention, insight',
+                description: '(write) Memory category: preference, pattern, context, mistake, decision, convention, insight',
                 required: false,
             },
             {
                 name: 'scope',
                 type: 'string',
-                description: '(write) 메모리 범위: global, project (기본: project)',
+                description: '(write) Memory scope: global, project (default: project)',
                 required: false,
                 default: 'project',
             },
             {
                 name: 'tags',
                 type: 'array',
-                description: '(write) 태그 목록',
+                description: '(write) Tag list',
                 required: false,
             },
             {
                 name: 'keyword',
                 type: 'string',
-                description: '(search) 검색 키워드',
+                description: '(search) Search keyword',
                 required: false,
             },
             {
                 name: 'limit',
                 type: 'number',
-                description: '(search) 최대 결과 수 (기본: 5)',
+                description: '(search) Maximum number of results (default: 5)',
                 required: false,
                 default: 5,
             },
@@ -68,11 +68,11 @@ export function createMemoryOpsTool(context) {
                 case 'read': {
                     const memoryId = params.memoryId;
                     if (!memoryId) {
-                        return { success: false, error: 'memoryId가 필요합니다.' };
+                        return { success: false, error: 'memoryId is required.' };
                     }
                     const memory = await manager.read(memoryId);
                     if (!memory) {
-                        return { success: false, error: `ID ${memoryId}의 메모리를 찾을 수 없습니다.` };
+                        return { success: false, error: `Memory with ID ${memoryId} not found.` };
                     }
                     return {
                         success: true,
@@ -90,7 +90,7 @@ export function createMemoryOpsTool(context) {
                 case 'write': {
                     const content = params.content;
                     if (!content) {
-                        return { success: false, error: 'content가 필요합니다.' };
+                        return { success: false, error: 'content is required.' };
                     }
                     const learning = createSimpleLearning(content, {
                         category: params.category,
@@ -105,7 +105,7 @@ export function createMemoryOpsTool(context) {
                         output: JSON.stringify({
                             id: memory.id,
                             title: memory.title,
-                            message: '메모리가 저장되었습니다.',
+                            message: 'Memory saved.',
                         }),
                     };
                 }
@@ -135,11 +135,11 @@ export function createMemoryOpsTool(context) {
                 case 'reinforce': {
                     const memoryId = params.memoryId;
                     if (!memoryId) {
-                        return { success: false, error: 'memoryId가 필요합니다.' };
+                        return { success: false, error: 'memoryId is required.' };
                     }
                     const reinforced = await manager.reinforce(memoryId);
                     if (!reinforced) {
-                        return { success: false, error: `ID ${memoryId}의 메모리를 찾을 수 없습니다.` };
+                        return { success: false, error: `Memory with ID ${memoryId} not found.` };
                     }
                     return {
                         success: true,
@@ -148,18 +148,18 @@ export function createMemoryOpsTool(context) {
                             title: reinforced.title,
                             newConfidence: reinforced.confidence,
                             reinforcementCount: reinforced.reinforcementCount,
-                            message: '메모리가 강화되었습니다.',
+                            message: 'Memory reinforced.',
                         }),
                     };
                 }
                 case 'contradict': {
                     const memoryId = params.memoryId;
                     if (!memoryId) {
-                        return { success: false, error: 'memoryId가 필요합니다.' };
+                        return { success: false, error: 'memoryId is required.' };
                     }
                     const contradicted = await manager.contradict(memoryId);
                     if (!contradicted) {
-                        return { success: false, error: `ID ${memoryId}의 메모리를 찾을 수 없습니다.` };
+                        return { success: false, error: `Memory with ID ${memoryId} not found.` };
                     }
                     return {
                         success: true,
@@ -168,14 +168,14 @@ export function createMemoryOpsTool(context) {
                             title: contradicted.title,
                             newConfidence: contradicted.confidence,
                             contradictionCount: contradicted.contradictionCount,
-                            message: '메모리가 반박 처리되었습니다.',
+                            message: 'Memory contradicted.',
                         }),
                     };
                 }
                 default:
                     return {
                         success: false,
-                        error: `알 수 없는 operation: ${operation}`,
+                        error: `Unknown operation: ${operation}`,
                     };
             }
         },

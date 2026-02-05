@@ -1,5 +1,5 @@
 /**
- * 주석 체크 훅
+ * Comment Checker Hook
  */
 import type { HookConfig, PluginContext } from '../types';
 export declare function createCommentCheckerHook(context: PluginContext): HookConfig;

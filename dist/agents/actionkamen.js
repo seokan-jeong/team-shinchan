@@ -52,7 +52,7 @@ export function createActionKamenAgent(settings) {
             cost: 'EXPENSIVE',
             model: 'opus',
             description: 'Reviewer - Verifies and approves work',
-            delegationTriggers: ['검토', 'review', '리뷰', '확인', 'verify'],
+            delegationTriggers: ['review', 'verify', 'verification', 'check', 'validation'],
             disallowedTools: ['Edit', 'Write', 'NotebookEdit'],
             isReadOnly: true,
         },

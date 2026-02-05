@@ -1,8 +1,8 @@
 /**
- * Team-Shinchan 공유 유틸리티
+ * Team-Shinchan Shared Utilities
  */
 // ============================================================
-// 환경 컨텍스트 생성
+// Create Environment Context
 // ============================================================
 export function createEnvContext() {
     const now = new Date();
@@ -14,7 +14,7 @@ export function createEnvContext() {
 </env-context>`;
 }
 // ============================================================
-// 에이전트 이름 변환
+// Agent Name Conversion
 // ============================================================
 export const AGENT_DISPLAY_NAMES = {
     shinnosuke: 'Shinnosuke',
@@ -60,7 +60,7 @@ export function formatAgentName(name) {
     return `${AGENT_DISPLAY_NAMES[name]} (${AGENT_ROLES[name]})`;
 }
 // ============================================================
-// 모델 관련 유틸리티
+// Model-related Utilities
 // ============================================================
 export function getModelDisplayName(model) {
     const names = {
@@ -77,7 +77,7 @@ export function isCheapModel(model) {
     return model === 'haiku';
 }
 // ============================================================
-// 문자열 유틸리티
+// String Utilities
 // ============================================================
 export function truncateString(str, maxLength) {
     if (str.length <= maxLength)
@@ -96,7 +96,7 @@ export function stripXmlTags(str) {
     return str.replace(/<[^>]*>/g, '');
 }
 // ============================================================
-// 키워드 매칭
+// Keyword Matching
 // ============================================================
 export function matchKeywords(text, keywords) {
     const lowerText = text.toLowerCase();
@@ -107,7 +107,7 @@ export function findMatchedKeyword(text, keywords) {
     return keywords.find((keyword) => lowerText.includes(keyword.toLowerCase()));
 }
 // ============================================================
-// 배열 유틸리티
+// Array Utilities
 // ============================================================
 export function chunk(array, size) {
     const chunks = [];
@@ -120,7 +120,7 @@ export function unique(array) {
     return [...new Set(array)];
 }
 // ============================================================
-// 로깅 유틸리티
+// Logging Utilities
 // ============================================================
 export function log(category, message, data) {
     const timestamp = new Date().toISOString();
@@ -141,7 +141,7 @@ export function logWarning(category, message) {
     console.warn(`[${timestamp}] [Team-Shinchan:${category}] WARNING: ${message}`);
 }
 // ============================================================
-// 타이밍 유틸리티
+// Timing Utilities
 // ============================================================
 export function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));

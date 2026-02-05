@@ -1,5 +1,5 @@
 /**
- * Help 스킬 - 도움말
+ * Help Skill - Help Information
  */
 import type { SkillConfig, PluginContext } from '../../../types';
 export declare function createHelpSkill(context: PluginContext): SkillConfig;

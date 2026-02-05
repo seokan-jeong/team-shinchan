@@ -1,6 +1,6 @@
 /**
  * Memory Operations Tool
- * 에이전트가 메모리를 읽고 쓸 수 있는 도구
+ * Tool for agents to read and write memories
  */
 import type { ToolConfig, PluginContext } from '../../types';
 export declare function createMemoryOpsTool(context: PluginContext): ToolConfig;

@@ -1,5 +1,5 @@
 /**
- * 디렉토리 AGENTS.md 주입 훅
+ * Directory AGENTS.md Injector Hook
  */
 import type { HookConfig, PluginContext } from '../types';
 export declare function createDirectoryAgentsInjectorHook(context: PluginContext): HookConfig;

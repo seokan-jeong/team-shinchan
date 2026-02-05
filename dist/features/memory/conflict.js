@@ -1,10 +1,10 @@
 /**
  * Memory Conflict Resolution
- * 메모리 충돌 해결
+ * Resolves conflicts between existing and incoming memories
  */
 import { calculateEffectiveConfidence } from './decay';
 /**
- * 텍스트 유사도 계산 (Jaccard 유사도)
+ * Calculate text similarity (Jaccard similarity)
  */
 function calculateTextSimilarity(text1, text2) {
     const words1 = new Set(text1.toLowerCase().split(/\s+/));
@@ -16,7 +16,7 @@ function calculateTextSimilarity(text1, text2) {
     return intersection.size / union.size;
 }
 /**
- * 태그 유사도 계산
+ * Calculate tag similarity
  */
 function calculateTagSimilarity(tags1, tags2) {
     if (tags1.length === 0 && tags2.length === 0)
@@ -30,44 +30,44 @@ function calculateTagSimilarity(tags1, tags2) {
     return intersection.size / union.size;
 }
 /**
- * 충돌 감지
+ * Detect conflict between existing and incoming memory
  */
 export function detectConflict(existing, incoming) {
-    // 같은 카테고리인지 확인
+    // Check if same category
     if (existing.category !== incoming.category) {
         return null;
     }
-    // 제목 유사도
+    // Title similarity
     const titleSimilarity = calculateTextSimilarity(existing.title, incoming.title);
-    // 내용 유사도
+    // Content similarity
     const contentSimilarity = calculateTextSimilarity(existing.content, incoming.content);
-    // 태그 유사도
+    // Tag similarity
     const tagSimilarity = calculateTagSimilarity(existing.tags, incoming.tags || []);
-    // 전체 유사도 (가중 평균)
+    // Overall similarity (weighted average)
     const overallSimilarity = titleSimilarity * 0.4 + contentSimilarity * 0.4 + tagSimilarity * 0.2;
-    // 높은 유사도 → 중복 또는 업데이트
+    // High similarity → duplicate or update
     if (overallSimilarity > 0.8) {
-        // 내용이 거의 같음 → 중복
+        // Almost identical content → duplicate
         if (contentSimilarity > 0.9) {
             return {
                 existing,
                 incoming,
                 type: 'duplicate',
-                description: `기존 메모리와 거의 동일한 내용입니다. (유사도: ${(overallSimilarity * 100).toFixed(1)}%)`,
+                description: `Almost identical to existing memory. (Similarity: ${(overallSimilarity * 100).toFixed(1)}%)`,
             };
         }
-        // 제목은 같지만 내용이 다름 → 업데이트
+        // Same title but different content → update
         return {
             existing,
             incoming,
             type: 'update',
-            description: `기존 메모리의 업데이트로 보입니다. (유사도: ${(overallSimilarity * 100).toFixed(1)}%)`,
+            description: `Appears to be an update to existing memory. (Similarity: ${(overallSimilarity * 100).toFixed(1)}%)`,
         };
     }
-    // 중간 유사도 + 같은 주제 → 잠재적 충돌
+    // Medium similarity + same topic → potential conflict
     if (overallSimilarity > 0.5 && titleSimilarity > 0.6) {
-        // 내용이 상반되는지 확인 (간단한 휴리스틱)
-        const contradictionIndicators = ['아니', '않', '반대', '대신', '말고', 'not', "don't", 'instead'];
+        // Check for contradicting content (simple heuristic)
+        const contradictionIndicators = ['not', "don't", 'instead', 'opposite', 'rather'];
         const hasContradiction = contradictionIndicators.some((indicator) => incoming.content.toLowerCase().includes(indicator) ||
             existing.content.toLowerCase().includes(indicator));
         if (hasContradiction) {
@@ -75,70 +75,70 @@ export function detectConflict(existing, incoming) {
                 existing,
                 incoming,
                 type: 'contradiction',
-                description: `기존 메모리와 상충되는 내용일 수 있습니다. (유사도: ${(overallSimilarity * 100).toFixed(1)}%)`,
+                description: `May contradict existing memory. (Similarity: ${(overallSimilarity * 100).toFixed(1)}%)`,
             };
         }
     }
     return null;
 }
 /**
- * 충돌 해결
- * 기본 전략: 최신 우선 + 신뢰도 점수 기반
+ * Resolve conflict
+ * Default strategy: Newest first + confidence score based
  */
 export function resolveConflict(conflict) {
     const { existing, incoming, type } = conflict;
     switch (type) {
         case 'duplicate':
-            // 중복 → 기존 유지, 강화
+            // Duplicate → keep existing, reinforce
             return {
                 action: 'keep_existing',
-                reason: '중복된 내용이므로 기존 메모리를 유지하고 강화합니다.',
+                reason: 'Duplicate content, keeping and reinforcing existing memory.',
             };
         case 'update':
-            // 업데이트 → 최신 내용으로 교체 (신뢰도가 더 높으면)
+            // Update → replace with newer content (if confidence is higher)
             const existingEffectiveConfidence = calculateEffectiveConfidence(existing);
             const incomingConfidence = incoming.confidence ?? 0.5;
             if (incomingConfidence >= existingEffectiveConfidence) {
                 return {
                     action: 'replace',
-                    reason: `새 메모리의 신뢰도(${incomingConfidence.toFixed(2)})가 기존(${existingEffectiveConfidence.toFixed(2)})보다 높거나 같으므로 교체합니다.`,
+                    reason: `New memory confidence (${incomingConfidence.toFixed(2)}) is higher or equal to existing (${existingEffectiveConfidence.toFixed(2)}), replacing.`,
                 };
             }
             else {
-                // 신뢰도가 낮으면 병합
+                // Lower confidence → merge
                 return {
                     action: 'merge',
                     mergedMemory: mergeMemories(existing, incoming),
-                    reason: `기존 메모리의 신뢰도가 더 높으므로 정보를 병합합니다.`,
+                    reason: `Existing memory has higher confidence, merging information.`,
                 };
             }
         case 'contradiction':
-            // 충돌 → 최신 우선 원칙 적용
+            // Conflict → apply newest first principle
             return {
                 action: 'replace',
-                reason: '최신 우선 원칙에 따라 새 메모리로 교체합니다. 기존 메모리는 반박으로 처리됩니다.',
+                reason: 'Replacing with new memory per newest-first principle. Existing memory is marked as contradicted.',
             };
         default:
             return {
                 action: 'keep_both',
-                reason: '충돌 유형을 판단할 수 없어 둘 다 유지합니다.',
+                reason: 'Cannot determine conflict type, keeping both.',
             };
     }
 }
 /**
- * 메모리 병합
+ * Merge memories
  */
 export function mergeMemories(existing, incoming) {
     const now = new Date();
-    // 태그 병합
+    // Merge tags
     const mergedTags = [...new Set([...existing.tags, ...(incoming.tags || [])])];
-    // 출처 병합
+    // Merge sources
     const mergedSources = [...new Set([...existing.sources, ...(incoming.sources || [])])];
-    // 관련 메모리 병합
+    // Merge related memories
     const mergedRelated = [
         ...new Set([...existing.relatedMemories, ...(incoming.relatedMemories || [])]),
     ];
-    // 신뢰도 계산 (기존과 새 것의 가중 평균)
+    // Calculate confidence (weighted average of existing and new)
     const existingWeight = existing.reinforcementCount + 1;
     const incomingWeight = 1;
     const totalWeight = existingWeight + incomingWeight;
@@ -146,7 +146,7 @@ export function mergeMemories(existing, incoming) {
         totalWeight;
     return {
         ...existing,
-        content: `${existing.content}\n\n[업데이트 ${now.toISOString().split('T')[0]}]\n${incoming.content}`,
+        content: `${existing.content}\n\n[Update ${now.toISOString().split('T')[0]}]\n${incoming.content}`,
         tags: mergedTags,
         sources: mergedSources,
         relatedMemories: mergedRelated,
@@ -161,7 +161,7 @@ export function mergeMemories(existing, incoming) {
     };
 }
 /**
- * 배치 충돌 검사
+ * Batch conflict detection
  */
 export function detectBatchConflicts(existingMemories, incoming) {
     const conflicts = [];
@@ -171,7 +171,7 @@ export function detectBatchConflicts(existingMemories, incoming) {
             conflicts.push(conflict);
         }
     }
-    // 유사도가 높은 순으로 정렬
+    // Sort by similarity (highest first)
     return conflicts.sort((a, b) => {
         const simA = calculateTextSimilarity(a.existing.content, incoming.content);
         const simB = calculateTextSimilarity(b.existing.content, incoming.content);
@@ -179,7 +179,7 @@ export function detectBatchConflicts(existingMemories, incoming) {
     });
 }
 /**
- * 자동 충돌 해결
+ * Auto-resolve conflicts
  */
 export function autoResolveConflicts(conflicts) {
     const resolutions = new Map();
@@ -190,7 +190,7 @@ export function autoResolveConflicts(conflicts) {
     return resolutions;
 }
 /**
- * 충돌 심각도 계산
+ * Calculate conflict severity
  */
 export function calculateConflictSeverity(conflict) {
     switch (conflict.type) {

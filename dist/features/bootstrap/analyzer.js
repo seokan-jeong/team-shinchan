@@ -1,11 +1,11 @@
 /**
  * Bootstrap Analyzer
- * 프로젝트 초기 분석 및 컨벤션 감지
+ * Project initial analysis and convention detection
  */
 import * as fs from 'fs';
 import * as path from 'path';
 /**
- * 프로젝트 유형 감지
+ * Detect project type
  */
 export function detectProjectType(rootPath) {
     const info = {
@@ -19,11 +19,11 @@ export function detectProjectType(rootPath) {
     };
     try {
         const files = fs.readdirSync(rootPath);
-        // 프로젝트 유형 감지
+        // Detect project type
         if (files.includes('package.json')) {
             info.type = 'node';
             info.languages.push('JavaScript', 'TypeScript');
-            // package.json 분석
+            // Analyze package.json
             try {
                 const pkgJson = JSON.parse(fs.readFileSync(path.join(rootPath, 'package.json'), 'utf-8'));
                 info.name = pkgJson.name || info.name;
@@ -31,7 +31,7 @@ export function detectProjectType(rootPath) {
                     ...pkgJson.dependencies,
                     ...pkgJson.devDependencies,
                 };
-                // 프레임워크 감지
+                // Detect frameworks
                 if (deps.react)
                     info.frameworks.push('React');
                 if (deps.vue)
@@ -63,26 +63,26 @@ export function detectProjectType(rootPath) {
             info.type = 'java';
             info.languages.push('Java');
         }
-        // TypeScript 감지
+        // Detect TypeScript
         if (files.includes('tsconfig.json')) {
             if (!info.languages.includes('TypeScript')) {
                 info.languages.push('TypeScript');
             }
         }
-        // 테스트 감지
+        // Detect tests
         info.hasTests =
             files.includes('__tests__') ||
                 files.includes('tests') ||
                 files.includes('test') ||
                 files.includes('spec') ||
                 files.some((f) => f.includes('.test.') || f.includes('.spec.'));
-        // CI 감지
+        // Detect CI
         info.hasCI =
             files.includes('.github') ||
                 files.includes('.gitlab-ci.yml') ||
                 files.includes('Jenkinsfile') ||
                 files.includes('.circleci');
-        // 문서 감지
+        // Detect docs
         info.hasDocs =
             files.includes('docs') ||
                 files.includes('README.md') ||
@@ -92,7 +92,7 @@ export function detectProjectType(rootPath) {
     return info;
 }
 /**
- * 구조 분석
+ * Analyze structure
  */
 export function analyzeStructure(rootPath) {
     const analysis = {
@@ -104,7 +104,7 @@ export function analyzeStructure(rootPath) {
     };
     try {
         const files = fs.readdirSync(rootPath);
-        // 소스 디렉토리 감지
+        // Detect source directory
         const sourceDirs = ['src', 'lib', 'app', 'source'];
         for (const dir of sourceDirs) {
             if (files.includes(dir)) {
@@ -112,7 +112,7 @@ export function analyzeStructure(rootPath) {
                 break;
             }
         }
-        // 테스트 디렉토리 감지
+        // Detect test directory
         const testDirs = ['__tests__', 'tests', 'test', 'spec'];
         for (const dir of testDirs) {
             if (files.includes(dir)) {
@@ -120,7 +120,7 @@ export function analyzeStructure(rootPath) {
                 break;
             }
         }
-        // 설정 파일
+        // Config files
         const configPatterns = [
             /^\..*rc(\.json|\.js|\.yml)?$/,
             /^.*config\.(js|ts|json|yml)$/,
@@ -132,7 +132,7 @@ export function analyzeStructure(rootPath) {
                 analysis.configFiles.push(file);
             }
         }
-        // 진입점 감지
+        // Detect entry points
         const entryPatterns = ['index.ts', 'index.js', 'main.ts', 'main.js', 'app.ts', 'app.js'];
         for (const pattern of entryPatterns) {
             if (files.includes(pattern)) {
@@ -148,39 +148,39 @@ export function analyzeStructure(rootPath) {
                 catch { }
             }
         }
-        // 패턴 감지
+        // Detect patterns
         if (files.includes('components') || files.some((f) => f.includes('.component.'))) {
-            analysis.patterns.push('컴포넌트 기반 구조');
+            analysis.patterns.push('Component-based structure');
         }
         if (files.includes('services') || files.some((f) => f.includes('.service.'))) {
-            analysis.patterns.push('서비스 레이어 패턴');
+            analysis.patterns.push('Service layer pattern');
         }
         if (files.includes('models') || files.includes('entities')) {
-            analysis.patterns.push('모델/엔티티 분리');
+            analysis.patterns.push('Model/Entity separation');
         }
         if (files.includes('controllers') || files.includes('routes')) {
-            analysis.patterns.push('MVC/라우트 패턴');
+            analysis.patterns.push('MVC/Route pattern');
         }
         if (files.includes('hooks') || files.some((f) => f.startsWith('use'))) {
-            analysis.patterns.push('React Hooks 패턴');
+            analysis.patterns.push('React Hooks pattern');
         }
     }
     catch { }
     return analysis;
 }
 /**
- * 컨벤션 감지
+ * Detect conventions
  */
 export function detectConventions(rootPath) {
     const conventions = [];
     try {
-        // ESLint 설정 분석
+        // Analyze ESLint config
         const eslintFiles = ['.eslintrc', '.eslintrc.js', '.eslintrc.json', '.eslintrc.yml'];
         for (const file of eslintFiles) {
             if (fs.existsSync(path.join(rootPath, file))) {
                 conventions.push({
-                    title: 'ESLint 코드 스타일',
-                    content: `ESLint 설정 파일 발견: ${file}. 프로젝트의 린트 규칙을 따릅니다.`,
+                    title: 'ESLint Code Style',
+                    content: `ESLint config file found: ${file}. Follow project lint rules.`,
                     category: 'convention',
                     scope: 'project',
                     confidence: 0.9,
@@ -190,13 +190,13 @@ export function detectConventions(rootPath) {
                 break;
             }
         }
-        // Prettier 설정 분석
+        // Analyze Prettier config
         const prettierFiles = ['.prettierrc', '.prettierrc.js', '.prettierrc.json', 'prettier.config.js'];
         for (const file of prettierFiles) {
             if (fs.existsSync(path.join(rootPath, file))) {
                 conventions.push({
-                    title: 'Prettier 포맷팅',
-                    content: `Prettier 설정 파일 발견: ${file}. 자동 포맷팅 규칙을 따릅니다.`,
+                    title: 'Prettier Formatting',
+                    content: `Prettier config file found: ${file}. Follow auto-formatting rules.`,
                     category: 'convention',
                     scope: 'project',
                     confidence: 0.9,
@@ -206,15 +206,15 @@ export function detectConventions(rootPath) {
                 break;
             }
         }
-        // TypeScript 엄격 모드 확인
+        // Check TypeScript strict mode
         try {
             const tsConfigPath = path.join(rootPath, 'tsconfig.json');
             if (fs.existsSync(tsConfigPath)) {
                 const tsConfig = JSON.parse(fs.readFileSync(tsConfigPath, 'utf-8'));
                 if (tsConfig.compilerOptions?.strict) {
                     conventions.push({
-                        title: 'TypeScript 엄격 모드',
-                        content: 'TypeScript strict 모드 활성화. 타입 안전성을 최우선합니다.',
+                        title: 'TypeScript Strict Mode',
+                        content: 'TypeScript strict mode enabled. Type safety is priority.',
                         category: 'convention',
                         scope: 'project',
                         confidence: 0.95,
@@ -225,22 +225,22 @@ export function detectConventions(rootPath) {
             }
         }
         catch { }
-        // 파일 네이밍 컨벤션 감지
+        // Detect file naming convention
         try {
             const srcPath = path.join(rootPath, 'src');
             if (fs.existsSync(srcPath)) {
                 const srcFiles = fs.readdirSync(srcPath, { recursive: true });
                 const fileNames = srcFiles.filter((f) => typeof f === 'string' && !f.includes('node_modules'));
-                // 케밥 케이스 감지
+                // Detect kebab-case
                 const kebabCase = fileNames.filter((f) => /^[a-z]+(-[a-z]+)+\.[a-z]+$/.test(path.basename(f)));
-                // 파스칼 케이스 감지
+                // Detect PascalCase
                 const pascalCase = fileNames.filter((f) => /^[A-Z][a-zA-Z]+\.[a-z]+$/.test(path.basename(f)));
-                // 카멜 케이스 감지
+                // Detect camelCase
                 const camelCase = fileNames.filter((f) => /^[a-z]+[A-Z][a-zA-Z]*\.[a-z]+$/.test(path.basename(f)));
                 if (kebabCase.length > pascalCase.length && kebabCase.length > camelCase.length) {
                     conventions.push({
-                        title: '파일 네이밍: kebab-case',
-                        content: '파일명에 kebab-case 사용 (예: my-component.ts)',
+                        title: 'File Naming: kebab-case',
+                        content: 'Use kebab-case for file names (e.g., my-component.ts)',
                         category: 'convention',
                         scope: 'project',
                         confidence: 0.7,
@@ -250,8 +250,8 @@ export function detectConventions(rootPath) {
                 }
                 else if (pascalCase.length > camelCase.length) {
                     conventions.push({
-                        title: '파일 네이밍: PascalCase',
-                        content: '파일명에 PascalCase 사용 (예: MyComponent.ts)',
+                        title: 'File Naming: PascalCase',
+                        content: 'Use PascalCase for file names (e.g., MyComponent.ts)',
                         category: 'convention',
                         scope: 'project',
                         confidence: 0.7,
@@ -267,37 +267,37 @@ export function detectConventions(rootPath) {
     return conventions;
 }
 /**
- * 전체 부트스트랩 분석 실행
+ * Run full bootstrap analysis
  */
 export function runBootstrapAnalysis(rootPath) {
     const projectInfo = detectProjectType(rootPath);
     const structure = analyzeStructure(rootPath);
     const conventionMemories = detectConventions(rootPath);
-    // 프로젝트 컨텍스트 생성
+    // Generate project context
     const projectContext = [];
-    // 기본 프로젝트 정보
+    // Basic project info
     projectContext.push({
-        title: '프로젝트 개요',
-        content: `프로젝트: ${projectInfo.name}
-유형: ${projectInfo.type}
-언어: ${projectInfo.languages.join(', ')}
-프레임워크: ${projectInfo.frameworks.join(', ') || '없음'}
-테스트: ${projectInfo.hasTests ? '있음' : '없음'}
-CI/CD: ${projectInfo.hasCI ? '있음' : '없음'}`,
+        title: 'Project Overview',
+        content: `Project: ${projectInfo.name}
+Type: ${projectInfo.type}
+Languages: ${projectInfo.languages.join(', ')}
+Frameworks: ${projectInfo.frameworks.join(', ') || 'None'}
+Tests: ${projectInfo.hasTests ? 'Yes' : 'No'}
+CI/CD: ${projectInfo.hasCI ? 'Yes' : 'No'}`,
         category: 'context',
         scope: 'project',
         confidence: 0.95,
         tags: ['project', 'overview', projectInfo.type],
         sources: ['bootstrap'],
     });
-    // 구조 정보
+    // Structure info
     if (structure.sourceDir || structure.patterns.length > 0) {
         projectContext.push({
-            title: '프로젝트 구조',
-            content: `소스 디렉토리: ${structure.sourceDir || '루트'}
-테스트 디렉토리: ${structure.testDir || '없음'}
-진입점: ${structure.entryPoints.join(', ') || '없음'}
-패턴: ${structure.patterns.join(', ') || '없음'}`,
+            title: 'Project Structure',
+            content: `Source directory: ${structure.sourceDir || 'root'}
+Test directory: ${structure.testDir || 'None'}
+Entry points: ${structure.entryPoints.join(', ') || 'None'}
+Patterns: ${structure.patterns.join(', ') || 'None'}`,
             category: 'context',
             scope: 'project',
             confidence: 0.9,
@@ -308,7 +308,7 @@ CI/CD: ${projectInfo.hasCI ? '있음' : '없음'}`,
     return {
         conventions: conventionMemories,
         projectContext,
-        bestPractices: [], // 별도 모듈에서 제공
+        bestPractices: [], // Provided by separate module
         analyzedAt: new Date(),
     };
 }

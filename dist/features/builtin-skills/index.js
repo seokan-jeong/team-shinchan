@@ -1,7 +1,7 @@
 /**
- * Team-Seokan 내장 스킬 시스템
+ * Team-Shinchan Built-in Skills System
  */
-// 스킬 생성 함수들
+// Skill creation functions
 import { createUltraworkSkill } from './ultrawork';
 import { createRalphSkill } from './ralph';
 import { createAutopilotSkill } from './autopilot';
@@ -12,14 +12,14 @@ import { createGitMasterSkill } from './git-master';
 import { createFrontendUiUxSkill } from './frontend-ui-ux';
 import { createHelpSkill } from './help';
 import { createCancelSkill } from './cancel';
-// v2.0 메모리 스킬
+// v2.0 Memory skills
 import { createMemoriesSkill } from './memories';
 import { createForgetSkill } from './forget';
 import { createLearnSkill } from './learn';
-// v2.1 토론 스킬
+// v2.1 Debate skill
 import { createDebateSkill } from './debate';
 // ============================================================
-// 모든 내장 스킬 생성
+// Create all built-in skills
 // ============================================================
 export function createBuiltinSkills(context) {
     return [
@@ -33,19 +33,19 @@ export function createBuiltinSkills(context) {
         createFrontendUiUxSkill(context),
         createHelpSkill(context),
         createCancelSkill(context),
-        // v2.0 메모리 스킬
+        // v2.0 Memory skills
         createMemoriesSkill(context),
         createForgetSkill(context),
         createLearnSkill(context),
-        // v2.1 토론 스킬
+        // v2.1 Debate skill
         createDebateSkill(context),
     ];
 }
 // ============================================================
-// 내보내기
+// Exports
 // ============================================================
-export { createUltraworkSkill, createRalphSkill, createAutopilotSkill, createPlanSkill, createAnalyzeSkill, createDeepsearchSkill, createGitMasterSkill, createFrontendUiUxSkill, createHelpSkill, createCancelSkill, 
-// v2.0 메모리 스킬
-createMemoriesSkill, createForgetSkill, createLearnSkill, 
-// v2.1 토론 스킬
+export { createUltraworkSkill, createRalphSkill, createAutopilotSkill, createPlanSkill, createAnalyzeSkill, createDeepsearchSkill, createGitMasterSkill, createFrontendUiUxSkill, createHelpSkill, createCancelSkill,
+// v2.0 Memory skills
+createMemoriesSkill, createForgetSkill, createLearnSkill,
+// v2.1 Debate skill
 createDebateSkill, };

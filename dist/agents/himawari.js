@@ -40,7 +40,7 @@ export function createHimawariAgent(settings) {
             cost: 'EXPENSIVE',
             model: 'opus',
             description: 'Master Orchestrator - Large project coordination',
-            delegationTriggers: ['대규모', 'large', 'complex', '복잡한'],
+            delegationTriggers: ['large', 'complex', 'large-scale', 'multi-phase', 'complicated'],
             isReadOnly: false,
         },
     };

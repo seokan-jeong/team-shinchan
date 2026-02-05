@@ -1,33 +1,33 @@
 /**
- * skill - 스킬 실행
+ * skill - Execute skill
  */
 export function createSkillTool(context) {
     return {
         name: 'skill',
-        description: `Team-Seokan 스킬을 실행합니다.
+        description: `Execute Team-Seokan skill.
 
-사용 가능한 스킬:
-- ultrawork: 병렬 실행 모드
-- ralph: 완료까지 반복 실행
-- autopilot: 자율 실행 모드
-- plan: 계획 세션 시작
-- analyze: 분석 모드
-- deepsearch: 심층 검색
-- git-master: Git 전문 모드
-- frontend-ui-ux: UI/UX 전문 모드
-- help: 도움말
-- cancel: 현재 모드 취소`,
+Available skills:
+- ultrawork: Parallel execution mode
+- ralph: Repeat execution until complete
+- autopilot: Autonomous execution mode
+- plan: Start planning session
+- analyze: Analysis mode
+- deepsearch: Deep search
+- git-master: Git expert mode
+- frontend-ui-ux: UI/UX expert mode
+- help: Help
+- cancel: Cancel current mode`,
         parameters: [
             {
                 name: 'name',
                 type: 'string',
-                description: '실행할 스킬 이름',
+                description: 'Name of the skill to execute',
                 required: true,
             },
             {
                 name: 'args',
                 type: 'string',
-                description: '스킬에 전달할 인자',
+                description: 'Arguments to pass to skill',
                 required: false,
             },
         ],
@@ -38,10 +38,10 @@ export function createSkillTool(context) {
             if (!skill) {
                 return {
                     success: false,
-                    error: `스킬 '${skillName}'을 찾을 수 없습니다.`,
+                    error: `Skill '${skillName}' not found.`,
                 };
             }
-            // 스킬 실행
+            // Execute skill
             const result = await skill.handler({
                 args,
                 message: args || '',

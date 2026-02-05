@@ -1,5 +1,5 @@
 /**
- * Team-Seokan 내장 스킬 시스템
+ * Team-Seokan Built-in Skill System
  */
 import type { SkillConfig, PluginContext } from '../../types';
 import { createUltraworkSkill } from './ultrawork';

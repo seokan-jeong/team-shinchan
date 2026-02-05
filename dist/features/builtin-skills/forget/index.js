@@ -1,78 +1,78 @@
 /**
- * Forget 스킬 - 메모리 삭제
+ * Forget Skill - Delete Memory
  */
 import { getMemoryManager } from '../../memory';
 export function createForgetSkill(context) {
     return {
         name: 'forget',
         displayName: 'Forget',
-        description: '특정 메모리를 삭제합니다.',
-        triggers: ['forget', '잊어', '삭제', 'delete memory'],
+        description: 'Deletes specific memories.',
+        triggers: ['forget', 'delete memory', 'remove'],
         autoActivate: false,
         handler: async ({ args, sessionState }) => {
             if (!args || args.trim() === '') {
                 return {
                     success: false,
-                    output: `# ❌ 삭제 대상 필요
+                    output: `# ❌ Deletion Target Required
 
-\`/forget "키워드"\` 형식으로 삭제할 메모리를 지정해주세요.
+Please specify the memory to delete using the format \`/forget "keyword"\`.
 
-**사용법:**
-- \`/forget 네이밍\` - "네이밍" 관련 메모리 삭제
-- \`/forget preference\` - 모든 선호도 메모리 삭제
-- \`/forget all\` - 모든 메모리 삭제 (주의!)
+**Usage:**
+- \`/forget naming\` - Delete "naming" related memories
+- \`/forget preference\` - Delete all preference memories
+- \`/forget all\` - Delete all memories (caution!)
 
-💡 먼저 \`/memories\`로 현재 학습 내용을 확인하세요.`,
+💡 First check current learned content with \`/memories\`.`,
                 };
             }
             try {
                 const manager = getMemoryManager();
                 await manager.initialize();
                 const keyword = args.trim();
-                // 전체 삭제 확인
+                // Check for full deletion
                 if (keyword.toLowerCase() === 'all') {
-                    // 모든 메모리 삭제
+                    // Delete all memories
                     const stats = await manager.getStats();
                     const totalBefore = stats.total;
-                    // 실제로는 각 메모리를 순회하며 삭제해야 함
+                    // Actually need to iterate through each memory to delete
                     const allMemories = manager.getAllMemories();
                     for (const memory of allMemories) {
                         await manager.delete(memory.id);
                     }
                     return {
                         success: true,
-                        output: `# 🗑️ 전체 메모리 삭제
+                        output: `# 🗑️ All Memories Deleted
 
-**${totalBefore}개**의 메모리가 모두 삭제되었습니다.
+All **${totalBefore}** memories have been deleted.
 
-학습이 초기화되었습니다. 새로운 작업부터 다시 학습을 시작합니다.`,
+Learning has been reset. Will start learning again from new tasks.`,
                     };
                 }
-                // 키워드로 삭제
+                // Delete by keyword
                 const deletedCount = await manager.forget(keyword);
                 if (deletedCount === 0) {
                     return {
                         success: true,
-                        output: `# ℹ️ 삭제 대상 없음
+                        output: `# ℹ️ No Deletion Target
 
-"${keyword}"와 관련된 메모리를 찾을 수 없습니다.
+Could not find memories related to "${keyword}".
 
-💡 \`/memories\`로 현재 학습 내용을 확인하세요.`,
+💡 Check current learned content with \`/memories\`.`,
                     };
                 }
                 return {
                     success: true,
-                    output: `# 🗑️ 메모리 삭제 완료
+                    output: `# 🗑️ Memory Deletion Complete
 
-**${deletedCount}개**의 "${keyword}" 관련 메모리가 삭제되었습니다.
+**${deletedCount}** memories related to "${keyword}" have been deleted.
 
-이 내용은 더 이상 에이전트의 행동에 영향을 주지 않습니다.`,
+This content will no longer influence agent behavior.`,
                 };
             }
             catch (error) {
                 return {
                     success: false,
-                    output: `❌ 메모리 삭제 실패: ${error}`,
+                    output: `❌ Memory deletion failed: ${error}`,
                 };
             }
         },

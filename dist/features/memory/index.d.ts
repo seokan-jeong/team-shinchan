@@ -1,6 +1,6 @@
 /**
  * Memory System
- * 에이전트 학습 및 메모리 시스템
+ * Agent learning and memory system
  */
 export * from './types';
 export { MemoryStorage, getDefaultStorage, setDefaultStorage, memoryToMarkdown, markdownToMemory, expandPath, getCategoryFileName, } from './storage';

@@ -1,33 +1,33 @@
 /**
- * Deepsearch 스킬 - 심층 검색
+ * Deepsearch Skill - Deep Search
  */
 export function createDeepsearchSkill(context) {
     return {
         name: 'deepsearch',
         displayName: 'Deepsearch',
-        description: '코드베이스를 깊이 탐색합니다.',
-        triggers: ['deepsearch', '깊은검색', '찾아줘', 'search'],
+        description: 'Deeply explores the codebase.',
+        triggers: ['deepsearch', 'deep search', 'find', 'search'],
         autoActivate: true,
         handler: async ({ args, sessionState }) => {
             sessionState.activeSkill = 'deepsearch';
             return {
                 success: true,
-                output: `🔎 **Deepsearch 모드 활성화**
+                output: `🔎 **Deepsearch Mode Activated**
 
-흰둥이(Explorer)와 채성아(Librarian)가 함께 심층 검색을 수행합니다.
+Shiro (Explorer) and Masumi (Librarian) perform deep search together.
 
-## 검색 대상
-${args || '검색할 내용을 설명해주세요'}
+## Search Target
+${args || 'Please describe what to search for'}
 
-## 검색 전략
-1. **코드 탐색**: 흰둥이가 코드베이스 탐색
-2. **문서 검색**: 채성아가 문서/외부 정보 검색
-3. **결과 종합**: 발견한 정보 정리
+## Search Strategy
+1. **Code Exploration**: Shiro explores the codebase
+2. **Document Search**: Masumi searches documents/external information
+3. **Result Synthesis**: Organize discovered information
 
-병렬로 검색을 시작합니다...`,
+Starting parallel search...`,
                 inject: `<deepsearch-mode>
-Deepsearch 모드가 활성화되었습니다.
-흰둥이(Explorer)와 채성아(Librarian)에게 병렬로 위임하세요.
+Deepsearch mode is activated.
+Delegate in parallel to Shiro (Explorer) and Masumi (Librarian).
 </deepsearch-mode>`,
             };
         },

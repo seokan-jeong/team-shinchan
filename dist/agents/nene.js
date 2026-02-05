@@ -47,7 +47,7 @@ export function createNeneAgent(settings) {
             cost: 'EXPENSIVE',
             model: 'opus',
             description: 'Strategic Planner - Creates implementation plans',
-            delegationTriggers: ['계획', 'plan', '설계', 'design'],
+            delegationTriggers: ['plan', 'design', 'planning', 'strategy'],
             disallowedTools: ['Edit', 'Write', 'NotebookEdit'],
             isReadOnly: true,
         },

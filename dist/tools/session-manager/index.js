@@ -1,22 +1,22 @@
 /**
- * session_manager - 세션 관리 도구
+ * session_manager - Session management tool
  */
 import { getRunningBackgroundTasks } from '../../features/session-state';
 export function createSessionManagerTool(context) {
     return {
         name: 'session_manager',
-        description: 'Team-Seokan 세션 상태를 조회하고 관리합니다.',
+        description: 'View and manage Team-Seokan session state.',
         parameters: [
             {
                 name: 'action',
                 type: 'string',
-                description: '수행할 액션: status, list_tasks, cancel_task',
+                description: 'Action to perform: status, list_tasks, cancel_task',
                 required: true,
             },
             {
                 name: 'task_id',
                 type: 'string',
-                description: '작업 ID (cancel_task 시 필요)',
+                description: 'Task ID (required for cancel_task)',
                 required: false,
             },
         ],
@@ -52,7 +52,7 @@ export function createSessionManagerTool(context) {
                     if (!taskId) {
                         return {
                             success: false,
-                            error: 'task_id가 필요합니다.',
+                            error: 'task_id is required.',
                         };
                     }
                     const task = context.sessionState.backgroundTasks.find((t) => t.id === taskId);
@@ -67,7 +67,7 @@ export function createSessionManagerTool(context) {
                 default:
                     return {
                         success: false,
-                        error: `알 수 없는 액션: ${action}`,
+                        error: `Unknown action: ${action}`,
                     };
             }
         },

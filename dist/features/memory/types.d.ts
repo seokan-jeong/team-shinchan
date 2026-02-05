@@ -1,62 +1,62 @@
 /**
  * Memory System Types
- * 에이전트 학습 및 메모리 시스템의 타입 정의
+ * Type definitions for agent learning and memory system
  */
 /**
- * 메모리 카테고리
+ * Memory Category
  */
 export type MemoryCategory = 'preference' | 'pattern' | 'context' | 'mistake' | 'decision' | 'convention' | 'insight';
 /**
- * 메모리 스코프
+ * Memory Scope
  */
 export type MemoryScope = 'global' | 'project';
 /**
- * 에이전트 이름 (메모리 소유자)
+ * Agent Name (Memory Owner)
  */
 export type MemoryOwner = 'shared' | 'jjangu' | 'jjanga' | 'maenggu' | 'cheolsu' | 'suji' | 'heukgom' | 'hooni' | 'shinhyungman' | 'yuri' | 'bongmisun' | 'actiongamen' | 'heendungi' | 'chaesunga' | 'namiri';
 /**
- * 메모리 엔트리
+ * Memory Entry
  */
 export interface MemoryEntry {
-    /** 고유 ID */
+    /** Unique ID */
     id: string;
-    /** 메모리 제목 */
+    /** Memory Title */
     title: string;
-    /** 메모리 내용 */
+    /** Memory Content */
     content: string;
-    /** 카테고리 */
+    /** Category */
     category: MemoryCategory;
-    /** 스코프 */
+    /** Scope */
     scope: MemoryScope;
-    /** 소유자 (에이전트 또는 shared) */
+    /** Owner (agent or shared) */
     owner: MemoryOwner;
-    /** 신뢰도 점수 (0.0 ~ 1.0) */
+    /** Confidence Score (0.0 ~ 1.0) */
     confidence: number;
-    /** 태그 목록 */
+    /** Tag List */
     tags: string[];
-    /** 출처 (어떤 작업/상호작용에서 학습했는지) */
+    /** Source (which task/interaction it was learned from) */
     sources: string[];
-    /** 생성 시간 */
+    /** Creation Time */
     createdAt: Date;
-    /** 마지막 업데이트 시간 */
+    /** Last Update Time */
     updatedAt: Date;
-    /** 마지막 접근 시간 */
+    /** Last Access Time */
     lastAccessedAt: Date;
-    /** 접근 횟수 */
+    /** Access Count */
     accessCount: number;
-    /** 강화 횟수 (같은 패턴이 반복 확인된 횟수) */
+    /** Reinforcement Count (how many times same pattern confirmed) */
     reinforcementCount: number;
-    /** 감쇠 계수 (0.0 ~ 1.0, 시간이 지나면 감소) */
+    /** Decay Factor (0.0 ~ 1.0, decreases over time) */
     decayFactor: number;
-    /** 반박 횟수 (이 메모리와 충돌하는 행동 횟수) */
+    /** Contradiction Count (how many conflicting behaviors) */
     contradictionCount: number;
-    /** 관련 메모리 ID 목록 */
+    /** Related Memory ID List */
     relatedMemories: string[];
-    /** 메타데이터 */
+    /** Metadata */
     metadata: Record<string, unknown>;
 }
 /**
- * 메모리 생성 입력
+ * Memory Creation Input
  */
 export interface CreateMemoryInput {
     title: string;
@@ -71,7 +71,7 @@ export interface CreateMemoryInput {
     metadata?: Record<string, unknown>;
 }
 /**
- * 메모리 업데이트 입력
+ * Memory Update Input
  */
 export interface UpdateMemoryInput {
     title?: string;
@@ -84,193 +84,193 @@ export interface UpdateMemoryInput {
     metadata?: Record<string, unknown>;
 }
 /**
- * 메모리 검색 쿼리
+ * Memory Search Query
  */
 export interface MemoryQuery {
-    /** 키워드 검색 (제목, 내용, 태그) */
+    /** Keyword Search (title, content, tags) */
     keyword?: string;
-    /** 카테고리 필터 */
+    /** Category Filter */
     categories?: MemoryCategory[];
-    /** 스코프 필터 */
+    /** Scope Filter */
     scope?: MemoryScope;
-    /** 소유자 필터 */
+    /** Owner Filter */
     owner?: MemoryOwner;
-    /** 최소 신뢰도 */
+    /** Minimum Confidence */
     minConfidence?: number;
-    /** 태그 필터 (AND 조건) */
+    /** Tag Filter (AND condition) */
     tags?: string[];
-    /** 최근 N일 이내 */
+    /** Within N Days */
     withinDays?: number;
-    /** 정렬 기준 */
+    /** Sort By */
     sortBy?: 'confidence' | 'createdAt' | 'updatedAt' | 'accessCount' | 'relevance';
-    /** 정렬 방향 */
+    /** Sort Order */
     sortOrder?: 'asc' | 'desc';
-    /** 제한 개수 */
+    /** Limit Count */
     limit?: number;
-    /** 오프셋 */
+    /** Offset */
     offset?: number;
 }
 /**
- * 메모리 검색 결과
+ * Memory Search Result
  */
 export interface MemorySearchResult {
-    /** 검색된 메모리 목록 */
+    /** Found Memory List */
     memories: MemoryEntry[];
-    /** 전체 개수 */
+    /** Total Count */
     total: number;
-    /** 검색 점수 (관련성) */
+    /** Search Score (relevance) */
     scores: Map<string, number>;
 }
 /**
- * 메모리 요약
+ * Memory Summary
  */
 export interface MemorySummary {
-    /** 요약 텍스트 */
+    /** Summary Text */
     text: string;
-    /** 포함된 메모리 ID 목록 */
+    /** Included Memory ID List */
     includedMemoryIds: string[];
-    /** 요약 생성 시간 */
+    /** Summary Generated Time */
     generatedAt: Date;
-    /** 토큰 수 (추정) */
+    /** Token Count (estimated) */
     estimatedTokens: number;
 }
 /**
- * 메모리 충돌 정보
+ * Memory Conflict Information
  */
 export interface MemoryConflict {
-    /** 기존 메모리 */
+    /** Existing Memory */
     existing: MemoryEntry;
-    /** 새 메모리 */
+    /** New Memory */
     incoming: CreateMemoryInput;
-    /** 충돌 유형 */
+    /** Conflict Type */
     type: 'contradiction' | 'update' | 'duplicate';
-    /** 충돌 설명 */
+    /** Conflict Description */
     description: string;
 }
 /**
- * 충돌 해결 결과
+ * Conflict Resolution Result
  */
 export interface ConflictResolution {
-    /** 해결 방법 */
+    /** Resolution Method */
     action: 'keep_existing' | 'replace' | 'merge' | 'keep_both';
-    /** 결과 메모리 (merge인 경우) */
+    /** Result Memory (for merge case) */
     mergedMemory?: MemoryEntry;
-    /** 해결 이유 */
+    /** Resolution Reason */
     reason: string;
 }
 /**
- * 메모리 저장소 설정
+ * Memory Storage Configuration
  */
 export interface MemoryStorageConfig {
-    /** 글로벌 메모리 경로 */
+    /** Global Memory Path */
     globalPath: string;
-    /** 프로젝트 메모리 경로 */
+    /** Project Memory Path */
     projectPath: string;
-    /** 최대 메모리 개수 */
+    /** Maximum Memory Count */
     maxEntries: number;
-    /** 감쇠 임계값 (이 값 이하면 자동 삭제) */
+    /** Decay Threshold (auto-delete below this value) */
     decayThreshold: number;
-    /** 신뢰도 임계값 (이 값 이하면 무시) */
+    /** Confidence Threshold (ignore below this value) */
     confidenceThreshold: number;
-    /** 자동 백업 활성화 */
+    /** Auto Backup Enabled */
     autoBackup: boolean;
 }
 /**
- * 회고 결과
+ * Reflection Result
  */
 export interface ReflectionResult {
-    /** 작업 ID */
+    /** Task ID */
     taskId: string;
-    /** 작업 설명 */
+    /** Task Description */
     taskDescription: string;
-    /** 성공 여부 */
+    /** Success Status */
     success: boolean;
-    /** 회고 깊이 */
+    /** Reflection Depth */
     depth: 'simple' | 'standard' | 'deep';
-    /** 학습된 내용 */
+    /** Learned Content */
     learnings: CreateMemoryInput[];
-    /** 다음에 다르게 할 것 */
+    /** Improvements for Next Time */
     improvements: string[];
-    /** 확인된 패턴 */
+    /** Confirmed Patterns */
     confirmedPatterns: string[];
-    /** 회고 시간 */
+    /** Reflection Time */
     reflectedAt: Date;
 }
 /**
- * 암묵적 피드백
+ * Implicit Feedback
  */
 export interface ImplicitFeedback {
-    /** 피드백 유형 */
+    /** Feedback Type */
     type: 'correction' | 'rejection' | 'acceptance' | 'modification';
-    /** 원본 내용 */
+    /** Original Content */
     original: string;
-    /** 수정된 내용 (있는 경우) */
+    /** Modified Content (if exists) */
     modified?: string;
-    /** 관련 에이전트 */
+    /** Related Agent */
     agent: MemoryOwner;
-    /** 컨텍스트 */
+    /** Context */
     context: string;
-    /** 타임스탬프 */
+    /** Timestamp */
     timestamp: Date;
 }
 /**
- * 학습 추출 결과
+ * Learning Extraction Result
  */
 export interface LearningExtraction {
-    /** 추출된 학습들 */
+    /** Extracted Learnings */
     learnings: CreateMemoryInput[];
-    /** 강화할 기존 메모리 ID 목록 */
+    /** Existing Memory IDs to Reinforce */
     reinforceMemoryIds: string[];
-    /** 반박할 기존 메모리 ID 목록 */
+    /** Existing Memory IDs to Contradict */
     contradictMemoryIds: string[];
-    /** 추출 신뢰도 */
+    /** Extraction Confidence */
     extractionConfidence: number;
 }
 /**
- * 부트스트랩 결과
+ * Bootstrap Result
  */
 export interface BootstrapResult {
-    /** 감지된 컨벤션 */
+    /** Detected Conventions */
     conventions: CreateMemoryInput[];
-    /** 프로젝트 컨텍스트 */
+    /** Project Context */
     projectContext: CreateMemoryInput[];
-    /** 기본 베스트 프랙티스 */
+    /** Default Best Practices */
     bestPractices: CreateMemoryInput[];
-    /** 분석 시간 */
+    /** Analysis Time */
     analyzedAt: Date;
 }
 /**
- * 컨텍스트 주입 결과
+ * Context Injection Result
  */
 export interface ContextInjection {
-    /** 주입할 요약 텍스트 */
+    /** Summary Text to Inject */
     summary: string;
-    /** 상세 메모리 (필요시) */
+    /** Detailed Memory (if needed) */
     details: MemoryEntry[];
-    /** 총 토큰 수 (추정) */
+    /** Total Token Count (estimated) */
     totalTokens: number;
-    /** 포함된 카테고리 */
+    /** Included Categories */
     includedCategories: MemoryCategory[];
 }
 /**
- * 기본 설정
+ * Default Configuration
  */
 export declare const DEFAULT_MEMORY_CONFIG: MemoryStorageConfig;
 /**
- * 기본 감쇠 설정
+ * Default Decay Configuration
  */
 export declare const DECAY_CONFIG: {
-    /** 일일 감쇠율 */
+    /** Daily Decay Rate */
     dailyDecayRate: number;
-    /** 반박 시 감쇠 가속 */
+    /** Contradiction Decay Multiplier */
     contradictionDecayMultiplier: number;
-    /** 접근 시 감쇠 회복 */
+    /** Access Recovery Rate */
     accessRecoveryRate: number;
-    /** 강화 시 신뢰도 증가 */
+    /** Reinforcement Confidence Boost */
     reinforcementBoost: number;
-    /** 최대 신뢰도 */
+    /** Maximum Confidence */
     maxConfidence: number;
-    /** 최소 신뢰도 */
+    /** Minimum Confidence */
     minConfidence: number;
 };
 //# sourceMappingURL=types.d.ts.map

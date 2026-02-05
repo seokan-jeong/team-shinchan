@@ -1,5 +1,5 @@
 /**
- * Team-Shinchan 공유 유틸리티
+ * Team-Shinchan Shared Utilities
  */
 import type { ModelTier, BuiltinAgentName } from '../types';
 export declare function createEnvContext(): string;

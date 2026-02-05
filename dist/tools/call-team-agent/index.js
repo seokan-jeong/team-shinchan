@@ -1,22 +1,22 @@
 /**
- * call_team_agent - 에이전트 직접 호출
+ * call_team_agent - Call agent directly
  */
 import { getAgentDisplayName, getAgentRole } from '../../shared';
 export function createCallTeamAgentTool(context) {
     return {
         name: 'call_team_agent',
-        description: '특정 Team-Seokan 에이전트를 직접 호출합니다.',
+        description: 'Directly call a specific Team-Seokan agent.',
         parameters: [
             {
                 name: 'agent',
                 type: 'string',
-                description: '호출할 에이전트 이름',
+                description: 'Name of the agent to call',
                 required: true,
             },
             {
                 name: 'message',
                 type: 'string',
-                description: '에이전트에게 전달할 메시지',
+                description: 'Message to deliver to the agent',
                 required: true,
             },
         ],
@@ -27,7 +27,7 @@ export function createCallTeamAgentTool(context) {
             if (!agent) {
                 return {
                     success: false,
-                    error: `에이전트 '${agentName}'을 찾을 수 없습니다.`,
+                    error: `Agent '${agentName}' not found.`,
                 };
             }
             return {

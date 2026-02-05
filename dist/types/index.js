@@ -1,2 +1,2 @@
-// Team-Shinchan 타입 정의
+// Team-Shinchan Type Definitions
 export {};

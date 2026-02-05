@@ -1,5 +1,5 @@
 /**
- * 도구 출력 잘라내기 훅
+ * Tool Output Truncator Hook
  */
 import type { HookConfig, PluginContext } from '../types';
 export declare function createToolOutputTruncatorHook(context: PluginContext): HookConfig;

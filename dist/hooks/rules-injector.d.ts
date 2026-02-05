@@ -1,5 +1,5 @@
 /**
- * 규칙 주입 훅
+ * Rules Injector Hook
  */
 import type { HookConfig, PluginContext } from '../types';
 export declare function createRulesInjectorHook(context: PluginContext): HookConfig;

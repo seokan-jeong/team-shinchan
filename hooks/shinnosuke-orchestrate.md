@@ -45,7 +45,7 @@ mkdir -p "shinchan-docs/${DOC_ID}"
    - Unclear → Delegate to Nene for interview OR Misae for analysis
 
 2. **Check for design decisions**
-   - 2+ approaches possible → Trigger Debate (직접 오케스트레이션)
+   - 2+ approaches possible → Trigger Debate (direct orchestration)
    - Architecture change → Trigger Debate
    - Security-sensitive → Trigger Debate
 
@@ -63,7 +63,7 @@ mkdir -p "shinchan-docs/${DOC_ID}"
 ```
 For each Phase:
   1. Shiro → Impact analysis for this phase
-  2. Design needed? → Debate (직접 오케스트레이션)
+  2. Design needed? → Debate (direct orchestration)
   3. Delegate implementation:
      - Frontend → Aichan
      - Backend → Bunta
@@ -102,7 +102,7 @@ For each Phase:
 | Codebase search | shiro | haiku |
 | Requirements interview | nene | opus |
 | Hidden requirements | misae | sonnet |
-| Debate orchestration | - | - (직접 패널 호출) |
+| Debate orchestration | - | - (direct panel invocation) |
 | Code implementation | bo | sonnet |
 | Frontend/UI | aichan | sonnet |
 | Backend/API | bunta | sonnet |

@@ -1,6 +1,6 @@
 /**
- * Team-Seokan Plugin
- * 짱구 캐릭터 기반 멀티 에이전트 오케스트레이션 시스템
+ * Team-Shinchan Plugin
+ * Shin-chan character-based multi-agent orchestration system
  */
 import type { PluginContext, PluginSettings, AgentConfig, HookConfig, ToolConfig, SkillConfig } from './types';
 export declare function TeamSeokanPlugin(ctx: unknown): Promise<PluginInstance>;

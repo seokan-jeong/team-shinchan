@@ -1,6 +1,6 @@
 /**
  * Memory System
- * 에이전트 학습 및 메모리 시스템
+ * Agent learning and memory system
  */
 // Types
 export * from './types';

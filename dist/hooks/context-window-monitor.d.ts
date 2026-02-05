@@ -1,6 +1,6 @@
 /**
- * 컨텍스트 윈도우 모니터링 훅
- * 컨텍스트 사용량을 추적하고 경고
+ * Context Window Monitoring Hook
+ * Tracks context usage and warns
  */
 import type { HookConfig, PluginContext } from '../types';
 export declare function createContextWindowMonitorHook(context: PluginContext): HookConfig;

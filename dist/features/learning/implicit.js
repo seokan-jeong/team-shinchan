@@ -1,9 +1,9 @@
 /**
  * Implicit Feedback Detection
- * 사용자의 암묵적 피드백 감지 및 학습 변환
+ * Detects and converts user implicit feedback into learnings
  */
 /**
- * 변경 분석
+ * Analyze changes
  */
 function analyzeChange(original, modified) {
     if (!original || !modified) {
@@ -21,7 +21,7 @@ function analyzeChange(original, modified) {
     let logicChanges = 0;
     let namingChanges = 0;
     let structureChanges = 0;
-    // 줄 단위 비교
+    // Compare line by line
     const maxLines = Math.max(originalLines.length, modifiedLines.length);
     let changedLines = 0;
     for (let i = 0; i < maxLines; i++) {
@@ -29,19 +29,19 @@ function analyzeChange(original, modified) {
         const modLine = modifiedLines[i] || '';
         if (origLine !== modLine) {
             changedLines++;
-            // 변경 유형 분석
+            // Analyze change type
             if (origLine.trim() === modLine.trim()) {
-                // 공백만 변경
+                // Whitespace only change
                 styleChanges++;
                 changedElements.push('whitespace');
             }
             else if (origLine.replace(/['"]/g, '') === modLine.replace(/['"]/g, '')) {
-                // 따옴표 스타일 변경
+                // Quote style change
                 styleChanges++;
                 changedElements.push('quote-style');
             }
             else if (origLine.replace(/;/g, '') === modLine.replace(/;/g, '')) {
-                // 세미콜론 변경
+                // Semicolon change
                 styleChanges++;
                 changedElements.push('semicolon');
             }
@@ -59,10 +59,10 @@ function analyzeChange(original, modified) {
             }
         }
     }
-    // 변경 비율 계산
+    // Calculate change ratio
     const changeRatio = changedLines / maxLines;
     const hasSubstantialChange = changeRatio > 0.05 || logicChanges > 0 || structureChanges > 0;
-    // 주요 변경 유형 결정
+    // Determine primary change type
     let changeType = 'unknown';
     const maxChanges = Math.max(styleChanges, logicChanges, namingChanges, structureChanges);
     if (maxChanges === 0) {
@@ -88,23 +88,23 @@ function analyzeChange(original, modified) {
     };
 }
 /**
- * 네이밍 변경 감지
+ * Detect naming changes
  */
 function hasNamingChange(original, modified) {
-    // 변수/함수명 패턴
+    // Variable/function name pattern
     const namePattern = /\b([a-zA-Z_][a-zA-Z0-9_]*)\b/g;
     const origNames = new Set(original.match(namePattern) || []);
     const modNames = new Set(modified.match(namePattern) || []);
-    // 새로운 이름이 추가되었거나 기존 이름이 변경됨
+    // New names added or existing names changed
     const newNames = [...modNames].filter((n) => !origNames.has(n));
     const removedNames = [...origNames].filter((n) => !modNames.has(n));
     return newNames.length > 0 && removedNames.length > 0;
 }
 /**
- * 구조 변경 감지
+ * Detect structure changes
  */
 function hasStructureChange(originalLines, modifiedLines, lineIndex) {
-    // 들여쓰기 수준 변경
+    // Indentation level change
     const getIndent = (line) => (line.match(/^\s*/) || [''])[0].length;
     if (lineIndex < originalLines.length && lineIndex < modifiedLines.length) {
         const origIndent = getIndent(originalLines[lineIndex]);
@@ -113,14 +113,14 @@ function hasStructureChange(originalLines, modifiedLines, lineIndex) {
             return true;
         }
     }
-    // 줄 수 크게 변경
+    // Large line count change
     if (Math.abs(originalLines.length - modifiedLines.length) > 5) {
         return true;
     }
     return false;
 }
 /**
- * 암묵적 피드백 감지
+ * Detect implicit feedback
  */
 export function detectImplicitFeedback(action) {
     switch (action.type) {
@@ -134,7 +134,7 @@ export function detectImplicitFeedback(action) {
                         original: action.context.originalContent,
                         modified: action.context.modifiedContent,
                         agent: action.context.agent || 'shared',
-                        context: `${action.context.taskDescription || ''} - ${analysis.changeType} 변경`,
+                        context: `${action.context.taskDescription || ''} - ${analysis.changeType} change`,
                         timestamp: action.timestamp,
                     };
                 }
@@ -146,7 +146,7 @@ export function detectImplicitFeedback(action) {
                 type: 'rejection',
                 original: action.context.originalContent || '',
                 agent: action.context.agent || 'shared',
-                context: action.context.taskDescription || '사용자가 변경을 거부함',
+                context: action.context.taskDescription || 'User rejected the change',
                 timestamp: action.timestamp,
             };
         case 'accept':
@@ -154,7 +154,7 @@ export function detectImplicitFeedback(action) {
                 type: 'acceptance',
                 original: action.context.originalContent || '',
                 agent: action.context.agent || 'shared',
-                context: action.context.taskDescription || '사용자가 변경을 승인함',
+                context: action.context.taskDescription || 'User approved the change',
                 timestamp: action.timestamp,
             };
         case 'retry':
@@ -162,14 +162,14 @@ export function detectImplicitFeedback(action) {
                 type: 'correction',
                 original: action.context.errorMessage || action.context.originalContent || '',
                 agent: action.context.agent || 'shared',
-                context: '사용자가 재시도를 요청함',
+                context: 'User requested retry',
                 timestamp: action.timestamp,
             };
     }
     return null;
 }
 /**
- * 피드백에서 학습 추출
+ * Extract learning from feedback
  */
 export function extractLearningFromFeedback(feedback) {
     const learnings = [];
@@ -179,11 +179,11 @@ export function extractLearningFromFeedback(feedback) {
         case 'modification': {
             if (feedback.original && feedback.modified) {
                 const analysis = analyzeChange(feedback.original, feedback.modified);
-                // 변경 유형에 따른 학습 생성
+                // Generate learning based on change type
                 if (analysis.changeType === 'style') {
                     learnings.push({
-                        title: '코딩 스타일 선호',
-                        content: `사용자가 코드 스타일을 수정함. 변경된 요소: ${analysis.changedElements.join(', ')}`,
+                        title: 'Coding Style Preference',
+                        content: `User modified code style. Changed elements: ${analysis.changedElements.join(', ')}`,
                         category: 'preference',
                         scope: 'global',
                         owner: feedback.agent,
@@ -194,8 +194,8 @@ export function extractLearningFromFeedback(feedback) {
                 }
                 else if (analysis.changeType === 'naming') {
                     learnings.push({
-                        title: '네이밍 선호',
-                        content: `사용자가 변수/함수명을 수정함.`,
+                        title: 'Naming Preference',
+                        content: `User modified variable/function names.`,
                         category: 'preference',
                         scope: 'project',
                         owner: feedback.agent,
@@ -206,8 +206,8 @@ export function extractLearningFromFeedback(feedback) {
                 }
                 else if (analysis.changeType === 'logic') {
                     learnings.push({
-                        title: '로직 수정',
-                        content: `사용자가 ${feedback.agent} 에이전트의 로직을 수정함. 컨텍스트: ${feedback.context}`,
+                        title: 'Logic Correction',
+                        content: `User corrected ${feedback.agent} agent's logic. Context: ${feedback.context}`,
                         category: 'mistake',
                         scope: 'project',
                         owner: feedback.agent,
@@ -221,8 +221,8 @@ export function extractLearningFromFeedback(feedback) {
         }
         case 'rejection':
             learnings.push({
-                title: '거부된 접근 방식',
-                content: `사용자가 ${feedback.agent} 에이전트의 제안을 거부함. 컨텍스트: ${feedback.context}`,
+                title: 'Rejected Approach',
+                content: `User rejected ${feedback.agent} agent's proposal. Context: ${feedback.context}`,
                 category: 'mistake',
                 scope: 'global',
                 owner: feedback.agent,
@@ -232,10 +232,10 @@ export function extractLearningFromFeedback(feedback) {
             });
             break;
         case 'acceptance':
-            // 승인은 기존 메모리 강화로 처리
+            // Handle acceptance as reinforcement of existing memory
             learnings.push({
-                title: '승인된 접근 방식',
-                content: `사용자가 ${feedback.agent} 에이전트의 작업을 승인함. 컨텍스트: ${feedback.context}`,
+                title: 'Approved Approach',
+                content: `User approved ${feedback.agent} agent's work. Context: ${feedback.context}`,
                 category: 'pattern',
                 scope: 'global',
                 owner: feedback.agent,
@@ -246,8 +246,8 @@ export function extractLearningFromFeedback(feedback) {
             break;
         case 'correction':
             learnings.push({
-                title: '수정 필요했던 작업',
-                content: `재시도가 요청됨. 원래 결과: ${feedback.original}`,
+                title: 'Work That Needed Correction',
+                content: `Retry was requested. Original result: ${feedback.original}`,
                 category: 'mistake',
                 scope: 'project',
                 owner: feedback.agent,
@@ -265,7 +265,7 @@ export function extractLearningFromFeedback(feedback) {
     };
 }
 /**
- * 피드백 배치 처리
+ * Process feedback batch
  */
 export function processFeedbackBatch(actions) {
     const allLearnings = [];
@@ -290,7 +290,7 @@ export function processFeedbackBatch(actions) {
     };
 }
 /**
- * 수정 패턴 분석
+ * Analyze modification patterns
  */
 export function analyzeModificationPatterns(feedbacks) {
     const patterns = new Map();

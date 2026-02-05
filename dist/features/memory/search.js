@@ -1,34 +1,34 @@
 /**
  * Memory Search
- * 메모리 검색 및 관련성 계산
+ * Memory search and relevance calculation
  */
 import { calculateEffectiveConfidence } from './decay';
 /**
- * 키워드 매칭 점수 계산
+ * Calculate keyword matching score
  */
 function calculateKeywordScore(memory, keyword) {
     const lowerKeyword = keyword.toLowerCase();
     let score = 0;
-    // 제목 매칭 (가중치 높음)
+    // Title match (high weight)
     if (memory.title.toLowerCase().includes(lowerKeyword)) {
         score += 3;
     }
-    // 내용 매칭
+    // Content match
     const contentLower = memory.content.toLowerCase();
     const contentMatches = (contentLower.match(new RegExp(lowerKeyword, 'g')) || []).length;
-    score += Math.min(contentMatches, 5); // 최대 5점
-    // 태그 매칭 (정확히 일치)
+    score += Math.min(contentMatches, 5); // Max 5 points
+    // Tag match (exact)
     if (memory.tags.some((tag) => tag.toLowerCase() === lowerKeyword)) {
         score += 4;
     }
-    // 태그 부분 매칭
+    // Tag partial match
     if (memory.tags.some((tag) => tag.toLowerCase().includes(lowerKeyword))) {
         score += 2;
     }
     return score;
 }
 /**
- * 날짜 필터링
+ * Date filtering
  */
 function isWithinDays(memory, days) {
     const now = new Date();
@@ -36,32 +36,32 @@ function isWithinDays(memory, days) {
     return memory.updatedAt >= cutoff;
 }
 /**
- * 메모리 필터링
+ * Filter memories
  */
 export function filterMemories(memories, query) {
     return memories.filter((memory) => {
-        // 카테고리 필터
+        // Category filter
         if (query.categories && query.categories.length > 0) {
             if (!query.categories.includes(memory.category)) {
                 return false;
             }
         }
-        // 스코프 필터
+        // Scope filter
         if (query.scope && memory.scope !== query.scope) {
             return false;
         }
-        // 소유자 필터
+        // Owner filter
         if (query.owner && memory.owner !== query.owner) {
             return false;
         }
-        // 최소 신뢰도 필터
+        // Minimum confidence filter
         if (query.minConfidence !== undefined) {
             const effectiveConfidence = calculateEffectiveConfidence(memory);
             if (effectiveConfidence < query.minConfidence) {
                 return false;
             }
         }
-        // 태그 필터 (AND 조건)
+        // Tag filter (AND condition)
         if (query.tags && query.tags.length > 0) {
             const memoryTagsLower = memory.tags.map((t) => t.toLowerCase());
             const hasAllTags = query.tags.every((tag) => memoryTagsLower.includes(tag.toLowerCase()));
@@ -69,13 +69,13 @@ export function filterMemories(memories, query) {
                 return false;
             }
         }
-        // 날짜 필터
+        // Date filter
         if (query.withinDays !== undefined) {
             if (!isWithinDays(memory, query.withinDays)) {
                 return false;
             }
         }
-        // 키워드 필터
+        // Keyword filter
         if (query.keyword) {
             const score = calculateKeywordScore(memory, query.keyword);
             if (score === 0) {
@@ -86,49 +86,49 @@ export function filterMemories(memories, query) {
     });
 }
 /**
- * 관련성 점수 계산
+ * Calculate relevance score
  */
 export function calculateRelevanceScore(memory, context) {
     let score = 0;
-    // 기본 신뢰도 점수
+    // Base confidence score
     const effectiveConfidence = calculateEffectiveConfidence(memory);
     score += effectiveConfidence * 10;
-    // 키워드 매칭
+    // Keyword matching
     if (context.keywords) {
         for (const keyword of context.keywords) {
             score += calculateKeywordScore(memory, keyword) * 2;
         }
     }
-    // 현재 작업과의 관련성
+    // Relevance to current task
     if (context.currentTask) {
         const taskWords = context.currentTask.toLowerCase().split(/\s+/);
         for (const word of taskWords) {
             if (word.length > 2) {
-                // 짧은 단어 무시
+                // Ignore short words
                 score += calculateKeywordScore(memory, word) * 0.5;
             }
         }
     }
-    // 에이전트 매칭
+    // Agent matching
     if (context.currentAgent && memory.owner === context.currentAgent) {
         score += 5;
     }
-    // 최근 태그 매칭
+    // Recent tag matching
     if (context.recentTags) {
         const matchingTags = memory.tags.filter((tag) => context.recentTags.some((rt) => rt.toLowerCase() === tag.toLowerCase()));
         score += matchingTags.length * 3;
     }
-    // 최근 접근 보너스
+    // Recent access bonus
     const daysSinceAccess = Math.floor((Date.now() - memory.lastAccessedAt.getTime()) / (1000 * 60 * 60 * 24));
     if (daysSinceAccess < 7) {
         score += (7 - daysSinceAccess) * 0.5;
     }
-    // 강화 횟수 보너스
+    // Reinforcement count bonus
     score += Math.min(memory.reinforcementCount, 10) * 0.5;
     return score;
 }
 /**
- * 메모리 정렬
+ * Sort memories
  */
 export function sortMemories(memories, sortBy = 'relevance', sortOrder = 'desc', relevanceScores) {
     const sorted = [...memories].sort((a, b) => {
@@ -161,20 +161,20 @@ export function sortMemories(memories, sortBy = 'relevance', sortOrder = 'desc',
     return sorted;
 }
 /**
- * 메모리 검색
+ * Search memories
  */
 export function searchMemories(memories, query, context) {
-    // 필터링
+    // Filter
     let filtered = filterMemories(memories, query);
-    // 관련성 점수 계산
+    // Calculate relevance scores
     const scores = new Map();
     for (const memory of filtered) {
         const score = calculateRelevanceScore(memory, context || {});
         scores.set(memory.id, score);
     }
-    // 정렬
+    // Sort
     const sorted = sortMemories(filtered, query.sortBy, query.sortOrder, scores);
-    // 페이지네이션
+    // Pagination
     const offset = query.offset || 0;
     const limit = query.limit || sorted.length;
     const paginated = sorted.slice(offset, offset + limit);
@@ -185,7 +185,7 @@ export function searchMemories(memories, query, context) {
     };
 }
 /**
- * 유사 메모리 찾기
+ * Find similar memories
  */
 export function findSimilarMemories(targetMemory, allMemories, limit = 5) {
     const scores = new Map();
@@ -193,18 +193,18 @@ export function findSimilarMemories(targetMemory, allMemories, limit = 5) {
         if (memory.id === targetMemory.id)
             continue;
         let score = 0;
-        // 같은 카테고리 보너스
+        // Same category bonus
         if (memory.category === targetMemory.category) {
             score += 5;
         }
-        // 같은 소유자 보너스
+        // Same owner bonus
         if (memory.owner === targetMemory.owner) {
             score += 3;
         }
-        // 태그 유사도
+        // Tag similarity
         const commonTags = memory.tags.filter((tag) => targetMemory.tags.some((tt) => tt.toLowerCase() === tag.toLowerCase()));
         score += commonTags.length * 2;
-        // 내용 키워드 매칭
+        // Content keyword matching
         const targetWords = targetMemory.content.toLowerCase().split(/\s+/).filter((w) => w.length > 3);
         for (const word of targetWords.slice(0, 10)) {
             if (memory.content.toLowerCase().includes(word)) {
@@ -219,7 +219,7 @@ export function findSimilarMemories(targetMemory, allMemories, limit = 5) {
         .slice(0, limit);
 }
 /**
- * 카테고리별 메모리 그룹화
+ * Group memories by category
  */
 export function groupByCategory(memories) {
     const groups = new Map();
@@ -231,7 +231,7 @@ export function groupByCategory(memories) {
     return groups;
 }
 /**
- * 태그 빈도 분석
+ * Analyze tag frequency
  */
 export function analyzeTagFrequency(memories) {
     const frequency = new Map();
@@ -244,18 +244,18 @@ export function analyzeTagFrequency(memories) {
     return new Map([...frequency.entries()].sort((a, b) => b[1] - a[1]));
 }
 /**
- * 검색 제안 생성
+ * Generate search suggestions
  */
 export function generateSearchSuggestions(memories, partialQuery, limit = 5) {
     const suggestions = new Set();
     const lowerQuery = partialQuery.toLowerCase();
-    // 제목에서 제안
+    // Suggestions from titles
     for (const memory of memories) {
         if (memory.title.toLowerCase().includes(lowerQuery)) {
             suggestions.add(memory.title);
         }
     }
-    // 태그에서 제안
+    // Suggestions from tags
     for (const memory of memories) {
         for (const tag of memory.tags) {
             if (tag.toLowerCase().includes(lowerQuery)) {

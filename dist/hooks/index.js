@@ -1,7 +1,7 @@
 /**
- * Team-Seokan 훅 시스템
+ * Team-Shinchan Hook System
  */
-// 훅 생성 함수들
+// Hook creation functions
 import { createTodoContinuationEnforcerHook } from './todo-continuation-enforcer';
 import { createContextWindowMonitorHook } from './context-window-monitor';
 import { createPreemptiveCompactionHook } from './preemptive-compaction';
@@ -15,16 +15,16 @@ import { createDirectoryAgentsInjectorHook } from './directory-agents-injector';
 import { createStopContinuationGuardHook } from './stop-continuation-guard';
 import { createReviewerCheckHook } from './reviewer-check';
 import { createRalphLoopHook } from './ralph-loop';
-// v2.0 메모리 관련 훅
+// v2.0 Memory-related hooks
 import { createPostTaskReflectionHook } from './post-task-reflection';
 import { createImplicitFeedbackHook } from './implicit-feedback';
 import { createMemoryInjectorHook, createMemoryInitHook } from './memory-injector';
 // ============================================================
-// 모든 내장 훅 생성
+// Create all built-in hooks
 // ============================================================
 export function createBuiltinHooks(settings, context) {
     const hooks = [];
-    // 핵심 훅들
+    // Core hooks
     if (settings.enableTodoEnforcer) {
         hooks.push(createTodoContinuationEnforcerHook(context));
     }
@@ -37,31 +37,31 @@ export function createBuiltinHooks(settings, context) {
     if (settings.enableReviewerCheck) {
         hooks.push(createReviewerCheckHook(context));
     }
-    // 모니터링 훅들
+    // Monitoring hooks
     hooks.push(createContextWindowMonitorHook(context));
     hooks.push(createPreemptiveCompactionHook(context));
-    // 도구 관련 훅들
+    // Tool-related hooks
     hooks.push(createToolOutputTruncatorHook(context));
     hooks.push(createEmptyTaskResponseDetectorHook(context));
     hooks.push(createCommentCheckerHook(context));
     hooks.push(createEditErrorRecoveryHook(context));
-    // 주입 훅들
+    // Injection hooks
     hooks.push(createRulesInjectorHook(context));
     hooks.push(createDirectoryAgentsInjectorHook(context));
-    // 보호 훅들
+    // Protection hooks
     hooks.push(createStopContinuationGuardHook(context));
-    // v2.0 메모리 훅들
+    // v2.0 Memory hooks
     hooks.push(createMemoryInitHook(context));
     hooks.push(createMemoryInjectorHook(context));
     hooks.push(createPostTaskReflectionHook(context));
     hooks.push(createImplicitFeedbackHook(context));
-    // 우선순위로 정렬
+    // Sort by priority
     hooks.sort((a, b) => b.priority - a.priority);
     return hooks;
 }
 // ============================================================
-// 내보내기
+// Exports
 // ============================================================
 export { createTodoContinuationEnforcerHook, createContextWindowMonitorHook, createPreemptiveCompactionHook, createToolOutputTruncatorHook, createEmptyTaskResponseDetectorHook, createCommentCheckerHook, createEditErrorRecoveryHook, createKeywordDetectorHook, createRulesInjectorHook, createDirectoryAgentsInjectorHook, createStopContinuationGuardHook, createReviewerCheckHook, createRalphLoopHook, 
-// v2.0 메모리 훅
+// v2.0 Memory hooks
 createPostTaskReflectionHook, createImplicitFeedbackHook, createMemoryInjectorHook, createMemoryInitHook, };

@@ -41,7 +41,7 @@ export function createAichanAgent(settings) {
             cost: 'CHEAP',
             model: 'sonnet',
             description: 'Frontend Specialist - UI/UX development',
-            delegationTriggers: ['UI', 'UX', '프론트', 'frontend', '컴포넌트', 'component', 'CSS', '스타일'],
+            delegationTriggers: ['UI', 'UX', 'frontend', 'component', 'CSS', 'style', 'styling'],
             isReadOnly: false,
         },
     };

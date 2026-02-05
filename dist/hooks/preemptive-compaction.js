@@ -1,11 +1,11 @@
 /**
- * 선제적 컴팩션 훅
+ * Preemptive Compaction Hook
  */
 export function createPreemptiveCompactionHook(context) {
     return {
         name: 'preemptive-compaction',
         event: 'chat.message',
-        description: '컨텍스트가 가득 차기 전에 선제적으로 압축을 제안합니다.',
+        description: 'Suggests preemptive compaction before context is full.',
         enabled: true,
         priority: 50,
         handler: async () => ({ continue: true }),

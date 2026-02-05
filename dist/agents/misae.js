@@ -41,7 +41,7 @@ export function createMisaeAgent(settings) {
             cost: 'CHEAP',
             model: 'sonnet',
             description: 'Pre-Planning Analyst - Discovers hidden requirements',
-            delegationTriggers: ['분석', 'analyze', '확인', '고려사항'],
+            delegationTriggers: ['analyze', 'analysis', 'check', 'considerations', 'requirements'],
             disallowedTools: ['Edit', 'Write', 'NotebookEdit'],
             isReadOnly: true,
         },

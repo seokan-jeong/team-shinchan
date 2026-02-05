@@ -1,7 +1,7 @@
 /**
- * Team-Seokan 도구 시스템
+ * Team-Seokan Tool System
  */
-// 도구 생성 함수들
+// Tool creation functions
 import { createDelegateTaskTool } from './delegate-task';
 import { createCallTeamAgentTool } from './call-team-agent';
 import { createBackgroundTaskTool } from './background-task';
@@ -12,39 +12,39 @@ import { createInteractiveBashTool } from './interactive-bash';
 import { createAstGrepTool } from './ast-grep';
 import { createLspDiagnosticsTool, createLspRenameTool, createLspReferencesTool } from './lsp';
 import { createSessionManagerTool } from './session-manager';
-// v2.0 메모리 도구
+// v2.0 Memory tools
 import { createMemoryOpsTool } from './memory-ops';
 // ============================================================
-// 모든 내장 도구 생성
+// Create all built-in tools
 // ============================================================
 export function createBuiltinTools(context) {
     return [
-        // 에이전트 관련
+        // Agent related
         createDelegateTaskTool(context),
         createCallTeamAgentTool(context),
         createBackgroundTaskTool(context),
-        // 파일/조회
+        // File/View
         createLookAtTool(context),
-        // 스킬/명령
+        // Skill/Command
         createSkillTool(context),
         createSlashcommandTool(context),
-        // 셸
+        // Shell
         createInteractiveBashTool(context),
-        // 코드 분석
+        // Code Analysis
         createAstGrepTool(context),
         // LSP
         createLspDiagnosticsTool(context),
         createLspRenameTool(context),
         createLspReferencesTool(context),
-        // 세션
+        // Session
         createSessionManagerTool(context),
-        // v2.0 메모리
+        // v2.0 Memory
         createMemoryOpsTool(context),
     ];
 }
 // ============================================================
-// 내보내기
+// Exports
 // ============================================================
-export { createDelegateTaskTool, createCallTeamAgentTool, createBackgroundTaskTool, createLookAtTool, createSkillTool, createSlashcommandTool, createInteractiveBashTool, createAstGrepTool, createLspDiagnosticsTool, createLspRenameTool, createLspReferencesTool, createSessionManagerTool, 
-// v2.0 메모리
+export { createDelegateTaskTool, createCallTeamAgentTool, createBackgroundTaskTool, createLookAtTool, createSkillTool, createSlashcommandTool, createInteractiveBashTool, createAstGrepTool, createLspDiagnosticsTool, createLspRenameTool, createLspReferencesTool, createSessionManagerTool,
+// v2.0 Memory
 createMemoryOpsTool, };

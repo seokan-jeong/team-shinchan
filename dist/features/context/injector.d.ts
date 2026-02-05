@@ -1,43 +1,43 @@
 /**
  * Context Injector
- * 에이전트 프롬프트에 메모리 주입
+ * Injects memories into agent prompts
  */
 import type { MemoryOwner, MemoryCategory, ContextInjection } from '../memory/types';
 /**
- * 컨텍스트 주입 옵션
+ * Context Injection Options
  */
 export interface InjectionOptions {
-    /** 대상 에이전트 */
+    /** Target Agent */
     agent: MemoryOwner;
-    /** 현재 작업 설명 */
+    /** Current Task Description */
     currentTask?: string;
-    /** 관련 키워드 */
+    /** Related Keywords */
     keywords?: string[];
-    /** 최대 토큰 수 */
+    /** Maximum Token Count */
     maxTokens?: number;
-    /** 포함할 카테고리 (기본: 전체) */
+    /** Categories to Include (default: all) */
     includeCategories?: MemoryCategory[];
-    /** 제외할 카테고리 */
+    /** Categories to Exclude */
     excludeCategories?: MemoryCategory[];
-    /** 최소 신뢰도 */
+    /** Minimum Confidence */
     minConfidence?: number;
-    /** 상세 메모리 포함 여부 */
+    /** Include Detailed Memories */
     includeDetails?: boolean;
 }
 /**
- * 컨텍스트 주입 생성
+ * Generate Context Injection
  */
 export declare function generateContextInjection(options: InjectionOptions): Promise<ContextInjection>;
 /**
- * 에이전트별 최적화된 컨텍스트 생성
+ * Generate Agent-Optimized Context
  */
 export declare function generateAgentContext(agent: MemoryOwner, task: string): Promise<string>;
 /**
- * 프롬프트에 컨텍스트 삽입
+ * Insert Context into Prompt
  */
 export declare function injectContextIntoPrompt(originalPrompt: string, context: string, position?: 'start' | 'end' | 'after-system'): string;
 /**
- * 캐시된 컨텍스트 관리
+ * Cached Context Management
  */
 declare class ContextCache {
     private cache;
@@ -48,7 +48,7 @@ declare class ContextCache {
 }
 export declare const contextCache: ContextCache;
 /**
- * 캐시된 컨텍스트 생성
+ * Generate Cached Context
  */
 export declare function getCachedAgentContext(agent: MemoryOwner, task: string): Promise<string>;
 export {};

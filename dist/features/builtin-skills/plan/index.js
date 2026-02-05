@@ -1,38 +1,38 @@
 /**
- * Plan 스킬 - 계획 세션
+ * Plan Skill - Planning Session
  */
 export function createPlanSkill(context) {
     return {
         name: 'plan',
         displayName: 'Plan',
-        description: '계획 세션을 시작하여 요구사항을 정리합니다.',
-        triggers: ['plan', '계획', '설계', 'planning'],
+        description: 'Starts a planning session to organize requirements.',
+        triggers: ['plan', 'planning', 'design'],
         autoActivate: true,
         handler: async ({ args, sessionState }) => {
             sessionState.activeSkill = 'plan';
             return {
                 success: true,
-                output: `📋 **계획 세션 시작**
+                output: `📋 **Planning Session Started**
 
-유리(Planner)와 함께 계획을 수립합니다.
+Creating a plan with Nene (Planner).
 
-## 프로젝트/작업
-${args || '계획할 내용을 설명해주세요'}
+## Project/Task
+${args || 'Please describe what to plan'}
 
-## 진행 방식
-1. **요구사항 수집**: 목표, 제약조건, 우선순위 파악
-2. **분석**: 봉미선(Metis)이 숨은 요구사항 분석
-3. **계획 작성**: 단계별 작업 분해
-4. **검토**: 액션가면(Reviewer) 검토
+## Process
+1. **Requirements Gathering**: Identify goals, constraints, priorities
+2. **Analysis**: Misae (Metis) analyzes hidden requirements
+3. **Plan Creation**: Break down into step-by-step tasks
+4. **Review**: Action Kamen (Reviewer) reviews
 
-## 질문
-계획을 수립하기 위해 몇 가지 질문을 드리겠습니다.
+## Questions
+Will ask a few questions to create the plan.
 
-유리(Planner)에게 위임합니다...`,
+Delegating to Nene (Planner)...`,
                 inject: `<plan-mode>
-계획 세션이 시작되었습니다.
-유리(Planner)에게 위임하여 체계적인 계획을 수립하세요.
-delegate_task(agent="yuri", task="...")
+Planning session has started.
+Delegate to Nene (Planner) to create a systematic plan.
+delegate_task(agent="nene", task="...")
 </plan-mode>`,
             };
         },

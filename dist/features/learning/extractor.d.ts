@@ -1,10 +1,10 @@
 /**
  * Learning Extractor
- * 상호작용에서 학습 포인트 추출
+ * Extract learning points from interactions
  */
 import type { CreateMemoryInput, MemoryCategory, MemoryScope, MemoryOwner, LearningExtraction } from '../memory/types';
 /**
- * 작업 결과 타입
+ * Task Result Type
  */
 export interface TaskResult {
     taskId: string;
@@ -19,7 +19,7 @@ export interface TaskResult {
     context: Record<string, unknown>;
 }
 /**
- * 코드 변경 정보
+ * Code Change Information
  */
 export interface CodeChange {
     filePath: string;
@@ -30,11 +30,11 @@ export interface CodeChange {
     summary: string;
 }
 /**
- * 학습 추출 실행
+ * Execute Learning Extraction
  */
 export declare function extractLearnings(result: TaskResult): LearningExtraction;
 /**
- * 간단한 학습 생성 (명시적 학습용)
+ * Create Simple Learning (for explicit learning)
  */
 export declare function createSimpleLearning(content: string, options?: {
     category?: MemoryCategory;
@@ -44,7 +44,7 @@ export declare function createSimpleLearning(content: string, options?: {
     source?: string;
 }): CreateMemoryInput;
 /**
- * 코드 변경에서 학습 추출
+ * Extract Learning from Code Changes
  */
 export declare function extractFromCodeChanges(changes: CodeChange[]): CreateMemoryInput[];
 //# sourceMappingURL=extractor.d.ts.map

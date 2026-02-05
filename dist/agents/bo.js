@@ -42,7 +42,7 @@ export function createBoAgent(settings) {
             cost: 'CHEAP',
             model: 'sonnet',
             description: 'Task Executor - Code writing and modification',
-            delegationTriggers: ['구현', '코드', '작성', '수정', 'implement', 'code', 'write'],
+            delegationTriggers: ['implement', 'code', 'write', 'modify', 'create'],
             isReadOnly: false,
         },
     };

@@ -1,5 +1,5 @@
 /**
- * look_at - 파일/이미지 조회
+ * look_at - View File/Image
  */
 import type { ToolConfig, PluginContext } from '../../types';
 export declare function createLookAtTool(context: PluginContext): ToolConfig;

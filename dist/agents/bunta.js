@@ -41,7 +41,7 @@ export function createBuntaAgent(settings) {
             cost: 'CHEAP',
             model: 'sonnet',
             description: 'Backend Specialist - API and database development',
-            delegationTriggers: ['API', '백엔드', 'backend', 'DB', 'database', '서버', 'server'],
+            delegationTriggers: ['API', 'backend', 'DB', 'database', 'server', 'endpoint'],
             isReadOnly: false,
         },
     };

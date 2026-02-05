@@ -1,35 +1,35 @@
 /**
- * Frontend-UI-UX 스킬 - UI/UX 전문 모드
+ * Frontend-UI-UX Skill - UI/UX Specialist Mode
  */
 export function createFrontendUiUxSkill(context) {
     return {
         name: 'frontend-ui-ux',
         displayName: 'Frontend-UI-UX',
-        description: 'UI/UX 작업 전문 모드를 활성화합니다.',
-        triggers: ['UI', 'UX', '컴포넌트', '스타일', 'CSS', 'component'],
+        description: 'Activates UI/UX specialist mode.',
+        triggers: ['UI', 'UX', 'component', 'style', 'CSS'],
         autoActivate: false,
         handler: async ({ args, sessionState }) => {
             sessionState.activeSkill = 'frontend-ui-ux';
             return {
                 success: true,
-                output: `🎨 **Frontend-UI-UX 모드 활성화**
+                output: `🎨 **Frontend-UI-UX Mode Activated**
 
-수지(Frontend)와 함께 UI/UX 작업을 수행합니다.
+Performing UI/UX work with Aichan (Frontend).
 
-## UI/UX 원칙
-- 사용자 중심 설계
-- 접근성 (a11y) 고려
-- 반응형 디자인
-- 일관된 디자인 시스템
+## UI/UX Principles
+- User-centered design
+- Accessibility (a11y) consideration
+- Responsive design
+- Consistent design system
 
-## 작업 내용
-${args || 'UI/UX 작업 내용을 설명해주세요'}
+## Task Description
+${args || 'Please describe the UI/UX task'}
 
-수지(Frontend)에게 위임합니다...`,
+Delegating to Aichan (Frontend)...`,
                 inject: `<frontend-ui-ux-mode>
-Frontend-UI-UX 모드가 활성화되었습니다.
-수지(Frontend)에게 위임하여 UI/UX 작업을 수행하세요.
-delegate_task(agent="suji", task="...")
+Frontend-UI-UX mode is activated.
+Delegate to Aichan (Frontend) to perform UI/UX work.
+delegate_task(agent="aichan", task="...")
 </frontend-ui-ux-mode>`,
             };
         },

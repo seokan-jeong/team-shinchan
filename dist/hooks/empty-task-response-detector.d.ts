@@ -1,5 +1,5 @@
 /**
- * 빈 작업 응답 감지 훅
+ * Empty Task Response Detector Hook
  */
 import type { HookConfig, PluginContext } from '../types';
 export declare function createEmptyTaskResponseDetectorHook(context: PluginContext): HookConfig;

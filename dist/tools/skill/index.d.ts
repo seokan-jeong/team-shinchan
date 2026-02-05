@@ -1,5 +1,5 @@
 /**
- * skill - 스킬 실행
+ * skill - Execute Skill
  */
 import type { ToolConfig, PluginContext } from '../../types';
 export declare function createSkillTool(context: PluginContext): ToolConfig;

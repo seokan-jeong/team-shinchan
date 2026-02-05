@@ -1,6 +1,6 @@
 /**
  * Memory Manager
- * 메모리 시스템의 메인 인터페이스
+ * Main interface for the memory system
  */
 import { v4 as uuidv4 } from 'uuid';
 import { getDefaultStorage } from './storage';
@@ -8,12 +8,12 @@ import { applyDecay, reinforceMemory, contradictMemory, recordAccess, processBat
 import { detectBatchConflicts, autoResolveConflicts } from './conflict';
 import { searchMemories, findSimilarMemories, groupByCategory, analyzeTagFrequency } from './search';
 /**
- * 메모리 매니저 클래스
+ * Memory Manager class
  */
 export class MemoryManager {
     storage;
     cache;
-    cacheExpiry = 5 * 60 * 1000; // 5분
+    cacheExpiry = 5 * 60 * 1000; // 5 minutes
     constructor(storage) {
         this.storage = storage || getDefaultStorage();
         this.cache = {
@@ -23,46 +23,46 @@ export class MemoryManager {
         };
     }
     /**
-     * 초기화
+     * Initialize
      */
     async initialize() {
         await this.storage.initialize();
         await this.loadMemories();
     }
     /**
-     * 메모리 로드 (캐시 적용)
+     * Load memories (with caching)
      */
     async loadMemories(force = false) {
         const now = new Date();
-        // 캐시가 유효하면 로드 스킵
+        // Skip loading if cache is valid
         if (!force &&
             this.cache.lastLoaded &&
             now.getTime() - this.cache.lastLoaded.getTime() < this.cacheExpiry) {
             return;
         }
         const { global, project } = await this.storage.loadAllMemories();
-        // 감쇠 적용
+        // Apply decay
         this.cache.global = global.map((m) => applyDecay(m));
         this.cache.project = project.map((m) => applyDecay(m));
         this.cache.lastLoaded = now;
     }
     /**
-     * 모든 메모리 가져오기 (글로벌 + 프로젝트 병합)
+     * Get all memories (merge global + project)
      */
     getAllMemories() {
-        // 프로젝트 메모리가 우선 (같은 ID면 프로젝트 것 사용)
+        // Project memories take priority (use project version for same ID)
         const projectIds = new Set(this.cache.project.map((m) => m.id));
         const globalFiltered = this.cache.global.filter((m) => !projectIds.has(m.id));
         return [...this.cache.project, ...globalFiltered];
     }
     /**
-     * 메모리 생성
+     * Create memory
      */
     async create(input) {
         await this.loadMemories();
         const now = new Date();
         const allMemories = this.getAllMemories();
-        // 충돌 검사
+        // Check for conflicts
         const conflicts = detectBatchConflicts(allMemories, input);
         if (conflicts.length > 0) {
             const resolutions = autoResolveConflicts(conflicts);
@@ -71,18 +71,18 @@ export class MemoryManager {
             if (resolution) {
                 switch (resolution.action) {
                     case 'keep_existing':
-                        // 기존 메모리 강화
+                        // Reinforce existing memory
                         const reinforced = reinforceMemory(firstConflict.existing);
                         await this.storage.saveMemory(reinforced);
                         this.invalidateCache();
                         return reinforced;
                     case 'replace':
-                        // 기존 메모리 반박 처리 후 새로 생성
+                        // Mark existing memory as contradicted, then create new
                         const contradicted = contradictMemory(firstConflict.existing);
                         await this.storage.saveMemory(contradicted);
                         break;
                     case 'merge':
-                        // 병합
+                        // Merge
                         if (resolution.mergedMemory) {
                             await this.storage.saveMemory(resolution.mergedMemory);
                             this.invalidateCache();
@@ -92,7 +92,7 @@ export class MemoryManager {
                 }
             }
         }
-        // 새 메모리 생성
+        // Create new memory
         const memory = {
             id: uuidv4(),
             title: input.title,
@@ -118,13 +118,13 @@ export class MemoryManager {
         return memory;
     }
     /**
-     * 메모리 읽기
+     * Read memory
      */
     async read(id) {
         await this.loadMemories();
         const memory = this.getAllMemories().find((m) => m.id === id);
         if (memory) {
-            // 접근 기록
+            // Record access
             const updated = recordAccess(memory);
             await this.storage.saveMemory(updated);
             return updated;
@@ -132,7 +132,7 @@ export class MemoryManager {
         return null;
     }
     /**
-     * 메모리 업데이트
+     * Update memory
      */
     async update(id, input) {
         await this.loadMemories();
@@ -158,7 +158,7 @@ export class MemoryManager {
         return updated;
     }
     /**
-     * 메모리 삭제
+     * Delete memory
      */
     async delete(id) {
         await this.loadMemories();
@@ -171,14 +171,14 @@ export class MemoryManager {
         return result;
     }
     /**
-     * 메모리 검색
+     * Search memories
      */
     async search(query, context) {
         await this.loadMemories();
         return searchMemories(this.getAllMemories(), query, context);
     }
     /**
-     * 메모리 강화
+     * Reinforce memory
      */
     async reinforce(id) {
         await this.loadMemories();
@@ -192,7 +192,7 @@ export class MemoryManager {
         return reinforced;
     }
     /**
-     * 메모리 반박
+     * Contradict memory
      */
     async contradict(id) {
         await this.loadMemories();
@@ -206,7 +206,7 @@ export class MemoryManager {
         return contradicted;
     }
     /**
-     * 유사 메모리 찾기
+     * Find similar memories
      */
     async findSimilar(id, limit = 5) {
         await this.loadMemories();
@@ -217,7 +217,7 @@ export class MemoryManager {
         return findSimilarMemories(memory, this.getAllMemories(), limit);
     }
     /**
-     * 메모리 요약 생성
+     * Generate memory summary
      */
     async generateSummary(query, maxTokens = 500) {
         await this.loadMemories();
@@ -226,15 +226,15 @@ export class MemoryManager {
             const result = await this.search(query);
             memories = result.memories;
         }
-        // 신뢰도 높은 순으로 정렬
+        // Sort by confidence (highest first)
         const sorted = memories
             .map((m) => ({ memory: m, confidence: calculateEffectiveConfidence(m) }))
             .sort((a, b) => b.confidence - a.confidence);
-        // 토큰 예산에 맞게 요약 생성
+        // Generate summary within token budget
         const lines = [];
         const includedIds = [];
         let estimatedTokens = 0;
-        const tokensPerChar = 0.25; // 대략적인 추정
+        const tokensPerChar = 0.25; // Rough estimate
         for (const { memory } of sorted) {
             const line = `- [${memory.category}] ${memory.title}: ${memory.content.slice(0, 100)}${memory.content.length > 100 ? '...' : ''}`;
             const lineTokens = Math.ceil(line.length * tokensPerChar);
@@ -253,7 +253,7 @@ export class MemoryManager {
         };
     }
     /**
-     * 감쇠 처리 (배치)
+     * Process decay (batch)
      */
     async processDecay() {
         await this.loadMemories(true);
@@ -265,7 +265,7 @@ export class MemoryManager {
             threshold: this.storage.getConfig().decayThreshold,
             applyChanges: true,
         });
-        // 만료된 메모리 삭제
+        // Delete expired memories
         for (const memory of [...globalResult.removed, ...projectResult.removed]) {
             await this.storage.deleteMemory(memory.id, memory.scope);
         }
@@ -276,7 +276,7 @@ export class MemoryManager {
         };
     }
     /**
-     * 통계
+     * Get statistics
      */
     async getStats() {
         await this.loadMemories();
@@ -305,7 +305,7 @@ export class MemoryManager {
         };
     }
     /**
-     * 키워드로 잊기 (forget)
+     * Forget by keyword
      */
     async forget(keyword) {
         await this.loadMemories();
@@ -320,20 +320,20 @@ export class MemoryManager {
         return deletedCount;
     }
     /**
-     * 캐시 무효화
+     * Invalidate cache
      */
     invalidateCache() {
         this.cache.lastLoaded = null;
     }
     /**
-     * 백업
+     * Create backup
      */
     async backup() {
         return this.storage.createBackup();
     }
 }
 /**
- * 기본 매니저 인스턴스
+ * Default manager instance
  */
 let defaultManager = null;
 export function getMemoryManager() {

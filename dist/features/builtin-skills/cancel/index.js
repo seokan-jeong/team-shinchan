@@ -1,13 +1,13 @@
 /**
- * Cancel 스킬 - 현재 모드 취소
+ * Cancel Skill - Cancel Current Mode
  */
 import { deactivateRalphLoop, deactivateUltrawork, deactivateAutopilot, } from '../../session-state';
 export function createCancelSkill(context) {
     return {
         name: 'cancel',
         displayName: 'Cancel',
-        description: '활성화된 모드를 취소합니다.',
-        triggers: ['cancel', '취소', '중단', 'stop', '멈춰'],
+        description: 'Cancels active modes.',
+        triggers: ['cancel', 'stop', 'halt', 'abort'],
         autoActivate: true,
         handler: async ({ args, sessionState }) => {
             const cancelTarget = args?.toLowerCase() || 'all';
@@ -29,24 +29,24 @@ export function createCancelSkill(context) {
                     deactivateAutopilot(sessionState);
                     deactivateRalphLoop(sessionState);
                     deactivateUltrawork(sessionState);
-                    cancelled.push('Autopilot (Ralph + Ultrawork 포함)');
+                    cancelled.push('Autopilot (including Ralph + Ultrawork)');
                 }
             }
             sessionState.activeSkill = undefined;
             if (cancelled.length === 0) {
                 return {
                     success: true,
-                    output: `ℹ️ 취소할 활성 모드가 없습니다.`,
+                    output: `ℹ️ No active modes to cancel.`,
                 };
             }
             return {
                 success: true,
-                output: `⏹️ **모드 취소됨**
+                output: `⏹️ **Modes Cancelled**
 
-다음 모드가 취소되었습니다:
+The following modes have been cancelled:
 ${cancelled.map((c) => `- ${c}`).join('\n')}
 
-일반 모드로 돌아갑니다.`,
+Returning to normal mode.`,
             };
         },
     };

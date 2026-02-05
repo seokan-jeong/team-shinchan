@@ -40,7 +40,7 @@ export function createKazamaAgent(settings) {
             cost: 'EXPENSIVE',
             model: 'opus',
             description: 'Autonomous Deep Worker - Complex long-running tasks',
-            delegationTriggers: ['복잡한', '장시간', 'complex', 'refactor', '리팩토링'],
+            delegationTriggers: ['complex', 'long-running', 'refactor', 'refactoring', 'deep work'],
             isReadOnly: false,
         },
     };

@@ -1,6 +1,6 @@
 /**
- * 키워드 감지 훅 (의도 게이트)
- * 사용자 메시지에서 키워드를 감지하여 적절한 스킬/에이전트 추천
+ * Keyword Detector Hook (Intent Gate)
+ * Detects keywords in user messages and recommends appropriate skills/agents
  */
 import type { HookConfig, PluginContext } from '../types';
 export declare function createKeywordDetectorHook(context: PluginContext): HookConfig;

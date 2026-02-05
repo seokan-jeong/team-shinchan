@@ -1,134 +1,134 @@
 /**
  * Best Practices
- * 언어/프레임워크별 기본 베스트 프랙티스
+ * Default best practices by language/framework
  */
 /**
- * 공통 베스트 프랙티스
+ * Common best practices
  */
 const COMMON_PRACTICES = [
     {
-        title: '명확한 네이밍',
-        content: '변수, 함수, 클래스명은 그 목적을 명확히 나타내야 합니다. 축약어보다 명확한 이름을 선호합니다.',
+        title: 'Clear Naming',
+        content: 'Variable, function, and class names should clearly indicate their purpose. Prefer clear names over abbreviations.',
         category: 'convention',
         tags: ['naming', 'readability'],
         applicableTo: ['*'],
     },
     {
-        title: '단일 책임 원칙',
-        content: '각 함수/클래스는 하나의 책임만 가져야 합니다. 너무 많은 일을 하는 코드는 분리합니다.',
+        title: 'Single Responsibility Principle',
+        content: 'Each function/class should have only one responsibility. Separate code that does too much.',
         category: 'convention',
         tags: ['solid', 'architecture'],
         applicableTo: ['*'],
     },
     {
-        title: 'DRY 원칙',
-        content: "Don't Repeat Yourself. 중복 코드는 공통 함수/모듈로 추출합니다.",
+        title: 'DRY Principle',
+        content: "Don't Repeat Yourself. Extract duplicate code into common functions/modules.",
         category: 'convention',
         tags: ['dry', 'refactoring'],
         applicableTo: ['*'],
     },
     {
-        title: '에러 핸들링',
-        content: '예외 상황을 적절히 처리합니다. 사용자에게 의미 있는 에러 메시지를 제공합니다.',
+        title: 'Error Handling',
+        content: 'Handle exceptional cases appropriately. Provide meaningful error messages to users.',
         category: 'convention',
         tags: ['error-handling', 'robustness'],
         applicableTo: ['*'],
     },
     {
-        title: '테스트 작성',
-        content: '핵심 로직에는 테스트를 작성합니다. 버그 수정 시 회귀 테스트를 추가합니다.',
+        title: 'Write Tests',
+        content: 'Write tests for core logic. Add regression tests when fixing bugs.',
         category: 'convention',
         tags: ['testing', 'quality'],
         applicableTo: ['*'],
     },
 ];
 /**
- * TypeScript 베스트 프랙티스
+ * TypeScript best practices
  */
 const TYPESCRIPT_PRACTICES = [
     {
-        title: 'TypeScript 타입 명시',
-        content: '함수 매개변수와 반환 타입을 명시합니다. any 사용을 최소화하고, unknown을 선호합니다.',
+        title: 'TypeScript Type Annotation',
+        content: 'Specify function parameters and return types. Minimize any usage, prefer unknown.',
         category: 'convention',
         tags: ['typescript', 'type-safety'],
         applicableTo: ['TypeScript'],
     },
     {
-        title: 'TypeScript 인터페이스 활용',
-        content: '객체 타입은 interface로 정의합니다. 확장이 필요 없는 경우 type alias도 사용 가능합니다.',
+        title: 'TypeScript Interface Usage',
+        content: 'Define object types with interface. Type alias can be used when extension is not needed.',
         category: 'convention',
         tags: ['typescript', 'interface'],
         applicableTo: ['TypeScript'],
     },
     {
-        title: 'TypeScript null 안전성',
-        content: 'strictNullChecks 활성화. optional chaining(?.)과 nullish coalescing(??)을 적절히 사용합니다.',
+        title: 'TypeScript Null Safety',
+        content: 'Enable strictNullChecks. Use optional chaining(?.) and nullish coalescing(??) appropriately.',
         category: 'convention',
         tags: ['typescript', 'null-safety'],
         applicableTo: ['TypeScript'],
     },
 ];
 /**
- * React 베스트 프랙티스
+ * React best practices
  */
 const REACT_PRACTICES = [
     {
-        title: 'React 함수형 컴포넌트',
-        content: '함수형 컴포넌트와 Hooks를 사용합니다. 클래스 컴포넌트보다 함수형을 선호합니다.',
+        title: 'React Functional Components',
+        content: 'Use functional components and Hooks. Prefer functional over class components.',
         category: 'convention',
         tags: ['react', 'functional'],
         applicableTo: ['React'],
     },
     {
-        title: 'React 상태 관리',
-        content: '로컬 상태는 useState, 복잡한 상태는 useReducer를 사용합니다. 전역 상태는 Context 또는 외부 라이브러리를 고려합니다.',
+        title: 'React State Management',
+        content: 'Use useState for local state, useReducer for complex state. Consider Context or external libraries for global state.',
         category: 'convention',
         tags: ['react', 'state'],
         applicableTo: ['React'],
     },
     {
-        title: 'React 메모이제이션',
-        content: '불필요한 리렌더링 방지를 위해 useMemo, useCallback, React.memo를 적절히 사용합니다.',
+        title: 'React Memoization',
+        content: 'Use useMemo, useCallback, React.memo appropriately to prevent unnecessary re-renders.',
         category: 'convention',
         tags: ['react', 'performance'],
         applicableTo: ['React'],
     },
     {
-        title: 'React 컴포넌트 분리',
-        content: '컴포넌트가 너무 커지면 작은 단위로 분리합니다. 프레젠테이션과 컨테이너 컴포넌트를 구분합니다.',
+        title: 'React Component Separation',
+        content: 'Split components into smaller units when they become too large. Separate presentational and container components.',
         category: 'convention',
         tags: ['react', 'architecture'],
         applicableTo: ['React'],
     },
 ];
 /**
- * Node.js 베스트 프랙티스
+ * Node.js best practices
  */
 const NODE_PRACTICES = [
     {
-        title: 'Node.js 비동기 처리',
-        content: 'async/await을 사용합니다. 콜백 대신 Promise를 사용하고, 에러는 try-catch로 처리합니다.',
+        title: 'Node.js Async Handling',
+        content: 'Use async/await. Use Promise instead of callbacks, handle errors with try-catch.',
         category: 'convention',
         tags: ['nodejs', 'async'],
         applicableTo: ['node'],
     },
     {
-        title: 'Node.js 환경 변수',
-        content: '민감한 정보는 환경 변수로 관리합니다. dotenv 또는 비슷한 도구를 사용합니다.',
+        title: 'Node.js Environment Variables',
+        content: 'Manage sensitive information with environment variables. Use dotenv or similar tools.',
         category: 'convention',
         tags: ['nodejs', 'security', 'config'],
         applicableTo: ['node'],
     },
     {
-        title: 'Node.js 모듈 구조',
-        content: '기능별로 모듈을 분리합니다. index.ts로 public API를 노출하고 내부 구현은 숨깁니다.',
+        title: 'Node.js Module Structure',
+        content: 'Separate modules by functionality. Expose public API through index.ts and hide internal implementation.',
         category: 'convention',
         tags: ['nodejs', 'architecture'],
         applicableTo: ['node'],
     },
 ];
 /**
- * 모든 베스트 프랙티스
+ * All best practices
  */
 const ALL_PRACTICES = [
     ...COMMON_PRACTICES,
@@ -137,7 +137,7 @@ const ALL_PRACTICES = [
     ...NODE_PRACTICES,
 ];
 /**
- * 해당하는 베스트 프랙티스 가져오기
+ * Get applicable best practices
  */
 export function getBestPractices(languages, frameworks) {
     const applicable = new Set(['*', ...languages, ...frameworks]);
@@ -152,27 +152,27 @@ export function getBestPractices(languages, frameworks) {
     }));
 }
 /**
- * 카테고리별 베스트 프랙티스
+ * Get best practices by category
  */
 export function getBestPracticesByCategory(category, languages, frameworks) {
     return getBestPractices(languages, frameworks).filter((p) => p.category === category);
 }
 /**
- * 베스트 프랙티스 요약
+ * Summarize best practices
  */
 export function summarizeBestPractices(practices) {
     if (practices.length === 0) {
-        return '적용 가능한 베스트 프랙티스가 없습니다.';
+        return 'No applicable best practices.';
     }
     const lines = [
-        '## 베스트 프랙티스',
+        '## Best Practices',
         '',
         ...practices.map((p) => `- **${p.title}**: ${p.content.slice(0, 60)}...`),
     ];
     return lines.join('\n');
 }
 /**
- * 기본 베스트 프랙티스 (언어/프레임워크 무관)
+ * Default best practices (language/framework agnostic)
  */
 export function getDefaultBestPractices() {
     return COMMON_PRACTICES.map((practice) => ({

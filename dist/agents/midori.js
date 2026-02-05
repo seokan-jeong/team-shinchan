@@ -60,7 +60,7 @@ export function createMidoriAgent(settings) {
             cost: 'EXPENSIVE',
             model: 'opus',
             description: 'Discussion Moderator - Facilitates debates and consensus',
-            delegationTriggers: ['토론', 'debate', '의견', '논의', '장단점', '비교'],
+            delegationTriggers: ['debate', 'discussion', 'opinion', 'pros and cons', 'compare', 'comparison'],
             disallowedTools: ['Edit', 'Write', 'NotebookEdit'],
             isReadOnly: true,
         },

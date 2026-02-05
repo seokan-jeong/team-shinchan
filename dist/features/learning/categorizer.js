@@ -1,61 +1,61 @@
 /**
  * Learning Categorizer
- * 학습 내용 자동 분류
+ * Automatic categorization of learning content
  */
 /**
- * 카테고리 키워드 매핑
+ * Category keyword mapping
  */
 const categoryKeywords = {
     preference: [
-        '선호', 'prefer', '좋아', 'like', '싫어', 'dislike',
-        '항상', 'always', '절대', 'never', '보통', 'usually',
-        '스타일', 'style', '방식', 'way', '습관', 'habit',
+        'prefer', 'like', 'dislike',
+        'always', 'never', 'usually',
+        'style', 'way', 'habit',
     ],
     pattern: [
-        '패턴', 'pattern', '반복', 'repeat', '워크플로우', 'workflow',
-        '자주', 'often', '매번', 'every time', '일반적으로', 'typically',
-        '프로세스', 'process', '순서', 'sequence', '단계', 'step',
+        'pattern', 'repeat', 'workflow',
+        'often', 'every time', 'typically',
+        'process', 'sequence', 'step',
     ],
     context: [
-        '아키텍처', 'architecture', '구조', 'structure', '기술 스택', 'tech stack',
-        '프레임워크', 'framework', '라이브러리', 'library', '의존성', 'dependency',
-        '설정', 'config', '환경', 'environment', '인프라', 'infrastructure',
+        'architecture', 'structure', 'tech stack',
+        'framework', 'library', 'dependency',
+        'config', 'environment', 'infrastructure',
     ],
     mistake: [
-        '실수', 'mistake', '에러', 'error', '버그', 'bug',
-        '주의', 'caution', '조심', 'careful', '피해야', 'avoid',
-        '문제', 'problem', '이슈', 'issue', '오류', 'fault',
+        'mistake', 'error', 'bug',
+        'caution', 'careful', 'avoid',
+        'problem', 'issue', 'fault',
     ],
     decision: [
-        '결정', 'decision', '선택', 'choice', '채택', 'adopt',
-        '이유', 'reason', '왜냐하면', 'because', '근거', 'rationale',
-        '트레이드오프', 'tradeoff', '대안', 'alternative', '비교', 'compare',
+        'decision', 'choice', 'adopt',
+        'reason', 'because', 'rationale',
+        'tradeoff', 'alternative', 'compare',
     ],
     convention: [
-        '컨벤션', 'convention', '규칙', 'rule', '가이드라인', 'guideline',
-        '표준', 'standard', '형식', 'format', '명명', 'naming',
-        '린트', 'lint', '포맷', 'format', '코드 스타일', 'code style',
+        'convention', 'rule', 'guideline',
+        'standard', 'format', 'naming',
+        'lint', 'code style',
     ],
     insight: [
-        '발견', 'discover', '알게 됨', 'learned', '흥미로운', 'interesting',
-        '참고', 'note', '팁', 'tip', '트릭', 'trick',
-        '최적화', 'optimize', '개선', 'improve', '효율', 'efficient',
+        'discover', 'learned', 'interesting',
+        'note', 'tip', 'trick',
+        'optimize', 'improve', 'efficient',
     ],
 };
 /**
- * 카테고리별 가중치
+ * Category weights
  */
 const categoryWeights = {
-    preference: 1.2, // 개인화 우선
+    preference: 1.2, // Prioritize personalization
     pattern: 1.1,
     context: 1.0,
-    mistake: 1.3, // 실수 학습 중요
+    mistake: 1.3, // Mistake learning is important
     decision: 1.0,
     convention: 1.1,
     insight: 0.9,
 };
 /**
- * 텍스트에서 카테고리 점수 계산
+ * Calculate category scores from text
  */
 function calculateCategoryScores(text) {
     const scores = new Map();
@@ -69,20 +69,20 @@ function calculateCategoryScores(text) {
                 score += matches.length;
             }
         }
-        // 가중치 적용
+        // Apply weight
         const weight = categoryWeights[category];
         scores.set(category, score * weight);
     }
     return scores;
 }
 /**
- * 최적 카테고리 결정
+ * Determine optimal category
  */
 export function determineCategory(content, title, tags) {
-    // 모든 텍스트 결합
+    // Combine all text
     const fullText = [title || '', content, ...(tags || [])].join(' ');
     const scores = calculateCategoryScores(fullText);
-    // 가장 높은 점수의 카테고리 반환
+    // Return category with highest score
     let maxScore = 0;
     let bestCategory = 'insight';
     for (const [category, score] of scores) {
@@ -94,26 +94,26 @@ export function determineCategory(content, title, tags) {
     return bestCategory;
 }
 /**
- * 카테고리 신뢰도 계산
+ * Calculate category confidence
  */
 export function calculateCategoryConfidence(content, determinedCategory) {
     const scores = calculateCategoryScores(content);
     const totalScore = Array.from(scores.values()).reduce((a, b) => a + b, 0);
     if (totalScore === 0) {
-        return 0.3; // 기본 낮은 신뢰도
+        return 0.3; // Default low confidence
     }
     const categoryScore = scores.get(determinedCategory) || 0;
     return Math.min(0.95, 0.3 + (categoryScore / totalScore) * 0.7);
 }
 /**
- * 학습 분류 및 보강
+ * Classify and enhance learning
  */
 export function classifyLearning(input) {
-    // 카테고리가 이미 적절하게 설정된 경우 스킵
+    // Skip if category is already properly set
     const currentScores = calculateCategoryScores(input.content);
     const currentCategoryScore = currentScores.get(input.category) || 0;
     const maxScore = Math.max(...Array.from(currentScores.values()));
-    // 현재 카테고리가 최적이 아닌 경우에만 재분류
+    // Reclassify only if current category is not optimal
     if (currentCategoryScore < maxScore * 0.8) {
         const betterCategory = determineCategory(input.content, input.title, input.tags);
         return {
@@ -125,17 +125,17 @@ export function classifyLearning(input) {
     return input;
 }
 /**
- * 배치 분류
+ * Batch classification
  */
 export function classifyBatch(inputs) {
     return inputs.map(classifyLearning);
 }
 /**
- * 카테고리 제안
+ * Suggest categories
  */
 export function suggestCategories(content) {
     const scores = calculateCategoryScores(content);
-    // 점수 순 정렬
+    // Sort by score
     const sorted = Array.from(scores.entries()).sort((a, b) => b[1] - a[1]);
     return {
         primary: sorted[0][0],
@@ -144,11 +144,11 @@ export function suggestCategories(content) {
     };
 }
 /**
- * 태그에서 카테고리 힌트 추출
+ * Extract category hints from tags
  */
 export function extractCategoryFromTags(tags) {
     const tagSet = new Set(tags.map((t) => t.toLowerCase()));
-    // 직접 카테고리 태그
+    // Direct category tags
     const directMappings = [
         [['pref', 'preference', 'like', 'style'], 'preference'],
         [['pattern', 'workflow', 'process'], 'pattern'],
@@ -166,25 +166,25 @@ export function extractCategoryFromTags(tags) {
     return null;
 }
 /**
- * 컨텍스트 기반 분류
+ * Context-based classification
  */
 export function classifyWithContext(input, context) {
     let classified = classifyLearning(input);
-    // 에이전트 유형에 따른 조정
+    // Adjust based on agent type
     if (context.agentType) {
         const agentCategoryBias = {
-            maenggu: 'pattern', // 실행자 → 패턴
-            suji: 'convention', // 프론트엔드 → 컨벤션
-            heukgom: 'context', // 백엔드 → 컨텍스트
-            shinhyungman: 'insight', // 조언자 → 인사이트
-            yuri: 'decision', // 플래너 → 결정
+            maenggu: 'pattern', // Executor → Pattern
+            suji: 'convention', // Frontend → Convention
+            heukgom: 'context', // Backend → Context
+            shinhyungman: 'insight', // Advisor → Insight
+            yuri: 'decision', // Planner → Decision
         };
         const biasCategory = agentCategoryBias[context.agentType];
         if (biasCategory) {
             const scores = calculateCategoryScores(classified.content);
             const biasScore = scores.get(biasCategory) || 0;
             const currentScore = scores.get(classified.category) || 0;
-            // 바이어스 카테고리가 비슷하게 높으면 우선
+            // Prioritize bias category if similarly high
             if (biasScore >= currentScore * 0.7) {
                 classified = {
                     ...classified,
@@ -193,7 +193,7 @@ export function classifyWithContext(input, context) {
             }
         }
     }
-    // 작업 유형에 따른 조정
+    // Adjust based on task type
     if (context.taskType) {
         const taskCategoryBias = {
             'bug fix': 'mistake',
@@ -213,7 +213,7 @@ export function classifyWithContext(input, context) {
     return classified;
 }
 /**
- * 카테고리 통계 분석
+ * Category statistics analysis
  */
 export function analyzeCategoryDistribution(learnings) {
     const stats = new Map();

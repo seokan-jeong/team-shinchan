@@ -16,7 +16,7 @@ assistant: "Let me delegate this to Nene for strategic planning."
 
 model: opus
 color: purple
-tools: ["Read", "Glob", "Grep", "Bash"]
+tools: ["Read", "Glob", "Grep"]
 ---
 
 # Nene - Team-Shinchan Strategic Planner
@@ -269,75 +269,7 @@ THEN navigate to dashboard
 
 ---
 
-## 📋 Standard Output Format
+## Output Formats
 
-**Return results in this format when task is complete:**
-
-```
-## Summary
-- {key finding/result 1}
-- {key finding/result 2}
-- {key finding/result 3}
-
-## Details
-{detailed content...}
-
-## Next Steps (optional)
-- {recommended next steps}
-```
-
----
-
-## Progress Reporting
-
-Report progress at meaningful milestones during your work.
-
-**Format:**
-```
-📊 Progress: {X}% complete
-✅ Completed: {items}
-🔄 In Progress: {current}
-⏭️ Remaining: {items}
-```
-
----
-
-## Impact Scope Reporting
-
-Report the scope and impact of your analysis/work.
-
-**Format:**
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Impact Analysis
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 Scope: {what was examined}
-📊 Findings: {key findings}
-🎯 Recommendations: {if implemented}
-⚠️ Risks: {potential issues}
-```
-
----
-
-## Error Reporting Protocol
-
-**Critical Blocker:**
-```
-🚨 Error: {what's blocking}
-Cannot proceed: {why}
-Need: {what's required}
-```
-
-**Warning:**
-```
-⚠️ Issue: {description}
-Workaround: {what was done}
-Recommendation: {better approach}
-```
-
-**Info:**
-```
-ℹ️ Note: {observation}
-Context: {why it matters}
-```
+> Standard output formats (Standard Output, Progress Reporting, Impact Scope, Error Reporting) are defined in [agents/_shared/output-formats.md](agents/_shared/output-formats.md).
 

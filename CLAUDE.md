@@ -73,7 +73,7 @@ Rule 6: ALWAYS use Task tool to invoke team-shinchan agents (NEVER work directly
 
 ---
 
-## PART 1.5: Skill Execution Rules (NEW)
+## PART 2: Skill Execution Rules
 
 ### 🚨 Skill Call = Agent Invocation
 
@@ -119,37 +119,11 @@ Task(
 
 ### Stage Checkpoint Enforcement
 
-```
-Workflow after calling /team-shinchan:start:
-
-Stage 1 → Cannot proceed to Stage 2 without REQUESTS.md
-Stage 2 → Cannot proceed to Stage 3 without PROGRESS.md
-Stage 3 → Cannot proceed to Stage 4 before all Phases complete
-Stage 4 → Action Kamen verification required
-```
-
-### Action Guide on Verification Failure
-
-```
-When stage transition verification fails:
-
-1. ❌ Do not proceed to next Stage
-2. ⚠️ Notify user of missing items
-3. 🔄 Re-verify after completing missing items
-4. ✅ Proceed to next Stage only when all items satisfied
-
-Example:
-"Stage 1 → Stage 2 transition verification failed:
- - [x] REQUESTS.md exists
- - [ ] Problem Statement missing
- - [ ] Acceptance Criteria missing
-
- You must complete the above items first before proceeding to Stage 2."
-```
+> Detailed stage transition rules, tool restrictions, and verification checklists are defined in **PART 6: Workflow State Management**.
 
 ---
 
-## PART 1.6: Enhanced Communication Protocol
+## PART 3: Enhanced Communication Protocol
 
 ### 🔔 Real-time Progress Output
 
@@ -228,7 +202,7 @@ Example:
 
 ---
 
-## PART 2: Integrated Main Workflow
+## PART 4: Integrated Main Workflow
 
 **This is THE workflow for all non-trivial tasks.**
 
@@ -270,7 +244,7 @@ Example:
 
 ---
 
-## PART 3: Document Management
+## PART 5: Document Management
 
 ### Folder Structure
 
@@ -297,7 +271,7 @@ Index is auto-incremented based on existing folders.
 
 ---
 
-## PART 3.5: Workflow State Management (NEW)
+## PART 6: Workflow State Management
 
 ### WORKFLOW_STATE.yaml
 
@@ -326,19 +300,33 @@ current:
 stage_rules:
   requirements:
     allowed_tools: [Read, Glob, Grep, Task, AskUserQuestion]
-    blocked_tools: [Edit, Write, TodoWrite]
+    blocked_tools: [Edit, Write, TodoWrite, Bash]
     interpretation:
       "Please do ~": "Add requirement"  # NOT implementation request
+  planning:
+    allowed_tools: [Read, Glob, Grep, Task, AskUserQuestion]
+    blocked_tools: [Edit, Write, TodoWrite, Bash]
+  execution:
+    allowed_tools: [Read, Glob, Grep, Task, Edit, Write, TodoWrite, Bash, AskUserQuestion]
+    blocked_tools: []
+  completion:
+    allowed_tools: [Read, Glob, Grep, Task, Write]  # Write for docs only
+    blocked_tools: [Edit, TodoWrite, Bash, AskUserQuestion]
 ```
 
 ### Stage-Tool Matrix
 
-| Stage | Read | Glob/Grep | Task | Edit/Write | TodoWrite |
-|-------|------|-----------|------|------------|-----------|
-| **requirements** | OK | OK | OK | **BLOCK** | **BLOCK** |
-| **planning** | OK | OK | OK | **BLOCK** | **BLOCK** |
-| **execution** | OK | OK | OK | OK | OK |
-| **completion** | OK | BLOCK | OK | BLOCK (docs OK) | BLOCK |
+| Tool | requirements | planning | execution | completion |
+|------|-------------|----------|-----------|-----------|
+| Read | ALLOW | ALLOW | ALLOW | ALLOW |
+| Glob | ALLOW | ALLOW | ALLOW | ALLOW |
+| Grep | ALLOW | ALLOW | ALLOW | ALLOW |
+| Task | ALLOW | ALLOW | ALLOW | ALLOW |
+| Edit | BLOCK | BLOCK | ALLOW | BLOCK |
+| Write | BLOCK | BLOCK | ALLOW | ALLOW (docs only) |
+| TodoWrite | BLOCK | BLOCK | ALLOW | BLOCK |
+| Bash | BLOCK | BLOCK | ALLOW | BLOCK |
+| AskUserQuestion | ALLOW | ALLOW | ALLOW | BLOCK |
 
 ### Transition Gates
 
@@ -374,7 +362,7 @@ hooks/workflow-guard.md
 
 ---
 
-## PART 4: Debate System
+## PART 7: Debate System
 
 ### When to Trigger Debate
 
@@ -392,12 +380,9 @@ hooks/workflow-guard.md
 
 ### Debate Process
 
-**Two orchestration methods are available:**
+**All debates are delegated to Midori via Task call.**
 
-1. **Midori Facilitation**: For complex debates with 3+ options or multiple stakeholders, Shinnosuke delegates to Midori via Task call
-2. **Direct Orchestration**: For simple 2-option debates or auto-triggered scenarios, Shinnosuke may follow midori.md guidelines directly
-
-Both methods are valid. Shinnosuke chooses based on debate complexity.
+Shinnosuke always delegates to Midori for all debate scenarios, regardless of complexity.
 
 ```
 ┌─────────────────────────────────────────┐
@@ -499,7 +484,7 @@ Both methods are valid. Shinnosuke chooses based on debate complexity.
 
 ---
 
-## PART 5: Agent Team (15 Members)
+## PART 8: Agent Team (15 Members)
 
 ### Orchestration Layer
 
@@ -549,7 +534,7 @@ Both methods are valid. Shinnosuke chooses based on debate complexity.
 
 ---
 
-## PART 6: Stage Details
+## PART 9: Stage Details
 
 ### Stage 1: Requirements
 
@@ -605,7 +590,8 @@ for phase in phases:
     # 4. Review (MANDATORY)
     review = delegate_to("actionkamen", f"Review {phase}")
     if review.has_critical_issues:
-        fix_and_retry()
+        # See PART 13: Error Handling procedure
+        retry_with_simplified_prompt_or_report_to_user()
 
     # 5. Phase retrospective
     update("PROGRESS.md", phase.retrospective)
@@ -622,12 +608,13 @@ final_review = delegate_to("actionkamen", "Final verification")
 if final_review.approved:
     report_completion()
 else:
-    fix_and_retry()
+    # See PART 13: Error Handling procedure
+    retry_with_simplified_prompt_or_report_to_user()
 ```
 
 ---
 
-## PART 7: Agent Invocation
+## PART 10: Agent Invocation
 
 ```typescript
 // Standard delegation
@@ -651,7 +638,7 @@ Task(
 
 ---
 
-## PART 8: Skills & Commands
+## PART 11: Skills & Commands
 
 | Command | Description | When |
 |---------|-------------|------|
@@ -671,7 +658,7 @@ Task(
 
 ---
 
-## PART 9: Completion Checklist
+## PART 12: Completion Checklist
 
 **Before declaring ANY task complete:**
 
@@ -687,7 +674,28 @@ Task(
 
 ---
 
-## PART 10: Quick Reference
+## PART 13: Error Handling
+
+### Agent Task Call Error Handling
+
+When a Task call fails or returns an error:
+
+1. **Log the error**: Note which agent failed and the error type
+2. **Classify the error**:
+   - **Recoverable** (timeout, token limit): Retry once with simplified prompt
+   - **Non-recoverable** (missing file, invalid config): Report to user, skip task
+3. **Recovery procedure**:
+   - Retry the same agent with a shorter/simpler prompt (max 1 retry)
+   - If retry fails, report failure and suggest manual intervention
+   - Never silently skip a failed task
+4. **User notification**: Always inform user of failures with:
+   - Which agent failed
+   - What was attempted
+   - Suggested next steps
+
+---
+
+## PART 14: Quick Reference
 
 ### Agent IDs
 ```

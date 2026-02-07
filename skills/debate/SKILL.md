@@ -6,9 +6,21 @@ user-invocable: true
 
 # EXECUTE IMMEDIATELY - Debate Initiation
 
-**Explicit `/team-shinchan:debate` command invokes Midori via Task tool.**
+## Step 0: Validate Input
 
-**Auto-triggered debates may be conducted directly by Shinnosuke following midori.md guidelines, or delegated to Midori for complex cases.**
+```
+If args is empty or only whitespace:
+  Ask user: "What topic would you like to debate?"
+  STOP and wait for user response
+
+If args length > 2000 characters:
+  Truncate to 2000 characters
+  Warn user: "Request was truncated to 2000 characters"
+```
+
+**All debates (explicit or auto-triggered) invoke Midori via Task tool.**
+
+When `/team-shinchan:debate` is called or debate is auto-triggered, Shinnosuke always delegates to Midori.
 
 ---
 

@@ -75,6 +75,9 @@ You are **Bo**. You execute coding tasks assigned by Shinnosuke.
 ```
 
 ### Standard Output
+
+> Standard output formats (Standard Output, Progress Reporting, Impact Scope, Error Reporting) are defined in [agents/_shared/output-formats.md](agents/_shared/output-formats.md).
+
 **Return results in this format when task is complete:**
 
 ```

@@ -41,14 +41,14 @@ Prevent workflow derailment by:
 | Tool | requirements | planning | execution | completion |
 |------|-------------|----------|-----------|------------|
 | Read | ALLOW | ALLOW | ALLOW | ALLOW |
-| Glob | ALLOW | ALLOW | ALLOW | BLOCK |
-| Grep | ALLOW | ALLOW | ALLOW | BLOCK |
+| Glob | ALLOW | ALLOW | ALLOW | ALLOW |
+| Grep | ALLOW | ALLOW | ALLOW | ALLOW |
 | Task | ALLOW | ALLOW | ALLOW | ALLOW |
 | Edit | **BLOCK** | **BLOCK** | ALLOW | **BLOCK** |
 | Write | **BLOCK** | **BLOCK** | ALLOW | ALLOW (docs only) |
 | TodoWrite | **BLOCK** | **BLOCK** | ALLOW | **BLOCK** |
 | Bash | **BLOCK** | **BLOCK** | ALLOW | **BLOCK** |
-| AskUserQuestion | ALLOW | BLOCK | BLOCK | BLOCK |
+| AskUserQuestion | ALLOW | ALLOW | ALLOW | BLOCK |
 
 ---
 
@@ -106,6 +106,62 @@ Correct action:
 
 DO NOT start implementation until Stage 3 (execution).
 ```
+
+---
+
+## Error Handling: Corrupted State File
+
+**When WORKFLOW_STATE.yaml is missing or unreadable:**
+
+### Recovery Rules
+
+```
+1. File not found or unreadable:
+   → Default to "execution" stage (most permissive)
+   → Warn user about missing/corrupted state
+   → Continue with execution stage permissions
+
+2. stage field is invalid or missing:
+   → Default to "execution" stage
+   → Warn user about invalid stage value
+   → Log the corrupted content for debugging
+
+3. blocked_tools field is malformed:
+   → Use default stage rules from CLAUDE.md
+   → Warn user about using fallback rules
+```
+
+### Warning Message Format
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ [Workflow Guard] State File Error
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Issue: {WORKFLOW_STATE.yaml missing/corrupted/invalid stage}
+
+Recovery: Defaulting to "execution" stage
+→ All implementation tools are now allowed
+
+Recommendation:
+- If you started a workflow, recreate WORKFLOW_STATE.yaml
+- If no workflow is active, you can ignore this warning
+
+Proceeding with tool: {requested_tool}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Default Stage Rules (Fallback)
+
+When state file cannot be read, use these defaults:
+
+| Stage | Default Value |
+|-------|---------------|
+| Current Stage | execution |
+| Allowed Tools | All (Read, Glob, Grep, Task, Edit, Write, TodoWrite, Bash, AskUserQuestion) |
+| Blocked Tools | None |
+
+**Rationale:** "execution" is the most permissive stage. If state is corrupted, it's safer to allow work than to block incorrectly.
 
 ---
 

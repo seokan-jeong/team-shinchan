@@ -51,6 +51,8 @@ user-invocable: true
 
 | Skill | Trigger | Description |
 |-------|---------|-------------|
+| `/start` | start, begin | Start integrated workflow |
+| `/orchestrate` | orchestrate | Explicit orchestration |
 | `/ultrawork` | fast, parallel, ulw | Parallel execution |
 | `/ralph` | until done, complete | Loop until complete |
 | `/autopilot` | auto, automatically | Autonomous execution |

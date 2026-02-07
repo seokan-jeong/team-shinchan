@@ -1,6 +1,6 @@
 ---
-name: team-shinchan:start
-description: Start a new task with the integrated workflow. Creates documentation folder and begins requirements gathering.
+name: team-shinchan:orchestrate
+description: Explicitly invoke Shinnosuke to orchestrate through the integrated workflow. Creates documentation folder and guides through requirements → planning → execution → completion stages.
 user-invocable: true
 ---
 
@@ -46,7 +46,7 @@ updated: "{current timestamp}"
 current:
   stage: requirements
   phase: null
-  owner: nene
+  owner: shinnosuke
   status: active
 
 stage_rules:
@@ -97,43 +97,83 @@ history:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 Team-Shinchan Workflow Started
+🎯 Team-Shinchan Orchestration Started
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📁 Document ID: {DOC_ID}
 📂 Folder: shinchan-docs/{DOC_ID}/
 📄 WORKFLOW_STATE.yaml ✅ Created
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📋 Stage 1: Requirements
-👤 Owner: Nene (Planner)
+👤 Orchestrator: Shinnosuke
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-## Step 6: Invoke Nene (Immediately - Use Task)
+## Step 6: Invoke Shinnosuke (Immediately - Use Task)
 
 ```typescript
 Task(
-  subagent_type="team-shinchan:nene",
+  subagent_type="team-shinchan:shinnosuke",
   model="opus",
-  prompt=`Starting Stage 1 (Requirements Gathering).
+  prompt=`Starting Orchestration Mode with integrated workflow.
 
 ## Context
 - DOC_ID: {DOC_ID}
-- User Request: {args or "None - Start interview"}
+- User Request: {args}
 - WORKFLOW_STATE.yaml Location: shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml
 
 ## Your Mission
-1. Interview user to gather requirements
-2. Write REQUESTS.md (shinchan-docs/{DOC_ID}/REQUESTS.md)
-3. All "please do ~" requests should be added as requirements (not implementation!)
+You are Shinnosuke, the Orchestrator. Guide this task through the full integrated workflow:
+
+### Stage 1: Requirements
+1. Analyze the user request
+2. If unclear, delegate to Nene for interview OR Misae for hidden requirements analysis
+3. If design decision needed, trigger Debate via Midori
+4. Create REQUESTS.md with:
+   - Problem Statement
+   - Requirements
+   - Acceptance Criteria
+5. Get user approval before proceeding
+
+### Stage 2: Planning
+1. Delegate to Nene: Break into phases with acceptance criteria
+2. Delegate to Shiro: Impact analysis across codebase
+3. Create PROGRESS.md with phase plan
+4. Update WORKFLOW_STATE.yaml (stage: planning → execution)
+
+### Stage 3: Execution (Per Phase)
+For each phase:
+1. Delegate to Shiro: Impact analysis for this phase
+2. If design decision needed: Trigger Debate
+3. Delegate implementation:
+   - Frontend → Aichan
+   - Backend → Bunta
+   - DevOps → Masao
+   - General → Bo
+4. Delegate to Action Kamen: Review (MANDATORY)
+5. Update PROGRESS.md with phase retrospective
+
+### Stage 4: Completion (Auto-proceed)
+1. Delegate to Masumi: Write RETROSPECTIVE.md
+2. Delegate to Masumi: Write IMPLEMENTATION.md
+3. Delegate to Action Kamen: Final verification
+4. Report completion
 
 ## Important Rules
-- Prohibited from using Edit, Write, Bash tools (except for writing REQUESTS.md)
-- Reject code modification/creation requests and record as requirements
-- Request user approval when requirements are sufficient
+- NEVER do substantive work yourself - always delegate to specialists
+- Follow stage rules in WORKFLOW_STATE.yaml
+- Cannot proceed to next stage without meeting transition gates
+- Action Kamen review is MANDATORY for every phase
+- Document everything in shinchan-docs/{DOC_ID}/
 
-## Start Interview
-Ask the user:
-"What problem would you like to solve?"`
+## Debate Integration
+Automatically trigger debate when:
+- 2+ implementation approaches possible
+- Architecture changes required
+- Breaking existing patterns
+- Security-sensitive decisions
+- Technology stack selection
+
+User request: {args}`
 )
 ```
 
@@ -144,12 +184,12 @@ Ask the user:
 1. ❌ Only explaining the steps without executing them
 2. ❌ Skipping Steps 3-4
 3. ❌ Proceeding without WORKFLOW_STATE.yaml
-4. ❌ Gathering requirements directly without invoking Nene
+4. ❌ Orchestrating directly without invoking Shinnosuke
 
 # ✅ Checklist
 
 After execution, all of the following must be completed:
 - [ ] `shinchan-docs/{DOC_ID}/` folder created
 - [ ] `shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml` file exists
-- [ ] Nene agent invoked
-- [ ] First question delivered to user
+- [ ] Shinnosuke agent invoked via Task
+- [ ] Orchestration mode active

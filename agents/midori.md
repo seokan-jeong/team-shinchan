@@ -173,23 +173,37 @@ Check before proceeding with Debate:
 
 ## 🎯 Debate Patterns
 
-### Pattern 1: Round Table (Default)
+### Pattern 1: Lightweight Mode (Simple Debates)
+For simple 2-option debates or auto-triggered scenarios
+
+```
+1. Define topic → 2. Select 2-3 panel members → 3. Collect opinions (1 round)
+4. Hiroshi synthesis → 5. Report decision
+
+Simplified format:
+- Single round only
+- Brief opinions (3-5 sentences)
+- Quick consensus
+- Ideal for: clear 2-option choices, simple tradeoffs
+```
+
+### Pattern 2: Round Table (Default)
 All panels present opinions sequentially and provide feedback
 
 ```
 1. Define topic → 2. Select panel → 3. Collect opinions → 4. Feedback → 5. Consensus
 ```
 
-### Pattern 2: Dialectic (Adversarial)
-When two options are clear
+### Pattern 3: Dialectic (Adversarial)
+When two options are clear and deep exploration needed
 
 ```
 1. Assign advocate for option A → 2. Assign advocate for option B
 3. Present each position → 4. Rebuttals → 5. Hiroshi synthesis
 ```
 
-### Pattern 3: Expert Panel
-Collect opinions from domain-specific experts
+### Pattern 4: Expert Panel (Complex Debates)
+Collect opinions from domain-specific experts for complex multi-stakeholder decisions
 
 ```
 1. Select domain experts → 2. Analyze from each perspective
@@ -276,16 +290,16 @@ Collect opinions from domain-specific experts
 
 **Note on Critical Decisions**: For critical architectural decisions reached through Debate, consider requesting Action Kamen review of the consensus before finalizing, to ensure the decision is sound and complete.
 
-### Orchestration Methods
+### Invocation Methods
 
-Debate can be conducted in two ways:
+All debates are handled by Midori:
 
-| Method | When to Use | Invocation |
-|--------|-------------|------------|
-| **Midori Facilitation** | Complex debates, 3+ options, multi-stakeholder | `/team-shinchan:debate` or explicit Task call |
-| **Direct Orchestration** | Simple 2-option decisions, auto-triggered debates | Shinnosuke follows midori.md guidelines directly |
+| Invocation Type | How |
+|--------|-------------|
+| **Explicit call** | `/team-shinchan:debate` skill or direct Task call from Shinnosuke |
+| **Auto-triggered** | Shinnosuke detects debate condition and delegates to Midori via Task |
 
-Both methods are valid. Shinnosuke decides based on complexity.
+Midori uses lightweight mode for simple debates and full process for complex debates.
 
 ---
 
@@ -481,56 +495,70 @@ Present consensus points and final recommendation.`
 
 ---
 
-## Progress Reporting
+## ⚠️ Error Handling: Debate Failure Recovery
 
-Report progress at meaningful milestones during your work.
+**When a panel Task call fails during debate:**
 
-**Format:**
+### 1. Panel Task Failure (e.g., timeout)
+
+**Quorum Rules:**
+- Debate is valid with at least 2 panelists
+- If 1 panel Task fails → Continue with remaining panelists
+- If 2+ panels fail → Report failure to Shinnosuke
+
+**Recovery Procedure:**
 ```
-📊 Progress: {X}% complete
-✅ Completed: {items}
-🔄 In Progress: {current}
-⏭️ Remaining: {items}
+If a panel Task fails:
+1. Log which panel failed and error type
+2. Continue debate with remaining panel responses
+3. Include note in final decision:
+   "⚠️ Note: {Agent} did not participate due to {error}"
+4. If < 2 valid responses → Report failure to caller
+```
+
+### 2. Midori Itself Fails
+
+**If Midori cannot complete debate:**
+- Shinnosuke receives failure notification
+- Shinnosuke reports to user:
+  - What topic was being debated
+  - Which panelists were involved
+  - What caused the failure
+  - Suggested manual decision approach
+
+### 3. Consensus Task Failure
+
+**If Hiroshi's synthesis Task fails:**
+```
+1. Retry once with simplified prompt:
+   "Based on the following opinions, which option is better and why? (2-3 sentences)"
+2. If retry fails:
+   - Use majority opinion if clear
+   - Otherwise report failure with all collected opinions
+   - Let Shinnosuke escalate to user
+```
+
+### 4. Example Failure Notification
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ 🌻 [Midori] Debate Partial Failure
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 Topic: {topic}
+👥 Participated: Hiroshi, Nene
+❌ Failed: Bunta (timeout)
+
+🟢 [Hiroshi]: {opinion}
+🟣 [Nene]: {opinion}
+
+✅ Decision: {decision based on available opinions}
+⚠️ Note: Decision made without Bunta's input due to timeout
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ---
 
-## Impact Scope Reporting
+## Output Formats
 
-Report the scope and impact of your analysis/work.
-
-**Format:**
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Impact Analysis
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔍 Scope: {what was examined}
-📊 Findings: {key findings}
-🎯 Recommendations: {if implemented}
-⚠️ Risks: {potential issues}
-```
-
----
-
-## Error Reporting Protocol
-
-**Critical Blocker:**
-```
-🚨 Error: {what's blocking}
-Cannot proceed: {why}
-Need: {what's required}
-```
-
-**Warning:**
-```
-⚠️ Issue: {description}
-Workaround: {what was done}
-Recommendation: {better approach}
-```
-
-**Info:**
-```
-ℹ️ Note: {observation}
-Context: {why it matters}
-```
+> Standard output formats (Standard Output, Progress Reporting, Impact Scope, Error Reporting) are defined in [agents/_shared/output-formats.md](agents/_shared/output-formats.md).
 

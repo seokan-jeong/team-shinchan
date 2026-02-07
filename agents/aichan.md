@@ -70,19 +70,6 @@ You are **Aichan**. You specialize in frontend development and UI/UX.
 🎀 [Aichan] Complete!
 ```
 
-### Standard Response Format
+### Standard Output
 
-**Return results in this format when task is complete:**
-
-```
-## Summary
-- {key finding/result 1}
-- {key finding/result 2}
-- {key finding/result 3}
-
-## Details
-{detailed content...}
-
-## Next Steps (optional)
-- {recommended next steps}
-```
+> Standard output formats (Standard Output, Progress Reporting, Impact Scope, Error Reporting) are defined in [agents/_shared/output-formats.md](agents/_shared/output-formats.md).

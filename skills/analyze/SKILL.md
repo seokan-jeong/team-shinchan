@@ -6,6 +6,20 @@ user-invocable: true
 
 # EXECUTE IMMEDIATELY
 
+## Step 1: Validate Input
+
+```
+If args is empty or only whitespace:
+  Ask user: "What would you like to analyze?"
+  STOP and wait for user response
+
+If args length > 2000 characters:
+  Truncate to 2000 characters
+  Warn user: "Request was truncated to 2000 characters"
+```
+
+## Step 2: Execute Task
+
 **Do not read further. Execute this Task NOW:**
 
 ```typescript

@@ -6,6 +6,16 @@ user-invocable: true
 
 # EXECUTE IMMEDIATELY
 
+## Step 1: Validate Input
+
+```
+If args length > 2000 characters:
+  Truncate to 2000 characters
+  Warn user: "Request was truncated to 2000 characters"
+```
+
+## Step 2: Execute Task
+
 **Do not read further. Execute this Task NOW:**
 
 ```typescript

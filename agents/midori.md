@@ -235,43 +235,8 @@ Collect opinions from domain-specific experts for complex multi-stakeholder deci
 
 ## 📢 Debate Output Format
 
-### Start Announcement
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💭 🌻 [Midori] Debate Started
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 Topic: {debate topic}
-👥 Panel: {selected experts}
-🎯 Goal: {what needs to be decided}
-```
-
-### Opinion Collection
-```
-🎤 Round 1: Opinion Collection
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🟢 [Hiroshi] Oracle's opinion:
-> "{opinion summary}"
-
-🟣 [Nene] Planner's opinion:
-> "{opinion summary}"
-```
-
-### Reach Consensus
-```
-🔄 Round 2: Consensus Check
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ Consensus: {consensus content}
-⚠️ Disagreement: {remaining disagreement, omit if none}
-```
-
-### Final Decision
-```
-✅ 🌻 [Midori] Debate Conclusion
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 Decision: {final decision}
-📝 Rationale: {decision rationale summary}
-```
+> Use the Debate Progress Output format defined in the Output Format section above.
+> Sequence: Start Announcement → Opinion Collection (per panel) → Consensus Check → Final Decision
 
 ---
 
@@ -286,30 +251,11 @@ Collect opinions from domain-specific experts for complex multi-stakeholder deci
 
 ## 🔄 Debate Procedure (Midori's Responsibility)
 
-**Midori does not just provide guidelines - actually executes the Debate.**
+**Midori actually executes the Debate (not just guidelines).**
 
-```
-1. Determine Debate necessity (refer to trigger conditions above)
-2. Select panel (refer to criteria table above)
-3. Output start announcement
+Procedure: Check trigger → Select panel → Announce start → Collect opinions via Task (parallel) → Output opinions → Organize consensus → If disagreement, Round 2 → Hiroshi synthesis via Task → Report conclusion.
 
-4. ✅ Collect panel opinions via Task (parallel calls)
-   → Actually request Task from each panel
-   → Wait for and collect responses
-
-5. 📊 Output each opinion in real-time
-   → Quote Task results directly
-
-6. ⚖️ Organize consensus/disagreements
-   → Proceed to Round 2 if disagreements exist
-
-7. ✅ Derive final decision
-   → Request synthesis from Hiroshi via Task
-
-8. 📋 Report conclusion
-```
-
-**Note on Critical Decisions**: For critical architectural decisions reached through Debate, consider requesting Action Kamen review of the consensus before finalizing, to ensure the decision is sound and complete.
+**Note**: For critical architectural decisions, consider Action Kamen review before finalizing.
 
 ---
 
@@ -322,17 +268,7 @@ After every debate concludes with a decision:
 3. Fill in all fields: Date, Doc ID, Panel, Category, Decision, Rationale, Status
 4. If this decision supersedes a previous one, update the old entry's Status to "Superseded by DECISION-{NNN}"
 
-**Example Entry Format:**
-```markdown
-### [DECISION-001] REST vs GraphQL API Selection
-- **Date**: 2025-02-07
-- **Doc ID**: feature-api-001
-- **Panel**: Hiroshi, Bunta
-- **Category**: tech-selection
-- **Decision**: Adopt GraphQL for the new API
-- **Rationale**: Better client flexibility and reduced over-fetching for mobile clients
-- **Status**: Active
-```
+**Entry fields**: `[DECISION-NNN] Title`, Date, Doc ID, Panel, Category, Decision, Rationale, Status (Active/Superseded)
 
 ---
 
@@ -351,118 +287,23 @@ Midori uses lightweight mode for simple debates and full process for complex deb
 
 ## 📝 Opinion Request Prompt Template
 
-```
-Debate topic: {topic}
-
-## Background
-{background explanation}
-
-## Options
-- A: {option A description}
-- B: {option B description}
-(- C: {option C, if applicable})
-
-Provide your expert opinion concisely. (3-5 sentences)
-```
+Include in prompt: `Debate topic`, `Background`, `Options (A/B/C)`, and instruction "Provide your expert opinion concisely. (3-5 sentences)"
 
 ---
 
 ## 💡 Practical Example
 
-### Example: "REST vs GraphQL" Debate
+### "REST vs GraphQL" Debate (Abbreviated)
 
-**❌ Wrong Approach (Simulation)**
 ```
-[Hiroshi] Opinion:
-"GraphQL prevents over-fetching..."
-
-[Bunta] Opinion:
-"REST has better caching..."
-
-Conclusion: We choose GraphQL.
+1. Start → Announce topic, panel (Hiroshi, Bunta), goal
+2. Collect → Task(hiroshi, "opinion on REST vs GraphQL") + Task(bunta, "opinion...")
+3. Output → Quote each Task result directly
+4. Consensus → If disagreement, Task(hiroshi, "synthesize opinions...")
+5. Conclude → Report decision with rationale
 ```
 
-**✅ Correct Approach (Actual Task Calls)**
-
-1. **Start Announcement**
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💭 🌻 [Midori] Debate Started
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 Topic: REST vs GraphQL API Selection
-👥 Panel: Hiroshi (Oracle), Bunta (Backend)
-🎯 Goal: Decide optimal API approach for project
-```
-
-2. **Collect Opinions via Task**
-```typescript
-// Call Hiroshi
-Task(
-  subagent_type="team-shinchan:hiroshi",
-  model="opus",
-  prompt=`Debate topic: REST vs GraphQL API Selection
-
-## Background
-Need to select API design approach for new project
-
-## Options
-- REST: Traditional RESTful API
-- GraphQL: GraphQL schema-based API
-
-Provide your expert opinion in 3-5 sentences.`
-)
-
-// Call Bunta
-Task(
-  subagent_type="team-shinchan:bunta",
-  model="sonnet",
-  prompt=`Debate topic: REST vs GraphQL API Selection
-
-## Background
-Need to select API design approach for new project
-
-## Options
-- REST: Traditional RESTful API
-- GraphQL: GraphQL schema-based API
-
-Provide your opinion from a backend perspective in 3-5 sentences.`
-)
-```
-
-3. **Output Task Results**
-```
-🎤 Round 1: Opinion Collection
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🟢 [Hiroshi] Oracle's opinion:
-> "{actual Task response content}"
-
-🔵 [Bunta] Backend's opinion:
-> "{actual Task response content}"
-```
-
-4. **Reach Consensus (if needed)**
-```typescript
-// If disagreement exists, request synthesis from Hiroshi
-Task(
-  subagent_type="team-shinchan:hiroshi",
-  model="opus",
-  prompt=`Synthesize the following opinions to make a final decision:
-
-[Hiroshi's previous opinion]: ${hiroshi_opinion}
-[Bunta's opinion]: ${bunta_opinion}
-
-Present consensus points and final recommendation.`
-)
-```
-
-5. **Report Final Decision**
-```
-✅ 🌻 [Midori] Debate Conclusion
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 Decision: Adopt GraphQL
-📝 Rationale: {summary based on Hiroshi Task response}
-```
+**❌ Never simulate opinions. ✅ Always use actual Task calls.**
 
 ---
 
@@ -477,67 +318,16 @@ Present consensus points and final recommendation.`
 
 ## ⚠️ Required: Real-time Progress Output
 
-**All Debate processes must be output in real-time.**
+**Output order: Start Announcement → Panel Call Announcement → Opinion Results → Consensus → Final Decision.**
 
-### 📋 Output Order (Must Follow)
+Key rules:
+1. Output text BEFORE calling Tasks
+2. Quote Task results immediately upon receiving them
+3. Never skip steps or stay silent
 
-**Step 1: Start Announcement (Output BEFORE Task calls)**
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💭 🌻 [Midori] Debate Started
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 Topic: {debate topic}
-👥 Panel: {panel list}
-🎯 Goal: {what to decide}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+**❌ Never just call Tasks and exit. ❌ Never only output final results. ✅ Always output all steps in real-time.**
 
-**Step 2: Panel Call Announcement (Output before each Task call)**
-```
-🎯 Calling [Agent Name]...
-```
-
-**Step 3: Opinion Collection Results (Output immediately after each Task completes)**
-```
-🎤 Round 1: Opinion Collection
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🟢 [Hiroshi] Oracle's opinion:
-> "{Quote Task result}"
-
-🔵 [Bunta] Backend's opinion:
-> "{Quote Task result}"
-```
-
-**Step 4: Consensus Process (If disagreements exist)**
-```
-🔄 Round 2: Reaching Consensus
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 Requesting synthesis from [Hiroshi]...
-
-✅ Consensus: {consensus content}
-⚠️ Disagreement: {remaining disagreement}
-```
-
-**Step 5: Final Decision (Output at the end)**
-```
-✅ 🌻 [Midori] Debate Conclusion
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 Decision: {final decision}
-📝 Rationale: {decision rationale}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-### ⚠️ Important Rules
-
-1. **Output text BEFORE calling Tasks**
-2. **Quote and output Task results immediately upon receiving them**
-3. **Do not skip any steps**
-4. **Do not stay silent - always communicate progress**
-
-**❌ Do not just call Tasks and exit without response.**
-**❌ Do not only output final results.**
-**✅ Output all processes in real-time.**
+> Output format templates are defined in the Debate Output Format section above.
 
 ---
 
@@ -584,23 +374,9 @@ If a panel Task fails:
    - Let Shinnosuke escalate to user
 ```
 
-### 4. Example Failure Notification
+### 4. Failure Notification Format
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ 🌻 [Midori] Debate Partial Failure
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 Topic: {topic}
-👥 Participated: Hiroshi, Nene
-❌ Failed: Bunta (timeout)
-
-🟢 [Hiroshi]: {opinion}
-🟣 [Nene]: {opinion}
-
-✅ Decision: {decision based on available opinions}
-⚠️ Note: Decision made without Bunta's input due to timeout
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+Include in output: `⚠️ 🌻 [Midori] Debate Partial Failure` with topic, participated/failed agents, collected opinions, decision, and note about missing input.
 
 ---
 

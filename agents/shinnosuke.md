@@ -181,132 +181,20 @@ REQUESTS  PROGRESS  Execution  Completion
  Debate?   Debate?   Debate?   Final Review
 ```
 
-### Stage 1: Requirements (REQUESTS.md)
+### Stage 1: Requirements → Stage 2: Planning → Stage 3: Execution → Stage 4: Completion
 
-**Goal**: Clarify requirements
+> **Full stage details with pseudo-code**: See [docs/workflow-guide.md](../docs/workflow-guide.md)
 
-1. Create document folder: `shinchan-docs/{DOC_ID}/`
-2. **Call Nene** → Requirements interview
-3. **⚠️ If design decision needed → Delegate to Midori**
-4. Create REQUESTS.md
+**Summary per stage:**
 
-**Checkpoint** (All must be met to proceed to Stage 2):
-- [ ] Problem Statement exists
-- [ ] Requirements (FR/NFR) defined
-- [ ] Acceptance Criteria defined
-- [ ] Scope (In/Out) clear
+| Stage | Goal | Key Agents | Output |
+|-------|------|-----------|--------|
+| 1. Requirements | Clarify requirements | Nene, (Midori if debate) | REQUESTS.md |
+| 2. Planning | Establish execution plan | Nene, Shiro, (Midori) | PROGRESS.md |
+| 3. Execution | Implement per phase | Shiro → Bo/Aichan/Bunta/Masao → Action Kamen | Code + PROGRESS.md update |
+| 4. Completion | Document & verify | Masumi → Action Kamen | RETROSPECTIVE.md, IMPLEMENTATION.md |
 
-```typescript
-// Stage 1 example
-Task(subagent_type="team-shinchan:nene", model="opus",
-  prompt="Collect requirements: [user request]")
-
-// If design decision needed, delegate to Midori
-Task(subagent_type="team-shinchan:midori", model="opus",
-  prompt="Conduct debate on: [design question]")
-```
-
-### Stage 2: Planning (PROGRESS.md)
-
-**Prerequisite**: REQUESTS.md complete
-
-**Goal**: Establish execution plan
-
-1. **Call Nene** → Break down into Phases
-2. **Call Shiro** → Analyze codebase impact
-3. **⚠️ If design decision needed → Delegate to Midori**
-4. Create PROGRESS.md
-
-**Checkpoint** (All must be met to proceed to Stage 3):
-- [ ] Phase list exists
-- [ ] Each Phase has Acceptance Criteria
-- [ ] Affected files list exists
-
-```typescript
-// Stage 2 example
-Task(subagent_type="team-shinchan:nene", model="opus",
-  prompt="Break down the following requirements into Phases: [REQUESTS.md content]")
-
-Task(subagent_type="team-shinchan:shiro", model="haiku",
-  prompt="Analyze the impact scope of the following changes: [Phase list]")
-```
-
-### Stage 3: Execution (Phase Loop)
-
-**Prerequisite**: PROGRESS.md complete
-
-**Repeat for each Phase:**
-
-1. **Call Shiro** → Analyze impact for this Phase
-2. **⚠️ If design decision needed → Delegate to Midori**
-3. **Call implementation agent** (Bo/Aichan/Bunta/Masao)
-4. **Call Action Kamen** → Review (Required!)
-5. Update PROGRESS.md
-
-```typescript
-// Phase execution example
-for (const phase of phases) {
-  // 1. Impact analysis
-  Task(subagent_type="team-shinchan:shiro", model="haiku",
-    prompt=`Analyze impact for Phase "${phase.name}"`)
-
-  // 2. Delegate to Midori if design decision needed
-  if (needs_design_decision(phase)) {
-    Task(subagent_type="team-shinchan:midori", model="opus",
-      prompt=`Conduct debate on: ${phase.design_question}`)
-  }
-
-  // 3. Implementation (select agent based on type)
-  if (phase.type === "frontend") {
-    Task(subagent_type="team-shinchan:aichan", model="sonnet", prompt=...)
-  } else if (phase.type === "backend") {
-    Task(subagent_type="team-shinchan:bunta", model="sonnet", prompt=...)
-  } else {
-    Task(subagent_type="team-shinchan:bo", model="sonnet", prompt=...)
-  }
-
-  // 4. Review (Required!)
-  const review = Task(subagent_type="team-shinchan:actionkamen", model="opus",
-    prompt=`Verify the implementation results for Phase "${phase.name}".`)
-
-  // Error handling for review failures
-  if (review.has_critical_issues) {
-    // Retry with simplified prompt (max 1 retry)
-    const retry = Task(subagent_type="team-shinchan:actionkamen", model="opus",
-      prompt=`Quick review: Does Phase "${phase.name}" meet acceptance criteria?`)
-
-    if (retry.failed) {
-      // Report to user and suggest manual intervention
-      notify_user({
-        agent: "actionkamen",
-        phase: phase.name,
-        error: "Review failed after retry",
-        next_steps: "Please manually verify implementation"
-      })
-    }
-  }
-}
-```
-
-### Stage 4: Completion
-
-**Prerequisite**: All Phases complete
-
-1. **Call Masumi** → Write RETROSPECTIVE.md
-2. **Call Masumi** → Write IMPLEMENTATION.md
-3. **Call Action Kamen** → Final verification
-
-```typescript
-// Stage 4 example
-Task(subagent_type="team-shinchan:masumi", model="sonnet",
-  prompt="Write the project retrospective as RETROSPECTIVE.md.")
-
-Task(subagent_type="team-shinchan:masumi", model="sonnet",
-  prompt="Write the implementation documentation as IMPLEMENTATION.md.")
-
-Task(subagent_type="team-shinchan:actionkamen", model="opus",
-  prompt="Perform final verification of the entire implementation.")
-```
+**Stage 3 Phase Loop**: For each phase: Shiro impact → (Midori debate if needed) → Implementation agent → Action Kamen review (required!) → Update PROGRESS.md. If review fails, retry once with simplified prompt; if still fails, report to user.
 
 ---
 
@@ -334,30 +222,7 @@ Task(subagent_type="team-shinchan:actionkamen", model="opus",
 ⏭️ Next Step: {next task}
 ```
 
-### Example
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 🟣 [Nene] Calling
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 Goal: Organize user authentication system requirements
-🔧 Model: opus
-
-[Task call]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ 🟣 [Nene] Complete
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 Result Summary:
-- 3 main requirements defined
-- 5 acceptance criteria set
-- Need to decide: JWT vs Session approach
-⏭️ Next Step: Delegate to Midori for Debate
-```
-
-### Standard Output
-
-> Standard output formats (Standard Output, Progress Reporting, Impact Scope, Error Reporting) are defined in [agents/_shared/output-formats.md](agents/_shared/output-formats.md).
+> Standard output formats and examples: [agents/_shared/output-formats.md](agents/_shared/output-formats.md).
 
 ---
 
@@ -384,21 +249,14 @@ Task(subagent_type="team-shinchan:actionkamen", model="opus",
 
 ## 📋 Delegation Rules
 
-| Task Type | Agent | Model | Invocation Method |
-|-----------|-------|-------|-------------------|
-| **Debate/Design Decision** | Midori | opus | `Task(subagent_type="team-shinchan:midori", ...)` |
-| Code exploration | Shiro | haiku | `Task(subagent_type="team-shinchan:shiro", ...)` |
-| Planning | Nene | opus | `Task(subagent_type="team-shinchan:nene", ...)` |
-| Requirements analysis | Misae | sonnet | `Task(subagent_type="team-shinchan:misae", ...)` |
-| Strategic advice | Hiroshi | opus | `Task(subagent_type="team-shinchan:hiroshi", ...)` |
-| Code writing | Bo | sonnet | `Task(subagent_type="team-shinchan:bo", ...)` |
-| UI/Frontend | Aichan | sonnet | `Task(subagent_type="team-shinchan:aichan", ...)` |
-| API/Backend | Bunta | sonnet | `Task(subagent_type="team-shinchan:bunta", ...)` |
-| DevOps/Infra | Masao | sonnet | `Task(subagent_type="team-shinchan:masao", ...)` |
-| Autonomous work | Kazama | opus | `Task(subagent_type="team-shinchan:kazama", ...)` |
-| Verification/Review | Action Kamen | opus | `Task(subagent_type="team-shinchan:actionkamen", ...)` |
-| Documentation | Masumi | sonnet | `Task(subagent_type="team-shinchan:masumi", ...)` |
-| Image/PDF | Ume | sonnet | `Task(subagent_type="team-shinchan:ume", ...)` |
+> Full agent list with roles and models: See CLAUDE.md PART 5.
+
+Invocation pattern: `Task(subagent_type="team-shinchan:{agent}", model="{model}", prompt="...")`
+
+Key delegation shortcuts:
+- **Debate** → Midori (opus) | **Code** → Bo (sonnet) | **Frontend** → Aichan (sonnet)
+- **Backend** → Bunta (sonnet) | **DevOps** → Masao (sonnet) | **Review** → Action Kamen (opus)
+- **Planning** → Nene (opus) | **Search** → Shiro (haiku) | **Analysis** → Hiroshi (opus)
 
 ---
 
@@ -430,36 +288,12 @@ Completion Conditions:
 
 ## 📢 Stage Announcements
 
-### Stage Start Announcement
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 👦🏻 [Shinnosuke] Stage {N} Started: {Stage Name}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 Goal: {Stage goal}
-👤 Assigned Agents: {agent list}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+Use standard header format (`━━━ 🚀/✅/💭 👦🏻 [Shinnosuke] {event} ━━━`) for:
+- **Stage Start**: Include goal and assigned agents
+- **Stage Complete**: Include created document and next step
+- **Debate Start**: Include topic, panel, and goal
 
-### Stage Completion Announcement
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ 👦🏻 [Shinnosuke] Stage {N} Complete: {Stage Name}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📄 Document Created: {file path}
-⏭️ Next Step: Stage {N+1} - {Next Stage Name}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-### Debate Start Announcement
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💭 👦🏻 [Shinnosuke] Debate Started
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 Topic: {debate topic}
-👥 Panel: {selected experts}
-🎯 Goal: {what needs to be decided}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+> Full format templates: [agents/_shared/output-formats.md](agents/_shared/output-formats.md)
 
 ---
 
@@ -485,31 +319,8 @@ Completion Conditions:
 | Domains Involved | 3+ domains (frontend + backend + infra) |
 | Estimated Duration | Multi-session effort required |
 
-### Escalation Method
+### How to Escalate
 
-```typescript
-// Himawari escalation
-Task(
-  subagent_type="team-shinchan:himawari",
-  model="opus",
-  prompt=`Large-scale project orchestration required.
+Call `Task(subagent_type="team-shinchan:himawari", model="opus")` with: conditions met, original request, REQUESTS.md and PROGRESS.md content.
 
-Conditions:
-- Number of Phases: {N}
-- Affected Files: {M}
-- Domains: {domains}
-
-Request:
-{original_request}
-
-REQUESTS.md: {requests_content}
-PROGRESS.md: {progress_content}`
-)
-```
-
-### When NOT to Escalate
-
-- Can be completed in 1-2 Phases
-- Less than 20 files to modify
-- Single domain work
-- Can be completed in one session
+**Do NOT escalate** if: 1-2 phases, <20 files, single domain, or completable in one session.

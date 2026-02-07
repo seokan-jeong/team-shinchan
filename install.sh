@@ -34,8 +34,17 @@ else
 fi
 
 echo ""
+
+# Verify installation
+if [ ! -f "$PLUGIN_DIR/.claude-plugin/plugin.json" ]; then
+    echo "Error: Plugin files not found. Installation may have failed."
+    exit 1
+fi
+
+VERSION=$(grep -m1 '"version"' "$PLUGIN_DIR/.claude-plugin/plugin.json" | cut -d'"' -f4)
+
 echo "================================================"
-echo "Installation complete!"
+echo "Installation complete! (v$VERSION)"
 echo ""
 echo "Location: $PLUGIN_DIR"
 echo ""

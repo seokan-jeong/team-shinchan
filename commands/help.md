@@ -16,7 +16,7 @@ See `skills/help/SKILL.md` for full documentation.
 
 ## Available Commands
 
-- `/team-shinchan:docs-work` - Issue-based workflow
+- `/team-shinchan:start` - Start integrated workflow
 - `/team-shinchan:autopilot` - Autonomous execution
 - `/team-shinchan:ralph` - Persistent completion
 - `/team-shinchan:ultrawork` - Parallel execution
@@ -24,6 +24,8 @@ See `skills/help/SKILL.md` for full documentation.
 - `/team-shinchan:analyze` - Deep analysis
 - `/team-shinchan:deepsearch` - Codebase search
 - `/team-shinchan:debate` - Expert debate
+- `/team-shinchan:orchestrate` - Explicit orchestration
+- `/team-shinchan:status` - Workflow status dashboard
 - `/team-shinchan:learn` - Add to memory
 - `/team-shinchan:memories` - View memories
 - `/team-shinchan:forget` - Delete memory

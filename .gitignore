@@ -1,7 +1,8 @@
 # Dependencies
 node_modules/
 
-# Build output (dist/ is tracked - contains actual plugin code)
+# Build output (legacy, no longer needed)
+dist/
 src/
 
 # Package files (not needed for this plugin)
@@ -16,6 +17,7 @@ package-lock.json
 
 # OS
 .DS_Store
+**/.DS_Store
 Thumbs.db
 
 # Logs

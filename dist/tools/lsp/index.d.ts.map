@@ -1,1 +1,0 @@
-{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/tools/lsp/index.ts"],"names":[],"mappings":"AAAA;;GAEG;AAEH,OAAO,KAAK,EAAE,UAAU,EAAE,aAAa,EAAE,MAAM,aAAa,CAAC;AAE7D,wBAAgB,wBAAwB,CAAC,OAAO,EAAE,aAAa,GAAG,UAAU,CA2B3E;AAED,wBAAgB,mBAAmB,CAAC,OAAO,EAAE,aAAa,GAAG,UAAU,CAiDtE;AAED,wBAAgB,uBAAuB,CAAC,OAAO,EAAE,aAAa,GAAG,UAAU,CAyC1E"}

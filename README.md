@@ -8,7 +8,7 @@
 
 **15 Shinchan character agents that debate, plan, execute, and learn together.**
 
-[![Version](https://img.shields.io/badge/version-2.13.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
+[![Version](https://img.shields.io/badge/version-3.0.0--rc1-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.ai)
 ![GitHub stars](https://img.shields.io/github/stars/seokan-jeong/team-shinchan?style=social)
@@ -219,6 +219,24 @@ No commands needed - just say:
 
 ---
 
+## Quick Fix Path
+
+For simple fixes (typo, null check, import fix), Team-Shinchan skips the full workflow:
+
+```
+User: "Fix the null check in user.ts line 42"
+
+👦 [Shinnosuke] Quick fix detected → Delegating to Bo
+🔨 [Bo] Added null check: user?.avatar
+🦸 [Action Kamen] APPROVED ✅
+
+Done! No REQUESTS.md or PROGRESS.md needed.
+```
+
+**Criteria** (ALL must be true): single file change, no design decisions, clear unambiguous fix.
+
+---
+
 ## Integrated Workflow
 
 Team-Shinchan follows a 4-stage workflow for every non-trivial task.
@@ -381,6 +399,26 @@ After every significant task, Team-Shinchan:
 | **Conventions** | "This project uses pnpm, not npm" |
 | **Mistakes** | "Always null-check before .map()" |
 | **Decisions** | "JWT with refresh token rotation" |
+
+---
+
+## Quality & Testing
+
+Team-Shinchan is validated by 3 tiers of automated testing:
+
+| Tier | Tests | What It Checks |
+|------|-------|----------------|
+| Static Validators | 13 | Schema, cross-refs, consistency, API contracts |
+| Agent Behavior (promptfoo) | 25 | Individual agent role adherence |
+| E2E Workflow | 11 | Full workflow scenarios (5 types) |
+
+```bash
+# Run static tests locally (free, no API key)
+./run-tests.sh static
+
+# Run all tests (requires ANTHROPIC_API_KEY)
+./run-tests.sh all
+```
 
 ---
 

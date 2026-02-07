@@ -2,6 +2,38 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [3.0.0-rc1] - 2026-02-07
+
+### API Freeze
+
+**v3.0.0 stabilizes the following interfaces:**
+
+- **15 Agents**: shinnosuke, himawari, midori, bo, kazama, aichan, bunta, masao, hiroshi, nene, misae, actionkamen, shiro, masumi, ume
+- **14 Skills**: start, autopilot, ralph, ultrawork, plan, analyze, deepsearch, debate, orchestrate, status, learn, memories, forget, help
+- **4-Stage Workflow**: Requirements → Planning → Execution → Completion
+- **Debate System**: All debates via Midori, panel selection by topic
+- **Memory System**: learn/memories/forget + auto-load at session start
+
+### Added (Month 4 - Quality 97.6 → 99+)
+- E2E workflow tests: 5 scenarios, 11 test cases with promptfoo
+- Quick Fix Path: explicit criteria + mandatory Action Kamen review
+- Dogfooding infrastructure: workflow metrics tracking
+- 2 new static validators: quick-fix-path, memory-system (total: 13)
+- 8 new promptfoo agent tests: Kazama, Ume, Aichan, Bunta, quick fix, stage transition (total: 25)
+- E2E test job in GitHub Actions CI
+
+### Changed (Month 4)
+- `/start` simplified: 6 steps → 2 steps, WORKFLOW_STATE.yaml 120 → 15 lines
+- CLAUDE.md: 654 → 447 lines (TOC, extracted workflow guide, compressed sections)
+- midori.md: 610 → 386 lines (condensed debate output, removed duplicate formats)
+- shinnosuke.md: 515 → 338 lines (extracted stage details, compact delegation rules)
+- output-formats.md: 249 → 78 lines (removed verbose examples)
+- Debate routing strengthened: "NEVER conduct debate directly" in shinnosuke.md
+
+### Fixed (Month 4)
+- Nene validator false positive: removed `Edit|Write` from forbidden pattern
+- Quick fix path: Action Kamen review now explicitly MANDATORY (was ambiguous)
+
 ## [2.13.0] - 2026-02-07
 
 ### Added (Month 3 - Quality 82 → 97.6)

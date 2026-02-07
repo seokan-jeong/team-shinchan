@@ -48,3 +48,32 @@ jobs:
           name: promptfoo-results
           path: promptfoo/test-results/
           if-no-files-found: ignore
+
+  e2e-workflow-tests:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install promptfoo
+        run: npm install -g promptfoo
+      - name: Run E2E workflow tests
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "⚠️ ANTHROPIC_API_KEY not set. Skipping E2E tests."
+            echo "Add ANTHROPIC_API_KEY to repository secrets to enable."
+            exit 0
+          fi
+          promptfoo eval -c tests/e2e/e2e-promptfoo.yaml
+      - name: Upload E2E results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: tests/e2e/test-results/
+          if-no-files-found: ignore

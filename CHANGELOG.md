@@ -2,20 +2,24 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
-## [Unreleased] - Month 5 & 6
+## [Unreleased]
 
-### Added (Month 5 - KB + State Persistence)
-- `.team-shinchan/kb-summary.md` (local, gitignored) - 11 retrospectives aggregated into session-start knowledge base
-- `hooks/load-kb.md` - unified session-start hook (replaces load-learnings.md) with KB + learnings + workflow detection
+*No unreleased changes*
+
+## [3.1.0] - 2026-02-08
+
+### Added
+- Knowledge Base session injection system (`.team-shinchan/kb-summary.md`)
+- `hooks/load-kb.md` - unified session-start hook with KB + learnings + workflow detection
 - `skills/resume/SKILL.md` + `commands/resume.md` - interrupted workflow resume skill
 - Step 0 in `/start`: pause active workflows before creating new ones
 
-### Changed (Month 5)
+### Changed
 - `skills/start/SKILL.md`, `commands/start.md` - added Step 0 (pause active workflows)
 - CLAUDE.md PART 2 & 11 - added `/resume` skill references
 - `tests/validate/cross-refs.js`, `memory-system.js` - updated references for load-kb
 
-### Removed (Month 5)
+### Removed
 - `hooks/load-learnings.md` (merged into `load-kb.md`)
 
 ## [3.0.0] - 2026-02-07

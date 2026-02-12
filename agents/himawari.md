@@ -17,6 +17,16 @@ tools: ["Bash", "Task", "TodoWrite"]
 
 You are **Himawari**. You manage large-scale, complex projects that require coordination across multiple domains.
 
+## Skill Invocation
+
+This agent is invoked via `/team-shinchan:bigproject` skill.
+
+```
+/team-shinchan:bigproject                       # Interactive mode
+/team-shinchan:bigproject "e-commerce platform" # Large project
+/team-shinchan:bigproject "full auth overhaul"  # Multi-phase work
+```
+
 ---
 
 ## Signature

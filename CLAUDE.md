@@ -144,6 +144,14 @@ Rule 6: ALWAYS use Task tool to invoke team-shinchan agents (NEVER work directly
 | `/team-shinchan:deepsearch` | Shiro + Masumi | haiku/sonnet |
 | `/team-shinchan:debate` | Midori | opus |
 | `/team-shinchan:resume` | Shinnosuke | opus |
+| `/team-shinchan:review` | Action Kamen | opus |
+| `/team-shinchan:frontend` | Aichan | sonnet |
+| `/team-shinchan:backend` | Bunta | sonnet |
+| `/team-shinchan:devops` | Masao | sonnet |
+| `/team-shinchan:implement` | Bo | sonnet |
+| `/team-shinchan:requirements` | Misae | sonnet |
+| `/team-shinchan:vision` | Ume | sonnet |
+| `/team-shinchan:bigproject` | Himawari | opus |
 
 ### ⛔ Absolutely Prohibited
 
@@ -393,19 +401,39 @@ Shinnosuke always delegates to Midori for all debate scenarios, regardless of co
 
 ## PART 11: Skills & Commands
 
+### Workflow Skills
+
 | Command | Description | When |
 |---------|-------------|------|
+| `/team-shinchan:start` | Start new task | Begin integrated workflow |
 | `/team-shinchan:orchestrate` | Explicit orchestration | Complex tasks |
-| `/team-shinchan:debate` | Explicit debate | Design decisions |
-| `/team-shinchan:plan` | Planning session | Need structured plan |
-| `/team-shinchan:analyze` | Deep analysis | Debugging, investigation |
-| `/team-shinchan:deepsearch` | Codebase search | Find code/patterns |
+| `/team-shinchan:resume` | Resume workflow | Continue interrupted work |
+| `/team-shinchan:status` | Show workflow status | Check progress |
 | `/team-shinchan:autopilot` | Full autonomous | Hands-off execution |
 | `/team-shinchan:ralph` | Persistent loop | Must complete |
 | `/team-shinchan:ultrawork` | Parallel execution | Speed priority |
-| `/team-shinchan:start` | Start new task | Begin integrated workflow |
-| `/team-shinchan:resume` | Resume workflow | Continue interrupted work |
-| `/team-shinchan:status` | Show workflow status | Check progress |
+
+### Agent Direct Access Skills
+
+| Command | Agent | When |
+|---------|-------|------|
+| `/team-shinchan:review` | 🦸 Action Kamen | Code review, verification |
+| `/team-shinchan:frontend` | 🎀 Aichan | UI/UX, React, CSS |
+| `/team-shinchan:backend` | 🍜 Bunta | API, database, server |
+| `/team-shinchan:devops` | 🍙 Masao | CI/CD, Docker, deploy |
+| `/team-shinchan:implement` | 😪 Bo | Quick code implementation |
+| `/team-shinchan:requirements` | 👩 Misae | Hidden requirements, risks |
+| `/team-shinchan:vision` | 🖼️ Ume | Image/PDF analysis |
+| `/team-shinchan:bigproject` | 🌸 Himawari | Large-scale projects |
+| `/team-shinchan:analyze` | 👔 Hiroshi | Deep analysis, debugging |
+| `/team-shinchan:plan` | 📋 Nene | Strategic planning |
+| `/team-shinchan:deepsearch` | 🐶 Shiro | Codebase search |
+| `/team-shinchan:debate` | 🌻 Midori | Design decisions |
+
+### Memory Skills
+
+| Command | Description | When |
+|---------|-------------|------|
 | `/team-shinchan:learn` | Add to memory | Remember patterns |
 | `/team-shinchan:memories` | View memories | Check learnings |
 | `/team-shinchan:forget` | Delete memory | Remove outdated |

@@ -23,6 +23,16 @@ tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 
 You are **Aichan**. You specialize in frontend development and UI/UX.
 
+## Skill Invocation
+
+This agent is invoked via `/team-shinchan:frontend` skill.
+
+```
+/team-shinchan:frontend                    # Interactive mode
+/team-shinchan:frontend "create navbar"    # Create component
+/team-shinchan:frontend "add dark mode"    # Add feature
+```
+
 ## Signature
 
 | Emoji | Agent |

@@ -23,6 +23,16 @@ tools: ["Read", "Glob", "Grep", "WebFetch"]
 
 You are **Ume**. You analyze visual content like images, screenshots, and PDFs.
 
+## Skill Invocation
+
+This agent is invoked via `/team-shinchan:vision` skill.
+
+```
+/team-shinchan:vision                      # Interactive mode
+/team-shinchan:vision "./mockup.png"       # Analyze image
+/team-shinchan:vision "./spec.pdf"         # Process PDF
+```
+
 ## Signature
 
 | Emoji | Agent |

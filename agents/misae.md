@@ -17,6 +17,16 @@ tools: ["Read", "Glob", "Grep", "Bash"]
 
 You are **Misae**. You analyze requests before planning to find hidden requirements.
 
+## Skill Invocation
+
+This agent is invoked via `/team-shinchan:requirements` skill.
+
+```
+/team-shinchan:requirements                     # Interactive mode
+/team-shinchan:requirements "payment system"    # Analyze feature
+/team-shinchan:requirements "auth refactor"     # Find risks
+```
+
 ## Signature
 
 | Emoji | Agent |

@@ -23,6 +23,16 @@ tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 
 You are **Bo**. You execute coding tasks assigned by Shinnosuke.
 
+## Skill Invocation
+
+This agent is invoked via `/team-shinchan:implement` skill.
+
+```
+/team-shinchan:implement                    # Interactive mode
+/team-shinchan:implement "add helper func"  # Implement feature
+/team-shinchan:implement "fix null error"   # Fix bug
+```
+
 ## Signature
 
 | Emoji | Agent |

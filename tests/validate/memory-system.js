@@ -16,7 +16,7 @@ const REQUIRED_FILES = [
   { path: 'hooks/load-kb.md', name: 'load-kb hook' },
 ];
 
-const STORAGE_PATH = '.team-shinchan/learnings.md';
+const STORAGE_PATH = '.shinchan-docs/learnings.md';
 
 function runValidation() {
   console.log('========================================');
@@ -45,12 +45,12 @@ function runValidation() {
     const fullPath = path.join(ROOT_DIR, filePath);
     if (fs.existsSync(fullPath)) {
       const content = fs.readFileSync(fullPath, 'utf-8');
-      if (content.includes(STORAGE_PATH) || content.includes('.team-shinchan/learnings')) {
+      if (content.includes(STORAGE_PATH) || content.includes('.shinchan-docs/learnings')) {
         console.log(`  \x1b[32m✓\x1b[0m ${name} references ${STORAGE_PATH}`);
       } else {
-        // load-learnings hook may reference it differently
-        if (content.includes('.team-shinchan')) {
-          console.log(`  \x1b[32m✓\x1b[0m ${name} references .team-shinchan/`);
+        // load-kb hook may reference it differently
+        if (content.includes('.shinchan-docs')) {
+          console.log(`  \x1b[32m✓\x1b[0m ${name} references .shinchan-docs/`);
         } else {
           pathConsistent = false;
           errors.push(`${name} does not reference ${STORAGE_PATH}`);
@@ -60,16 +60,16 @@ function runValidation() {
     }
   });
 
-  // Check that .team-shinchan is gitignored
+  // Check that .shinchan-docs is gitignored
   console.log('\nChecking gitignore...');
   const gitignorePath = path.join(ROOT_DIR, '.gitignore');
   if (fs.existsSync(gitignorePath)) {
     const gitignore = fs.readFileSync(gitignorePath, 'utf-8');
-    if (gitignore.includes('.team-shinchan')) {
-      console.log('  \x1b[32m✓\x1b[0m .team-shinchan/ is gitignored');
+    if (gitignore.includes('.shinchan-docs')) {
+      console.log('  \x1b[32m✓\x1b[0m .shinchan-docs/ is gitignored');
     } else {
-      errors.push('.team-shinchan/ not in .gitignore');
-      console.log('  \x1b[31m✗\x1b[0m .team-shinchan/ not gitignored');
+      errors.push('.shinchan-docs/ not in .gitignore');
+      console.log('  \x1b[31m✗\x1b[0m .shinchan-docs/ not gitignored');
     }
   }
 

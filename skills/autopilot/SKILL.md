@@ -42,6 +42,11 @@ Complete autonomously without user intervention:
 - execution Stage: Implementation proceeds
 - completion Stage: Documentation and verification
 
+## Safety Limits
+
+- **Max iterations**: 15 (pause and report if reached)
+- **Progress check**: If no measurable progress in 3 consecutive iterations, pause and report to user
+
 User request: ${args || '(Request content analysis needed)'}
 `
 )

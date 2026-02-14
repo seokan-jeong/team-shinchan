@@ -13,8 +13,8 @@ const ROOT_DIR = path.join(__dirname, '../..');
 const FILES_TO_CHECK = [
   {
     path: 'CLAUDE.md',
-    requiredSection: 'PART 13',
-    keywords: ['Error Handling', 'error', 'failure', 'recovery']
+    requiredSection: 'Error Handling',
+    keywords: ['Error Handling', 'error', 'failure', 'retry']
   },
   {
     path: 'agents/shinnosuke.md',

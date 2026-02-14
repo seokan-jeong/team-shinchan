@@ -46,7 +46,7 @@ If confirmed:
 ```
 ✅ Removed: "Use Zustand over Redux"
 
-📁 Updated: .team-shinchan/learnings.md
+📁 Updated: .shinchan-docs/learnings.md
 ```
 
 ### Clear All Mode (`/forget --all`)
@@ -63,7 +63,7 @@ If confirmed:
 ```
 ✅ Cleared all learnings.
 
-📁 Reset: .team-shinchan/learnings.md
+📁 Reset: .shinchan-docs/learnings.md
 💡 Start fresh with /team-shinchan:learn or just work!
 ```
 

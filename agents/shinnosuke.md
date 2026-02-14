@@ -10,7 +10,7 @@ assistant: "I'll use shinnosuke to orchestrate this task across multiple special
 
 model: opus
 color: yellow
-tools: ["Bash", "Task", "TodoWrite"]
+tools: ["Read", "Glob", "Grep", "Bash", "Task", "TodoWrite"]
 ---
 
 # Shinnosuke - Team-Shinchan Main Orchestrator
@@ -348,7 +348,7 @@ Use standard header format (`━━━ 🚀/✅/💭 👦 [Shinnosuke] {event} �
 
 ## 🚨 Prohibited Actions
 
-1. ❌ Direct code exploration (Glob/Grep/Read)
+1. ❌ Direct code analysis (analyzing code to make implementation decisions yourself)
 2. ❌ Direct code writing/modification (Edit/Write)
 3. ❌ Skipping Stages
 4. ❌ Completing Phase without Action Kamen review

@@ -43,7 +43,7 @@ Categorize findings:
 
 ### Step 3: Save to Memory File
 
-**File location**: `.team-shinchan/learnings.md`
+**File location**: `.shinchan-docs/learnings.md`
 
 **Format for each learning**:
 
@@ -65,7 +65,7 @@ Categorize findings:
    - [pattern] Discovered: {brief description}
    - [mistake] Avoided: {brief description}
 
-📁 Saved to: .team-shinchan/learnings.md
+📁 Saved to: .shinchan-docs/learnings.md
 ```
 
 ## Example
@@ -89,4 +89,16 @@ After fixing a bug:
 2. **Be specific** - Vague learnings are useless
 3. **Be concise** - One clear insight per entry
 4. **Include context** - Future you needs to understand when this applies
-5. **Create file if missing** - Initialize `.team-shinchan/learnings.md` if it doesn't exist
+5. **Create file if missing** - Initialize `.shinchan-docs/learnings.md` if it doesn't exist
+
+## Deduplication
+
+Before appending a new learning:
+
+1. Read existing `.shinchan-docs/learnings.md`
+2. Check if a learning with similar content already exists (same tags + similar title)
+3. If duplicate found:
+   - Update confidence level if new evidence strengthens it
+   - Skip adding duplicate entry
+   - Log: `🧠 [Auto-Retrospective] Skipped duplicate: "{title}"`
+4. If no duplicate: Append normally

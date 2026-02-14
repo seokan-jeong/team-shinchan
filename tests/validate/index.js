@@ -17,6 +17,7 @@ const errorHandling = require('./error-handling');
 const partNumbering = require('./part-numbering');
 const quickFixPath = require('./quick-fix-path');
 const memorySystem = require('./memory-system');
+const tokenBudget = require('./token-budget');
 
 async function runAllValidations() {
   console.log('\n╔════════════════════════════════════════╗');
@@ -36,7 +37,8 @@ async function runAllValidations() {
     errorHandling: 0,
     partNumbering: 0,
     quickFixPath: 0,
-    memorySystem: 0
+    memorySystem: 0,
+    tokenBudget: 0
   };
 
   const times = {
@@ -52,7 +54,8 @@ async function runAllValidations() {
     errorHandling: 0,
     partNumbering: 0,
     quickFixPath: 0,
-    memorySystem: 0
+    memorySystem: 0,
+    tokenBudget: 0
   };
 
   // Run agent schema validation
@@ -120,6 +123,12 @@ async function runAllValidations() {
   results.memorySystem = memorySystem.runValidation();
   times.memorySystem = Date.now() - start;
 
+  // Run token budget validation
+  start = Date.now();
+  const tokenResult = tokenBudget.validateTokenBudget();
+  results.tokenBudget = tokenResult.warnings > 0 ? tokenResult.warnings : 0;
+  times.tokenBudget = Date.now() - start;
+
   // Summary
   const totalErrors = Object.values(results).reduce((a, b) => a + b, 0);
   const totalTime = Object.values(times).reduce((a, b) => a + b, 0);
@@ -140,6 +149,7 @@ async function runAllValidations() {
   console.log(`║  PART Numbering:     ${results.partNumbering === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.partNumbering).padStart(5)}ms  ║`);
   console.log(`║  Quick Fix Path:     ${results.quickFixPath === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.quickFixPath).padStart(5)}ms  ║`);
   console.log(`║  Memory System:      ${results.memorySystem === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.memorySystem).padStart(5)}ms  ║`);
+  console.log(`║  Token Budget:       ${results.tokenBudget === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[33mWARN\x1b[0m'}  ${String(times.tokenBudget).padStart(5)}ms  ║`);
   console.log('╠════════════════════════════════════════════════╣');
 
   if (totalErrors === 0) {

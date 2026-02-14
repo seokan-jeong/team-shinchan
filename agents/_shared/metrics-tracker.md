@@ -134,4 +134,4 @@ Rate this workflow (optional):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-Feedback is appended to `.team-shinchan/feedback.md` for future analysis.
+Feedback is appended to `.shinchan-docs/feedback.md` for future analysis.

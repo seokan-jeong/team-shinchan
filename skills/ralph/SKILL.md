@@ -31,10 +31,17 @@ Don't stop until complete:
 1. Check TODO list
 2. Execute next task (delegate to appropriate agent)
 3. Verify results
-4. On failure → Analyze cause → Retry
+4. On failure → Analyze cause → Retry (max 3 retries per task)
 5. On success → Next task
 6. All tasks complete → Action Kamen final verification
 7. Verification fails → Fix and re-verify
+
+## Safety Limits
+
+- **Max iterations**: 15 (pause and report if reached)
+- **Max retries per task**: 3 (report failure if exceeded)
+- **Progress check**: If no measurable progress in 3 consecutive iterations, pause and report to user
+- **Never silently loop** - always show progress
 
 ## Completion Conditions
 
@@ -43,7 +50,7 @@ Complete only when all conditions met:
 - Build/tests pass
 - Action Kamen review approved
 
-**If conditions not met, automatically continue!**
+**If conditions not met, automatically continue (respecting safety limits)!**
 
 User request: ${args || '(Task to complete)'}
 `

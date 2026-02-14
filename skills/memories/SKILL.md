@@ -20,7 +20,7 @@ user-invocable: true
 
 ### Step 1: Read Learning File
 
-Read `.team-shinchan/learnings.md`
+Read `.shinchan-docs/learnings.md`
 
 If file doesn't exist:
 ```
@@ -106,7 +106,7 @@ Found 2 results.
 
 ## Important
 
-- Learnings are stored in `.team-shinchan/learnings.md`
+- Learnings are stored in `.shinchan-docs/learnings.md`
 - Automatically loaded at session start
 - Higher confidence learnings are prioritized
 - Old learnings can be removed with `/forget`

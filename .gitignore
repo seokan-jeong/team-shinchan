@@ -39,11 +39,9 @@ npm-debug.log*
 .cache/
 *.tsbuildinfo
 
-# Team-Shinchan workflow docs (local only)
+# Team-Shinchan data (local only - workflow docs, learnings, feedback)
 .shinchan-docs/
 shinchan-docs/
-
-# Team-Shinchan learnings (local project-specific data)
 .team-shinchan/
 ~/
 

@@ -81,6 +81,15 @@ function runValidation() {
 
   console.log('');
 
+  // If no PART headings found, that's valid (compact CLAUDE.md format)
+  if (parts.length === 0) {
+    console.log('\x1b[32m✓ CLAUDE.md uses compact format (no PART headings)\x1b[0m');
+    console.log('\n----------------------------------------');
+    console.log('Errors: 0');
+    console.log('----------------------------------------\n');
+    return 0;
+  }
+
   const errors = validateSequence(parts);
 
   if (errors.length === 0) {

@@ -89,6 +89,34 @@ This agent is invoked via `/team-shinchan:frontend` skill.
 - Semantic HTML
 - Performance optimization
 
+## Stage Awareness
+
+Before starting work, check WORKFLOW_STATE.yaml:
+
+| Stage | Aichan's Role |
+|-------|---------------|
+| requirements | NOT active |
+| planning | NOT active |
+| execution | ACTIVE - implement frontend tasks |
+| completion | NOT active |
+
+**Always read PROGRESS.md** to understand current phase requirements before implementing.
+
+## Bash Restrictions
+
+- **NEVER** run destructive commands without explicit user confirmation
+- **NEVER** push to remote repositories
+- Use Bash for: running dev server, installing packages, running tests/linters
+- Do NOT use Bash for: file reading (use Read), file searching (use Glob/Grep)
+
+## Testing Protocol
+
+- Run existing tests before and after changes
+- Write component tests for new UI components
+- Test responsive design at multiple breakpoints
+- Verify accessibility (WCAG) compliance
+- Report test results in completion summary
+
 ---
 
 ## Output Format

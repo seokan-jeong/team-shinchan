@@ -102,7 +102,8 @@ function runValidation() {
     return 1;
   }
 
-  // Extract matrices
+  // Extract matrices - workflow-guard.md is the authoritative source
+  // CLAUDE.md may reference it via link instead of duplicating the matrix
   const claudeContent = fs.readFileSync(CLAUDE_MD, 'utf-8');
   const guardContent = fs.readFileSync(GUARD_MD, 'utf-8');
 
@@ -113,9 +114,25 @@ function runValidation() {
   console.log(`  CLAUDE.md: ${Object.keys(claudeMatrix).length} tools`);
   console.log(`  workflow-guard.md: ${Object.keys(guardMatrix).length} tools\n`);
 
-  // Compare matrices
-  const matrixErrors = compareMatrices(claudeMatrix, guardMatrix, 'CLAUDE.md', 'workflow-guard.md');
-  errors.push(...matrixErrors);
+  // workflow-guard.md must have the matrix
+  if (Object.keys(guardMatrix).length === 0) {
+    errors.push('workflow-guard.md: Stage-Tool Matrix not found');
+  } else {
+    console.log('\x1b[32m✓ workflow-guard.md has Stage-Tool Matrix\x1b[0m');
+  }
+
+  // CLAUDE.md may either have the matrix inline or reference workflow-guard.md
+  if (Object.keys(claudeMatrix).length === 0) {
+    if (claudeContent.includes('workflow-guard')) {
+      console.log('\x1b[32m✓ CLAUDE.md references workflow-guard.md for stage rules\x1b[0m');
+    } else {
+      errors.push('CLAUDE.md: Neither has Stage-Tool Matrix nor references workflow-guard.md');
+    }
+  } else {
+    // Both have matrices - check consistency
+    const matrixErrors = compareMatrices(claudeMatrix, guardMatrix, 'CLAUDE.md', 'workflow-guard.md');
+    errors.push(...matrixErrors);
+  }
 
   // Report results
   if (errors.length === 0) {

@@ -153,6 +153,27 @@ Correct action:
 DO NOT start implementation until Stage 3 (execution).
 ```
 
+### Completion Stage - Write Path Filtering
+
+In completion stage, Write is allowed ONLY for documentation files:
+
+**Allowed paths for Write in completion stage:**
+- Files within `.shinchan-docs/` directory
+- Files ending in `.md` extension
+
+**Block Write for non-documentation paths:**
+```
+[Workflow Guard] Write Restricted in Completion Stage
+
+You attempted to write to: {file_path}
+
+In completion stage, Write is only allowed for documentation:
+  → .shinchan-docs/**  (workflow documents)
+  → *.md files (documentation)
+
+For code changes, return to execution stage.
+```
+
 ---
 
 ## Error Handling: Corrupted State File
@@ -163,14 +184,14 @@ DO NOT start implementation until Stage 3 (execution).
 
 ```
 1. File not found or unreadable:
-   → Default to "execution" stage (most permissive)
+   → Default to "requirements" stage (most restrictive)
    → Warn user about missing/corrupted state
-   → Continue with execution stage permissions
+   → Suggest running /team-shinchan:resume or /team-shinchan:start
 
 2. stage field is invalid or missing:
-   → Default to "execution" stage
+   → Default to "requirements" stage
    → Warn user about invalid stage value
-   → Log the corrupted content for debugging
+   → Suggest recreating WORKFLOW_STATE.yaml
 
 3. blocked_tools field is malformed:
    → Use default stage rules from CLAUDE.md
@@ -186,14 +207,15 @@ DO NOT start implementation until Stage 3 (execution).
 
 Issue: {WORKFLOW_STATE.yaml missing/corrupted/invalid stage}
 
-Recovery: Defaulting to "execution" stage
-→ All implementation tools are now allowed
+Recovery: Defaulting to "requirements" stage (most restrictive)
+→ Only Read/Glob/Grep/Task/AskUserQuestion are allowed
 
 Recommendation:
-- If you started a workflow, recreate WORKFLOW_STATE.yaml
-- If no workflow is active, you can ignore this warning
+- Run /team-shinchan:resume to recover your workflow
+- Run /team-shinchan:start to begin a new workflow
+- If no workflow is active, this warning can be ignored
 
-Proceeding with tool: {requested_tool}
+Blocking tool: {requested_tool}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -203,11 +225,11 @@ When state file cannot be read, use these defaults:
 
 | Stage | Default Value |
 |-------|---------------|
-| Current Stage | execution |
-| Allowed Tools | All (Read, Glob, Grep, Task, Edit, Write, TodoWrite, Bash, AskUserQuestion) |
-| Blocked Tools | None |
+| Current Stage | requirements |
+| Allowed Tools | Read, Glob, Grep, Task, AskUserQuestion |
+| Blocked Tools | Edit, Write, TodoWrite, Bash |
 
-**Rationale:** "execution" is the most permissive stage. If state is corrupted, it's safer to allow work than to block incorrectly.
+**Rationale:** "requirements" is the most restrictive stage. If state is corrupted, it's safer to block implementation than to allow premature coding.
 
 ---
 

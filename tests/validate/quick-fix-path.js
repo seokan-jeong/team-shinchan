@@ -33,11 +33,11 @@ function runValidation() {
   const claudeContent = fs.readFileSync(CLAUDE_MD, 'utf-8');
 
   console.log('Checking CLAUDE.md...');
-  if (/Quick Fix Path/i.test(claudeContent)) {
-    console.log('  \x1b[32m✓\x1b[0m Quick Fix Path section exists');
+  if (/Quick Fix|Lite Mode/i.test(claudeContent)) {
+    console.log('  \x1b[32m✓\x1b[0m Quick Fix / Lite Mode section exists');
   } else {
-    errors.push('CLAUDE.md missing Quick Fix Path section');
-    console.log('  \x1b[31m✗\x1b[0m Quick Fix Path section missing');
+    errors.push('CLAUDE.md missing Quick Fix / Lite Mode section');
+    console.log('  \x1b[31m✗\x1b[0m Quick Fix / Lite Mode section missing');
   }
 
   // Check shinnosuke.md

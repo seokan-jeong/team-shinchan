@@ -1,95 +1,30 @@
 # Debate Workflow Details
 
-## Phase 1: Problem Definition and Panel Assembly
+> **Authoritative source**: The debate process is fully defined in [agents/midori.md](/agents/midori.md).
+> This file provides a summary reference only.
 
-Midori(Moderator) analyzes the topic and summons appropriate experts.
+## Debate Patterns (from midori.md)
 
-**Tasks:**
-1. Clarify discussion topic
-2. Auto-select participants based on keywords
-3. Announce discussion rules
+| Pattern | Use Case | Rounds |
+|---------|----------|--------|
+| Lightweight | Simple 2-option debates | 1 round |
+| Round Table (default) | Standard debates | 2-3 rounds |
+| Dialectic | Deep 2-option exploration | 2 rounds + synthesis |
+| Expert Panel | Complex multi-stakeholder | 2+ rounds |
 
-## Phase 2: Opinion Collection
+## Process Summary
 
-Each agent independently presents their opinion.
+1. **Panel Assembly**: Select experts based on topic keywords
+2. **Opinion Collection**: Parallel Task calls to panel members (3-5 sentences each)
+3. **Discussion**: If disagreement, additional rounds (max 3 total)
+4. **Synthesis**: Hiroshi synthesizes all opinions via Task
+5. **Decision**: Report final decision with rationale
 
-**Parallel Execution Example:**
-```
-Task(subagent_type="team-shinchan:aichan", prompt="Topic: [topic]\nPlease provide your expert opinion.")
-Task(subagent_type="team-shinchan:bunta", prompt="Topic: [topic]\nPlease provide your expert opinion.")
-```
+## Key Rules
 
-**Opinion Contents:**
-- Core opinion
-- Pros
-- Cons
-- Recommendations
+- All opinions MUST come from actual Task calls (never simulated)
+- Maximum 3 rounds (usually 2 sufficient)
+- Debate valid with minimum 2 panelists
+- Record decision in agents/_shared/debate-decisions.md
 
-## Phase 3: Discussion Rounds
-
-Share collected opinions and provide mutual feedback.
-
-**Round Progression:**
-1. Round 1: Rebuttals/agreements on initial opinions
-2. Round 2: Consolidate issues and adjust positions
-3. Round 3: Finalize positions
-
-**Early Termination Conditions:**
-- All participants reach consensus
-- Major issues resolved
-
-## Phase 4: Consensus Building
-
-Hiroshi(Oracle) synthesizes all opinions.
-
-**Synthesis Contents:**
-- Summary of each opinion
-- Analysis of commonalities and differences
-- Optimal solution proposal
-- Trade-off explanation
-
-## Phase 5: Verification
-
-Action Kamen(Reviewer) reviews the consensus.
-
-**Verification Criteria:**
-- All requirements met
-- Technical feasibility
-- Potential risks
-
-**Results:**
-- ✅ Approved: Consensus finalized
-- ❌ Revision needed: Feedback applied and re-debate
-
-## Output Format
-
-```markdown
-## Discussion Result
-
-### Topic
-[Discussion topic]
-
-### Participants
-- Agent A (Role)
-- Agent B (Role)
-
-### Opinion Summary
-| Agent | Core Opinion | Pros | Cons |
-|-------|--------------|------|------|
-| A | ... | ... | ... |
-| B | ... | ... | ... |
-
-### Discussion Highlights
-- Round 1: ...
-- Round 2: ...
-
-### Consensus
-[Final agreed solution]
-
-### Rationale
-- Reason 1
-- Reason 2
-
-### Verification Result
-✅ Approved / ❌ Revision needed
-```
+> For full panel selection criteria, debate templates, and error handling, see [agents/midori.md](/agents/midori.md).

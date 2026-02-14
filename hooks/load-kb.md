@@ -12,7 +12,7 @@ At session start, load KB summary, past learnings, and detect any interrupted wo
 
 ### 1. Load KB Summary
 
-1. **Check**: If `.team-shinchan/kb-summary.md` exists, read it. If not, skip silently.
+1. **Check**: If `.shinchan-docs/kb-summary.md` exists, read it. If not, skip silently.
 2. **Parse**: Extract pattern count and decision count from content.
 3. **Display**:
 
@@ -22,7 +22,7 @@ At session start, load KB summary, past learnings, and detect any interrupted wo
 
 ### 2. Load Learnings
 
-1. **Check**: If `.team-shinchan/learnings.md` exists, read it. If not, skip silently.
+1. **Check**: If `.shinchan-docs/learnings.md` exists, read it. If not, skip silently.
 2. **Load**: Extract last 20 learnings (most recent first, high-confidence prioritized).
 3. **Display** (max 5 key items):
 

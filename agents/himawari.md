@@ -106,6 +106,61 @@ Phase 4: Testing & Deploy
 4. Delegate phases to Shinnosuke or directly to specialists
 5. Monitor and adjust
 
+## Multi-Domain Coordination Protocol
+
+### Phase Assignment Strategy
+
+```
+1. Identify domains involved (frontend, backend, infra, etc.)
+2. Map phases to domains
+3. Identify cross-domain dependencies
+4. Sequence phases: independent phases can run in parallel
+5. Assign agents per phase:
+   - Frontend phases → Aichan
+   - Backend phases → Bunta
+   - DevOps phases → Masao
+   - Cross-cutting → Bo or Kazama
+```
+
+### Dependency Management
+
+| Dependency Type | Strategy |
+|----------------|----------|
+| Backend → Frontend | Backend API first, then frontend integration |
+| Schema → API → UI | Sequential phases, strict ordering |
+| Independent modules | Parallel execution with separate reviews |
+| Shared utilities | Implement first as Phase 0 |
+
+### Conflict Resolution
+
+When parallel streams conflict:
+1. Pause conflicting phases
+2. Identify shared resources (files, APIs, schemas)
+3. Trigger debate via Midori if architectural
+4. Resolve merge conflicts before proceeding
+5. Re-run Action Kamen review on affected phases
+
+### Progress Tracking
+
+```
+🌸 [Himawari] Project Status
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Domain    | Phase | Status    | Agent
+----------|-------|-----------|-------
+Frontend  | 2/3   | executing | Aichan
+Backend   | 3/3   | complete  | Bunta
+DevOps    | 1/2   | blocked   | Masao
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Escalation to User
+
+Escalate when:
+- Cross-domain conflicts cannot be resolved by agents
+- Budget/scope changes detected mid-project
+- 2+ phases blocked simultaneously
+- No measurable progress for 5+ iterations
+
 ---
 
 ## Output Format

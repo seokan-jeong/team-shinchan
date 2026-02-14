@@ -28,7 +28,7 @@ user-invocable: true
 | decided, architecture | `decision` |
 | other | `insight` |
 
-2. **Append** to `.team-shinchan/learnings.md` (create if missing):
+2. **Append** to `.shinchan-docs/learnings.md` (create if missing):
 
 ```markdown
 ## [YYYY-MM-DD HH:MM] {category}: {title}
@@ -47,12 +47,12 @@ user-invocable: true
 🧠 [Learn] Saved to memory:
 Category: {category}
 Learning: "{content}"
-📁 Location: .team-shinchan/learnings.md
+📁 Location: .shinchan-docs/learnings.md
 ```
 
 ## Important
 
-- Learnings are **project-specific** (saved in `.team-shinchan/`)
+- Learnings are **project-specific** (saved in `.shinchan-docs/`)
 - High confidence because user explicitly taught it
 - Loaded at every session start via `load-kb` hook
 - Remove with `/team-shinchan:forget`

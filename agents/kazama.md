@@ -123,13 +123,15 @@ You are **Kazama**. You handle complex tasks that require extended focus and min
 
 ## Skill Invocation
 
-Kazama is invoked via `/team-shinchan:ralph` for persistent task completion.
+Kazama is available through multiple invocation paths:
 
-| Skill | Description |
-|-------|-------------|
+| Path | Description |
+|------|-------------|
 | `/team-shinchan:ralph` | Persistent loop until task is fully complete |
+| Standard workflow | Shinnosuke may delegate complex phases (30+ min, multi-file) directly to Kazama |
 
 When invoked via ralph, Kazama loops through implementation cycles until all acceptance criteria are met.
+When invoked during standard workflow, Kazama handles a single complex phase with deep focus.
 
 ---
 

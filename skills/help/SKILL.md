@@ -52,8 +52,8 @@ user-invocable: true
 | Skill | Trigger | Description |
 |-------|---------|-------------|
 | `/start` | start, begin | Start integrated workflow |
+| `/resume` | resume, continue | Resume interrupted workflow |
 | `/status` | status, progress | Show workflow status |
-| `/orchestrate` | orchestrate | Explicit orchestration |
 | `/ultrawork` | fast, parallel, ulw | Parallel execution |
 | `/ralph` | until done, complete | Loop until complete |
 | `/autopilot` | auto, automatically | Autonomous execution |
@@ -61,6 +61,7 @@ user-invocable: true
 | `/analyze` | analyze, debug | Deep analysis |
 | `/deepsearch` | find, search | Code search |
 | `/debate` | debate, opinion, compare | Agent debate |
+| `/research` | research, lookup | External research |
 | `/memories` | - | View memories |
 | `/learn` | - | Add learning |
 | `/forget` | - | Delete memory |

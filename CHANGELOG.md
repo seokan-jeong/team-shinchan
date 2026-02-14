@@ -6,6 +6,22 @@ All notable changes to Team-Shinchan will be documented in this file.
 
 *No unreleased changes*
 
+## [3.3.0] - 2026-02-14
+
+### Added
+- 6 new verify-* skills wrapping existing JS validators
+  - `verify-agents` (agent-schema, shared-refs)
+  - `verify-skills` (skill-schema, skill-format, input-validation)
+  - `verify-consistency` (cross-refs, stage-matrix, debate-consistency)
+  - `verify-workflow` (workflow-state-schema, error-handling, part-numbering, quick-fix-path)
+  - `verify-memory` (memory-system)
+  - `verify-budget` (token-budget)
+
+### Changed
+- Redesigned `manage-skills` for markdown plugin structure (13KB → 3KB)
+- Redesigned `verify-implementation` with actual verify-* skills and fast-path (8.9KB → 4KB)
+- Updated `cross-refs.js` KNOWN_SKILLS with new verify-* skills
+
 ## [3.2.0] - 2026-02-14
 
 ### Added

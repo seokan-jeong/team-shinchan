@@ -32,6 +32,9 @@ npm-debug.log*
 .claude/settings.local.json
 .serena/
 
+# Superset
+.superset/
+
 # Cache
 .cache/
 *.tsbuildinfo

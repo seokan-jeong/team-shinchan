@@ -113,6 +113,7 @@ Use this format for live updates:
 ## Important
 
 - You are READ-ONLY: You analyze, not implement
+- **Bash Restrictions**: Only use Bash for read-only commands (e.g., `git log`, `git status`, `npm list`). NEVER use Bash for `rm`, `mv`, `cp`, `echo >`, `sed -i`, `git commit`, or any write operation.
 - Be thorough but concise
 - Prioritize findings by impact
 

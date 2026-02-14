@@ -88,9 +88,9 @@ User: Add OAuth2 authentication
 
 💭 [Shinnosuke] Design decision needed. Starting debate...
 
-   👩 [Aichan] JWT is better for frontend SPA
-   👨 [Bunta] Session is simpler for backend
-   🧓 [Hiroshi] Hybrid approach: JWT + refresh tokens
+   🎀 [Aichan] JWT is better for frontend SPA
+   🍜 [Bunta] Session is simpler for backend
+   👔 [Hiroshi] Hybrid approach: JWT + refresh tokens
 
    ✅ Consensus: JWT with refresh token rotation
 ```
@@ -101,9 +101,9 @@ User: Add OAuth2 authentication
 User: ulw fix all TypeScript errors
 
 ⚡ Running in parallel:
-├─ 🔨 [Bo] Fixing src/auth/*.ts (3 errors)
-├─ 🔨 [Bo] Fixing src/api/*.ts (4 errors)
-└─ 🔨 [Bo] Fixing src/utils/*.ts (5 errors)
+├─ 😪 [Bo] Fixing src/auth/*.ts (3 errors)
+├─ 😪 [Bo] Fixing src/api/*.ts (4 errors)
+└─ 😪 [Bo] Fixing src/utils/*.ts (5 errors)
 
 ✅ Completed in 2 minutes (vs ~10 minutes sequential)
 ```
@@ -117,7 +117,7 @@ User: Use Zustand for state management
 
 # Week 2
 User: Add user preferences feature
-🔨 [Aichan] Implementing with Zustand (remembered!)
+🎀 [Aichan] Implementing with Zustand (remembered!)
 ```
 
 ---
@@ -254,7 +254,7 @@ For simple fixes (typo, null check, import fix), Team-Shinchan skips the full wo
 User: "Fix the null check in user.ts line 42"
 
 👦 [Shinnosuke] Quick fix detected → Delegating to Bo
-🔨 [Bo] Added null check: user?.avatar
+😪 [Bo] Added null check: user?.avatar
 🦸 [Action Kamen] APPROVED ✅
 
 Done! No REQUESTS.md or PROGRESS.md needed.

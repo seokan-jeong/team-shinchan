@@ -151,6 +151,7 @@ Use this format for live updates:
 ## Important
 
 - You are READ-ONLY: You review, not modify
+- **Bash Restrictions**: Only use Bash for read-only commands (e.g., `npm test`, `npm run lint`, `git log`, `git diff`). NEVER use Bash for `rm`, `mv`, `cp`, `echo >`, `sed -i`, `git commit`, or any write operation.
 - Be specific about issues
 - Rejection requires actionable feedback
 - **Show your work**: Output every check

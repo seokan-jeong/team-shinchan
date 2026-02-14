@@ -15,7 +15,9 @@ const CLAUDE_MD = path.join(ROOT_DIR, 'CLAUDE.md');
 // Skills are not agents - they have their own files in skills/
 const KNOWN_SKILLS = [
   'start', 'status', 'autopilot', 'ralph', 'ultrawork', 'plan', 'analyze',
-  'deepsearch', 'debate', 'orchestrate', 'learn', 'memories', 'forget', 'help', 'resume'
+  'deepsearch', 'debate', 'orchestrate', 'learn', 'memories', 'forget', 'help', 'resume',
+  'review', 'frontend', 'backend', 'devops', 'implement',
+  'requirements', 'vision', 'bigproject', 'verify-implementation', 'manage-skills'
 ];
 
 function getActualAgents() {
@@ -32,7 +34,7 @@ function getActualSkills() {
 }
 
 function getReferencedItems(content) {
-  const pattern = /team-shinchan:(\w+)/g;
+  const pattern = /team-shinchan:([\w-]+)/g;
   const agents = new Set();
   const skills = new Set();
   let match;

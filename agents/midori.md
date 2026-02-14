@@ -2,6 +2,18 @@
 name: midori
 description: Debate Moderator - Facilitates expert debates to reach optimal decisions through structured discussion.
 
+<example>
+Context: Multiple implementation approaches exist
+user: "Should we use REST or GraphQL for the new API?"
+assistant: "Design decision needed. Delegating to Midori for structured debate."
+</example>
+
+<example>
+Context: Architecture change being considered
+user: "We need to decide between monorepo and polyrepo"
+assistant: "This is an architectural decision. Let Midori facilitate a debate."
+</example>
+
 model: opus
 color: teal
 tools: ["Task"]

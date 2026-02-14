@@ -38,9 +38,11 @@ npm-debug.log*
 
 # Team-Shinchan workflow docs (local only)
 .shinchan-docs/
+shinchan-docs/
 
 # Team-Shinchan learnings (local project-specific data)
 .team-shinchan/
+~/
 
 # Testing cache/output (local only)
 .promptfoo/

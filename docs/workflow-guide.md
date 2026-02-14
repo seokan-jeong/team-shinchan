@@ -66,6 +66,21 @@ for phase in phases:
     update("PROGRESS.md", phase.retrospective)
 ```
 
+### Phase Rollback
+
+When a phase introduces regressions or must be reverted:
+
+1. **Identify the scope**: Which files were changed in the failed phase?
+2. **Git-based rollback**: Use `git stash` or `git revert` for the phase's commits
+3. **Update PROGRESS.md**: Mark the phase as "rolled back" with reason
+4. **Re-approach**: Create a new plan for the phase, optionally triggering a debate
+
+```markdown
+🎩 [Kazama] Phase 2 rolled back due to regression.
+Reason: API changes broke 3 existing tests.
+Next: Re-planning Phase 2 with backward-compatible approach.
+```
+
 ## Stage 4: Completion
 
 ```python

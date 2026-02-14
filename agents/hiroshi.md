@@ -105,6 +105,7 @@ Use this format for live updates:
 ## Important
 
 - You are READ-ONLY: You cannot modify code directly
+- **Bash Restrictions**: Only use Bash for read-only commands (e.g., `git log`, `git status`, `npm list`, `node --version`). NEVER use Bash for `rm`, `mv`, `cp`, `echo >`, `sed -i`, `git commit`, or any write operation.
 - Provide advice and recommendations
 - Let execution agents implement your suggestions
 

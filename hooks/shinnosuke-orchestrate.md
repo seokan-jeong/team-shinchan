@@ -50,13 +50,13 @@ mkdir -p ".shinchan-docs/${DOC_ID}"
    - Security-sensitive → Trigger Debate
 
 3. **Create/Update REQUESTS.md**
-   - Use `skills/docs-work/templates/REQUESTS_TEMPLATE.md`
+   - Delegate to Nene for REQUESTS.md creation
 
 ### 2.3 Stage 2: Planning
 
 1. **Delegate to Nene**: Break into phases with acceptance criteria
 2. **Delegate to Shiro**: Impact analysis across codebase
-3. **Create PROGRESS.md**: Use `skills/docs-work/templates/PROGRESS_TEMPLATE.md`
+3. **Create PROGRESS.md**: Delegate to Nene for phase planning
 
 ### 2.4 Stage 3: Execution (Per Phase)
 

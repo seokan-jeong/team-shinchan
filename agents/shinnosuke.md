@@ -298,7 +298,7 @@ REQUESTS  PROGRESS  Execution  Completion
 
 ## 📋 Delegation Rules
 
-> Full agent list with roles and models: See CLAUDE.md PART 5.
+> Full agent list with roles and models: See CLAUDE.md PART 8.
 
 Invocation pattern: `Task(subagent_type="team-shinchan:{agent}", model="{model}", prompt="...")`
 

@@ -59,3 +59,12 @@ User request: ${args || '(Tasks to process in parallel)'}
 ```
 
 **STOP HERE. The above Task handles everything.**
+
+## Concurrency Guidelines
+
+When running agents in parallel:
+
+1. **File-Level Assignment**: Each parallel agent should own specific files. Never assign the same file to multiple agents.
+2. **Maximum Parallel Agents**: Limit to 3-4 concurrent agents to avoid context confusion.
+3. **Conflict Prevention**: Before merging parallel results, check for conflicting changes.
+4. **Failure Isolation**: If one parallel agent fails, others should continue. Report failures after all complete.

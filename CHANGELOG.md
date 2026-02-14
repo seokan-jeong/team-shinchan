@@ -6,6 +6,20 @@ All notable changes to Team-Shinchan will be documented in this file.
 
 *No unreleased changes*
 
+## [3.2.0] - 2026-02-14
+
+### Added
+- **Self-Evolving Verification System** (integrated from kimoring-ai-skills)
+  - `skills/verify-implementation/SKILL.md` - orchestrates all verify-* skills sequentially
+  - `skills/manage-skills/SKILL.md` - auto-generates/updates verify-* skills based on changes
+  - `hooks/auto-verify.md` - auto-triggers verification in Completion stage
+- New completion gate: `verify-implementation passed`
+
+### Changed
+- CLAUDE.md PART 2 & 11 - added verify-implementation and manage-skills
+- CLAUDE.md PART 12 - added verify-implementation to completion checklist
+- `docs/workflow-guide.md` - Stage 4 now includes automatic verification workflow
+
 ## [3.1.0] - 2026-02-08
 
 ### Added

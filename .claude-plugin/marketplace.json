@@ -12,7 +12,7 @@
   "plugins": [
     {
       "name": "team-shinchan",
-      "version": "3.3.0",
+      "version": "3.4.0",
       "description": "Turn Claude Code into a full AI development team. 15 specialist agents debate decisions, plan systematically, execute in parallel, and learn from your project conventions.",
       "category": "productivity",
       "source": "./",

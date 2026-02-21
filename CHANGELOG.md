@@ -6,6 +6,45 @@ All notable changes to Team-Shinchan will be documented in this file.
 
 *No unreleased changes*
 
+## [3.5.0] - 2026-02-22
+
+### Added
+- **Proactive Coding Hooks** (PreToolUse/PostToolUse prompt hooks)
+  - `hooks/coding-reminder.md` - Injects Karpathy 4 principles before Edit/Write
+  - `hooks/change-tracker.md` - Reminds agents to log changes in PROGRESS.md
+- **Self-Check System** for all execution agents
+  - `agents/_shared/self-check.md` - Completion checklist (Principle Compliance, Quality Gate, Reporting)
+  - Applied to Bo, Aichan, Bunta, Masao, Kazama
+- **Karpathy Coding Principles** integrated into agent system
+  - `agents/_shared/coding-principles.md` - Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven
+  - `EXAMPLES.md` - 4 scenarios with Do/Don't examples and Anti-Pattern table
+  - Action Kamen review checklist extended with principle-based checks
+- **Rationale Structure** in PROGRESS.md template (mandatory Why/Alternatives/Trade-offs)
+- **Step Splitting Rules** for large Phases (4+ files → Step N-M breakdown)
+- **Standard Output Rationale** section in output-formats.md
+
+### Changed
+- CLAUDE.md Communication Format: emoji table inlined for cross-project plugin usage
+- `hooks/hooks.json`: added PreToolUse and PostToolUse prompt hooks
+- `agents/nene.md`: PROGRESS.md template guide with Rationale and Step rules
+- `agents/shinnosuke.md`: Step Splitting delegation guide
+- `docs/workflow-guide.md`: Quality Checklist and Phase Rationale Pattern
+
+### Fixed
+- Dashboard zombie process cleanup (`killZombieProcesses()`)
+- Dashboard port file write-back verification
+- `checkExistingServer()` response body validation
+- `stdin.on('end')` now calls `gracefulShutdown()` instead of `process.exit(0)`
+
+## [3.4.0] - 2026-02-20
+
+### Added
+- Dashboard auto-open browser on server start (`openBrowser()`, `DASHBOARD_AUTO_OPEN` env var)
+- Dashboard URL notification in workflow entry skills
+
+### Changed
+- `marketplace.json` version bump to 3.4.0
+
 ## [3.3.0] - 2026-02-14
 
 ### Added

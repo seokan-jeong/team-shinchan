@@ -6,6 +6,24 @@ All notable changes to Team-Shinchan will be documented in this file.
 
 *No unreleased changes*
 
+## [3.6.0] - 2026-02-22
+
+### Changed
+- **Token Budget Optimization**: 6 oversized files compressed (total -50%)
+  - midori.md -56%, shinnosuke.md -58%, nene.md -33%
+  - workflow-guard.md -65%, debate/SKILL.md -44%, resume/SKILL.md -32%
+- **Verbose Communication**: Agents now report more frequently
+  - output-formats.md: 6 event-based reporting rules + 5 communication rules
+  - CLAUDE.md: "Be verbose and communicative" progress reporting
+  - bo.md: "Never silently chain 3+ tool calls"
+- **Interactive Interview**: Nene now uses AskUserQuestion for requirements
+  - Added AskUserQuestion to Nene's tools
+  - Interactive Interview section with single/multi-select patterns
+
+### Fixed
+- CLAUDE.md tone gaps (personality, progress reporting, error tiers)
+- Dashboard SSE: added `connected` and `activity` event listeners
+
 ## [3.5.0] - 2026-02-22
 
 ### Added

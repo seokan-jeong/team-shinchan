@@ -112,12 +112,19 @@ All agents reference this document for consistent output formatting.
 - {key finding/result 1}
 - {key finding/result 2}
 
+## Rationale
+- Why: {why this approach was chosen}
+- Alternatives considered: {what else was evaluated}
+- Trade-offs: {what was gained/sacrificed}
+
 ## Details
 {detailed content...}
 
 ## Next Steps (optional)
 - {recommended next steps}
 ```
+
+**Note**: The Rationale section is REQUIRED for any task involving design decisions or implementation choices. For simple bug fixes with obvious solutions, a brief one-liner is sufficient (e.g., "Why: Only valid fix for the null pointer").
 
 ---
 

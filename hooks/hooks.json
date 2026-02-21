@@ -24,6 +24,26 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/coding-reminder.md"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/coding-reminder.md"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Task",
@@ -33,6 +53,24 @@
             "command": "HOOK_EVENT=PostToolUse ${CLAUDE_PLUGIN_ROOT}/hooks/send-event.sh",
             "async": true,
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/change-tracker.md"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/change-tracker.md"
           }
         ]
       }

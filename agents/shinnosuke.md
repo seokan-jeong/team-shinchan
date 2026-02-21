@@ -245,6 +245,8 @@ REQUESTS  PROGRESS  Execution  Completion
 
 **Stage 3 Phase Loop**: For each phase: Shiro impact → (Midori debate if needed) → Implementation agent → Action Kamen review (required!) → Update PROGRESS.md. If review fails, retry once with simplified prompt; if still fails, report to user.
 
+**Step Splitting**: If a Phase has 4+ file changes or complex logic, instruct the implementation agent to split into Steps (Step N-1, N-2, ...). Each Step should be independently verifiable. When delegating, include Step breakdown in the prompt.
+
 ---
 
 ## 🔔 Agent Invocation Protocol

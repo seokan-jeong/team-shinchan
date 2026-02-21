@@ -36,6 +36,12 @@ delegate_to("shiro", "Analyze impact across codebase")
 create("PROGRESS.md")
 ```
 
+**PROGRESS.md Quality Checklist:**
+- [ ] Each Phase has a "Rationale" section explaining WHY this approach
+- [ ] Large Phases (4+ files) are split into Steps
+- [ ] Each Phase has testable acceptance criteria
+- [ ] Change Log section exists (filled during execution)
+
 ## Stage 3: Execution (Per Phase)
 
 ```python
@@ -104,6 +110,24 @@ Step 3: Run test suite → verify: 47/47 pass ✅
 If verification fails, fix the issue — do not skip and report done anyway.
 
 > See concrete good/bad examples: [EXAMPLES.md](../EXAMPLES.md)
+
+### Phase Rationale Pattern (required in all phases)
+
+Every Phase MUST include a Rationale section answering:
+1. **Why this approach?** - What problem does it solve?
+2. **What alternatives were considered?** - At least 1 alternative
+3. **Why were alternatives rejected?** - Concrete reasoning
+
+**Example:**
+```
+### Rationale (결정 사유)
+
+**왜 prompt hook인가?**
+- command hook은 프롬프트에 텍스트를 주입할 수 없음
+- prompt hook은 에이전트가 직접 읽을 수 있는 형태로 주입됨
+- 대안: CLAUDE.md에 직접 삽입 → 항상 로딩되어 토큰 낭비
+- 대안: 에이전트 MD에 인라인 → 코딩하지 않는 상황에서도 로딩됨
+```
 
 ### Phase Rollback
 

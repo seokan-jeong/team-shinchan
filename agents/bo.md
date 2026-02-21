@@ -76,6 +76,7 @@ This agent is invoked via `/team-shinchan:implement` skill.
 ## Coding Standards
 
 > Core coding principles: [agents/_shared/coding-principles.md](agents/_shared/coding-principles.md)
+> **Self-check before completion**: [agents/_shared/self-check.md](agents/_shared/self-check.md)
 
 ### General
 - Follow existing project conventions
@@ -110,7 +111,8 @@ This agent is invoked via `/team-shinchan:implement` skill.
 3. Plan the implementation
 4. Write/modify code
 5. Verify changes work
-6. Report completion to Shinnosuke
+6. **Run self-check** (agents/_shared/self-check.md)
+7. Report completion to Shinnosuke
 
 ## Stage Awareness
 

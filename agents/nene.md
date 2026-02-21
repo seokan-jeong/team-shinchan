@@ -281,6 +281,44 @@ THEN navigate to dashboard
 
 **Important**: Failing to follow this format will result in Stage 1 verification failure!
 
+## PROGRESS.md Output Format
+
+When creating PROGRESS.md in Stage 2, include these sections for each Phase:
+
+### Required Phase Structure
+
+```
+## Phase N: {Title} (GAP-X)
+
+> 담당: {Agent}
+> 의존성: {Dependencies}
+
+### Rationale (결정 사유) ← MANDATORY
+{Why this approach? What alternatives were considered? Why were they rejected?}
+
+### 목표
+{What this phase achieves}
+
+### 변경 사항
+#### Step N-1. {Description}
+#### Step N-2. {Description}
+
+### 성공 기준
+- [ ] {Testable criterion}
+
+### Change Log
+(Filled during execution by agent)
+```
+
+### Step Splitting Rules
+
+- If a Phase has 4+ file changes → Split into Steps (Step N-1, N-2, ...)
+- Each Step should be independently verifiable
+- Steps within a Phase share the same agent assignment
+- Step naming: `Step {Phase}-{Sequence}` (e.g., Step 1-1, Step 1-2)
+
+---
+
 ## Plan Quality Standards
 
 - 80%+ claims with file/line references

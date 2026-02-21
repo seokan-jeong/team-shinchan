@@ -8,7 +8,7 @@
 
 **15 AI agents that debate decisions, plan systematically, execute in parallel, and learn from your project.**
 
-[![Version](https://img.shields.io/badge/version-3.3.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
+[![Version](https://img.shields.io/badge/version-3.6.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.ai)
 ![GitHub stars](https://img.shields.io/github/stars/seokan-jeong/team-shinchan?style=social)
@@ -133,7 +133,7 @@ User: Add user preferences feature
 |-------|------|
 | **Shinnosuke** | Orchestrator |
 | **Himawari** | Atlas (Large Projects) |
-| **Midori** | Debate Guide (Reference) |
+| **Midori** | Debate Moderator |
 
 ### Execution
 | Agent | Role |
@@ -177,21 +177,58 @@ User: Add user preferences feature
 
 ## Commands
 
+32 commands across workflow, specialist, and utility categories:
+
+### Workflow Commands
 | Command | Description |
 |---------|-------------|
 | `/team-shinchan:start` | Start integrated workflow |
 | `/team-shinchan:resume` | Resume interrupted workflow |
-| `/team-shinchan:debate` | Trigger expert debate |
-| `/team-shinchan:plan` | Planning session |
-| `/team-shinchan:analyze` | Deep analysis |
-| `/team-shinchan:deepsearch` | Codebase search |
 | `/team-shinchan:autopilot` | Autonomous execution |
 | `/team-shinchan:ultrawork` | Parallel execution |
 | `/team-shinchan:ralph` | Loop until complete |
+| `/team-shinchan:orchestrate` | Orchestrate multi-agent task |
+| `/team-shinchan:bigproject` | Large project with Himawari |
 | `/team-shinchan:status` | Show workflow status |
+
+### Analysis & Planning
+| Command | Description |
+|---------|-------------|
+| `/team-shinchan:debate` | Trigger expert debate (via Midori) |
+| `/team-shinchan:plan` | Planning session |
+| `/team-shinchan:analyze` | Deep analysis |
+| `/team-shinchan:deepsearch` | Codebase search |
+| `/team-shinchan:requirements` | Gather and clarify requirements |
+| `/team-shinchan:research` | Research a topic |
+
+### Implementation
+| Command | Description |
+|---------|-------------|
+| `/team-shinchan:implement` | Execute code changes |
+| `/team-shinchan:frontend` | Frontend/UI development |
+| `/team-shinchan:backend` | Backend/API development |
+| `/team-shinchan:devops` | Infrastructure & DevOps |
+| `/team-shinchan:review` | Code review |
+| `/team-shinchan:vision` | Image/PDF analysis |
+
+### Verification
+| Command | Description |
+|---------|-------------|
+| `/team-shinchan:verify-implementation` | Run full verification suite |
+| `/team-shinchan:verify-agents` | Verify agent schema |
+| `/team-shinchan:verify-skills` | Verify skill files |
+| `/team-shinchan:verify-consistency` | Verify cross-references |
+| `/team-shinchan:verify-workflow` | Verify workflow state |
+| `/team-shinchan:verify-memory` | Verify memory system |
+| `/team-shinchan:verify-budget` | Verify token budget |
+
+### Memory & Utility
+| Command | Description |
+|---------|-------------|
 | `/team-shinchan:memories` | View learned memories |
 | `/team-shinchan:learn` | Add to memory |
 | `/team-shinchan:forget` | Remove memory |
+| `/team-shinchan:manage-skills` | Manage plugin skills |
 | `/team-shinchan:help` | Show help |
 
 ---
@@ -237,10 +274,17 @@ No commands needed - just say:
 | `/plan` | Nene → Structured planning |
 | `/analyze` | Hiroshi → Deep analysis |
 | `/deepsearch` | Shiro → Masumi |
-| `/debate` | Shinnosuke → Expert panel |
+| `/debate` | Midori → Expert panel |
 | `/autopilot` | Shinnosuke → Autonomous mode |
 | `/ultrawork` | Shinnosuke → Parallel execution |
 | `/ralph` | Kazama → Persistent loop |
+| `/implement` | Bo → Code execution |
+| `/frontend` | Aichan → Frontend/UI |
+| `/backend` | Bunta → Backend/API |
+| `/devops` | Masao → Infrastructure |
+| `/review` | Action Kamen → Code review |
+| `/requirements` | Misae → Requirements analysis |
+| `/bigproject` | Himawari → Large project orchestration |
 
 **You run the skill, agents do the work.**
 
@@ -412,7 +456,7 @@ Team-Shinchan is validated by 3 tiers of automated testing:
 
 | Tier | Tests | What It Checks |
 |------|-------|----------------|
-| Static Validators | 13 | Schema, cross-refs, consistency, API contracts |
+| Static Validators | 14 | Schema, cross-refs, consistency, API contracts, token budget |
 | Agent Behavior (promptfoo) | 25 | Individual agent role adherence |
 | E2E Workflow | 11 | Full workflow scenarios (5 types) |
 

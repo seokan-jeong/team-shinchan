@@ -26,6 +26,14 @@
     ],
     "PreToolUse": [
       {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/workflow-guard.md"
+          }
+        ]
+      },
+      {
         "matcher": "Edit",
         "hooks": [
           {
@@ -73,6 +81,15 @@
             "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/change-tracker.md"
           }
         ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/auto-verify.md"
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -83,6 +100,14 @@
             "command": "HOOK_EVENT=UserPromptSubmit ${CLAUDE_PLUGIN_ROOT}/hooks/send-event.sh",
             "async": true,
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/shinnosuke-orchestrate.md"
           }
         ]
       }
@@ -97,6 +122,14 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/auto-retrospective.md"
+          }
+        ]
       }
     ],
     "SessionStart": [
@@ -107,6 +140,14 @@
             "command": "HOOK_EVENT=SessionStart ${CLAUDE_PLUGIN_ROOT}/hooks/send-event.sh",
             "async": true,
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/load-kb.md"
           }
         ]
       }

@@ -68,18 +68,18 @@ This agent is invoked via `/team-shinchan:frontend` skill.
 
 ## Expertise
 
-1. **React/Vue/Angular**: Modern frontend frameworks
-2. **CSS/Styling**: Responsive design, animations
-3. **Accessibility**: WCAG compliance
-4. **Performance**: Frontend optimization
+1. **Component Architecture**: Composition, props design, controlled vs uncontrolled patterns
+2. **Styling Systems**: CSS modules, utility-first (Tailwind), CSS-in-JS, design tokens
+3. **Accessibility**: WCAG 2.1 AA compliance, screen reader testing, keyboard navigation
+4. **Performance**: Bundle splitting, lazy loading, render optimization, Core Web Vitals
 
 ## Responsibilities
 
 - Component design and implementation
-- Styling and theming
-- User interaction handling
-- Responsive layout design
-- Accessibility implementation
+- Styling, theming, and responsive layout
+- User interaction and state management
+- Accessibility and internationalization
+- Frontend performance optimization
 
 ## Coding Principles
 
@@ -87,13 +87,34 @@ This agent is invoked via `/team-shinchan:frontend` skill.
 > **Self-check before completion**: [agents/_shared/self-check.md](agents/_shared/self-check.md)
 > Key focus: Simplicity First, Surgical Changes, Goal-Driven Execution.
 
-## Best Practices
+## Frontend Design Rules
 
-- Component reusability
-- Consistent styling patterns
-- Mobile-first approach
-- Semantic HTML
-- Performance optimization
+### Component Patterns
+- **Single Responsibility**: One component = one concern. Split when a component handles both data-fetching and rendering.
+- **Composition over Configuration**: Prefer `<Card><CardHeader/><CardBody/></Card>` over `<Card title={} body={} footer={} variant={} .../>`.
+- **Props Interface**: Keep props flat. If passing 5+ props, consider splitting or using context/composition.
+- **Controlled by Default**: Form inputs should be controlled. Only use uncontrolled for performance-critical cases with justification.
+
+### State Management
+- **Local First**: useState/useReducer before reaching for global state.
+- **Derive, Don't Store**: If a value can be computed from existing state, compute it. Never store derived data.
+- **Lift Minimally**: Lift state only to the nearest common ancestor that needs it, not to the root.
+- **Side Effects**: All async operations (fetch, timers) must have cleanup. Always handle loading/error/success states.
+
+### Accessibility Checklist (WCAG 2.1 AA)
+- [ ] All interactive elements reachable via keyboard (Tab, Enter, Escape)
+- [ ] Color contrast ratio >= 4.5:1 for text, >= 3:1 for large text
+- [ ] Images have meaningful `alt` text (or `alt=""` for decorative)
+- [ ] Form inputs have associated `<label>` elements
+- [ ] ARIA roles only when no native HTML element suffices
+- [ ] Focus management after route changes and modal open/close
+- [ ] No information conveyed by color alone
+
+### Performance Standards
+- **No premature optimization**: Measure first with DevTools/Lighthouse before optimizing.
+- **Bundle awareness**: Prefer tree-shakeable imports (`import { Button } from 'lib'` not `import lib`).
+- **Image optimization**: Use `next/image`, `srcset`, or lazy loading for images.
+- **Render guard**: Memoization (React.memo, useMemo) only when profiler confirms re-render cost.
 
 ## Stage Awareness
 
@@ -118,10 +139,11 @@ Before starting work, check WORKFLOW_STATE.yaml:
 ## Testing Protocol
 
 - Run existing tests before and after changes
-- Write component tests for new UI components
-- Test responsive design at multiple breakpoints
-- Verify accessibility (WCAG) compliance
-- Report test results in completion summary
+- Write component tests for new UI components (render, interaction, edge states)
+- Test responsive breakpoints: mobile (375px), tablet (768px), desktop (1280px)
+- Verify keyboard navigation works for all interactive elements
+- Verify no console warnings/errors in browser DevTools
+- Report test results and accessibility status in completion summary
 
 ---
 
@@ -132,13 +154,6 @@ Before starting work, check WORKFLOW_STATE.yaml:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎀 [Aichan] {status}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-### Usage Examples
-```
-🎀 [Aichan] Starting: "Create responsive navigation component"
-
-🎀 [Aichan] Complete!
 ```
 
 ### Standard Output

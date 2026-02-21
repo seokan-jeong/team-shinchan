@@ -2,7 +2,7 @@
 
 ## Overview
 
-13 static validators ensure consistency across the Team-Shinchan codebase.
+17 static validators ensure consistency across the Team-Shinchan codebase.
 
 ## Coverage Matrix
 
@@ -21,6 +21,10 @@
 | part-numbering | CLAUDE.md | PARTs are sequential (1 through N) with no gaps |
 | quick-fix-path | CLAUDE.md | Quick Fix Path criteria and mandatory Action Kamen review |
 | memory-system | hooks/load-kb.md, skills/learn/SKILL.md, skills/memories/SKILL.md, skills/forget/SKILL.md | Memory system files exist and cross-reference correctly |
+| token-budget | agents/*.md, CLAUDE.md | File sizes within recommended token budget thresholds |
+| hook-registration | hooks/*.md, hooks/hooks.json | All hooks referenced in hooks.json exist; no broken references |
+| skill-command-parity | skills/*/,  commands/*.md | Every skill directory has a matching command file and vice versa |
+| version-consistency | .claude-plugin/plugin.json, .claude-plugin/marketplace.json, README.md, CHANGELOG.md | Version numbers match across all release files |
 
 ## Overlap Analysis
 

@@ -18,6 +18,9 @@ const partNumbering = require('./part-numbering');
 const quickFixPath = require('./quick-fix-path');
 const memorySystem = require('./memory-system');
 const tokenBudget = require('./token-budget');
+const hookRegistration = require('./hook-registration');
+const skillCommandParity = require('./skill-command-parity');
+const versionConsistency = require('./version-consistency');
 
 async function runAllValidations() {
   console.log('\n╔════════════════════════════════════════╗');
@@ -38,7 +41,10 @@ async function runAllValidations() {
     partNumbering: 0,
     quickFixPath: 0,
     memorySystem: 0,
-    tokenBudget: 0
+    tokenBudget: 0,
+    hookRegistration: 0,
+    skillCommandParity: 0,
+    versionConsistency: 0
   };
 
   const times = {
@@ -55,7 +61,10 @@ async function runAllValidations() {
     partNumbering: 0,
     quickFixPath: 0,
     memorySystem: 0,
-    tokenBudget: 0
+    tokenBudget: 0,
+    hookRegistration: 0,
+    skillCommandParity: 0,
+    versionConsistency: 0
   };
 
   // Run agent schema validation
@@ -129,6 +138,21 @@ async function runAllValidations() {
   results.tokenBudget = tokenResult.warnings > 0 ? tokenResult.warnings : 0;
   times.tokenBudget = Date.now() - start;
 
+  // Run hook registration validation
+  start = Date.now();
+  results.hookRegistration = hookRegistration.runValidation();
+  times.hookRegistration = Date.now() - start;
+
+  // Run skill-command parity validation
+  start = Date.now();
+  results.skillCommandParity = skillCommandParity.runValidation();
+  times.skillCommandParity = Date.now() - start;
+
+  // Run version consistency validation
+  start = Date.now();
+  results.versionConsistency = versionConsistency.runValidation();
+  times.versionConsistency = Date.now() - start;
+
   // Summary
   const totalErrors = Object.values(results).reduce((a, b) => a + b, 0);
   const totalTime = Object.values(times).reduce((a, b) => a + b, 0);
@@ -150,6 +174,9 @@ async function runAllValidations() {
   console.log(`║  Quick Fix Path:     ${results.quickFixPath === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.quickFixPath).padStart(5)}ms  ║`);
   console.log(`║  Memory System:      ${results.memorySystem === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.memorySystem).padStart(5)}ms  ║`);
   console.log(`║  Token Budget:       ${results.tokenBudget === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[33mWARN\x1b[0m'}  ${String(times.tokenBudget).padStart(5)}ms  ║`);
+  console.log(`║  Hook Registration:  ${results.hookRegistration === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.hookRegistration).padStart(5)}ms  ║`);
+  console.log(`║  Skill-Cmd Parity:   ${results.skillCommandParity === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.skillCommandParity).padStart(5)}ms  ║`);
+  console.log(`║  Version Consist.:   ${results.versionConsistency === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.versionConsistency).padStart(5)}ms  ║`);
   console.log('╠════════════════════════════════════════════════╣');
 
   if (totalErrors === 0) {

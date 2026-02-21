@@ -4,7 +4,20 @@ All notable changes to Team-Shinchan will be documented in this file.
 
 ## [Unreleased]
 
-*No unreleased changes*
+### Added
+- **32 Command Files**: Added 16 new command `.md` files to complete coverage of all skills
+  - `commands/implement.md`, `commands/frontend.md`, `commands/backend.md`, `commands/devops.md`
+  - `commands/review.md`, `commands/requirements.md`, `commands/vision.md`
+  - `commands/bigproject.md`, `commands/manage-skills.md`
+  - `commands/verify-agents.md`, `commands/verify-budget.md`, `commands/verify-consistency.md`
+  - `commands/verify-implementation.md`, `commands/verify-memory.md`, `commands/verify-skills.md`, `commands/verify-workflow.md`
+
+### Fixed
+- README.md version badge updated from 3.3.0 to 3.6.0
+- README.md debate skill now correctly shows Midori (not Shinnosuke) as moderator
+- README.md Commands table expanded from 14 to 32 commands
+- README.md Skills table expanded to include all 15 specialist skill mappings
+- COVERAGE.md updated to reflect 17 static validators (added hook-registration, skill-command-parity, version-consistency)
 
 ## [3.6.0] - 2026-02-22
 

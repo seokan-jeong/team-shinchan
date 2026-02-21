@@ -43,10 +43,43 @@ fi
 
 VERSION=$(grep -m1 '"version"' "$PLUGIN_DIR/.claude-plugin/plugin.json" | cut -d'"' -f4)
 
+# Post-install verification
+echo "Verifying installation..."
+VERIFY_FAILED=0
+
+check_path() {
+    if [ ! -e "$PLUGIN_DIR/$1" ]; then
+        echo "  MISSING: $1"
+        VERIFY_FAILED=1
+    fi
+}
+
+check_path "CLAUDE.md"
+check_path "agents"
+check_path "skills"
+check_path "commands"
+check_path "hooks/hooks.json"
+check_path ".claude-plugin/plugin.json"
+
+if [ "$VERIFY_FAILED" -eq 1 ]; then
+    echo "Warning: Some expected files are missing. The plugin may not work correctly."
+fi
+
+# Count installed components
+AGENT_COUNT=$(find "$PLUGIN_DIR/agents" -maxdepth 1 -name "*.md" ! -name "_*" 2>/dev/null | wc -l | tr -d ' ')
+SKILL_COUNT=$(find "$PLUGIN_DIR/skills" -maxdepth 2 -name "SKILL.md" 2>/dev/null | wc -l | tr -d ' ')
+COMMAND_COUNT=$(find "$PLUGIN_DIR/commands" -maxdepth 1 -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+
+echo ""
 echo "================================================"
 echo "Installation complete! (v$VERSION)"
 echo ""
 echo "Location: $PLUGIN_DIR"
+echo ""
+echo "Installed:"
+echo "  Agents:   $AGENT_COUNT"
+echo "  Skills:   $SKILL_COUNT"
+echo "  Commands: $COMMAND_COUNT"
 echo ""
 echo "Next steps:"
 echo "  1. Restart Claude Code"

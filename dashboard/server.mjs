@@ -12,6 +12,7 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { exec as execCmd } from 'child_process';
 
 // ── 경로 설정 ──────────────────────────────────────────────────────────────────
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -56,18 +57,74 @@ async function checkExistingServer() {
       signal: controller.signal,
     });
     clearTimeout(timeout);
+
     if (res.ok) {
-      return existingPort; // 기존 서버가 살아있음
+      // 응답 내용까지 검증: 정상적인 dashboard 서버인지 확인
+      try {
+        const body = await res.json();
+        if (body.status === 'ok') {
+          return existingPort; // 기존 서버가 살아있음
+        }
+        log(`기존 서버 health 응답 이상: ${JSON.stringify(body)}`);
+      } catch {
+        log('기존 서버 health 응답 파싱 실패');
+      }
     }
   } catch {
     // 기존 서버가 죽었거나 응답 없음
   }
 
+  // 포트 파일은 있지만 서버가 응답하지 않음 → stale 포트 파일 삭제
+  log('stale 포트 파일 삭제');
+  removePortFile();
   return null;
 }
 
 /**
+ * 현재 프로세스를 제외한 다른 server.mjs 프로세스를 찾아 종료
+ * macOS/Linux: pgrep + process.kill 사용
+ * @returns {Promise<number>} 종료된 프로세스 수
+ */
+async function killZombieProcesses() {
+  const { exec } = await import('child_process');
+  const myPid = process.pid;
+
+  return new Promise((resolve) => {
+    // server.mjs를 실행 중인 node 프로세스 찾기
+    exec('pgrep -f "node.*server\\.mjs"', (err, stdout) => {
+      if (err || !stdout.trim()) {
+        resolve(0);
+        return;
+      }
+
+      const pids = stdout.trim().split('\n')
+        .map(p => parseInt(p.trim(), 10))
+        .filter(pid => !isNaN(pid) && pid !== myPid);
+
+      let killed = 0;
+      for (const pid of pids) {
+        try {
+          process.kill(pid, 'SIGTERM');
+          killed++;
+          log(`좀비 프로세스 종료: PID ${pid}`);
+        } catch {
+          // 이미 종료되었거나 권한 없음 - 무시
+        }
+      }
+
+      if (killed > 0) {
+        log(`좀비 프로세스 ${killed}개 정리 완료`);
+      } else {
+        log('좀비 프로세스 없음');
+      }
+      resolve(killed);
+    });
+  });
+}
+
+/**
  * 포트 파일에 실제 바인딩된 포트를 기록
+ * 쓰기 후 읽기 검증(write-back verify) 수행
  * @param {number} port - 실제 바인딩된 포트 번호
  */
 function writePortFile(port) {
@@ -76,8 +133,16 @@ function writePortFile(port) {
     if (!fs.existsSync(DOCS_DIR)) {
       fs.mkdirSync(DOCS_DIR, { recursive: true });
     }
-    fs.writeFileSync(PORT_FILE_PATH, String(port), 'utf-8');
-    log(`포트 파일 기록: ${PORT_FILE_PATH} (포트: ${port})`);
+    // 절대 경로 확인
+    const absPath = path.resolve(PORT_FILE_PATH);
+    fs.writeFileSync(absPath, String(port), 'utf-8');
+    // 쓰기 후 읽기 검증 (write-back verify)
+    const written = fs.readFileSync(absPath, 'utf-8').trim();
+    if (written !== String(port)) {
+      log(`포트 파일 검증 실패: 기대=${port}, 실제=${written}`);
+    } else {
+      log(`포트 파일 기록 검증 완료: ${absPath} (포트: ${port})`);
+    }
   } catch (err) {
     log(`포트 파일 기록 실패: ${err.message}`);
   }
@@ -95,6 +160,37 @@ function removePortFile() {
   } catch {
     // 삭제 실패해도 무시 (이미 없거나 권한 문제)
   }
+}
+
+/**
+ * 기본 브라우저에서 URL을 엽니다 (OS별 분기)
+ * DASHBOARD_AUTO_OPEN 환경변수로 제어 (기본값: true)
+ * @param {string} url - 열 URL
+ */
+function openBrowser(url) {
+  if (process.env.DASHBOARD_AUTO_OPEN === 'false') {
+    log('브라우저 자동 열기 비활성화 (DASHBOARD_AUTO_OPEN=false)');
+    return;
+  }
+
+  const platform = process.platform;
+  let cmd;
+
+  if (platform === 'darwin') {
+    cmd = `open "${url}"`;
+  } else if (platform === 'win32') {
+    cmd = `start "" "${url}"`;
+  } else {
+    cmd = `xdg-open "${url}"`;
+  }
+
+  execCmd(cmd, (err) => {
+    if (err) {
+      log(`브라우저 열기 실패 (${platform}): ${err.message}`);
+    } else {
+      log(`브라우저 열기 성공: ${url}`);
+    }
+  });
 }
 
 // ── 에이전트 정적 데이터 ──────────────────────────────────────────────────────
@@ -451,6 +547,7 @@ function serveStaticFile(res, filePath) {
   const contentType = contentTypeMap[ext] || 'application/octet-stream';
 
   if (!fs.existsSync(filePath)) {
+    log(`정적 파일 없음: ${filePath}`);  // 디버그 로그: 어떤 경로를 찾으려 했는지 출력
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('Not Found');
     return;
@@ -550,12 +647,17 @@ async function handleHttpRequest(req, res) {
 
   // ── GET /api/health → 서버 헬스 체크 ──
   if (method === 'GET' && url.pathname === '/api/health') {
-    jsonResponse(res, 200, {
+    const uptimeSeconds = process.uptime();
+    const healthResponse = {
       status: 'ok',
       port:   state.serverPort,
-      uptime: process.uptime(),
+      uptime: uptimeSeconds,
       url:    `http://localhost:${state.serverPort}`,
-    });
+    };
+    if (uptimeSeconds > 86400) { // 24시간 초과 시 경고
+      healthResponse.warning = '서버 업타임 24시간 초과. 재시작을 권장합니다.';
+    }
+    jsonResponse(res, 200, healthResponse);
     return;
   }
 
@@ -945,6 +1047,13 @@ async function handleHttpRequest(req, res) {
           state.agents          = {};
           state.delegationChain = [];
           state.session         = { active: true, startedAt: event.timestamp };
+          // workflow 상태 초기화 (ENH-3: 이전 세션의 stale docId 제거)
+          state.workflow = {
+            stage:  null,
+            phase:  null,
+            status: null,
+            docId:  null,
+          };
           // Debate 상태 초기화
           state.debate = {
             active: false, topic: null, panelists: [], opinions: [],
@@ -1323,11 +1432,12 @@ function startMcpServer() {
   });
 
   process.stdin.on('end', () => {
-    log('stdin 종료. Claude Code 연결이 끊어졌습니다. HTTP 서버는 계속 동작합니다.');
-    // MCP 클라이언트(Claude Code)가 종료되면 프로세스도 종료
+    log('stdin 종료. Claude Code 연결이 끊어졌습니다.');
+    // MCP 클라이언트(Claude Code)가 종료되면 gracefulShutdown으로 깨끗하게 종료
+    // (포트 파일 삭제 + SSE 클라이언트 정리 포함)
     // (단, HTTP 서버 단독 테스트 시에는 종료하지 않도록 플래그 확인)
     if (!process.env.DASHBOARD_STANDALONE) {
-      process.exit(0);
+      gracefulShutdown();
     }
   });
 
@@ -1375,6 +1485,9 @@ function startHttpServer(port = PORT, maxRetries = 10) {
     log(`- 메시지 목록:   http://localhost:${port}/api/messages`);
     log(`- 채팅 메시지:   http://localhost:${port}/api/messages?type=chat`);
     log(`- Debate 상태:   http://localhost:${port}/api/debate`);
+
+    // 브라우저 자동 열기 (새 서버가 시작될 때만 호출)
+    openBrowser(`http://localhost:${port}`);
   });
 }
 
@@ -1444,6 +1557,12 @@ startMcpServer();
 
 // 기존 인스턴스 감지 후 HTTP 서버 시작 여부 결정
 (async () => {
+  // 좀비 프로세스 먼저 정리 (BUG-3, ENH-1)
+  await killZombieProcesses();
+
+  // 좀비 종료 후 포트 해제 대기 (SIGTERM 처리 시간)
+  await new Promise(r => setTimeout(r, 1000));
+
   const existingPort = await checkExistingServer();
 
   if (existingPort) {

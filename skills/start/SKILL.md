@@ -64,7 +64,7 @@ history:
 
 📁 Project: {DOC_ID}
 🎯 Stage: Requirements
-🖥️ Dashboard: http://localhost:3333
+🖥️ Dashboard: http://localhost:3333 (auto-opened in browser)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 

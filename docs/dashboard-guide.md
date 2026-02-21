@@ -1,6 +1,6 @@
 # Team-Shinchan 대시보드 사용 가이드
 
-> 버전: 1.0.0 | 최종 수정: 2026-02-19
+> 버전: 1.1.0 | 최종 수정: 2026-02-22
 
 ---
 
@@ -145,7 +145,7 @@ SHINCHAN_DOCS_DIR=.shinchan-docs node dashboard/server.mjs
 | `SHINCHAN_DOCS_DIR` | `.shinchan-docs` | 워크플로우 문서 디렉토리 경로 (절대 경로 또는 플러그인 루트 기준 상대 경로) |
 | `DASHBOARD_URL` | `http://localhost:3333` | Hook 이벤트 전송 대상 URL (send-event.sh에서 사용) |
 | `DASHBOARD_STANDALONE` | 미지원 | (향후 예정) 독립 실행 모드 |
-| `DASHBOARD_AUTO_OPEN` | 미지원 | (향후 예정) 브라우저 자동 열기 |
+| `DASHBOARD_AUTO_OPEN` | `true` | 서버 시작 시 브라우저 자동 열기 (`false`로 비활성화) |
 
 > **참고**: `SHINCHAN_DOCS_DIR`에 절대 경로를 지정하면 그 경로를 그대로 사용하고, 상대 경로를 지정하면 플러그인 루트(`${CLAUDE_PLUGIN_ROOT}`)를 기준으로 해석합니다.
 
@@ -754,6 +754,66 @@ ls .shinchan-docs/*/WORKFLOW_STATE.yaml
 3. YAML 파일 형식 확인:
    - 서버는 정규식으로 `stage:`, `phase:`, `status:`, `doc_id:` 필드를 추출합니다
    - `key: value` 또는 `key: "value"` 형식 모두 지원
+
+---
+
+### 좀비 프로세스가 남아있을 때
+
+**증상:** Claude Code 세션 재시작 후에도 이전 대시보드 서버 프로세스가 포트를 점유하고 있습니다.
+
+**해결 방법:**
+
+서버는 시작 시 자동으로 다른 `server.mjs` 프로세스를 감지하고 종료합니다 (`killZombieProcesses()`). 자동 정리가 실패한 경우 수동으로 처리합니다:
+
+```bash
+# 실행 중인 server.mjs 프로세스 확인
+pgrep -f "node.*server\.mjs"
+
+# 해당 PID 종료 (PID를 실제 값으로 교체)
+kill -TERM <PID>
+
+# 또는 일괄 종료
+pkill -f "node.*server\.mjs"
+```
+
+---
+
+### 브라우저가 자동으로 열리지 않을 때
+
+**증상:** 서버 로그에 `브라우저 열기 실패` 메시지가 표시되거나, 브라우저가 열리지 않습니다.
+
+**확인 사항:**
+
+1. `DASHBOARD_AUTO_OPEN` 환경변수 확인:
+
+```bash
+# 비활성화 여부 확인
+echo $DASHBOARD_AUTO_OPEN
+# false면 브라우저가 열리지 않도록 설정된 것
+
+# 활성화 (기본값)
+DASHBOARD_AUTO_OPEN=true node dashboard/server.mjs
+```
+
+2. headless/SSH 환경에서는 브라우저 열기가 불가능합니다. 서버 로그에서 URL을 확인하고 수동으로 접속합니다:
+
+```bash
+# 서버 로그에서 URL 확인
+# [dashboard] HTTP 서버 시작: http://localhost:3333
+
+# 수동 접속
+open http://localhost:3333        # macOS
+xdg-open http://localhost:3333    # Linux
+```
+
+3. 서버 로그에서 오류 확인:
+
+```bash
+node dashboard/server.mjs 2>&1 | grep "브라우저"
+# [dashboard] 브라우저 열기 성공: http://localhost:3333
+# 또는
+# [dashboard] 브라우저 열기 실패 (darwin): ...
+```
 
 ---
 

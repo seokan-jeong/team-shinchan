@@ -2,6 +2,23 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [3.8.0] - 2026-02-22
+
+### Added
+- **Dashboard Document Viewer**: 4th tab with markdown rendering and real-time doc_updated SSE
+- **Session Persistence**: localStorage save/restore with previous session display
+- **Progress Enhancement**: Phase-level progress bars, metrics widget, activity normalization
+- **Extended Event Pipeline**: 4 new event types (file_change, plan_step, review_result, progress_update)
+
+### Changed
+- **Frontend Split**: Monolithic index.html (2618 lines) → index.html (213) + styles.css (1584) + app.js (1849)
+- **server.mjs**: Added `/api/docs` endpoints, `parseProgressMd()` phase-level parsing, session auto-save
+
+### Fixed
+- **Hook Registration** (critical): Added `"hooks": "./hooks/hooks.json"` to plugin.json — hooks were never loaded by Claude Code
+- **SSE Port Discovery**: send-event.sh now searches `$PWD` before `$PLUGIN_ROOT` for `.dashboard-port`
+- **SSE Client Bugs**: Removed undefined `updateTimeline()` call, fixed `agent_status` event type mapping
+
 ## [3.7.0] - 2026-02-22
 
 ### Added

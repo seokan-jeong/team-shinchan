@@ -239,22 +239,80 @@ const state = {
   },
 };
 
+// ── 세션별 상태 관리 ──────────────────────────────────────────────────────────
+/** @type {Map<string, object>} sessionId -> sessionState */
+const sessions = new Map();
+const MAX_SESSIONS = 20;
+
+function createSessionState(sessionId) {
+  return {
+    sessionId,
+    workflow: { stage: null, phase: null, status: null, docId: null },
+    agents: {},
+    events: [],
+    delegations: [],
+    messages: [],
+    delegationChain: [],
+    session: { active: true, startedAt: new Date().toISOString() },
+    debate: {
+      active: false, topic: null, panelists: [], opinions: [],
+      conclusion: null, startedAt: null, endedAt: null,
+    },
+    active: true,
+    startedAt: new Date().toISOString(),
+    endedAt: null,
+    eventCount: 0,
+  };
+}
+
+function getOrCreateSession(sessionId) {
+  const id = sessionId || 'global';
+  if (!sessions.has(id)) {
+    if (sessions.size >= MAX_SESSIONS) {
+      cleanOldestInactiveSession();
+    }
+    sessions.set(id, createSessionState(id));
+  }
+  return sessions.get(id);
+}
+
+function cleanOldestInactiveSession() {
+  let oldestId = null;
+  let oldestTime = Infinity;
+  for (const [id, s] of sessions.entries()) {
+    if (!s.active && id !== 'global') {
+      const t = new Date(s.startedAt).getTime();
+      if (t < oldestTime) { oldestTime = t; oldestId = id; }
+    }
+  }
+  if (oldestId) {
+    sessions.delete(oldestId);
+    log(`세션 정리: ${oldestId} (비활성, 최대 ${MAX_SESSIONS}개 초과)`);
+  }
+}
+
 // ── SSE 클라이언트 관리 ──────────────────────────────────────────────────────
-/** @type {http.ServerResponse[]} */
+/** @type {Array<{ res: http.ServerResponse, sessionId: string | null }>} */
 const sseClients = [];
 
 /**
- * 모든 SSE 클라이언트에 이벤트 브로드캐스트
+ * SSE 클라이언트에 이벤트 브로드캐스트 (세션 필터링 지원)
  * @param {string} eventType - SSE 이벤트 타입
  * @param {object} data      - 전송할 데이터 (JSON 직렬화)
+ * @param {string|null} sessionId - null이면 전체 broadcast, 값이 있으면 해당 세션만
  */
-function broadcast(eventType, data) {
+function broadcast(eventType, data, sessionId = null) {
   const payload = `event: ${eventType}\ndata: ${JSON.stringify(data)}\n\n`;
   // 끊어진 클라이언트를 걸러내며 전송
   for (let i = sseClients.length - 1; i >= 0; i--) {
     const client = sseClients[i];
+    // 세션 필터링: client.sessionId가 null이면 모든 이벤트 수신
+    // sessionId가 null이면 전체 broadcast
+    if (sessionId && client.sessionId && client.sessionId !== sessionId) {
+      continue;
+    }
     try {
-      client.write(payload);
+      client.res.write(payload);
     } catch {
       // 클라이언트 연결이 끊어진 경우 배열에서 제거
       sseClients.splice(i, 1);
@@ -695,23 +753,44 @@ async function handleHttpRequest(req, res) {
     return;
   }
 
-  // ── GET / → index.html 서빙 ──
+  // ── GET / → index.html 서빙 (dist/ 우선, 없으면 public/ fallback) ──
   if (method === 'GET' && url.pathname === '/') {
-    const indexPath = path.join(__dirname, 'public', 'index.html');
+    const distIndex   = path.join(__dirname, 'dist', 'index.html');
+    const publicIndex = path.join(__dirname, 'public', 'index.html');
+    const indexPath   = fs.existsSync(distIndex) ? distIndex : publicIndex;
     serveStaticFile(res, indexPath);
     return;
   }
 
-  // ── 정적 파일 (public/) ──
+  // ── 정적 파일 (dist/ 우선, 없으면 public/ fallback, 없으면 SPA index.html) ──
   if (method === 'GET' && !url.pathname.startsWith('/api/')) {
-    const filePath = path.join(__dirname, 'public', url.pathname);
-    // 경로 순회 방지 (Path Traversal 보안)
+    const distDir   = path.join(__dirname, 'dist');
     const publicDir = path.join(__dirname, 'public');
-    if (!filePath.startsWith(publicDir)) {
+
+    // dist/ 를 먼저 시도 (경로 순회 방지 포함)
+    const distPath = path.join(distDir, url.pathname);
+    if (distPath.startsWith(distDir) && fs.existsSync(distPath) && fs.statSync(distPath).isFile()) {
+      serveStaticFile(res, distPath);
+      return;
+    }
+
+    // public/ 로 fallback (개발 모드 호환)
+    const publicPath = path.join(publicDir, url.pathname);
+    // 경로 순회 방지 (Path Traversal 보안)
+    if (!publicPath.startsWith(publicDir)) {
       jsonResponse(res, 403, { error: 'Forbidden' });
       return;
     }
-    serveStaticFile(res, filePath);
+    if (fs.existsSync(publicPath) && fs.statSync(publicPath).isFile()) {
+      serveStaticFile(res, publicPath);
+      return;
+    }
+
+    // SPA fallback: 정적 파일이 없으면 index.html 반환 (클라이언트 라우팅 지원)
+    const distIndex   = path.join(__dirname, 'dist', 'index.html');
+    const publicIndex = path.join(__dirname, 'public', 'index.html');
+    const indexPath   = fs.existsSync(distIndex) ? distIndex : publicIndex;
+    serveStaticFile(res, indexPath);
     return;
   }
 
@@ -733,13 +812,15 @@ async function handleHttpRequest(req, res) {
 
   // ── GET /api/status → 워크플로우 상태 반환 ──
   if (method === 'GET' && url.pathname === '/api/status') {
+    const statusSessionId = url.searchParams.get('session') || null;
+    const targetState = statusSessionId ? (sessions.get(statusSessionId) || state) : state;
     jsonResponse(res, 200, {
-      workflow:        state.workflow,
-      session:         state.session,
-      delegationChain: state.delegationChain,
-      eventCount:      state.events.length,
-      delegationCount: state.delegations.length,
-      messageCount:    state.messages.length,
+      workflow:        targetState.workflow,
+      session:         targetState.session,
+      delegationChain: targetState.delegationChain,
+      eventCount:      targetState.events.length,
+      delegationCount: targetState.delegations.length,
+      messageCount:    targetState.messages.length,
       sseClients:      sseClients.length,
       server: {
         port:       state.serverPort,
@@ -756,10 +837,12 @@ async function handleHttpRequest(req, res) {
 
   // ── GET /api/agents → 에이전트 목록 반환 ──
   if (method === 'GET' && url.pathname === '/api/agents') {
+    const agentsSessionId = url.searchParams.get('session') || null;
+    const agentsTargetState = agentsSessionId ? (sessions.get(agentsSessionId) || state) : state;
     const agentsWithStatus = Object.entries(AGENTS).map(([id, agent]) => ({
       id,
       ...agent,
-      status: state.agents[id] || { active: false, lastSeen: null },
+      status: agentsTargetState.agents[id] || { active: false, lastSeen: null },
     }));
     jsonResponse(res, 200, { agents: agentsWithStatus });
     return;
@@ -767,32 +850,38 @@ async function handleHttpRequest(req, res) {
 
   // ── GET /api/events → 최근 이벤트 목록 반환 ──
   if (method === 'GET' && url.pathname === '/api/events') {
+    const eventsSessionId = url.searchParams.get('session') || null;
+    const eventsTargetState = eventsSessionId ? (sessions.get(eventsSessionId) || state) : state;
     const limit  = parseInt(url.searchParams.get('limit') || '50', 10);
-    const events = state.events.slice(-Math.min(limit, 1000));
+    const events = eventsTargetState.events.slice(-Math.min(limit, 1000));
     // 이전 세션 이벤트 여부를 클라이언트가 판단할 수 있도록 hasPreviousSession 필드 포함
     const hasPreviousSession = events.some(ev => ev.fromPreviousSession === true);
-    jsonResponse(res, 200, { events, total: state.events.length, hasPreviousSession });
+    jsonResponse(res, 200, { events, total: eventsTargetState.events.length, hasPreviousSession });
     return;
   }
 
   // ── GET /api/delegations → 최근 위임 흐름 반환 ──
   if (method === 'GET' && url.pathname === '/api/delegations') {
+    const delegSessionId = url.searchParams.get('session') || null;
+    const delegTargetState = delegSessionId ? (sessions.get(delegSessionId) || state) : state;
     const limit       = parseInt(url.searchParams.get('limit') || '50', 10);
-    const delegations = state.delegations.slice(-Math.min(limit, 100));
+    const delegations = delegTargetState.delegations.slice(-Math.min(limit, 100));
     jsonResponse(res, 200, {
       delegations,
-      chain: state.delegationChain,
-      total: state.delegations.length,
+      chain: delegTargetState.delegationChain,
+      total: delegTargetState.delegations.length,
     });
     return;
   }
 
   // ── GET /api/messages → 최근 에이전트 메시지 반환 ──
   if (method === 'GET' && url.pathname === '/api/messages') {
+    const msgSessionId = url.searchParams.get('session') || null;
+    const msgTargetState = msgSessionId ? (sessions.get(msgSessionId) || state) : state;
     const limit    = parseInt(url.searchParams.get('limit') || '50', 10);
     const agent    = url.searchParams.get('agent') || null;
     const type     = url.searchParams.get('type') || null; // 'chat' = 파싱된 에이전트 메시지만
-    let   messages = state.messages.slice(-Math.min(limit * 2, 200)); // 필터 전 여유분
+    let   messages = msgTargetState.messages.slice(-Math.min(limit * 2, 200)); // 필터 전 여유분
 
     if (agent) {
       messages = messages.filter((m) => m.agent === agent);
@@ -807,7 +896,7 @@ async function handleHttpRequest(req, res) {
     }
 
     messages = messages.slice(-Math.min(limit, 200));
-    jsonResponse(res, 200, { messages, total: state.messages.length });
+    jsonResponse(res, 200, { messages, total: msgTargetState.messages.length });
     return;
   }
 
@@ -820,6 +909,23 @@ async function handleHttpRequest(req, res) {
     return;
   }
 
+  // ── GET /api/sessions → 세션 목록 반환 ──
+  if (method === 'GET' && url.pathname === '/api/sessions') {
+    const sessionList = [];
+    for (const [id, s] of sessions.entries()) {
+      sessionList.push({
+        sessionId:  id,
+        startedAt:  s.startedAt,
+        endedAt:    s.endedAt,
+        active:     s.active,
+        eventCount: s.eventCount,
+      });
+    }
+    sessionList.sort((a, b) => new Date(b.startedAt) - new Date(a.startedAt));
+    jsonResponse(res, 200, { sessions: sessionList });
+    return;
+  }
+
   // ── GET /api/events/stream → SSE 스트림 ──
   if (method === 'GET' && url.pathname === '/api/events/stream') {
     // 최대 클라이언트 수 제한 (50개)
@@ -828,6 +934,8 @@ async function handleHttpRequest(req, res) {
       jsonResponse(res, 503, { error: `SSE 클라이언트 수 초과 (최대 ${MAX_SSE_CLIENTS}개)` });
       return;
     }
+
+    const sessionId = url.searchParams.get('session') || null;
 
     res.writeHead(200, {
       'Content-Type':                'text/event-stream',
@@ -843,11 +951,12 @@ async function handleHttpRequest(req, res) {
       clientId:   Date.now(),
       timestamp:  new Date().toISOString(),
       workflow:   state.workflow,
+      sessionId:  sessionId,
     })}\n\n`);
 
-    // 클라이언트 배열에 추가
-    sseClients.push(res);
-    log(`SSE 클라이언트 연결. 현재 클라이언트 수: ${sseClients.length}`);
+    // 클라이언트 배열에 추가 (세션ID 포함)
+    sseClients.push({ res, sessionId });
+    log(`SSE 클라이언트 연결 (sessionId: ${sessionId || 'none'}). 현재 클라이언트 수: ${sseClients.length}`);
 
     // 30초마다 heartbeat (연결 유지)
     const heartbeatInterval = setInterval(() => {
@@ -861,7 +970,7 @@ async function handleHttpRequest(req, res) {
     // 연결 종료 시 클라이언트 제거
     req.on('close', () => {
       clearInterval(heartbeatInterval);
-      const idx = sseClients.indexOf(res);
+      const idx = sseClients.findIndex(c => c.res === res);
       if (idx !== -1) {
         sseClients.splice(idx, 1);
       }
@@ -900,10 +1009,20 @@ async function handleHttpRequest(req, res) {
         ...body,
       };
 
+      // 세션별 상태 가져오기
+      const sessionId = body.sessionId || null;
+      const sessionState = getOrCreateSession(sessionId);
+
+      // 글로벌 state에도 저장 (하위 호환)
       state.events.push(event);
       if (state.events.length > 1000) {
         state.events.shift();
       }
+
+      // 세션별 state에도 저장
+      sessionState.events.push(event);
+      if (sessionState.events.length > 1000) sessionState.events.shift();
+      sessionState.eventCount++;
 
       // ── 이벤트 타입별 처리 ──────────────────────────────────────────────────
 
@@ -912,19 +1031,22 @@ async function handleHttpRequest(req, res) {
         // 에이전트 작업 시작 → status: working, active: true
         case 'agent_start': {
           if (body.agent && AGENTS[body.agent]) {
-            state.agents[body.agent] = {
+            const agentStatus = {
               ...(state.agents[body.agent] || {}),
               status:   'working',
               active:   true,
               lastSeen: event.timestamp,
             };
+            state.agents[body.agent] = agentStatus;
+            sessionState.agents[body.agent] = { ...agentStatus };
             broadcast('agent_status', {
               agent:     body.agent,
               status:    'working',
               active:    true,
               task:      body.task || body.content || null,
               timestamp: event.timestamp,
-            });
+              sessionId,
+            }, sessionId);
           }
           break;
         }
@@ -932,20 +1054,23 @@ async function handleHttpRequest(req, res) {
         // 에이전트 작업 완료 → status: idle, active: false, 마지막 메시지 저장
         case 'agent_done': {
           if (body.agent && AGENTS[body.agent]) {
-            state.agents[body.agent] = {
+            const agentDoneStatus = {
               ...(state.agents[body.agent] || {}),
               status:      'idle',
               active:      false,
               lastSeen:    event.timestamp,
               lastMessage: body.content || body.result || null,
             };
+            state.agents[body.agent] = agentDoneStatus;
+            sessionState.agents[body.agent] = { ...agentDoneStatus };
             broadcast('agent_status', {
               agent:       body.agent,
               status:      'idle',
               active:      false,
               lastMessage: body.content || body.result || null,
               timestamp:   event.timestamp,
-            });
+              sessionId,
+            }, sessionId);
           }
           break;
         }
@@ -961,6 +1086,8 @@ async function handleHttpRequest(req, res) {
             };
             state.delegations.push(delegation);
             if (state.delegations.length > 100) state.delegations.shift();
+            sessionState.delegations.push({ ...delegation });
+            if (sessionState.delegations.length > 100) sessionState.delegations.shift();
 
             // 위임 체인 추적: 마지막 체인의 끝 에이전트가 현재 from과 같으면 체인에 추가
             const chain = state.delegationChain;
@@ -973,23 +1100,28 @@ async function handleHttpRequest(req, res) {
               // 새 위임 흐름 시작 (기존 체인과 무관한 새 from)
               state.delegationChain = [body.from, body.to];
             }
+            sessionState.delegationChain = [...state.delegationChain];
 
             // 양쪽 에이전트 상태 업데이트
             if (AGENTS[body.from]) {
-              state.agents[body.from] = {
+              const fromStatus = {
                 ...(state.agents[body.from] || {}),
                 status:   'delegating',
                 active:   true,
                 lastSeen: event.timestamp,
               };
+              state.agents[body.from] = fromStatus;
+              sessionState.agents[body.from] = { ...fromStatus };
             }
             if (AGENTS[body.to]) {
-              state.agents[body.to] = {
+              const toStatus = {
                 ...(state.agents[body.to] || {}),
                 status:   'receiving',
                 active:   true,
                 lastSeen: event.timestamp,
               };
+              state.agents[body.to] = toStatus;
+              sessionState.agents[body.to] = { ...toStatus };
             }
 
             broadcast('delegation', {
@@ -998,7 +1130,8 @@ async function handleHttpRequest(req, res) {
               task:            delegation.task,
               delegationChain: state.delegationChain,
               timestamp:       event.timestamp,
-            });
+              sessionId,
+            }, sessionId);
           }
           break;
         }
@@ -1017,14 +1150,18 @@ async function handleHttpRequest(req, res) {
             };
             state.messages.push(msg);
             if (state.messages.length > 200) state.messages.shift();
+            sessionState.messages.push({ ...msg });
+            if (sessionState.messages.length > 200) sessionState.messages.shift();
 
             // 에이전트 마지막 메시지 업데이트
             if (AGENTS[body.agent]) {
-              state.agents[body.agent] = {
+              const agentMsgStatus = {
                 ...(state.agents[body.agent] || {}),
                 lastSeen:    event.timestamp,
                 lastMessage: body.content,
               };
+              state.agents[body.agent] = agentMsgStatus;
+              sessionState.agents[body.agent] = { ...agentMsgStatus };
             }
 
             // 위임 메시지 감지 → delegation 이벤트 자동 처리
@@ -1038,6 +1175,8 @@ async function handleHttpRequest(req, res) {
               };
               state.delegations.push(delegation);
               if (state.delegations.length > 100) state.delegations.shift();
+              sessionState.delegations.push({ ...delegation });
+              if (sessionState.delegations.length > 100) sessionState.delegations.shift();
 
               const chain = state.delegationChain;
               if (chain.length === 0) {
@@ -1047,6 +1186,7 @@ async function handleHttpRequest(req, res) {
               } else {
                 state.delegationChain = [parsed.from, parsed.to];
               }
+              sessionState.delegationChain = [...state.delegationChain];
             }
 
             // Debate 자동 감지 (midori 에이전트 또는 키워드)
@@ -1060,12 +1200,14 @@ async function handleHttpRequest(req, res) {
               if (!state.debate.panelists.includes(body.agent)) {
                 state.debate.panelists.push(body.agent);
               }
+              sessionState.debate = { ...state.debate };
               broadcast('debate', {
                 subtype:   'start',
                 topic:     state.debate.topic,
                 panelists: state.debate.panelists,
                 timestamp: event.timestamp,
-              });
+                sessionId,
+              }, sessionId);
             }
 
             // 파싱된 chat_message SSE 전송 (구조화 데이터 포함)
@@ -1074,9 +1216,10 @@ async function handleHttpRequest(req, res) {
               content:   body.content,
               parsed,
               timestamp: event.timestamp,
-            });
+              sessionId,
+            }, sessionId);
           }
-          broadcast('activity', event);
+          broadcast('activity', event, sessionId);
           break;
         }
 
@@ -1089,71 +1232,103 @@ async function handleHttpRequest(req, res) {
           };
           state.messages.push(userMsg);
           if (state.messages.length > 200) state.messages.shift();
-          broadcast('activity', event);
+          sessionState.messages.push({ ...userMsg });
+          if (sessionState.messages.length > 200) sessionState.messages.shift();
+          broadcast('activity', event, sessionId);
           break;
         }
 
         // 메인 응답 완료 → shinnosuke idle로 변경
         case 'stop': {
           if (AGENTS['shinnosuke']) {
-            state.agents['shinnosuke'] = {
+            const stopStatus = {
               ...(state.agents['shinnosuke'] || {}),
               status:   'idle',
               active:   false,
               lastSeen: event.timestamp,
             };
+            state.agents['shinnosuke'] = stopStatus;
+            sessionState.agents['shinnosuke'] = { ...stopStatus };
           }
           // 위임 체인 초기화
           state.delegationChain = [];
+          sessionState.delegationChain = [];
           broadcast('agent_status', {
             agent:     'shinnosuke',
             status:    'idle',
             active:    false,
             timestamp: event.timestamp,
-          });
+            sessionId,
+          }, sessionId);
           break;
         }
 
         // 세션 시작 → 모든 에이전트 상태 초기화
         case 'session_start': {
-          state.agents          = {};
-          state.delegationChain = [];
-          state.session         = { active: true, startedAt: event.timestamp };
-          // workflow 상태 초기화 (ENH-3: 이전 세션의 stale docId 제거)
-          state.workflow = {
-            stage:  null,
-            phase:  null,
-            status: null,
-            docId:  null,
-          };
-          // Debate 상태 초기화
-          state.debate = {
-            active: false, topic: null, panelists: [], opinions: [],
-            conclusion: null, startedAt: null, endedAt: null,
-          };
+          const sid = body.sessionId || null;
+          const ss = getOrCreateSession(sid);
+          ss.agents = {};
+          ss.delegationChain = [];
+          ss.session = { active: true, startedAt: event.timestamp };
+          ss.active = true;
+          ss.startedAt = event.timestamp;
+          ss.workflow = { stage: null, phase: null, status: null, docId: null };
+          ss.debate = { active: false, topic: null, panelists: [], opinions: [], conclusion: null, startedAt: null, endedAt: null };
+
+          // 글로벌도 업데이트 (sessionId 없는 클라이언트용)
+          if (!sid || sid === 'global') {
+            state.agents          = {};
+            state.delegationChain = [];
+            state.session         = { active: true, startedAt: event.timestamp };
+            // workflow 상태 초기화 (ENH-3: 이전 세션의 stale docId 제거)
+            state.workflow = {
+              stage:  null,
+              phase:  null,
+              status: null,
+              docId:  null,
+            };
+            // Debate 상태 초기화
+            state.debate = {
+              active: false, topic: null, panelists: [], opinions: [],
+              conclusion: null, startedAt: null, endedAt: null,
+            };
+          }
+
           broadcast('agent_status', {
             reset:     true,
-            session:   state.session,
+            session:   ss.session,
+            sessionId: sid,
             timestamp: event.timestamp,
-          });
+          }, sid);
           break;
         }
 
         // 세션 종료 표시
         case 'session_end': {
-          state.session = { active: false, startedAt: state.session.startedAt, endedAt: event.timestamp };
-          state.delegationChain = [];
+          const sid = body.sessionId || null;
+          const ss = getOrCreateSession(sid);
+          ss.session = { active: false, startedAt: ss.session.startedAt, endedAt: event.timestamp };
+          ss.active = false;
+          ss.endedAt = event.timestamp;
+          ss.delegationChain = [];
+
+          if (!sid || sid === 'global') {
+            state.session = { active: false, startedAt: state.session.startedAt, endedAt: event.timestamp };
+            state.delegationChain = [];
+          }
+
           broadcast('agent_status', {
             reset:     true,
-            session:   state.session,
+            session:   ss.session,
+            sessionId: sid,
             timestamp: event.timestamp,
-          });
+          }, sid);
           break;
         }
 
         // Debate 시작
         case 'debate_start': {
-          state.debate = {
+          const newDebate = {
             active:     true,
             topic:      body.topic || null,
             panelists:  Array.isArray(body.panelists) ? body.panelists : [],
@@ -1162,12 +1337,15 @@ async function handleHttpRequest(req, res) {
             startedAt:  event.timestamp,
             endedAt:    null,
           };
+          state.debate = newDebate;
+          sessionState.debate = { ...newDebate };
           broadcast('debate', {
             subtype:   'start',
             topic:     state.debate.topic,
             panelists: state.debate.panelists,
             timestamp: event.timestamp,
-          });
+            sessionId,
+          }, sessionId);
           log(`Debate 시작: topic="${state.debate.topic}"`);
           break;
         }
@@ -1182,10 +1360,14 @@ async function handleHttpRequest(req, res) {
               timestamp: event.timestamp,
             };
             state.debate.opinions.push(opinionEntry);
+            sessionState.debate.opinions.push({ ...opinionEntry });
 
             // 패널리스트 자동 추가
             if (!state.debate.panelists.includes(body.agent)) {
               state.debate.panelists.push(body.agent);
+            }
+            if (!sessionState.debate.panelists.includes(body.agent)) {
+              sessionState.debate.panelists.push(body.agent);
             }
 
             broadcast('debate', {
@@ -1195,7 +1377,8 @@ async function handleHttpRequest(req, res) {
               round:     body.round || null,
               panelists: state.debate.panelists,
               timestamp: event.timestamp,
-            });
+              sessionId,
+            }, sessionId);
           }
           break;
         }
@@ -1205,13 +1388,17 @@ async function handleHttpRequest(req, res) {
           state.debate.active     = false;
           state.debate.conclusion = body.conclusion || body.content || null;
           state.debate.endedAt    = event.timestamp;
+          sessionState.debate.active     = false;
+          sessionState.debate.conclusion = state.debate.conclusion;
+          sessionState.debate.endedAt    = event.timestamp;
           broadcast('debate', {
             subtype:    'conclusion',
             conclusion: state.debate.conclusion,
             topic:      state.debate.topic,
             panelists:  state.debate.panelists,
             timestamp:  event.timestamp,
-          });
+            sessionId,
+          }, sessionId);
           log(`Debate 종료: conclusion="${(state.debate.conclusion || '').substring(0, 50)}"`);
           break;
         }
@@ -1219,79 +1406,89 @@ async function handleHttpRequest(req, res) {
         // 도구 사용 기록 (에이전트 활동 업데이트)
         case 'tool_use': {
           if (body.agent && AGENTS[body.agent]) {
-            state.agents[body.agent] = {
+            const toolStatus = {
               ...(state.agents[body.agent] || {}),
               status:      'working',
               active:      true,
               lastSeen:    event.timestamp,
               currentTool: body.tool || body.content || null,
             };
+            state.agents[body.agent] = toolStatus;
+            sessionState.agents[body.agent] = { ...toolStatus };
           }
-          broadcast('activity', event);
+          broadcast('activity', event, sessionId);
           break;
         }
 
         // 파일 변경 이벤트 (create / modify / delete)
         case 'file_change': {
           if (body.agent && AGENTS[body.agent]) {
-            state.agents[body.agent] = {
+            const fileChangeStatus = {
               ...(state.agents[body.agent] || {}),
               lastSeen: event.timestamp,
               active:   true,
             };
+            state.agents[body.agent] = fileChangeStatus;
+            sessionState.agents[body.agent] = { ...fileChangeStatus };
           }
           broadcast('activity', {
             ...event,
             type: 'file_change',
-          });
+          }, sessionId);
           break;
         }
 
         // 플랜 스텝 진행 이벤트
         case 'plan_step': {
           if (body.agent && AGENTS[body.agent]) {
-            state.agents[body.agent] = {
+            const planStepStatus = {
               ...(state.agents[body.agent] || {}),
               lastSeen: event.timestamp,
               active:   true,
             };
+            state.agents[body.agent] = planStepStatus;
+            sessionState.agents[body.agent] = { ...planStepStatus };
           }
           broadcast('activity', {
             ...event,
             type: 'plan_step',
-          });
+          }, sessionId);
           break;
         }
 
         // 검토 결과 이벤트 (pass / fail / warning)
         case 'review_result': {
           if (body.agent && AGENTS[body.agent]) {
-            state.agents[body.agent] = {
+            const reviewStatus = {
               ...(state.agents[body.agent] || {}),
               lastSeen: event.timestamp,
               active:   false,
             };
+            state.agents[body.agent] = reviewStatus;
+            sessionState.agents[body.agent] = { ...reviewStatus };
           }
           broadcast('activity', {
             ...event,
             type: 'review_result',
-          });
+          }, sessionId);
           break;
         }
 
         // 진행률 업데이트 이벤트
         case 'progress_update': {
           if (body.agent && AGENTS[body.agent]) {
-            state.agents[body.agent] = {
+            const progressStatus = {
               ...(state.agents[body.agent] || {}),
               lastSeen: event.timestamp,
               active:   true,
             };
+            state.agents[body.agent] = progressStatus;
+            sessionState.agents[body.agent] = { ...progressStatus };
           }
           broadcast('activity', {
             ...event,
             type: 'progress_update',
-          });
+          }, sessionId);
           break;
         }
 
@@ -1299,11 +1496,13 @@ async function handleHttpRequest(req, res) {
         case 'workflow_update': {
           if (body.workflow) {
             state.workflow = { ...state.workflow, ...body.workflow };
+            sessionState.workflow = { ...sessionState.workflow, ...body.workflow };
           }
           broadcast('workflow_status', {
             workflow:  state.workflow,
             timestamp: event.timestamp,
-          });
+            sessionId,
+          }, sessionId);
           break;
         }
 
@@ -1311,12 +1510,14 @@ async function handleHttpRequest(req, res) {
         default: {
           // 에이전트 필드가 있으면 lastSeen 업데이트
           if (body.agent && AGENTS[body.agent]) {
-            state.agents[body.agent] = {
+            const defaultStatus = {
               ...(state.agents[body.agent] || {}),
               lastSeen: event.timestamp,
             };
+            state.agents[body.agent] = defaultStatus;
+            sessionState.agents[body.agent] = { ...defaultStatus };
           }
-          broadcast('activity', event);
+          broadcast('activity', event, sessionId);
           break;
         }
       }
@@ -1517,37 +1718,53 @@ function executeMcpTool(toolName, args) {
         ...args,
       };
 
+      const mcpSessionId = args.sessionId || null;
+      const mcpSessionState = getOrCreateSession(mcpSessionId);
+
       state.events.push(event);
       if (state.events.length > 1000) state.events.shift();
+      mcpSessionState.events.push(event);
+      if (mcpSessionState.events.length > 1000) mcpSessionState.events.shift();
+      mcpSessionState.eventCount++;
 
       // 에이전트 상태 업데이트 (타입별)
       if (args.agent && AGENTS[args.agent]) {
         if (args.type === 'agent_start') {
-          state.agents[args.agent] = {
+          const mcpAgentStart = {
             ...(state.agents[args.agent] || {}),
             status: 'working', active: true, lastSeen: event.timestamp,
           };
-          broadcast('agent_status', { agent: args.agent, status: 'working', active: true, timestamp: event.timestamp });
+          state.agents[args.agent] = mcpAgentStart;
+          mcpSessionState.agents[args.agent] = { ...mcpAgentStart };
+          broadcast('agent_status', { agent: args.agent, status: 'working', active: true, timestamp: event.timestamp, sessionId: mcpSessionId }, mcpSessionId);
         } else if (args.type === 'agent_done') {
-          state.agents[args.agent] = {
+          const mcpAgentDone = {
             ...(state.agents[args.agent] || {}),
             status: 'idle', active: false, lastSeen: event.timestamp,
             lastMessage: args.content || args.result || null,
           };
-          broadcast('agent_status', { agent: args.agent, status: 'idle', active: false, timestamp: event.timestamp });
+          state.agents[args.agent] = mcpAgentDone;
+          mcpSessionState.agents[args.agent] = { ...mcpAgentDone };
+          broadcast('agent_status', { agent: args.agent, status: 'idle', active: false, timestamp: event.timestamp, sessionId: mcpSessionId }, mcpSessionId);
         } else {
-          state.agents[args.agent] = {
+          const mcpAgentDefault = {
             ...(state.agents[args.agent] || {}),
             lastSeen: event.timestamp,
           };
-          broadcast('activity', event);
+          state.agents[args.agent] = mcpAgentDefault;
+          mcpSessionState.agents[args.agent] = { ...mcpAgentDefault };
+          broadcast('activity', event, mcpSessionId);
         }
       }
 
       // delegation 타입 처리
       if (args.type === 'delegation' && args.from && args.to) {
-        state.delegations.push({ from: args.from, to: args.to, task: args.task || '', timestamp: event.timestamp });
+        const mcpDelegation = { from: args.from, to: args.to, task: args.task || '', timestamp: event.timestamp };
+        state.delegations.push(mcpDelegation);
         if (state.delegations.length > 100) state.delegations.shift();
+        mcpSessionState.delegations.push({ ...mcpDelegation });
+        if (mcpSessionState.delegations.length > 100) mcpSessionState.delegations.shift();
+
         const chain = state.delegationChain;
         if (chain.length === 0) {
           state.delegationChain = [args.from, args.to];
@@ -1556,13 +1773,15 @@ function executeMcpTool(toolName, args) {
         } else {
           state.delegationChain = [args.from, args.to];
         }
-        broadcast('delegation', { from: args.from, to: args.to, task: args.task || '', delegationChain: state.delegationChain, timestamp: event.timestamp });
+        mcpSessionState.delegationChain = [...state.delegationChain];
+        broadcast('delegation', { from: args.from, to: args.to, task: args.task || '', delegationChain: state.delegationChain, timestamp: event.timestamp, sessionId: mcpSessionId }, mcpSessionId);
       }
 
       // workflow_update 타입 처리
       if (args.type === 'workflow_update' && args.workflow) {
         state.workflow = { ...state.workflow, ...args.workflow };
-        broadcast('workflow_status', { workflow: state.workflow, timestamp: event.timestamp });
+        mcpSessionState.workflow = { ...mcpSessionState.workflow, ...args.workflow };
+        broadcast('workflow_status', { workflow: state.workflow, timestamp: event.timestamp, sessionId: mcpSessionId }, mcpSessionId);
       }
 
       return {
@@ -1784,6 +2003,20 @@ function saveSessionState() {
       messages:    state.messages,
       delegations: state.delegations,
       workflow:    state.workflow,
+      // 세션별 데이터 추가
+      sessions: Object.fromEntries(
+        [...sessions.entries()].map(([id, s]) => [id, {
+          sessionId:  s.sessionId,
+          workflow:   s.workflow,
+          events:     s.events,
+          delegations: s.delegations,
+          messages:   s.messages,
+          active:     s.active,
+          startedAt:  s.startedAt,
+          endedAt:    s.endedAt,
+          eventCount: s.eventCount,
+        }])
+      ),
     };
 
     const timestamp = Date.now();
@@ -1918,7 +2151,7 @@ function gracefulShutdown() {
   // SSE 클라이언트 연결 종료
   for (let i = sseClients.length - 1; i >= 0; i--) {
     try {
-      sseClients[i].end();
+      sseClients[i].res.end();
     } catch {
       // 이미 끊어진 클라이언트는 무시
     }

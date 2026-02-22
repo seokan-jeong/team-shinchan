@@ -38,6 +38,9 @@ if [ -z "${DASHBOARD_URL}" ]; then
 fi
 DASHBOARD_URL="${DASHBOARD_URL:-http://localhost:3333}"
 
+# 세션 ID 파일 경로 (호스트 프로젝트 기준)
+SESSION_ID_FILE="${PWD}/.shinchan-docs/.session-id"
+
 HOOK_EVENT="${HOOK_EVENT:-unknown}"
 
 # stdin에서 JSON 읽기
@@ -50,7 +53,7 @@ fi
 
 # node가 있으면 node로 변환, 없으면 raw 전달
 if command -v node &>/dev/null; then
-  PAYLOAD=$(echo "$INPUT" | HOOK_EVENT="$HOOK_EVENT" node -e "
+  PAYLOAD=$(echo "$INPUT" | HOOK_EVENT="$HOOK_EVENT" SESSION_ID_FILE="$SESSION_ID_FILE" node -e "
     const chunks = [];
     process.stdin.on('data', c => chunks.push(c));
     process.stdin.on('end', () => {
@@ -63,6 +66,14 @@ if command -v node &>/dev/null; then
       }
 
       const event = process.env.HOOK_EVENT || 'unknown';
+
+      // 세션 ID 읽기: 환경변수 우선, 없으면 파일에서 읽기
+      const fs = require('fs');
+      const sessionIdFile = process.env.SESSION_ID_FILE || '';
+      let currentSessionId = process.env.SHINCHAN_SESSION_ID || null;
+      if (!currentSessionId && sessionIdFile) {
+        try { currentSessionId = fs.readFileSync(sessionIdFile, 'utf-8').trim(); } catch(e) {}
+      }
 
       // agent_type에서 에이전트 ID 추출
       // 예: 'team-shinchan:bo' -> 'bo'
@@ -128,19 +139,37 @@ if command -v node &>/dev/null; then
           };
           break;
 
-        case 'SessionStart':
+        case 'SessionStart': {
+          // 세션 ID 생성: session-{timestamp}-{random4chars}
+          const newSessionId = 'session-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+          // 세션 ID 파일에 기록
+          if (sessionIdFile) {
+            try { fs.writeFileSync(sessionIdFile, newSessionId); } catch(e) {}
+          }
           output = {
             type: 'session_start',
+            sessionId: newSessionId,
             content: 'Session started (model: ' + (input.model || 'unknown') + ')',
           };
+          // currentSessionId를 새로 생성한 ID로 업데이트 (아래에서 모든 output에 추가)
+          currentSessionId = newSessionId;
           break;
+        }
 
-        case 'SessionEnd':
+        case 'SessionEnd': {
+          // 세션 ID 파일에서 읽은 후 삭제
+          let endSessionId = currentSessionId;
+          if (sessionIdFile) {
+            try { endSessionId = fs.readFileSync(sessionIdFile, 'utf-8').trim(); } catch(e) {}
+            try { fs.unlinkSync(sessionIdFile); } catch(e) {}
+          }
           output = {
             type: 'session_end',
+            sessionId: endSessionId,
             content: 'Session ended: ' + (input.reason || 'unknown'),
           };
           break;
+        }
 
         default:
           output = {
@@ -149,6 +178,10 @@ if command -v node &>/dev/null; then
           };
       }
 
+      // 모든 이벤트에 sessionId 포함 (SessionStart/SessionEnd는 이미 포함)
+      if (currentSessionId && !output.sessionId) {
+        output.sessionId = currentSessionId;
+      }
       console.log(JSON.stringify(output));
     });
   " 2>/dev/null)

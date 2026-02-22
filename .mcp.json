@@ -2,12 +2,21 @@
   "mcpServers": {
     "team-shinchan-dashboard": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/dashboard/server.mjs"],
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/dashboard/server.mjs"
+      ],
       "env": {
         "DASHBOARD_PORT": "3333",
         "SHINCHAN_DOCS_DIR": ".shinchan-docs",
         "DASHBOARD_AUTO_OPEN": "true"
       }
+    },
+    "shadcn": {
+      "command": "npx",
+      "args": [
+        "shadcn@latest",
+        "mcp"
+      ]
     }
   }
 }

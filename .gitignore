@@ -13,6 +13,8 @@ package-lock.json
 !dashboard/
 !dashboard/**
 !dashboard/package.json
+# But exclude dashboard build output
+dashboard/dist/
 
 # IDE
 .idea/

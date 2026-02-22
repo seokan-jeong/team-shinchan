@@ -4,27 +4,27 @@ All agents reference this document for consistent output formatting.
 
 ---
 
-## Agent Emoji Reference
+## Agent Team (15 Members)
 
 **Always use the correct emoji when outputting messages:**
 
-| Agent | Emoji | Role |
-|-------|-------|------|
-| Shinnosuke | 👦 | Orchestrator |
-| Himawari | 🌸 | Master Orchestrator |
-| Midori | 🌻 | Debate Moderator |
-| Bo | 😪 | Task Executor |
-| Kazama | 🎩 | Deep Worker |
-| Aichan | 🎀 | Frontend |
-| Bunta | 🍜 | Backend |
-| Masao | 🍙 | DevOps |
-| Hiroshi | 👔 | Oracle |
-| Nene | 📋 | Planner |
-| Misae | 👩 | Pre-Planning Analyst |
-| Action Kamen | 🦸 | Reviewer |
-| Shiro | 🐶 | Explorer |
-| Masumi | 📚 | Librarian |
-| Ume | 🖼️ | Multimodal |
+| Emoji | Agent | Role | Model | Layer |
+|-------|-------|------|-------|-------|
+| 👦 | shinnosuke | Orchestrator | Opus | Orchestration |
+| 🌸 | himawari | Atlas (large projects) | Opus | Orchestration |
+| 🌻 | midori | Debate Moderator | Sonnet | Orchestration |
+| 😪 | bo | Code Executor | Sonnet | Execution |
+| 🎩 | kazama | Deep Worker | Opus | Execution |
+| 🎀 | aichan | Frontend | Sonnet | Specialist |
+| 🍜 | bunta | Backend | Sonnet | Specialist |
+| 🍙 | masao | DevOps | Sonnet | Specialist |
+| 👔 | hiroshi | Oracle (analysis) | Opus | Advisory |
+| 📋 | nene | Planner | Opus | Advisory |
+| 👩 | misae | Hidden Requirements | Sonnet | Advisory |
+| 🦸 | actionkamen | Reviewer | Opus | Advisory |
+| 🐶 | shiro | Explorer | Haiku | Utility |
+| 📚 | masumi | Librarian | Sonnet | Utility |
+| 🖼️ | ume | Multimodal | Sonnet | Utility |
 
 ---
 

@@ -239,11 +239,15 @@ function updateAgentStatus(agentId, status, previewMsg) {
       checkEl.classList.add('show');
       setTimeout(() => {
         checkEl.classList.remove('show');
-        card.dataset.status = 'idle';
-        state.agentStatuses[agentId] = 'idle';
-        /* idle 전환 시 role 복원 */
-        const agentData = AGENTS[agentId];
-        if (agentData && roleEl) roleEl.textContent = agentData.role;
+        const freshCard = document.getElementById(`agent-${agentId}`);
+        if (freshCard) {
+          freshCard.dataset.status = 'idle';
+          state.agentStatuses[agentId] = 'idle';
+          /* idle 전환 시 role 복원 */
+          const agentData = AGENTS[agentId];
+          const freshRoleEl = freshCard.querySelector('.agent-role');
+          if (agentData && freshRoleEl) freshRoleEl.textContent = agentData.role;
+        }
       }, 2000);
     }
   }
@@ -618,6 +622,7 @@ function addTimelineEvent(data) {
 
   /* 타임라인 최상단에 삽입 (최신순) */
   const timeline = document.getElementById('timeline');
+  if (!timeline) return;
   timeline.insertBefore(item, timeline.firstChild);
 
   /* 이벤트 배열 업데이트 */
@@ -1465,10 +1470,10 @@ async function loadInitialData() {
       if (data.hasPreviousSession && Array.isArray(data.events) && data.events.length > 0) {
         const prevEvents = data.events.filter(ev => ev.fromPreviousSession === true);
         if (prevEvents.length > 0) {
-          /* 이전 세션 이벤트를 타임라인에 추가 (오래된 것부터 → 가장 아래쪽에 위치) */
-          /* addTimelineEvent는 최신순(insertBefore firstChild)이므로
-             이전 세션 이벤트는 역순으로 추가하여 시간순 유지 */
-          for (let i = prevEvents.length - 1; i >= 0; i--) {
+          /* 이전 세션 이벤트를 타임라인에 추가 (최신이 위로) */
+          /* addTimelineEvent는 insertBefore(firstChild)이므로
+             정순으로 추가하면 마지막(최신)이 맨 위에 위치 */
+          for (let i = 0; i < prevEvents.length; i++) {
             const ev = prevEvents[i];
             addTimelineEvent({
               agentId:             ev.agent || null,
@@ -1585,7 +1590,7 @@ function connectSSE() {
             timestamp: data.timestamp ? new Date(data.timestamp) : new Date(),
           });
         }
-      } catch (_) {}
+      } catch (err) { console.warn('[SSE] event parse error:', err); }
     });
 
     /* 커스텀 이벤트: 위임 */
@@ -1601,7 +1606,7 @@ function connectSSE() {
           task:      data.task || data.message,
           timestamp: data.timestamp ? new Date(data.timestamp) : new Date(),
         });
-      } catch (_) {}
+      } catch (err) { console.warn('[SSE] event parse error:', err); }
     });
 
     /* 커스텀 이벤트: 채팅 메시지 */
@@ -1619,7 +1624,7 @@ function connectSSE() {
           timestamp: data.timestamp ? new Date(data.timestamp) : new Date(),
           isUser:    data.isUser || false,
         });
-      } catch (_) {}
+      } catch (err) { console.warn('[SSE] event parse error:', err); }
     });
 
     /* 커스텀 이벤트: Debate */
@@ -1636,7 +1641,7 @@ function connectSSE() {
             timestamp: data.timestamp ? new Date(data.timestamp) : new Date(),
           });
         }
-      } catch (_) {}
+      } catch (err) { console.warn('[SSE] event parse error:', err); }
     });
 
     /* 커스텀 이벤트: 워크플로우 상태 변경 */
@@ -1663,7 +1668,7 @@ function connectSSE() {
             timestamp: data.timestamp ? new Date(data.timestamp) : new Date(),
           });
         }
-      } catch (_) {}
+      } catch (err) { console.warn('[SSE] event parse error:', err); }
     });
 
     /* 커스텀 이벤트: 서버 연결 확인 */
@@ -1690,7 +1695,7 @@ function connectSSE() {
             loadDocContent(docsState.currentFile);
           }
         }
-      } catch (_) {}
+      } catch (err) { console.warn('[SSE] event parse error:', err); }
     });
 
     /* 커스텀 이벤트: 활동 이벤트

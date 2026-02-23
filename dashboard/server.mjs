@@ -21,6 +21,7 @@ const PLUGIN_ROOT = path.resolve(__dirname, '..');
 // ── 환경 변수 ──────────────────────────────────────────────────────────────────
 const PORT = parseInt(process.env.DASHBOARD_PORT || '3333', 10);
 const DOCS_DIR_NAME = process.env.SHINCHAN_DOCS_DIR || '.shinchan-docs';
+const VERSION = '3.10.0';
 
 // SHINCHAN_DOCS_DIR가 절대 경로면 그대로, 아니면 cwd(호스트 프로젝트) 기준으로 설정
 const DOCS_DIR = path.isAbsolute(DOCS_DIR_NAME)
@@ -645,10 +646,8 @@ function refreshStateFromDocs() {
   };
 
   // 최근 1000개 유지 (글로벌)
+  if (state.events.length >= 1000) state.events.shift();
   state.events.push(event);
-  if (state.events.length > 1000) {
-    state.events.shift();
-  }
 
   // 세션별 이벤트 기록
   if (mappedSessionId && sessions.has(mappedSessionId)) {
@@ -865,7 +864,7 @@ async function handleHttpRequest(req, res) {
     const uptimeSeconds = process.uptime();
     const healthResponse = {
       status: 'ok',
-      version: '3.10.0',
+      version: VERSION,
       port:   state.serverPort,
       uptime: uptimeSeconds,
       url:    `http://localhost:${state.serverPort}`,
@@ -893,7 +892,7 @@ async function handleHttpRequest(req, res) {
       server: {
         port:       state.serverPort,
         uptime:     process.uptime(),
-        version:    '3.10.0',
+        version:    VERSION,
         startedAt:  state.serverStartedAt,
         eventCount: state.events.length,
         sseClients: sseClients.length,
@@ -1039,6 +1038,8 @@ async function handleHttpRequest(req, res) {
         res.write(`: heartbeat ${new Date().toISOString()}\n\n`);
       } catch {
         clearInterval(heartbeatInterval);
+        const idx = sseClients.findIndex(c => c.res === res);
+        if (idx !== -1) sseClients.splice(idx, 1);
       }
     }, 30000);
 
@@ -1097,10 +1098,8 @@ async function handleHttpRequest(req, res) {
       }
 
       // 글로벌 state에도 저장 (하위 호환)
+      if (state.events.length >= 1000) state.events.shift();
       state.events.push(event);
-      if (state.events.length > 1000) {
-        state.events.shift();
-      }
 
       // 세션별 state에도 저장
       sessionState.events.push(event);
@@ -1828,10 +1827,10 @@ function executeMcpTool(toolName, args) {
       const mcpSessionId = args.sessionId || null;
       const mcpSessionState = getOrCreateSession(mcpSessionId);
 
+      if (state.events.length >= 1000) state.events.shift();
       state.events.push(event);
-      if (state.events.length > 1000) state.events.shift();
+      if (mcpSessionState.events.length >= 1000) mcpSessionState.events.shift();
       mcpSessionState.events.push(event);
-      if (mcpSessionState.events.length > 1000) mcpSessionState.events.shift();
       mcpSessionState.eventCount++;
 
       // 에이전트 상태 업데이트 (타입별)
@@ -1924,7 +1923,7 @@ function handleMcpRequest(request) {
         capabilities:    { tools: {} },
         serverInfo:      {
           name:    'team-shinchan-dashboard',
-          version: '3.10.0',
+          version: VERSION,
         },
       });
 
@@ -2248,6 +2247,12 @@ function startAutoSave() {
  */
 function gracefulShutdown() {
   log('서버 종료 중...');
+
+  // 자동 저장 타이머 정리
+  if (autoSaveTimer) {
+    clearInterval(autoSaveTimer);
+    autoSaveTimer = null;
+  }
 
   // 세션 상태 저장 (포트 파일 삭제보다 먼저)
   saveSessionState();

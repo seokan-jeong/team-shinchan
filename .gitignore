@@ -21,6 +21,7 @@ package-lock.json
 .vscode/
 *.swp
 *.swo
+*.bak
 
 # OS
 .DS_Store

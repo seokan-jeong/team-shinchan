@@ -407,6 +407,22 @@ export function useSSE(): void {
     es.addEventListener('error', () => {
       if (es.readyState === EventSource.CLOSED) {
         setConnected(false)
+        // 서버가 완전히 끊긴 경우 health check 후 재연결 시도
+        const retryDelay = 3000
+        setTimeout(async () => {
+          try {
+            const resp = await fetch('/api/health', { signal: AbortSignal.timeout(2000) })
+            if (resp.ok) {
+              // 서버 살아있음 → useEffect가 currentSessionId 변경 없이도 재연결하도록 트리거
+              setConnected('reconnecting')
+              esRef.current?.close()
+              esRef.current = null
+              // 새 EventSource 생성은 컴포넌트 리마운트나 세션 변경 시 발생
+            }
+          } catch {
+            // 서버 아직 죽어있음 → 다음 retry에서 재시도
+          }
+        }, retryDelay)
       } else {
         // CONNECTING state: reconnecting
         setConnected('reconnecting')

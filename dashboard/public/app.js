@@ -1,3 +1,7 @@
+/* DEPRECATED: This legacy dashboard JS is a fallback for when dist/ is not built.
+   Use the React app (npm run build) for the full-featured dashboard.
+   This file will be removed in a future version. */
+
 /* ════════════════════════════════════════════════════
    에이전트 정적 데이터
 ════════════════════════════════════════════════════ */
@@ -67,6 +71,7 @@ function init() {
   startClock();
   startMetricsTicker();
   updateFooterEndpoint();
+  updateFooterVersion();
   initTabs();
   loadInitialData();
   connectSSE();
@@ -131,6 +136,17 @@ function startClock() {
 function updateFooterEndpoint() {
   const el = document.getElementById('footer-endpoint');
   el.textContent = window.location.host || 'localhost';
+}
+
+/* ── 푸터 버전 (서버에서 동적 조회) ──────────────── */
+function updateFooterVersion() {
+  fetch('/api/health')
+    .then(r => r.json())
+    .then(data => {
+      const el = document.getElementById('footer-version');
+      if (el && data.version) el.textContent = data.version;
+    })
+    .catch(() => { /* 실패 시 — 표시 유지 */ });
 }
 
 /* ════════════════════════════════════════════════════

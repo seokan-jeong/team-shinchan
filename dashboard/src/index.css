@@ -9,6 +9,7 @@
   --muted-foreground: #8b949e;
   --primary: #58a6ff;
   --destructive: #f85149;
+  --error: #f85149;
 
   /* Custom semantic colors */
   --success: #3fb950;

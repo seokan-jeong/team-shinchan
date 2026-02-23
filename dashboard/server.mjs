@@ -30,6 +30,10 @@ const DOCS_DIR = path.isAbsolute(DOCS_DIR_NAME)
 // ── stderr 로거 (console.log 금지 - MCP stdio가 stdout 사용) ─────────────────
 const log = (...args) => process.stderr.write('[dashboard] ' + args.join(' ') + '\n');
 
+// ── 이벤트 ID 생성기 (밀리초 충돌 방지용 monotonic counter) ──────────────────
+let _serverEventSeq = 0;
+const nextEventId = () => `${Date.now()}-${++_serverEventSeq}`;
+
 // ── 포트 파일 경로 (포트 디스커버리용) ──────────────────────────────────────────
 const PORT_FILE_PATH = path.join(DOCS_DIR, '.dashboard-port');
 
@@ -486,10 +490,14 @@ function parseAgentMessage(content) {
  */
 function isDebateContent(content) {
   if (!content) return false;
-  const keywords = ['토론', 'debate', '패널', 'panelist', '찬성', '반대', '결론', 'conclusion',
-                    '의견', 'opinion', '라운드', 'round', '중재', 'moderat'];
+  const strongKeywords = ['토론', 'debate', '패널', 'panelist', '중재', 'moderat'];
+  const weakKeywords = ['찬성', '반대', '결론', 'conclusion', '의견', 'opinion', '라운드', 'round'];
   const lower = content.toLowerCase();
-  return keywords.some((kw) => lower.includes(kw));
+  // 강한 키워드가 하나라도 있으면 토론으로 판단
+  if (strongKeywords.some((kw) => lower.includes(kw))) return true;
+  // 약한 키워드는 2개 이상 매칭 시에만 토론으로 판단
+  const weakCount = weakKeywords.filter((kw) => lower.includes(kw)).length;
+  return weakCount >= 2;
 }
 
 // ── 파일 시스템 감시 (fs.watch) ────────────────────────────────────────────────
@@ -598,7 +606,7 @@ function refreshStateFromDocs() {
 
   // 이벤트 기록
   const event = {
-    id:        Date.now(),
+    id:        nextEventId(),
     type:      'state_update',
     timestamp: new Date().toISOString(),
     workflow:  state.workflow,
@@ -820,6 +828,7 @@ async function handleHttpRequest(req, res) {
     const uptimeSeconds = process.uptime();
     const healthResponse = {
       status: 'ok',
+      version: '3.9.0',
       port:   state.serverPort,
       uptime: uptimeSeconds,
       url:    `http://localhost:${state.serverPort}`,
@@ -1025,7 +1034,7 @@ async function handleHttpRequest(req, res) {
 
       // 이벤트 정규화 및 저장
       const event = {
-        id:        Date.now(),
+        id:        nextEventId(),
         timestamp: new Date().toISOString(),
         ...body,
       };
@@ -1685,7 +1694,7 @@ const MCP_TOOLS = [
     inputSchema: {
       type:       'object',
       properties: {
-        type:       { type: 'string', description: '이벤트 타입 (delegation | message | agent_start | agent_done | tool_use | user_prompt | stop | session_start | session_end | workflow_update | file_change | plan_step | review_result | progress_update)' },
+        type:       { type: 'string', description: '이벤트 타입 (delegation | message | agent_start | agent_done | tool_use | user_prompt | stop | session_start | session_end | workflow_update | file_change | plan_step | review_result | progress_update | debate_start | debate_opinion | debate_conclusion)' },
         agent:      { type: 'string', description: '에이전트 ID (예: shinnosuke, bo, bunta)' },
         content:    { type: 'string', description: '이벤트 내용 (선택)' },
         from:       { type: 'string', description: '위임 출발 에이전트 (delegation 타입 시)' },
@@ -1731,7 +1740,7 @@ function executeMcpTool(toolName, args) {
       };
 
     case 'send_agent_event': {
-      const VALID_EVENT_TYPES = ['delegation', 'message', 'agent_start', 'agent_done', 'tool_use', 'user_prompt', 'stop', 'session_start', 'session_end', 'workflow_update', 'file_change', 'plan_step', 'review_result', 'progress_update'];
+      const VALID_EVENT_TYPES = ['delegation', 'message', 'agent_start', 'agent_done', 'tool_use', 'user_prompt', 'stop', 'session_start', 'session_end', 'workflow_update', 'file_change', 'plan_step', 'review_result', 'progress_update', 'debate_start', 'debate_opinion', 'debate_conclusion'];
       if (!args.type) {
         return {
           isError: true,
@@ -1746,14 +1755,14 @@ function executeMcpTool(toolName, args) {
       }
 
       // 허용된 필드만 추출하여 이벤트 생성
-      const ALLOWED_FIELDS = ['type', 'agent', 'content', 'from', 'to', 'task', 'sessionId', 'workflow', 'file', 'phase', 'step', 'verdict', 'progress'];
+      const ALLOWED_FIELDS = ['type', 'agent', 'content', 'from', 'to', 'task', 'sessionId', 'workflow', 'file', 'phase', 'step', 'verdict', 'progress', 'action', 'total', 'description', 'result', 'details', 'percentage'];
       const sanitized = {};
       for (const key of ALLOWED_FIELDS) {
         if (key in args) sanitized[key] = args[key];
       }
 
       const event = {
-        id:        Date.now(),
+        id:        nextEventId(),
         timestamp: new Date().toISOString(),
         ...sanitized,
       };

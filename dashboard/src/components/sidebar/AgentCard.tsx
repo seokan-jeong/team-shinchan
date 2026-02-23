@@ -36,9 +36,8 @@ export const AgentCard = memo(function AgentCard({ agentId }: AgentCardProps) {
   const agent = AGENTS[agentId]
   const status = useDashboardStore((s) => s.agentStatuses[agentId] ?? 'idle')
   const previewMsg = useDashboardStore((s) => {
-    const events = s.events
-    const latest = events.find((e) => e.agent === agentId || (e as Record<string, unknown>).agentId === agentId)
-    return latest ? ((latest.content as string) || (latest as Record<string, unknown>).message as string | undefined) : undefined
+    const latest = s.events.find((e) => e.agent === agentId || e.agentId === agentId)
+    return latest ? (latest.content || latest.message || undefined) : undefined
   })
 
   const roleText = STATUS_ROLE_TEXT[status] ?? agent.role

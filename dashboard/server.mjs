@@ -231,6 +231,7 @@ const state = {
   delegations:     [], // 위임 흐름 (최대 100개)
   messages:        [], // 에이전트 메시지 (최대 200개)
   delegationChain: [], // 현재 활성 위임 체인 (예: [shinnosuke, nene, bo])
+  progress:        null, // 최근 progress 데이터 (refreshStateFromDocs에서 갱신)
   session:         { active: false, startedAt: null }, // 세션 상태
   debate: {
     active:     false,         // 현재 Debate 진행 중 여부
@@ -247,6 +248,9 @@ const state = {
 /** @type {Map<string, object>} sessionId -> sessionState */
 const sessions = new Map();
 const MAX_SESSIONS = 20;
+
+/** @type {Map<string, string>} docId -> sessionId (파일 감시 → 세션 라우팅용) */
+const docIdToSessionMap = new Map();
 
 function createSessionState(sessionId) {
   return {
@@ -290,6 +294,10 @@ function cleanOldestInactiveSession() {
     }
   }
   if (oldestId) {
+    // 삭제할 세션에 연결된 docId 매핑도 정리
+    for (const [docId, sid] of docIdToSessionMap.entries()) {
+      if (sid === oldestId) docIdToSessionMap.delete(docId);
+    }
     sessions.delete(oldestId);
     log(`세션 정리: ${oldestId} (비활성, 최대 ${MAX_SESSIONS}개 초과)`);
   }
@@ -599,10 +607,33 @@ function refreshStateFromDocs() {
     return;
   }
 
-  // 상태 업데이트
+  // 상태 업데이트 — docId로 매핑된 세션이 있으면 세션별 업데이트
+  const mappedSessionId = latestWorkflow?.docId
+    ? (docIdToSessionMap.get(latestWorkflow.docId) || null)
+    : null;
+
+  // 글로벌 state 업데이트 (하위 호환)
   if (latestWorkflow) {
     state.workflow = { ...state.workflow, ...latestWorkflow };
   }
+  if (latestProgress) {
+    state.progress = latestProgress;
+  }
+
+  // 세션별 state 업데이트
+  if (mappedSessionId && sessions.has(mappedSessionId)) {
+    const sessionState = sessions.get(mappedSessionId);
+    if (latestWorkflow) {
+      sessionState.workflow = { ...sessionState.workflow, ...latestWorkflow };
+    }
+  }
+
+  const progressPayload = latestProgress ? {
+    total:      latestProgress.total,
+    completed:  latestProgress.completed,
+    percentage: latestProgress.percentage,
+    phases:     latestProgress.phases,
+  } : null;
 
   // 이벤트 기록
   const event = {
@@ -613,25 +644,31 @@ function refreshStateFromDocs() {
     progress:  latestProgress,
   };
 
-  // 최근 1000개 유지
+  // 최근 1000개 유지 (글로벌)
   state.events.push(event);
   if (state.events.length > 1000) {
     state.events.shift();
   }
 
-  // SSE 브로드캐스트 (파일 변경 → workflow_status 이벤트)
-  broadcast('workflow_status', {
-    workflow:   state.workflow,
-    progress:   latestProgress ? {
-      total:      latestProgress.total,
-      completed:  latestProgress.completed,
-      percentage: latestProgress.percentage,
-      phases:     latestProgress.phases,
-    } : null,
-    timestamp:  new Date().toISOString(),
-  });
+  // 세션별 이벤트 기록
+  if (mappedSessionId && sessions.has(mappedSessionId)) {
+    const sessionState = sessions.get(mappedSessionId);
+    sessionState.events.push(event);
+    if (sessionState.events.length > 1000) sessionState.events.shift();
+    sessionState.eventCount++;
+  }
 
-  log(`상태 업데이트 완료: stage=${state.workflow.stage}, phase=${state.workflow.phase}`);
+  // SSE 브로드캐스트 (세션 매핑이 있으면 해당 세션으로, 없으면 글로벌)
+  broadcast('workflow_status', {
+    workflow:   mappedSessionId && sessions.has(mappedSessionId)
+      ? sessions.get(mappedSessionId).workflow
+      : state.workflow,
+    progress:   progressPayload,
+    timestamp:  new Date().toISOString(),
+    sessionId:  mappedSessionId,
+  }, mappedSessionId);
+
+  log(`상태 업데이트 완료: stage=${state.workflow.stage}, phase=${state.workflow.phase}, session=${mappedSessionId || 'global'}`);
 }
 
 /**
@@ -846,6 +883,7 @@ async function handleHttpRequest(req, res) {
     const targetState = statusSessionId ? (sessions.get(statusSessionId) || state) : state;
     jsonResponse(res, 200, {
       workflow:        targetState.workflow,
+      progress:        targetState.progress || state.progress || null,
       session:         targetState.session,
       delegationChain: targetState.delegationChain,
       eventCount:      targetState.events.length,
@@ -855,7 +893,7 @@ async function handleHttpRequest(req, res) {
       server: {
         port:       state.serverPort,
         uptime:     process.uptime(),
-        version:    '1.0.0',
+        version:    '3.9.0',
         startedAt:  state.serverStartedAt,
         eventCount: state.events.length,
         sseClients: sseClients.length,
@@ -930,10 +968,14 @@ async function handleHttpRequest(req, res) {
     return;
   }
 
-  // ── GET /api/debate → 현재 Debate 상태 반환 ──
+  // ── GET /api/debate → 현재 Debate 상태 반환 (세션 필터 지원) ──
   if (method === 'GET' && url.pathname === '/api/debate') {
+    const debateSessionId = url.searchParams.get('session') || null;
+    const debateTargetState = debateSessionId && sessions.has(debateSessionId)
+      ? sessions.get(debateSessionId)
+      : state;
     jsonResponse(res, 200, {
-      debate:    state.debate,
+      debate:    debateTargetState.debate,
       timestamp: new Date().toISOString(),
     });
     return;
@@ -975,12 +1017,15 @@ async function handleHttpRequest(req, res) {
       'X-Accel-Buffering':           'no', // Nginx 버퍼링 비활성화
     });
 
-    // 초기 연결 확인 이벤트 전송
+    // 초기 연결 확인 이벤트 전송 (세션별 workflow 지원)
+    const sseWorkflow = sessionId && sessions.has(sessionId)
+      ? sessions.get(sessionId).workflow
+      : state.workflow;
     res.write(`event: connected\ndata: ${JSON.stringify({
       message:    'SSE 연결 성공',
       clientId:   Date.now(),
       timestamp:  new Date().toISOString(),
-      workflow:   state.workflow,
+      workflow:   sseWorkflow,
       sessionId:  sessionId,
     })}\n\n`);
 
@@ -1042,6 +1087,14 @@ async function handleHttpRequest(req, res) {
       // 세션별 상태 가져오기
       const sessionId = body.sessionId || null;
       const sessionState = getOrCreateSession(sessionId);
+
+      // docId ↔ sessionId 매핑 기록 (파일 감시 → 세션 라우팅용)
+      if (sessionId) {
+        const eventDocId = body.docId || body.doc_id || body.workflow?.docId || body.workflow?.doc_id || null;
+        if (eventDocId) {
+          docIdToSessionMap.set(eventDocId, sessionId);
+        }
+      }
 
       // 글로벌 state에도 저장 (하위 호환)
       state.events.push(event);
@@ -1527,6 +1580,11 @@ async function handleHttpRequest(req, res) {
           if (body.workflow) {
             state.workflow = { ...state.workflow, ...body.workflow };
             sessionState.workflow = { ...sessionState.workflow, ...body.workflow };
+            // docId ↔ sessionId 매핑 갱신
+            const updDocId = body.workflow.docId || body.workflow.doc_id || null;
+            if (updDocId && sessionId) {
+              docIdToSessionMap.set(updDocId, sessionId);
+            }
           }
           broadcast('workflow_status', {
             workflow:  state.workflow,
@@ -1866,7 +1924,7 @@ function handleMcpRequest(request) {
         capabilities:    { tools: {} },
         serverInfo:      {
           name:    'team-shinchan-dashboard',
-          version: '1.0.0',
+          version: '3.9.0',
         },
       });
 

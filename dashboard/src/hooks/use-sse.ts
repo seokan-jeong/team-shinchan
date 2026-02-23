@@ -7,7 +7,7 @@
  * Faithfully mirrors app.js connectSSE() (lines 1489-1714) and
  * handleSSEMessage() (lines 1736-1844).
  */
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDashboardStore } from '../stores/dashboard-store'
 import type { AgentStatus } from '../lib/types'
 
@@ -22,6 +22,8 @@ function toDate(ts: string | undefined): string {
 export function useSSE(): void {
   const esRef = useRef<EventSource | null>(null)
   const currentSessionId = useDashboardStore((s) => s.currentSessionId)
+  const [reconnectCount, setReconnectCount] = useState(0)
+  const reconnect = useCallback(() => setReconnectCount((c) => c + 1), [])
 
   const {
     setConnected,
@@ -417,11 +419,11 @@ export function useSSE(): void {
           try {
             const resp = await fetch('/api/health', { signal: AbortSignal.timeout(2000) })
             if (resp.ok) {
-              // 서버 살아있음 → useEffect가 currentSessionId 변경 없이도 재연결하도록 트리거
+              // 서버 살아있음 → reconnectCount 변경으로 useEffect 재실행 트리거
               setConnected('reconnecting')
               esRef.current?.close()
               esRef.current = null
-              // 새 EventSource 생성은 컴포넌트 리마운트나 세션 변경 시 발생
+              reconnect()
             }
           } catch {
             // 서버 아직 죽어있음 → 다음 retry에서 재시도
@@ -439,5 +441,5 @@ export function useSSE(): void {
       esRef.current = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSessionId])
+  }, [currentSessionId, reconnectCount])
 }

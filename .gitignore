@@ -13,8 +13,8 @@ package-lock.json
 !dashboard/
 !dashboard/**
 !dashboard/package.json
-# But exclude dashboard build output
-dashboard/dist/
+# Dashboard dist/ is committed so plugin users get the built dashboard without needing to build
+# dashboard/dist/
 
 # IDE
 .idea/

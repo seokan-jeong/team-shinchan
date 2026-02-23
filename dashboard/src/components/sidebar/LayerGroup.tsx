@@ -27,28 +27,9 @@ export function LayerGroup({ layer, agentIds }: LayerGroupProps) {
 
   return (
     <div className="layer-group" role="group" aria-label={`${layer} layer`}>
-      {/* Layer label — clickable to toggle collapse */}
       <button
         type="button"
         className="layer-label"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          width: '100%',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          padding: '0 6px 6px',
-          borderBottom: '1px solid var(--border)',
-          marginBottom: '6px',
-          color: 'var(--text-muted)',
-          font: 'inherit',
-          fontSize: '10px',
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '1px',
-        }}
         onClick={() => setCollapsed((prev) => !prev)}
         aria-expanded={!collapsed}
         aria-label={`${layer} layer group`}
@@ -59,7 +40,7 @@ export function LayerGroup({ layer, agentIds }: LayerGroupProps) {
             <span className="layer-active-badge">{activeInLayer}</span>
           )}
         </span>
-        <span style={{ fontSize: '9px', opacity: 0.6 }}>{collapsed ? '▶' : '▼'}</span>
+        <span className="layer-collapse-icon">{collapsed ? '\u25B6' : '\u25BC'}</span>
       </button>
 
       {!collapsed && agentIds.map((id) => <AgentCard key={id} agentId={id} />)}

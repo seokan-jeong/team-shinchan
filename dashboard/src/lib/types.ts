@@ -77,10 +77,13 @@ export interface TimelineEvent {
   type: EventType | string
   timestamp: string
   agent?: string
+  agentId?: string
   from?: string
   to?: string
   content?: string
+  message?: string
   task?: string
+  etype?: string
   fromPreviousSession?: boolean
   [key: string]: unknown
 }

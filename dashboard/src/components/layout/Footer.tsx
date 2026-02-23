@@ -3,7 +3,7 @@
  *
  * Status bar at the bottom of the dashboard.
  * Left: docId badge + Stage indicator + SSE micro-dot
- * Right: version + clock
+ * Right: version (fetched from server) + clock
  */
 import { useEffect, useState } from 'react'
 import { useDashboardStore } from '../../stores/dashboard-store'
@@ -27,10 +27,36 @@ function useClock(): string {
   return time
 }
 
+// ── Server version (fetch once from /api/health) ─────────────────────────────
+
+function useServerVersion(): string {
+  const [version, setVersion] = useState('v?.?.?')
+
+  useEffect(() => {
+    let cancelled = false
+    async function fetchVersion() {
+      try {
+        const res = await fetch('/api/health')
+        if (!cancelled && res.ok) {
+          const data = (await res.json()) as { version?: string }
+          if (data.version) setVersion(`v${data.version}`)
+        }
+      } catch {
+        // server not available — keep fallback
+      }
+    }
+    fetchVersion()
+    return () => { cancelled = true }
+  }, [])
+
+  return version
+}
+
 // ── Footer ───────────────────────────────────────────────────────────────────
 
 export function Footer() {
   const time = useClock()
+  const version = useServerVersion()
   const connected = useDashboardStore((s) => s.connected)
   const workflowDocId = useDashboardStore((s) => s.workflowDocId)
   const currentStage = useDashboardStore((s) => s.currentStage)
@@ -72,7 +98,7 @@ export function Footer() {
       </div>
       <div className="footer-right">
         <div className="footer-item">
-          <span>v3.9.0</span>
+          <span>{version}</span>
         </div>
         <div className="footer-item">
           <span>{time}</span>

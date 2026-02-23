@@ -16,7 +16,7 @@ See `skills/verify-implementation/SKILL.md` for full documentation.
 
 ## What It Does
 
-1. Runs all 14 validators via `node tests/validate/index.js` (fast path)
+1. Runs all 14 validators via `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/index.js` (fast path)
 2. If failures found, executes each verify-* skill individually
 3. Generates a consolidated pass/fail report
 4. Prompts user before applying any fixes

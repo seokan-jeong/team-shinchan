@@ -12,7 +12,7 @@ user-invocable: true
 
 | Validator | Command | What it checks |
 |-----------|---------|---------------|
-| token-budget | `node tests/validate/token-budget.js` | All files stay within token budget limits |
+| token-budget | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/token-budget.js` | All files stay within token budget limits |
 
 ## When to Run
 
@@ -26,7 +26,7 @@ user-invocable: true
 ### Check 1: Token Budget
 
 ```bash
-node tests/validate/token-budget.js
+cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/token-budget.js
 ```
 
 **Success criteria:**

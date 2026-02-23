@@ -12,8 +12,8 @@ user-invocable: true
 
 | Validator | Command | What it checks |
 |-----------|---------|---------------|
-| agent-schema | `node tests/validate/agent-schema.js` | Agent files follow required schema (frontmatter, sections) |
-| shared-refs | `node tests/validate/shared-refs.js` | Shared agent references resolve to existing files |
+| agent-schema | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/agent-schema.js` | Agent files follow required schema (frontmatter, sections) |
+| shared-refs | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/shared-refs.js` | Shared agent references resolve to existing files |
 
 ## When to Run
 
@@ -26,7 +26,7 @@ user-invocable: true
 ### Check 1: Agent Schema
 
 ```bash
-node tests/validate/agent-schema.js
+cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/agent-schema.js
 ```
 
 **Success criteria:**
@@ -41,7 +41,7 @@ node tests/validate/agent-schema.js
 ### Check 2: Shared References
 
 ```bash
-node tests/validate/shared-refs.js
+cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/shared-refs.js
 ```
 
 **Success criteria:**

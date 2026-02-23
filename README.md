@@ -398,7 +398,7 @@ Team-Shinchan gets smarter with every task through automatic retrospection.
 Task Complete ──→ Auto-Retrospective ──→ Save Learning
                          │
                          ↓
-                  .team-shinchan/learnings.md
+                  .shinchan-docs/learnings.md
                          │
                          ↓
 New Session ────→ Load Learnings ────→ Apply to Work

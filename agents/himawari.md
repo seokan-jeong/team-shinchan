@@ -8,6 +8,12 @@ user: "Build a complete e-commerce platform"
 assistant: "I'll use Himawari to coordinate this large-scale project."
 </example>
 
+<example>
+Context: Large-scale migration across all modules
+user: "Migrate the entire codebase from JavaScript to TypeScript across all modules"
+assistant: "This spans 3+ domains and 20+ files — I'll use Himawari to orchestrate the migration."
+</example>
+
 model: opus
 color: pink
 tools: ["Read", "Glob", "Grep", "Bash", "Task", "TodoWrite"]

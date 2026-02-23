@@ -1,10 +1,8 @@
-# Resume Workflow Command
-
-```yaml
 ---
 description: Resume an interrupted workflow from where it left off
 ---
-```
+
+# Resume Workflow Command
 
 ## EXECUTE IMMEDIATELY
 

@@ -1,7 +1,11 @@
-# Debate Decision Log
+# Debate Decision Log (Template)
 
-This file tracks key decisions made through the Team-Shinchan debate process.
-Midori checks this log before initiating new debates to avoid re-debating resolved topics.
+> **Note**: This file is a **reference template** shipped with the plugin.
+> Midori writes actual debate decisions to `.shinchan-docs/debate-decisions.md` in the host project directory.
+> If that file does not exist, Midori will copy this template to create it.
+
+This file defines the format for tracking key decisions made through the Team-Shinchan debate process.
+Midori checks the project-local log before initiating new debates to avoid re-debating resolved topics.
 
 ## Format
 

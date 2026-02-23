@@ -12,9 +12,9 @@ user-invocable: true
 
 | Validator | Command | What it checks |
 |-----------|---------|---------------|
-| skill-schema | `node tests/validate/skill-schema.js` | Skill files follow required schema (frontmatter, sections) |
-| skill-format | `node tests/validate/skill-format.js` | Skill naming conventions and structural format |
-| input-validation | `node tests/validate/input-validation.js` | Input validation rules are properly defined |
+| skill-schema | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/skill-schema.js` | Skill files follow required schema (frontmatter, sections) |
+| skill-format | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/skill-format.js` | Skill naming conventions and structural format |
+| input-validation | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/input-validation.js` | Input validation rules are properly defined |
 
 ## When to Run
 
@@ -27,7 +27,7 @@ user-invocable: true
 ### Check 1: Skill Schema
 
 ```bash
-node tests/validate/skill-schema.js
+cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/skill-schema.js
 ```
 
 **Success criteria:**
@@ -42,7 +42,7 @@ node tests/validate/skill-schema.js
 ### Check 2: Skill Format
 
 ```bash
-node tests/validate/skill-format.js
+cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/skill-format.js
 ```
 
 **Success criteria:**
@@ -57,7 +57,7 @@ node tests/validate/skill-format.js
 ### Check 3: Input Validation
 
 ```bash
-node tests/validate/input-validation.js
+cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/input-validation.js
 ```
 
 **Success criteria:**

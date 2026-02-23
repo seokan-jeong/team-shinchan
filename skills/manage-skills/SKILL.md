@@ -29,8 +29,11 @@ git status --porcelain && git diff --name-only HEAD~1
 | `agents/*-part-*.md` | verify-workflow | part-numbering |
 | Memory-related sections | verify-memory | memory-system |
 | Any file creation/expansion | verify-budget | token-budget |
+| `hooks/hooks.json`, `plugin.json` | verify-hooks | hook-registration |
+| `skills/*/SKILL.md`, `commands/*.md` | verify-skills | skill-command-parity |
+| `plugin.json`, `marketplace.json`, `README.md`, `CHANGELOG.md` | verify-consistency | version-consistency |
 
-Total: 14 validators across 6 verify-* skills.
+Total: 17 validators across 7 verify-* skills.
 
 ## Step 3: Report Coverage
 
@@ -41,7 +44,7 @@ Total: 14 validators across 6 verify-* skills.
 📊 Changed files: {count}
 ✅ Covered: {file → verify-skill (validators)}
 ⚠️ Uncovered: {file → No matching skill}
-📋 Run: node tests/validate/index.js
+📋 Run: cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/index.js
 ```
 
 ## Step 4: Gap Resolution

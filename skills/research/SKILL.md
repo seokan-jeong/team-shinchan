@@ -4,33 +4,44 @@ description: Research and documentation with Masumi (Librarian). Use for web res
 user-invocable: true
 ---
 
-# Research Skill
+# EXECUTE IMMEDIATELY
 
-Invokes **Masumi (Librarian)** for standalone research and documentation tasks.
+## Step 1: Validate Input
 
-## When to Use
+```
+If args is empty or only whitespace:
+  Ask user: "What would you like to research?"
+  STOP and wait for user response
 
-- Web research on technologies, libraries, or APIs
-- Documentation lookup and summarization
-- Knowledge gathering before implementation
-- External reference collection
+If args length > 2000 characters:
+  Truncate to 2000 characters
+  Warn user: "Request was truncated to 2000 characters"
+```
 
-## Execution
+## Step 2: Execute Task
+
+**Do not read further. Execute this Task NOW:**
 
 ```typescript
 Task(
   subagent_type="team-shinchan:masumi",
   model="sonnet",
-  prompt="Research task: {args}
+  prompt=`/team-shinchan:research has been invoked.
+
+## Research Request
 
 Conduct thorough research and provide:
-1. Key findings with sources
-2. Relevant documentation links
-3. Best practices and recommendations
-4. Potential concerns or caveats"
+
+| Section | Content |
+|---------|---------|
+| Key Findings | Main discoveries with sources |
+| Documentation | Relevant docs and reference links |
+| Best Practices | Recommended approaches |
+| Caveats | Potential concerns or limitations |
+
+User request: ${args || '(Please describe what to research)'}
+`
 )
 ```
 
-## Output
-
-Masumi will return a structured research report with findings, sources, and recommendations.
+**STOP HERE. The above Task handles everything.**

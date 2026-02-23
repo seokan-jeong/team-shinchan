@@ -10,7 +10,10 @@ user-invocable: true
 
 ## Fast Path
 
-Run all validators at once: `node tests/validate/index.js`
+Run all validators at once (from plugin root):
+```bash
+cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/index.js
+```
 If all pass, report success and stop. If any fail, continue to detailed execution below.
 
 ## Step 1: Discovery

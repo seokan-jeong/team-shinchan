@@ -8,6 +8,12 @@ user: "What should I consider before building a payment system?"
 assistant: "I'll have Misae analyze this to find hidden requirements and risks."
 </example>
 
+<example>
+Context: User needs edge case analysis for a complex feature
+user: "What edge cases should we handle for the real-time notification system?"
+assistant: "I'll have Misae identify hidden requirements and edge cases for the notification system."
+</example>
+
 model: sonnet
 color: brown
 tools: ["Read", "Glob", "Grep", "Bash"]

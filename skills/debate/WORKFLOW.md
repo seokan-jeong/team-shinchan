@@ -25,6 +25,6 @@
 - All opinions MUST come from actual Task calls (never simulated)
 - Maximum 3 rounds (usually 2 sufficient)
 - Debate valid with minimum 2 panelists
-- Record decision in agents/_shared/debate-decisions.md
+- Record decision in `.shinchan-docs/debate-decisions.md` (project-local, not plugin directory)
 
 > For full panel selection criteria, debate templates, and error handling, see [agents/midori.md](/agents/midori.md).

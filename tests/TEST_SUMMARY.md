@@ -3,11 +3,11 @@
 ## Overview
 
 Three tiers of testing ensure plugin quality:
-1. **Static Validators** (13) - Structure/schema checks, no API calls
+1. **Static Validators** (17) - Structure/schema checks, no API calls
 2. **Promptfoo Agent Tests** (25) - Individual agent behavior verification
 3. **E2E Workflow Tests** (11) - Full workflow scenario validation
 
-## Static Validators (13 total)
+## Static Validators (17 total)
 
 | # | Validator | What It Validates |
 |---|-----------|-------------------|
@@ -24,6 +24,10 @@ Three tiers of testing ensure plugin quality:
 | 11 | part-numbering | CLAUDE.md PARTs are sequential |
 | 12 | quick-fix-path | Quick Fix Path defined with criteria and mandatory review |
 | 13 | memory-system | Memory skills + hook + storage path consistency |
+| 14 | hook-registration | All hooks in hooks.json are registered in plugin.json |
+| 15 | skill-command-parity | Each skill has a corresponding command file |
+| 16 | version-consistency | Version matches across plugin.json, marketplace.json, README, CHANGELOG |
+| 17 | token-budget | File sizes stay within token budget limits |
 
 ## Promptfoo Agent Tests (25 total)
 

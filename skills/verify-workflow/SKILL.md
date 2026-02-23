@@ -12,10 +12,10 @@ user-invocable: true
 
 | Validator | Command | What it checks |
 |-----------|---------|---------------|
-| workflow-state-schema | `node tests/validate/workflow-state-schema.js` | WORKFLOW_STATE.yaml files follow required schema |
-| error-handling | `node tests/validate/error-handling.js` | Error handling patterns are properly defined |
-| part-numbering | `node tests/validate/part-numbering.js` | Multi-part agent files have correct numbering |
-| quick-fix-path | `node tests/validate/quick-fix-path.js` | Quick-fix (lite mode) workflow path is valid |
+| workflow-state-schema | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/workflow-state-schema.js` | WORKFLOW_STATE.yaml files follow required schema |
+| error-handling | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/error-handling.js` | Error handling patterns are properly defined |
+| part-numbering | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/part-numbering.js` | Multi-part agent files have correct numbering |
+| quick-fix-path | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/quick-fix-path.js` | Quick-fix (lite mode) workflow path is valid |
 
 ## When to Run
 
@@ -29,7 +29,7 @@ user-invocable: true
 ### Check 1: Workflow State Schema
 
 ```bash
-node tests/validate/workflow-state-schema.js
+cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/workflow-state-schema.js
 ```
 
 **Success criteria:**
@@ -44,7 +44,7 @@ node tests/validate/workflow-state-schema.js
 ### Check 2: Error Handling
 
 ```bash
-node tests/validate/error-handling.js
+cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/error-handling.js
 ```
 
 **Success criteria:**
@@ -59,7 +59,7 @@ node tests/validate/error-handling.js
 ### Check 3: Part Numbering
 
 ```bash
-node tests/validate/part-numbering.js
+cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/part-numbering.js
 ```
 
 **Success criteria:**
@@ -74,7 +74,7 @@ node tests/validate/part-numbering.js
 ### Check 4: Quick-Fix Path
 
 ```bash
-node tests/validate/quick-fix-path.js
+cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/quick-fix-path.js
 ```
 
 **Success criteria:**

@@ -38,6 +38,7 @@ user-invocable: true
 | Nene | Planner | Strategic planning |
 | Misae | Metis | Requirements analysis |
 | Action Kamen | Reviewer | Code review |
+| Midori | Debate Moderator | Structured debate facilitation |
 
 ### Exploration (Read-only)
 
@@ -49,19 +50,64 @@ user-invocable: true
 
 ## Skills List
 
+### Workflow
+
 | Skill | Trigger | Description |
 |-------|---------|-------------|
 | `/start` | start, begin | Start integrated workflow |
 | `/resume` | resume, continue | Resume interrupted workflow |
-| `/status` | status, progress | Show workflow status |
-| `/ultrawork` | fast, parallel, ulw | Parallel execution |
-| `/ralph` | until done, complete | Loop until complete |
+| `/orchestrate` | orchestrate | Invoke Shinnosuke for full workflow orchestration |
 | `/autopilot` | auto, automatically | Autonomous execution |
+| `/ralph` | until done, complete | Loop until complete |
+| `/ultrawork` | fast, parallel, ulw | Parallel execution |
+
+### Analysis & Planning
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
 | `/plan` | plan, design | Planning |
 | `/analyze` | analyze, debug | Deep analysis |
 | `/deepsearch` | find, search | Code search |
 | `/debate` | debate, opinion, compare | Agent debate |
+| `/requirements` | what am I missing, risks, edge cases | Hidden requirements analysis |
+
+### Implementation
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
+| `/implement` | implement, code this, fix | Quick code implementation |
+| `/frontend` | UI, component, React, CSS | Frontend development |
+| `/backend` | API, database, server, endpoint | Backend development |
+| `/devops` | CI/CD, Docker, deploy, pipeline | DevOps and infrastructure |
+| `/bigproject` | big project, multi-phase | Large-scale project orchestration |
+
+### Review & Quality
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
+| `/review` | review, check my code | Code review and verification |
+| `/verify-implementation` | verify all | Run all validators sequentially |
+| `/verify-agents` | - | Validate agent schema compliance |
+| `/verify-skills` | - | Validate skill schema and format |
+| `/verify-consistency` | - | Validate cross-references and config |
+| `/verify-workflow` | - | Validate workflow state and error handling |
+| `/verify-memory` | - | Validate memory system configuration |
+| `/verify-budget` | - | Validate token budget compliance |
+| `/manage-skills` | - | Maintain verification pipeline integrity |
+
+### Utility
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
 | `/research` | research, lookup | External research |
+| `/vision` | analyze image, read PDF, screenshot | Image and PDF analysis |
+| `/status` | status, progress | Show workflow status |
+| `/help` | help | This guide |
+
+### Memory
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
 | `/memories` | - | View memories |
 | `/learn` | - | Add learning |
 | `/forget` | - | Delete memory |

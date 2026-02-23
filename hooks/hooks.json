@@ -68,6 +68,12 @@
         "matcher": "Edit",
         "hooks": [
           {
+            "type": "command",
+            "command": "HOOK_EVENT=PostToolUse ${CLAUDE_PLUGIN_ROOT}/hooks/send-event.sh",
+            "async": true,
+            "timeout": 5
+          },
+          {
             "type": "prompt",
             "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/change-tracker.md"
           }
@@ -76,6 +82,12 @@
       {
         "matcher": "Write",
         "hooks": [
+          {
+            "type": "command",
+            "command": "HOOK_EVENT=PostToolUse ${CLAUDE_PLUGIN_ROOT}/hooks/send-event.sh",
+            "async": true,
+            "timeout": 5
+          },
           {
             "type": "prompt",
             "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/change-tracker.md"

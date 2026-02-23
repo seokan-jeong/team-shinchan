@@ -12,7 +12,7 @@ user-invocable: true
 
 | Validator | Command | What it checks |
 |-----------|---------|---------------|
-| memory-system | `node tests/validate/memory-system.js` | Memory system files and configuration are valid |
+| memory-system | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/memory-system.js` | Memory system files and configuration are valid |
 
 ## When to Run
 
@@ -25,7 +25,7 @@ user-invocable: true
 ### Check 1: Memory System
 
 ```bash
-node tests/validate/memory-system.js
+cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/memory-system.js
 ```
 
 **Success criteria:**

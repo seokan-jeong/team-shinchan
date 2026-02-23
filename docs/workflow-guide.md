@@ -2,7 +2,7 @@
 
 Detailed stage-by-stage reference for the Team-Shinchan 4-stage workflow.
 
-> This document is extracted from CLAUDE.md for maintainability. CLAUDE.md references this file.
+> This document describes the 4-stage workflow referenced by orchestration hooks and agent prompts.
 
 ---
 
@@ -66,7 +66,7 @@ for phase in phases:
     # 4. Review (MANDATORY)
     review = delegate_to("actionkamen", f"Review {phase}")
     if review.has_critical_issues:
-        fix_and_retry()  # See PART 13 in CLAUDE.md
+        fix_and_retry()  # Error handling defined in agent prompts and hook configurations
 
     # 5. Phase retrospective
     update("PROGRESS.md", phase.retrospective)
@@ -172,7 +172,7 @@ final_review = delegate_to("actionkamen", "Final verification")
 if final_review.approved:
     report_completion()
 else:
-    fix_and_retry()  # See PART 13 in CLAUDE.md
+    fix_and_retry()  # Error handling defined in agent prompts and hook configurations
 ```
 
 ### Completion Gate (Updated)

@@ -12,9 +12,9 @@ user-invocable: true
 
 | Validator | Command | What it checks |
 |-----------|---------|---------------|
-| cross-refs | `node tests/validate/cross-refs.js` | CLAUDE.md agent/skill references match actual files |
-| stage-matrix | `node tests/validate/stage-matrix.js` | Workflow stage definitions are consistent |
-| debate-consistency | `node tests/validate/debate-consistency.js` | Debate panelist and topic configurations are valid |
+| cross-refs | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/cross-refs.js` | CLAUDE.md agent/skill references match actual files |
+| stage-matrix | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/stage-matrix.js` | Workflow stage definitions are consistent |
+| debate-consistency | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/debate-consistency.js` | Debate panelist and topic configurations are valid |
 
 ## When to Run
 
@@ -28,7 +28,7 @@ user-invocable: true
 ### Check 1: Cross-References
 
 ```bash
-node tests/validate/cross-refs.js
+cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/cross-refs.js
 ```
 
 **Success criteria:**
@@ -43,7 +43,7 @@ node tests/validate/cross-refs.js
 ### Check 2: Stage Matrix
 
 ```bash
-node tests/validate/stage-matrix.js
+cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/stage-matrix.js
 ```
 
 **Success criteria:**
@@ -58,7 +58,7 @@ node tests/validate/stage-matrix.js
 ### Check 3: Debate Consistency
 
 ```bash
-node tests/validate/debate-consistency.js
+cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/debate-consistency.js
 ```
 
 **Success criteria:**

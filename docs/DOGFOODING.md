@@ -47,7 +47,7 @@ After completing a workflow, evaluate these areas:
 
 ## Collecting Feedback
 
-Save feedback to `.team-shinchan/feedback.md`:
+Save feedback to `.shinchan-docs/feedback.md`:
 
 ```markdown
 ## Feedback - {DOC_ID} ({date})

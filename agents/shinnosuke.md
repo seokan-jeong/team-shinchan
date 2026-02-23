@@ -8,6 +8,12 @@ user: "Build a user authentication system"
 assistant: "I'll use shinnosuke to orchestrate this task across multiple specialist agents."
 </example>
 
+<example>
+Context: Multi-domain task with design decisions
+user: "Add OAuth authentication with database schema changes and comprehensive tests"
+assistant: "This requires backend, database, and testing coordination — I'll use Shinnosuke to orchestrate."
+</example>
+
 model: opus
 color: yellow
 tools: ["Read", "Glob", "Grep", "Bash", "Task", "TodoWrite"]

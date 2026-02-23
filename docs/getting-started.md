@@ -116,7 +116,7 @@ These are saved locally and auto-loaded in every session.
 
 ### "No agents responding"
 
-- Ensure CLAUDE.md is loaded (it should auto-load from the plugin)
+- Ensure the plugin is properly installed and registered
 - Try `/team-shinchan:help` to verify the plugin is active
 
 ### "Stage blocked"

@@ -16,7 +16,7 @@ assistant: "This is an architectural decision. Let Midori facilitate a debate."
 
 model: sonnet
 color: teal
-tools: ["Read", "Glob", "Task"]
+tools: ["Read", "Write", "Glob", "Task"]
 ---
 
 # Midori - Debate Moderator
@@ -105,7 +105,7 @@ Prohibited: writing opinions directly, fictional dialogue, or drawing conclusion
 
 ## Pre-Debate: Check Past Decisions
 
-Before any debate: read `agents/_shared/debate-decisions.md`. If matching active decision found, ask user to reuse or re-debate. If re-debating, note prior decision as context.
+Before any debate: read `.shinchan-docs/debate-decisions.md`. If matching active decision found, ask user to reuse or re-debate. If re-debating, note prior decision as context.
 
 ---
 
@@ -124,7 +124,7 @@ Before any debate: read `agents/_shared/debate-decisions.md`. If matching active
 
 ## Post-Debate: Record Decision
 
-Append to `agents/_shared/debate-decisions.md` with next sequential `DECISION-{NNN}`.
+Append to `.shinchan-docs/debate-decisions.md` with next sequential `DECISION-{NNN}`. Create the file from the template in `agents/_shared/debate-decisions.md` if it does not exist.
 
 **Fields**: `[DECISION-NNN] Title`, Date, Doc ID, Panel, Category, Decision, Rationale, Status (Active/Superseded).
 

@@ -4,36 +4,27 @@ description: Explicitly invoke Shinnosuke to orchestrate through the integrated 
 user-invocable: true
 ---
 
-# Redirecting to /team-shinchan:start
+# Redirect to /team-shinchan:start
 
-**Output immediately before executing:**
+**This skill is fully merged into `/team-shinchan:start`. Execute the start skill with identical behavior.**
+
+**Output immediately:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 👦 [Shinnosuke] Orchestrating your task~ 🎯
-🖥️ Dashboard: http://localhost:3333
+   → Redirecting to /start workflow...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-**This skill has been merged into `/team-shinchan:start`.** Both skills now invoke Shinnosuke as orchestrator.
+**Then execute the EXACT same steps as /team-shinchan:start:**
 
-Execute `/team-shinchan:start` with the same arguments:
+1. Step 0: Pause Active Workflows
+2. Step 1: Setup (Folder + State)
+3. Step 2A-pre: Visual Input Detection (if applicable)
+4. Step 2A: Nene direct invocation for Stage 1
+5. Step 2A-post: Misae hidden requirements analysis
+6. Step 2B: Shinnosuke for Stage 2-4
 
-```typescript
-// Simply redirect to start skill behavior
-Task(
-  subagent_type="team-shinchan:shinnosuke",
-  model="opus",
-  prompt="Starting Orchestration via /team-shinchan:orchestrate (redirected to /start behavior).
+**Follow every step in skills/start/SKILL.md exactly. Do NOT invoke Shinnosuke directly for Stage 1.**
 
-## Context
-- User Request: {args}
-
-## Your Mission
-Follow the same workflow as /team-shinchan:start:
-1. Create .shinchan-docs/{DOC_ID}/ folder
-2. Create WORKFLOW_STATE.yaml
-3. Guide through 4-stage workflow
-
-User request: {args}"
-)
-```
+User request: {args}

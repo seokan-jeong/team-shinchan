@@ -22,7 +22,34 @@ If args length > 2000 characters:
   Warn user: "Request was truncated to 2000 characters"
 ```
 
-## Step 2: Execute Task
+## Step 2: Rapid Planning (Mandatory for 3+ files or unclear scope)
+
+```
+Assess task complexity:
+- If task touches 3+ files OR scope is unclear OR multiple domains involved:
+  → Run quick planning via Nene BEFORE parallel execution
+- If task is clear, scoped, and touches 1-2 files:
+  → Skip to Step 3 directly
+
+Quick planning (when needed):
+```
+
+```typescript
+Task(
+  subagent_type="team-shinchan:nene",
+  model="opus",
+  prompt="ULTRAWORK rapid planning. Create a minimal task breakdown ONLY (no full PROGRESS.md needed).
+
+List: task units, file ownership per agent, dependency order, parallelizable groups.
+Keep it under 30 lines. Speed over ceremony.
+
+User request: {args}"
+)
+```
+
+**Store Nene's breakdown as {plan_context}. If skipped, set to empty.**
+
+## Step 3: Execute Task
 
 **Do not read further. Execute this Task NOW:**
 
@@ -33,10 +60,10 @@ Task(
   prompt=`/team-shinchan:ultrawork has been invoked.
 
 ## Parallel Execution Mode
-
+${plan_context ? '## Pre-planned Breakdown\n' + plan_context + '\n\nFollow this breakdown for agent assignment.\n' : ''}
 Complete quickly with maximum parallelization:
 
-1. Break tasks into independent units
+1. Break tasks into independent units (or follow pre-planned breakdown if provided)
 2. Assign each unit to appropriate agents in parallel
    - Use run_in_background=true
    - Agent routing:

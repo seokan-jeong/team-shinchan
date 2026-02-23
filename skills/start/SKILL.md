@@ -72,6 +72,37 @@ history:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
+### Step 2A-pre: Visual Input Detection (Optional)
+
+**If user's args contain image/PDF file paths (.png, .jpg, .jpeg, .gif, .svg, .pdf, .webp) or reference visual content (mockup, screenshot, wireframe, design):**
+
+```typescript
+Task(
+  subagent_type="team-shinchan:ume",
+  model="sonnet",
+  prompt="Analyze visual content for requirements gathering.
+
+## Context
+- DOC_ID: {DOC_ID}
+- User Request: {args}
+
+## Your Mission
+1. Read and analyze the referenced images/PDFs
+2. Extract: UI components, layout structure, design patterns, text content, user flows
+3. Return a structured summary for the planner:
+   - Visual elements identified
+   - Implied functional requirements (buttons, forms, navigation, etc.)
+   - Implied non-functional requirements (responsive, accessibility, etc.)
+   - Ambiguities that need clarification
+
+Keep output concise and structured for Nene to consume.
+
+User request: {args}"
+)
+```
+
+**Store the Ume analysis result as {vision_context}. If no visual input detected, skip this step and set {vision_context} to empty.**
+
 ### Step 2A: Stage 1 (Requirements) - Invoke Nene DIRECTLY
 
 **CRITICAL: Do NOT invoke Shinnosuke for Stage 1. Invoke Nene directly to reduce subagent chain depth (1-level instead of 2-level).**
@@ -86,13 +117,17 @@ Task(
 - DOC_ID: {DOC_ID}
 - User Request: {args}
 - WORKFLOW_STATE.yaml Location: .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml
+- Visual Analysis: {vision_context or 'None - no visual input detected'}
 
 ## Your Mission
 Conduct a thorough requirements interview with the user:
-1. Analyze the user request
+1. Analyze the user request (and visual analysis if provided)
 2. Ask clarifying questions using AskUserQuestion
 3. Create REQUESTS.md with Problem Statement, Requirements (FR/NFR), Scope, AC
 4. Get user approval before completing
+
+If visual analysis is provided, incorporate the extracted requirements as a starting point
+and validate them with the user during the interview.
 
 ## Stage 1 Completion
 When user approves REQUESTS.md:
@@ -103,9 +138,52 @@ User request: {args}"
 )
 ```
 
+### Step 2A-post: Hidden Requirements Analysis (Misae)
+
+**After Nene returns with REQUESTS.md draft, run Misae to discover hidden requirements before user approval:**
+
+```typescript
+Task(
+  subagent_type="team-shinchan:misae",
+  model="sonnet",
+  prompt="Analyze REQUESTS.md for hidden requirements.
+
+## Context
+- DOC_ID: {DOC_ID}
+- REQUESTS.md: .shinchan-docs/{DOC_ID}/REQUESTS.md
+
+## Your Mission
+Read REQUESTS.md and identify what's missing:
+1. STRIDE security analysis (relevant threats only)
+2. Edge cases and boundary conditions
+3. Scalability concerns
+4. Implicit dependencies
+5. 80/20 check: Can 80% of value be achieved with 30% effort?
+
+## Output Format
+Return a concise supplement (NOT a full rewrite):
+- 🔍 Hidden Requirements Found: (list, max 5 most impactful)
+- ⚠️ Risks Identified: (list with severity)
+- 💡 Recommendation: (simplification opportunities if any)
+
+If REQUESTS.md already covers everything well, say so briefly.
+
+Nene's requirements summary: {nene_result_summary}"
+)
+```
+
+**If Misae finds significant gaps, present them to the user via AskUserQuestion:**
+```
+If Misae found hidden requirements:
+  Show Misae's findings to user
+  Ask: "Should we add these to the requirements?"
+  If yes: Update REQUESTS.md with additions, then proceed
+  If no: Proceed as-is
+```
+
 ### Step 2B: After Nene Completes - Invoke Shinnosuke for Stage 2-4
 
-**After Nene returns (Stage 1 complete), invoke Shinnosuke to continue from Stage 2:**
+**After Nene returns and Misae analysis is done (Stage 1 complete), invoke Shinnosuke to continue from Stage 2:**
 
 ```typescript
 Task(

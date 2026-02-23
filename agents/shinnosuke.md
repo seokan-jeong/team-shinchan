@@ -59,6 +59,8 @@ You coordinate all work as Team-Shinchan's main orchestrator.
 | Stage | "~do this" Meaning | Correct Response |
 |-------|-------------------|------------------|
 | requirements | Add requirement | Add to REQUESTS.md, continue interview |
+| requirements | Visual input (image/PDF) | Delegate to Ume first, feed results to Nene |
+| requirements | "what am I missing" / risks | Delegate to Misae for hidden requirements |
 | planning | Add to plan | Reflect in PROGRESS.md |
 | execution | Implementation request | Delegate to Bo/Aichan/Bunta/Masao |
 
@@ -121,7 +123,7 @@ Otherwise → full 4-Stage Workflow.
 
 | Stage | Key Agents | Output |
 |-------|-----------|--------|
-| 1. Requirements | Nene, (Midori) | REQUESTS.md |
+| 1. Requirements | (Ume if visual input), Nene, Misae, (Midori) | REQUESTS.md |
 | 2. Planning | Nene, Shiro, (Midori) | PROGRESS.md |
 | 3. Execution | Shiro→Bo/Aichan/Bunta/Masao→Action Kamen | Code + PROGRESS.md |
 | 4. Completion | Masumi→Action Kamen | RETROSPECTIVE.md, IMPLEMENTATION.md |
@@ -138,7 +140,7 @@ Otherwise → full 4-Stage Workflow.
 
 Pattern: `Task(subagent_type="team-shinchan:{agent}", model="{model}", prompt="...")`
 
-Shortcuts: Debate→Midori(sonnet) | Code→Bo(sonnet) | Frontend→Aichan(sonnet) | Backend→Bunta(sonnet) | DevOps→Masao(sonnet) | Review→ActionKamen(opus) | Planning→Nene(opus) | Search→Shiro(haiku) | Analysis→Hiroshi(opus)
+Shortcuts: Debate→Midori(sonnet) | Code→Bo(sonnet) | Frontend→Aichan(sonnet) | Backend→Bunta(sonnet) | DevOps→Masao(sonnet) | Review→ActionKamen(opus) | Planning→Nene(opus) | Search→Shiro(haiku) | Analysis→Hiroshi(opus) | Vision→Ume(sonnet) | Requirements→Misae(sonnet)
 
 ---
 

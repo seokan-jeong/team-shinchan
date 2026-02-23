@@ -4,63 +4,38 @@ description: Automatically reflect and learn after task completion
 event: Stop
 ---
 
-# Auto-Retrospective Hook
+# Auto-Retrospective
 
-**After EVERY significant task completion, automatically reflect and save learnings.**
+**After significant task completion, reflect and save learnings.**
 
 ## When to Trigger
 
 - Task involved code changes (not just questions)
-- Task took more than 2 agent delegations
+- Task took 2+ agent delegations
 - Task involved debugging or problem-solving
 
-## Reflection Process
+## Process
 
-### Step 1: Analyze What Happened
+### 1. Analyze
 
-```
-🔄 [Auto-Retrospective] Analyzing completed task...
-```
+Answer briefly: What was the task? What worked? What mistakes? What patterns? What would you change?
 
-You MUST answer these questions:
-1. What was the task?
-2. What approach worked?
-3. What mistakes were made?
-4. What patterns were discovered?
-5. What would I do differently?
+### 2. Categorize
 
-### Step 2: Extract Learnings
-
-Categorize findings:
-
-| Category | What to Extract |
-|----------|-----------------|
-| `pattern` | Reusable code patterns, architectural approaches |
-| `mistake` | Errors made and how to avoid them |
+| Category | Extract |
+|----------|---------|
+| `pattern` | Reusable code/architecture approaches |
+| `mistake` | Errors made and prevention |
 | `preference` | User preferences discovered |
 | `convention` | Project conventions found |
 | `insight` | Technical insights gained |
 
-### Step 3: Save to Memory File
+### 3. Save to `.shinchan-docs/learnings.md`
 
-**You MUST write learnings to `.shinchan-docs/learnings.md` before the session ends.**
-If `.shinchan-docs/learnings.md` doesn't exist, create it with this header:
+Create file if missing with header: `# Team-Shinchan Learnings`
 
+**Format per entry:**
 ```markdown
-# Team-Shinchan Learnings
-
-Accumulated learnings from workflow executions.
-
----
-```
-
-**File location**: `.shinchan-docs/learnings.md`
-
-**Format for each learning**:
-
-```markdown
-## Learnings
-
 ### [{category}] {title}
 - **Date**: {YYYY-MM-DD}
 - **Source**: {DOC_ID}
@@ -71,60 +46,24 @@ Accumulated learnings from workflow executions.
 ---
 ```
 
-**Legacy format (also accepted)**:
-
-```markdown
-## [YYYY-MM-DD HH:MM] Category: Title
-
-**Context**: Brief description of when this was learned
-**Learning**: The actual insight or pattern
-**Confidence**: high/medium/low
-**Tags**: #tag1 #tag2
-
----
-```
-
-### Step 4: Output Summary
+### 4. Output Summary
 
 ```
-🧠 [Auto-Retrospective] Learnings saved:
-   - [pattern] Discovered: {brief description}
-   - [mistake] Avoided: {brief description}
-
-📁 Saved to: .shinchan-docs/learnings.md
+[Auto-Retrospective] Learnings saved:
+  - [{category}] {brief description}
+Saved to: .shinchan-docs/learnings.md
 ```
-
-## Example
-
-After fixing a bug:
-
-```markdown
-## [2024-02-03 15:30] mistake: Null check before array access
-
-**Context**: Fixed crash in UserService.getUsers()
-**Learning**: Always check if array exists before using .map() or .filter()
-**Confidence**: high
-**Tags**: #typescript #null-safety #arrays
-
----
-```
-
-## Rules
-
-1. **DO NOT skip** - Always reflect after meaningful tasks
-2. **Be specific** - Vague learnings are useless
-3. **Be concise** - One clear insight per entry
-4. **Include context** - Future you needs to understand when this applies
-5. **Create file if missing** - Initialize `.shinchan-docs/learnings.md` if it doesn't exist
 
 ## Deduplication
 
-Before appending a new learning:
+Before appending:
+1. Read existing learnings.md
+2. If similar content exists (same tags + similar title) → update confidence, skip duplicate
+3. If no duplicate → append
 
-1. Read existing `.shinchan-docs/learnings.md`
-2. Check if a learning with similar content already exists (same tags + similar title)
-3. If duplicate found:
-   - Update confidence level if new evidence strengthens it
-   - Skip adding duplicate entry
-   - Log: `🧠 [Auto-Retrospective] Skipped duplicate: "{title}"`
-4. If no duplicate: Append normally
+## Rules
+
+- Never skip after meaningful tasks
+- Be specific, not vague
+- One clear insight per entry
+- Include enough context for future reference

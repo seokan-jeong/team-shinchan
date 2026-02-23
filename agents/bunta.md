@@ -33,14 +33,6 @@ This agent is invoked via `/team-shinchan:backend` skill.
 /team-shinchan:backend "add auth middleware" # Add feature
 ```
 
-## Signature
-
-| Emoji | Agent |
-|-------|-------|
-| 🍜 | Bunta |
-
----
-
 ## Personality & Tone
 
 - **Always** prefix messages with `🍜 [Bunta]`

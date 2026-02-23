@@ -4,111 +4,50 @@ description: Enforce workflow stage rules by checking WORKFLOW_STATE.yaml before
 event: PreToolUse
 ---
 
-# Workflow Guard Hook
+# Workflow Guard
 
-**This hook runs BEFORE every tool use to enforce workflow stage rules.**
+**Runs BEFORE every tool use. Enforces stage restrictions.**
 
-## ABSOLUTE RULE
+## Logic
 
-```
-If current.stage is "requirements" or "planning":
--> Edit, Write(*), Bash, TodoWrite = IMMEDIATELY BLOCK. NO EXCEPTIONS.
--> Even if the user asks. Even if you think it's needed. BLOCK IT.
--> (*) Exception: Write is allowed ONLY for .shinchan-docs/*/WORKFLOW_STATE.yaml in Stage 1.
-```
-
-## Check Logic
-
-```
-1. Search for .shinchan-docs/*/WORKFLOW_STATE.yaml
-   - If NOT found → ALLOW (no active workflow)
-2. Parse current.stage from WORKFLOW_STATE.yaml
-3. If requested_tool in blocked_tools[current_stage] → BLOCK
-   Otherwise → ALLOW
-```
-
----
+1. Find `.shinchan-docs/*/WORKFLOW_STATE.yaml` (use most recent if multiple)
+2. If NOT found → ALLOW (no active workflow)
+3. Parse `current.stage` → check matrix below → BLOCK or ALLOW
 
 ## Stage-Tool Matrix
 
 | Tool | requirements | planning | execution | completion |
-|------|-------------|----------|-----------|------------|
-| Read | ALLOW | ALLOW | ALLOW | ALLOW |
-| Glob | ALLOW | ALLOW | ALLOW | ALLOW |
-| Grep | ALLOW | ALLOW | ALLOW | ALLOW |
-| Task | ALLOW | ALLOW | ALLOW | ALLOW |
-| Edit | **BLOCK** | **BLOCK** | ALLOW | **BLOCK** |
-| Write | **BLOCK** | **BLOCK** | ALLOW | ALLOW (docs only) |
-| TodoWrite | **BLOCK** | **BLOCK** | ALLOW | **BLOCK** |
-| Bash | **BLOCK** | **BLOCK** | ALLOW | **BLOCK** |
-| AskUserQuestion | ALLOW | ALLOW | ALLOW | BLOCK |
+|------|:---:|:---:|:---:|:---:|
+| Read/Glob/Grep/Task | OK | OK | OK | OK |
+| AskUserQuestion | OK | OK | OK | BLOCK |
+| Edit | BLOCK | BLOCK | OK | BLOCK |
+| Write | BLOCK* | BLOCK | OK | docs only** |
+| TodoWrite | BLOCK | BLOCK | OK | BLOCK |
+| Bash | BLOCK | BLOCK | OK | BLOCK |
 
----
+*Stage 1 Write exception: ONLY `.shinchan-docs/*/WORKFLOW_STATE.yaml` allowed (interview state).
+**Completion Write: ONLY `.shinchan-docs/**` or `*.md` files.
 
-## Block Message Format
+## Absolute Rule
 
-```
-BLOCKED. Stage: {stage}. Tool: {tool_name} is FORBIDDEN.
-You are in {stage} stage. Return to: {stage-appropriate-action}.
-Do NOT attempt to use {tool_name} again.
-```
+In requirements/planning: Edit, Write, Bash, TodoWrite = **BLOCK. NO EXCEPTIONS.**
+Even if user asks. Even if you think it's needed.
 
-| Stage | Allowed Tools | Advancement Conditions |
-|-------|--------------|----------------------|
-| requirements | Read, Glob, Grep, Task, AskUserQuestion | REQUESTS.md + Problem Statement + AC + User approval |
-| planning | Read, Glob, Grep, Task, AskUserQuestion | PROGRESS.md + Phase breakdown + per-phase AC |
-| completion | Task, Write (docs only) | RETROSPECTIVE.md + IMPLEMENTATION.md + Final review |
+## Stage 1 Interpretation Guard
 
----
+User requests like "do X", "add feature" → add to REQUESTS.md, never implement.
 
-## Special Rules
+## Block Message
 
-### Stage 1 - Interpretation Guard
+`BLOCKED. Stage: {stage}. Tool: {tool} FORBIDDEN. Return to {stage}-appropriate action.`
 
-In Stage 1, user requests like "Please do ~", "Add this feature" must be added to REQUESTS.md — never implemented. If Edit/Write/TodoWrite is attempted:
+## Advancement Conditions
 
-```
-[Workflow Guard] Stage 1 Interpretation Error
-In Stage 1 (requirements), ALL user requests → add to REQUESTS.md.
-Do NOT implement until Stage 3 (execution).
-```
+- **requirements**: REQUESTS.md + Problem Statement + AC + User approval
+- **planning**: PROGRESS.md + Phase breakdown + per-phase AC
+- **completion**: RETROSPECTIVE.md + IMPLEMENTATION.md + Final review
 
-### Stage 1 - WORKFLOW_STATE.yaml Write Exception
+## Error Handling
 
-In Stage 1, Write is allowed ONLY for `.shinchan-docs/*/WORKFLOW_STATE.yaml`.
-All other Write targets remain BLOCKED. This exception exists for interview state persistence.
-
-### Completion Stage - Write Path Filtering
-
-Write is allowed ONLY for `.shinchan-docs/**` or `*.md` files. All other paths:
-
-```
-[Workflow Guard] Write Restricted in Completion Stage
-Target: {file_path} — only .shinchan-docs/** and *.md allowed.
-For code changes, return to execution stage.
-```
-
----
-
-## Error Handling: Corrupted State
-
-| Situation | Action |
-|-----------|--------|
-| File not found / unreadable | Default to "requirements" stage, warn user |
-| stage field invalid / missing | Default to "requirements" stage, warn user |
-| blocked_tools malformed | Use Stage-Tool Matrix above as fallback |
-
-Warning format:
-```
-⚠️ [Workflow Guard] State File Error
-Issue: {description} | Defaulting to: requirements
-Allowed: Read, Glob, Grep, Task, AskUserQuestion | Blocking: {tool}
-Action: Run /team-shinchan:resume or /team-shinchan:start
-```
-
----
-
-## Implementation Notes
-
-- Check all `.shinchan-docs/*/WORKFLOW_STATE.yaml`; use most recently updated if multiple exist
-- When no workflow is active, allow all tools
+State file missing/corrupt/invalid → default to "requirements" stage, warn user.
+Suggest: `/team-shinchan:resume` or `/team-shinchan:start`

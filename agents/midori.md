@@ -16,7 +16,7 @@ assistant: "This is an architectural decision. Let Midori facilitate a debate."
 
 model: sonnet
 color: teal
-tools: ["Task"]
+tools: ["Read", "Glob", "Task"]
 ---
 
 # Midori - Debate Moderator

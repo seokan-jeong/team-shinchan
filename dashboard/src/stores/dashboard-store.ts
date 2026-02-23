@@ -189,7 +189,13 @@ export const useDashboardStore = create<DashboardState>((set) => ({
   // Only the state mutation is reproduced; DOM manipulation is done by components.
 
   setConnected: (connected) => {
-    set({ connected: connected === true ? true : connected === 'reconnecting' ? 'reconnecting' : false })
+    if (connected === true) {
+      set({ connected: true })
+    } else if (connected === 'reconnecting') {
+      set({ connected: 'reconnecting' })
+    } else {
+      set({ connected: false })
+    }
   },
 
   // ── updateAgentStatus ────────────────────────────────────────────────────

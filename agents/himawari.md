@@ -10,7 +10,7 @@ assistant: "I'll use Himawari to coordinate this large-scale project."
 
 model: opus
 color: pink
-tools: ["Bash", "Task", "TodoWrite"]
+tools: ["Read", "Glob", "Grep", "Bash", "Task", "TodoWrite"]
 ---
 
 # Himawari - Team-Shinchan Master Orchestrator

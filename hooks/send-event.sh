@@ -31,7 +31,8 @@ if [ -z "${DASHBOARD_URL}" ]; then
 
   if [ -n "$PORT_FILE" ]; then
     DISCOVERED_PORT=$(cat "$PORT_FILE" 2>/dev/null | tr -d '[:space:]')
-    if [ -n "$DISCOVERED_PORT" ]; then
+    # 포트 번호가 숫자이고 유효 범위(1024-65535)인지 검증
+    if [ -n "$DISCOVERED_PORT" ] && echo "$DISCOVERED_PORT" | grep -qE '^[0-9]+$' && [ "$DISCOVERED_PORT" -ge 1024 ] && [ "$DISCOVERED_PORT" -le 65535 ]; then
       DASHBOARD_URL="http://localhost:${DISCOVERED_PORT}"
     fi
   fi
@@ -61,7 +62,8 @@ if command -v node &>/dev/null; then
       try {
         input = JSON.parse(chunks.join(''));
       } catch (e) {
-        // JSON 파싱 실패 시 빈 객체로 처리
+        // JSON 파싱 실패 시 빈 객체로 처리 (stderr로 경고)
+        process.stderr.write('[send-event] JSON parse error: ' + e.message + '\\n');
         input = {};
       }
 
@@ -186,8 +188,8 @@ if command -v node &>/dev/null; then
     });
   " 2>/dev/null)
 else
-  # node 없으면 이벤트 타입과 raw 입력을 그대로 전달
-  PAYLOAD="{\"type\":\"${HOOK_EVENT}\",\"content\":$(echo "$INPUT" | head -c 500)}"
+  # node 없으면 이벤트 타입만 전달 (raw 입력은 JSON 이스케이프 없이 위험하므로 제외)
+  PAYLOAD="{\"type\":\"${HOOK_EVENT}\",\"content\":\"(node not available - raw event)\"}"
 fi
 
 # 페이로드가 비어있으면 종료

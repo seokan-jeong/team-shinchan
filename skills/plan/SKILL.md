@@ -44,6 +44,14 @@ Create a systematic work plan:
 - No ambiguous terms allowed
 - All risks include mitigation plans
 
+## Output Format
+
+Create PROGRESS.md containing:
+- Phased plan with numbered phases (Phase 1, Phase 2, ...)
+- Each phase: goals, file changes, acceptance criteria (checkboxes), assigned agent
+- Dependencies between phases
+- Risk assessment with mitigations
+
 User request: ${args || '(Please describe what to plan)'}
 `
 )

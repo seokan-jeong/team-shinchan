@@ -54,6 +54,16 @@ Complete autonomously without user intervention:
 
 - **Max iterations**: 15 (pause and report if reached)
 - **Progress check**: If no measurable progress in 3 consecutive iterations, pause and report to user
+- **Scope escalation**: If requirements analysis reveals 20+ files or 3+ domains, recommend switching to /team-shinchan:bigproject
+
+## On Max Iterations Reached
+
+If the 15-iteration limit is reached, output:
+- Current stage and phase
+- What was completed
+- What remains incomplete
+- Specific blocker (if any)
+- Recommended next step for user
 
 User request: ${args || '(Request content analysis needed)'}
 `

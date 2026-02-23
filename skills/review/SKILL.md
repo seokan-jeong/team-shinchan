@@ -47,6 +47,7 @@ Perform thorough review covering:
 - Provide specific file:line references
 - Give actionable fix recommendations
 - Final verdict: APPROVED ✅ or REJECTED ❌
+- If REJECTED: list specific issues that must be fixed, ordered by severity
 
 User request: ${args || '(Please describe what to review)'}
 `

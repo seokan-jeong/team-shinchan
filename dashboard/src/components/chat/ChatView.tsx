@@ -10,7 +10,7 @@
  * Mirrors app.js addChatMessage() (lines 636-723) and
  * _appendDelegationBubble() (lines 726-775).
  */
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
 import { useDashboardStore } from '../../stores/dashboard-store'
 import { ScrollArea } from '../ui/scroll-area'
 import { ChatBubble } from './ChatBubble'
@@ -33,10 +33,19 @@ function isUserMessage(msg: ChatMessage): boolean {
 export function ChatView() {
   const chatMessages = useDashboardStore((s) => s.chatMessages)
   const scrollRef    = useRef<HTMLDivElement>(null)
+  const isNearBottom = useRef(true)
 
-  // Auto-scroll to bottom when new messages arrive
+  // Track whether user has scrolled up (reading history)
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current
+    if (!el) return
+    // Consider "near bottom" if within 100px of the bottom
+    isNearBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 100
+  }, [])
+
+  // Only auto-scroll if user is near the bottom
   useEffect(() => {
-    if (scrollRef.current) {
+    if (scrollRef.current && isNearBottom.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [chatMessages])
@@ -58,6 +67,7 @@ export function ChatView() {
           role="log"
           aria-label="Chat messages"
           aria-live="polite"
+          onScroll={handleScroll}
         >
           {/* Empty state */}
           {chatMessages.length === 0 && (

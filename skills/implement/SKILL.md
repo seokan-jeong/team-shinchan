@@ -49,11 +49,19 @@ Handle coding tasks including:
 - Keep functions small and focused
 - Add comments only for complex logic
 
+## Post-Implementation Verification
+
+After writing code:
+1. Run existing tests if available (detect test framework from package.json/config)
+2. If tests fail, fix the issues before reporting completion
+3. If no tests exist, verify the code compiles/loads without errors
+
 ## Output Format
 
 After implementation:
 - Summary of changes made
 - Files modified with line references
+- Test results (pass/fail/skipped)
 - Any follow-up recommendations
 
 User request: ${args || '(Please describe what to implement)'}

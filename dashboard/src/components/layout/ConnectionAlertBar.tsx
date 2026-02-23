@@ -32,9 +32,10 @@ export function ConnectionAlertBar() {
       className={barClass}
       role="alert"
       aria-live="assertive"
+      aria-atomic="true"
       aria-hidden={!visible}
     >
-      <span>⚠️</span>
+      <span aria-hidden="true">⚠️</span>
       <span>{message}</span>
     </div>
   )

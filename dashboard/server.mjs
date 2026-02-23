@@ -295,6 +295,18 @@ function cleanOldestInactiveSession() {
 /** @type {Array<{ res: http.ServerResponse, sessionId: string | null }>} */
 const sseClients = [];
 
+// 60초마다 끊어진 SSE 클라이언트 정리
+setInterval(() => {
+  for (let i = sseClients.length - 1; i >= 0; i--) {
+    if (sseClients[i].res.writableEnded || sseClients[i].res.destroyed) {
+      sseClients.splice(i, 1);
+    }
+  }
+  if (sseClients.length > 0) {
+    log(`SSE 클라이언트 정리 완료. 활성 클라이언트: ${sseClients.length}`);
+  }
+}, 60000);
+
 /**
  * SSE 클라이언트에 이벤트 브로드캐스트 (세션 필터링 지원)
  * @param {string} eventType - SSE 이벤트 타입
@@ -330,15 +342,24 @@ function broadcast(eventType, data, sessionId = null) {
  */
 function parseWorkflowYaml(content) {
   const extract = (key) => {
-    // key: value 또는 key: "value" 형태 모두 처리
-    const match = content.match(new RegExp(`^${key}:\\s*["']?([^"'\\n]+)["']?`, 'm'));
-    return match ? match[1].trim() : null;
+    // key: value, key: "value", key: 'value' 형태 모두 처리
+    const match = content.match(new RegExp(`^${key}:\\s*(?:"([^"]*?)"|'([^']*?)'|([^\\n]*))`, 'm'));
+    if (!match) return null;
+    // 그룹 1: 쌍따옴표, 그룹 2: 홑따옴표, 그룹 3: 따옴표 없음
+    const val = (match[1] ?? match[2] ?? match[3] ?? '').trim();
+    return val || null;
   };
 
+  const VALID_STAGES  = ['requirements', 'planning', 'execution', 'completion'];
+  const VALID_STATUSES = ['active', 'paused', 'completed', 'blocked', 'error'];
+
+  const stage  = extract('stage');
+  const status = extract('status');
+
   return {
-    stage:  extract('stage'),
+    stage:  VALID_STAGES.includes(stage) ? stage : null,
     phase:  extract('phase'),
-    status: extract('status'),
+    status: VALID_STATUSES.includes(status) ? status : null,
     docId:  extract('doc_id'),
   };
 }
@@ -1614,8 +1635,13 @@ async function handleHttpRequest(req, res) {
     }
 
     try {
-      const content      = fs.readFileSync(filePath, 'utf-8');
       const stat         = fs.statSync(filePath);
+      const MAX_DOC_SIZE = 10 * 1024 * 1024; // 10MB
+      if (stat.size > MAX_DOC_SIZE) {
+        jsonResponse(res, 413, { error: 'Payload Too Large', message: `파일 크기 ${(stat.size / 1024 / 1024).toFixed(1)}MB가 제한(10MB)을 초과합니다` });
+        return;
+      }
+      const content      = fs.readFileSync(filePath, 'utf-8');
       const lastModified = stat.mtime.toISOString();
       jsonResponse(res, 200, { filename, content, lastModified });
     } catch (err) {
@@ -1705,17 +1731,31 @@ function executeMcpTool(toolName, args) {
       };
 
     case 'send_agent_event': {
+      const VALID_EVENT_TYPES = ['delegation', 'message', 'agent_start', 'agent_done', 'tool_use', 'user_prompt', 'stop', 'session_start', 'session_end', 'workflow_update', 'file_change', 'plan_step', 'review_result', 'progress_update'];
       if (!args.type) {
         return {
           isError: true,
           content: [{ type: 'text', text: 'type 필드가 필요합니다' }],
         };
       }
+      if (!VALID_EVENT_TYPES.includes(args.type)) {
+        return {
+          isError: true,
+          content: [{ type: 'text', text: `유효하지 않은 이벤트 타입: ${args.type}. 허용: ${VALID_EVENT_TYPES.join(', ')}` }],
+        };
+      }
+
+      // 허용된 필드만 추출하여 이벤트 생성
+      const ALLOWED_FIELDS = ['type', 'agent', 'content', 'from', 'to', 'task', 'sessionId', 'workflow', 'file', 'phase', 'step', 'verdict', 'progress'];
+      const sanitized = {};
+      for (const key of ALLOWED_FIELDS) {
+        if (key in args) sanitized[key] = args[key];
+      }
 
       const event = {
         id:        Date.now(),
         timestamp: new Date().toISOString(),
-        ...args,
+        ...sanitized,
       };
 
       const mcpSessionId = args.sessionId || null;

@@ -17,6 +17,8 @@ assistant: "Let me use Shiro to explore the API route files."
 model: haiku
 color: white
 tools: ["Read", "Glob", "Grep", "Bash"]
+maxTurns: 10
+permissionMode: plan
 ---
 
 # Shiro - Team-Shinchan Fast Explorer

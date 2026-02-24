@@ -17,6 +17,10 @@ assistant: "Let me delegate this to Masao for DevOps work."
 model: sonnet
 color: gray
 tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
+skills:
+  - devops
+maxTurns: 25
+permissionMode: acceptEdits
 ---
 
 # Masao - Team-Shinchan DevOps Specialist

@@ -17,6 +17,10 @@ assistant: "Let me delegate this to Aichan for frontend implementation."
 model: sonnet
 color: coral
 tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
+skills:
+  - frontend
+maxTurns: 30
+permissionMode: acceptEdits
 ---
 
 # Aichan - Team-Shinchan Frontend Specialist

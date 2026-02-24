@@ -17,6 +17,8 @@ assistant: "Let me delegate this to Nene for strategic planning."
 model: opus
 color: purple
 tools: ["Read", "Write", "Glob", "Grep", "AskUserQuestion"]
+maxTurns: 20
+permissionMode: plan
 ---
 
 # Nene - Team-Shinchan Strategic Planner

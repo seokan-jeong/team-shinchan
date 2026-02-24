@@ -17,6 +17,10 @@ assistant: "Let me delegate this to Bunta for backend work."
 model: sonnet
 color: orange
 tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
+skills:
+  - backend
+maxTurns: 30
+permissionMode: acceptEdits
 ---
 
 # Bunta - Team-Shinchan Backend Specialist

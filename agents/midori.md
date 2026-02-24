@@ -17,6 +17,7 @@ assistant: "This is an architectural decision. Let Midori facilitate a debate."
 model: sonnet
 color: teal
 tools: ["Read", "Write", "Glob", "Task"]
+maxTurns: 25
 ---
 
 # Midori - Debate Moderator

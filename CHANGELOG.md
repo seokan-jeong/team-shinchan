@@ -2,6 +2,25 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [3.12.0] - 2026-02-24
+
+### Removed
+- **Dashboard**: Deleted `dashboard/` folder, `docs/dashboard-guide.md`, MCP server entry in `.mcp.json`
+- **send-event.sh**: Replaced HTTP-based event forwarding with local JSONL logging
+
+### Added
+- **write-tracker.sh**: Zero-dependency JSONL event logger — appends to `.shinchan-docs/work-tracker.jsonl`
+  - Event mapping: SubagentStart/Stop, PostToolUse (delegation, file_change, tool_use), UserPromptSubmit, Stop, SessionStart/End
+  - Auto-rotation: archives to `.jsonl.gz` when file exceeds 10,000 lines
+  - Session ID management via `.shinchan-docs/.session-id`
+- **work-log skill**: `/team-shinchan:work-log` — query JSONL events with `--last N`, `--agent`, `--type`, `--session` filters
+- **work-log command**: `commands/work-log.md` for skill-command parity
+
+### Changed
+- **hooks.json**: All 9 `send-event.sh` references replaced with `write-tracker.sh`
+- **README.md**: Dashboard sections replaced with Work Tracker documentation
+- **skills/status/SKILL.md**: Removed "dashboard" terminology
+
 ## [3.11.0] - 2026-02-24
 
 ### Added

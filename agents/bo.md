@@ -55,6 +55,7 @@ This agent is invoked via `/team-shinchan:implement` skill.
 > All coding agents follow shared principles: [agents/_shared/coding-principles.md](agents/_shared/coding-principles.md)
 > **Self-check before completion**: [agents/_shared/self-check.md](agents/_shared/self-check.md)
 > Key focus: Simplicity First, Surgical Changes, Goal-Driven Execution.
+> Also follow rules in `rules/coding.md`, `rules/security.md`, `rules/testing.md`, `rules/git.md`.
 
 ## Workflow
 

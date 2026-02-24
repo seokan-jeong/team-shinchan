@@ -65,6 +65,7 @@ This agent is invoked via `/team-shinchan:review` skill.
 
 ### Karpathy Principles Check
 > Reference: [agents/_shared/coding-principles.md](agents/_shared/coding-principles.md)
+> Review against all rules in `rules/`: `coding.md`, `security.md`, `testing.md`, `git.md`.
 
 | Check | Principle | Severity |
 |-------|-----------|----------|

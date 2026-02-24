@@ -72,7 +72,6 @@ history:
 📁 Document ID: {DOC_ID}
 📂 Folder: .shinchan-docs/{DOC_ID}/
 📄 WORKFLOW_STATE.yaml ✅
-🖥️ Dashboard: auto-opened in browser
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📋 Stage 1: Requirements
 👤 Owner: Nene

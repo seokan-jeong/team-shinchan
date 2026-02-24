@@ -1,0 +1,62 @@
+[
+  {
+    "tool": "Bash",
+    "pattern": "rm -rf /",
+    "reason": "Prevents recursive root deletion"
+  },
+  {
+    "tool": "Bash",
+    "pattern": "rm -rf ~",
+    "reason": "Prevents home directory deletion"
+  },
+  {
+    "tool": "Bash",
+    "pattern": "chmod 777",
+    "reason": "Prevents overly permissive file permissions"
+  },
+  {
+    "tool": "Bash",
+    "pattern": "npm publish",
+    "reason": "Prevents accidental package publishing"
+  },
+  {
+    "tool": "Bash",
+    "pattern": "> /dev/sda",
+    "reason": "Prevents disk overwrite"
+  },
+  {
+    "tool": "Bash",
+    "pattern": "curl.*| bash",
+    "reason": "Prevents piping remote scripts to bash"
+  },
+  {
+    "tool": "Bash",
+    "pattern": ":(){ :|:& };:",
+    "reason": "Prevents fork bomb"
+  },
+  {
+    "tool": "Write",
+    "pattern": "\\.env$",
+    "reason": "Prevents writing to .env files directly"
+  },
+  {
+    "tool": "Bash",
+    "pattern": "DROP TABLE",
+    "reason": "Prevents accidental SQL table drops"
+  },
+  {
+    "tool": "Bash",
+    "pattern": "DROP DATABASE",
+    "reason": "Prevents accidental SQL database drops"
+  },
+  {
+    "tool": "Bash",
+    "pattern": "mkfs\\.",
+    "reason": "Prevents filesystem formatting"
+  },
+  {
+    "tool": "Bash",
+    "pattern": "dd if=.* of=/dev/",
+    "reason": "Prevents raw disk writes via dd"
+  }
+]

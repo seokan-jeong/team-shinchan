@@ -36,7 +36,6 @@ Add `resumed` event to history, set `status: active`.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ▶️ Workflow Resumed: {DOC_ID}
 Stage: {current_stage} ({n}/4) | Phase: {current_phase|N/A} | Owner: {current_owner}
-Dashboard: http://localhost:3333
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 

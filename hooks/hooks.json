@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "HOOK_EVENT=SubagentStart ${CLAUDE_PLUGIN_ROOT}/hooks/send-event.sh",
+            "command": "HOOK_EVENT=SubagentStart ${CLAUDE_PLUGIN_ROOT}/hooks/write-tracker.sh",
             "async": true,
             "timeout": 5
           }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "HOOK_EVENT=SubagentStop ${CLAUDE_PLUGIN_ROOT}/hooks/send-event.sh",
+            "command": "HOOK_EVENT=SubagentStop ${CLAUDE_PLUGIN_ROOT}/hooks/write-tracker.sh",
             "async": true,
             "timeout": 5
           }
@@ -25,6 +25,22 @@
       }
     ],
     "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/security-check.md"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/deny-check.md"
+          }
+        ]
+      },
       {
         "hooks": [
           {
@@ -58,7 +74,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "HOOK_EVENT=PostToolUse ${CLAUDE_PLUGIN_ROOT}/hooks/send-event.sh",
+            "command": "HOOK_EVENT=PostToolUse ${CLAUDE_PLUGIN_ROOT}/hooks/write-tracker.sh",
             "async": true,
             "timeout": 5
           }
@@ -69,7 +85,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "HOOK_EVENT=PostToolUse ${CLAUDE_PLUGIN_ROOT}/hooks/send-event.sh",
+            "command": "HOOK_EVENT=PostToolUse ${CLAUDE_PLUGIN_ROOT}/hooks/write-tracker.sh",
             "async": true,
             "timeout": 5
           },
@@ -84,7 +100,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "HOOK_EVENT=PostToolUse ${CLAUDE_PLUGIN_ROOT}/hooks/send-event.sh",
+            "command": "HOOK_EVENT=PostToolUse ${CLAUDE_PLUGIN_ROOT}/hooks/write-tracker.sh",
             "async": true,
             "timeout": 5
           },
@@ -104,7 +120,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "HOOK_EVENT=UserPromptSubmit ${CLAUDE_PLUGIN_ROOT}/hooks/send-event.sh",
+            "command": "HOOK_EVENT=UserPromptSubmit ${CLAUDE_PLUGIN_ROOT}/hooks/write-tracker.sh",
             "async": true,
             "timeout": 5
           }
@@ -132,9 +148,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "HOOK_EVENT=Stop ${CLAUDE_PLUGIN_ROOT}/hooks/send-event.sh",
+            "command": "HOOK_EVENT=Stop ${CLAUDE_PLUGIN_ROOT}/hooks/write-tracker.sh",
             "async": true,
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/session-wrap.md"
           }
         ]
       },
@@ -152,7 +176,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "HOOK_EVENT=SessionStart ${CLAUDE_PLUGIN_ROOT}/hooks/send-event.sh",
+            "command": "HOOK_EVENT=SessionStart ${CLAUDE_PLUGIN_ROOT}/hooks/write-tracker.sh",
             "async": true,
             "timeout": 5
           }
@@ -172,7 +196,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "HOOK_EVENT=SessionEnd ${CLAUDE_PLUGIN_ROOT}/hooks/send-event.sh",
+            "command": "HOOK_EVENT=SessionEnd ${CLAUDE_PLUGIN_ROOT}/hooks/write-tracker.sh",
             "async": true,
             "timeout": 5
           }

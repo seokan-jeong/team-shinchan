@@ -9,12 +9,6 @@ src/
 package.json
 package-lock.json
 
-# Dashboard 예외: dashboard/ 하위 파일은 git에 포함
-!dashboard/
-!dashboard/**
-!dashboard/package.json
-# Dashboard dist/ is committed so plugin users get the built dashboard without needing to build
-# dashboard/dist/
 
 # IDE
 .idea/

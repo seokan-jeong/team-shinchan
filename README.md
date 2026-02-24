@@ -8,7 +8,7 @@
 
 **15 AI agents that debate decisions, plan systematically, execute in parallel, and learn from your project.**
 
-[![Version](https://img.shields.io/badge/version-3.11.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
+[![Version](https://img.shields.io/badge/version-3.12.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.ai)
 ![GitHub stars](https://img.shields.io/github/stars/seokan-jeong/team-shinchan?style=social)
@@ -109,15 +109,16 @@ User: ulw fix all TypeScript errors
 ✅ Completed in 2 minutes (vs ~10 minutes sequential)
 ```
 
-### 3. Session-Isolated Dashboard
+### 3. Work Tracker (JSONL Log)
 
 ```
-# Multiple Claude Code sessions? Each gets its own dashboard view.
+# Every event is logged to .shinchan-docs/work-tracker.jsonl
 
-Session A: 🟢 session-abc1 (auth feature)
-Session B: 🟢 session-xyz2 (bug fixes)
+{"ts":"2026-02-24T06:00:00Z","type":"agent_start","agent":"bo","session":"session-abc1"}
+{"ts":"2026-02-24T06:00:05Z","type":"file_change","agent":null,"session":"session-abc1","data":{"file":"src/auth.ts","action":"modify"}}
+{"ts":"2026-02-24T06:01:00Z","type":"agent_done","agent":"bo","session":"session-abc1"}
 
-Dashboard auto-detects sessions and shows per-session events in real-time.
+# Query with: /team-shinchan:work-log --last 20 --agent bo
 ```
 
 ### 4. Self-Learning Memory
@@ -189,7 +190,7 @@ User: Add user preferences feature
 
 ## Commands
 
-32 commands across workflow, specialist, and utility categories:
+33 commands across workflow, specialist, and utility categories:
 
 ### Workflow Commands
 | Command | Description |
@@ -240,6 +241,7 @@ User: Add user preferences feature
 | `/team-shinchan:memories` | View learned memories |
 | `/team-shinchan:learn` | Add to memory |
 | `/team-shinchan:forget` | Remove memory |
+| `/team-shinchan:work-log` | Query work tracker events |
 | `/team-shinchan:manage-skills` | Manage plugin skills |
 | `/team-shinchan:help` | Show help |
 
@@ -429,14 +431,12 @@ New Session ────→ Load Learnings ────→ Apply to Work
 
 ---
 
-## What's New in v3.10.0
+## What's New in v3.12.0
 
-- **Plugin Portability Complete** — 27 issues fixed so the plugin works 100% when installed in any external project.
-- **Validator Paths Fixed** — All verify-* skills now use `${CLAUDE_PLUGIN_ROOT}` for correct execution from any host project.
-- **Dashboard File Events** — Edit/Write changes now appear in the real-time dashboard (previously only Task delegations were shown).
-- **Enhanced Dashboard** — 7 real-time metrics, SSE auto-reconnect, phase-level progress bars.
-- **Agent Quality** — Midori can now record debate decisions, Kazama has safety guardrails, help shows all 32 skills.
-- **Token Optimization** — Reduced overhead across hooks, agents, and shared resources.
+- **Dashboard Removed** — Replaced HTTP dashboard with zero-dependency JSONL work tracker (`write-tracker.sh`).
+- **Work Tracker** — All agent events logged to `.shinchan-docs/work-tracker.jsonl` with auto-rotation at 10K lines.
+- **Work Log Skill** — `/team-shinchan:work-log` to query events by agent, type, or session.
+- **Zero External Dependencies** — No MCP server, no curl, no port discovery. Just a shell script appending to a file.
 
 ---
 

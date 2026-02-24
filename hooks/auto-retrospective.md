@@ -16,6 +16,12 @@ event: Stop
 
 ## Process
 
+### 0. Check Session Summary (if available)
+
+Read `.shinchan-docs/{doc_id}/SESSION_SUMMARY.md` or `.shinchan-docs/SESSION_SUMMARY.md` for quantitative data. Use agent counts, file changes, and duration to ground your retrospective in facts.
+
+If a SESSION_SUMMARY.md exists, reference its metrics (duration, agent invocations, files changed, delegations) in your analysis below. If it does not exist, proceed without it.
+
 ### 1. Analyze
 
 Answer briefly: What was the task? What worked? What mistakes? What patterns? What would you change?

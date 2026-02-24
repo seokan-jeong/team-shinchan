@@ -25,7 +25,8 @@ See `skills/help/SKILL.md` for full documentation.
 - `/team-shinchan:deepsearch` - Codebase search
 - `/team-shinchan:debate` - Expert debate
 - `/team-shinchan:orchestrate` - Explicit orchestration
-- `/team-shinchan:status` - Workflow status dashboard
+- `/team-shinchan:status` - Workflow status
+- `/team-shinchan:work-log` - Query work tracker events
 - `/team-shinchan:learn` - Add to memory
 - `/team-shinchan:memories` - View memories
 - `/team-shinchan:forget` - Delete memory

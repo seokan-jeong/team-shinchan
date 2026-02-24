@@ -9,7 +9,6 @@ user-invocable: true
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 👦 [Shinnosuke] Ultrawork mode -- maximum parallelization!
-🖥️ Dashboard: http://localhost:3333
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 

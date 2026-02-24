@@ -1,5 +1,5 @@
 ---
-description: Show current workflow status dashboard
+description: Show current workflow status
 ---
 
 # Status Command

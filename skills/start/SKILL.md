@@ -44,7 +44,6 @@ Output greeting (adapt to user's language):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 👦 [Shinnosuke] Hey! Let's build something great~ 💪
 📁 Project: {DOC_ID} | 🎯 Stage: Requirements
-🖥️ Dashboard: http://localhost:3333
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 

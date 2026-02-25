@@ -109,6 +109,19 @@ Otherwise → full 4-Stage Workflow.
 
 ---
 
+## Ontology-Aware Routing
+
+Before delegating tasks, check if `.shinchan-docs/ontology/ontology.json` exists. If it does:
+
+1. **Query affected entities**: Identify entities related to the user's request (e.g., "payment" → search ontology for DomainConcept/Component matching)
+2. **Map impact scope**: Use DEPENDS_ON relations to find all affected files/modules
+3. **Include context in delegation**: Pass ontology-derived file list and dependency info to the delegated agent's prompt
+4. **Optimal agent selection**: Use Module domain info to route to the best specialist (frontend domain → Aichan, api domain → Bunta)
+
+If ontology doesn't exist, proceed with standard code exploration via Shiro.
+
+---
+
 ## Agent Invocation Protocol
 
 > Format templates: [agents/_shared/output-formats.md](_shared/output-formats.md)

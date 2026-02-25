@@ -21,7 +21,9 @@ const KNOWN_SKILLS = [
   'verify-agents', 'verify-skills', 'verify-consistency',
   'verify-workflow', 'verify-memory', 'verify-budget', 'research', 'work-log',
   'session-summary',
-  'eval'
+  'eval',
+  'ontology',
+  'impact-analysis'
 ];
 
 function getActualAgents() {

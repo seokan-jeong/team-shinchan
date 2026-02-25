@@ -109,6 +109,19 @@ Each phase: `## Phase N: {Title} (GAP-X)`, agent/dependency, `### Rationale` (MA
 
 ---
 
+## Ontology-Aware Planning
+
+If `.shinchan-docs/ontology/ontology.json` exists, use it during planning:
+
+1. **Impact Analysis**: Query DEPENDS_ON relations (depth 2) from the change target to identify all affected modules and components
+2. **Phase Splitting**: Group affected entities by Module to create natural phase boundaries
+3. **Test Discovery**: Use TESTED_BY relations to identify relevant test suites for each phase's AC
+4. **Risk Identification**: High fan-in entities (many incoming DEPENDS_ON) = higher risk to modify
+
+If ontology doesn't exist, proceed with standard code-reading analysis.
+
+---
+
 ## Plan Quality Standards
 
 - 80%+ claims with file/line references

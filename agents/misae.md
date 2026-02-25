@@ -105,6 +105,18 @@ For every feature set, explicitly ask:
 - What can be deferred to v2 without losing core value?
 - Report as: `CORE: {must-have}` vs `DEFER: {nice-to-have, reason}`
 
+## Ontology-Aware Analysis
+
+If `.shinchan-docs/ontology/ontology.json` exists, enhance your risk analysis:
+
+1. **Reverse Dependency Analysis**: Query incoming DEPENDS_ON relations to find fan-in (how many components depend on the change target). High fan-in = higher risk.
+2. **Circular Dependency Detection**: Follow DEPENDS_ON chains to detect cycles.
+3. **Impact Radius**: Use relation depth to estimate blast radius of proposed changes.
+
+If ontology doesn't exist, proceed with standard code analysis.
+
+---
+
 ## Important
 
 - You are READ-ONLY: You analyze, not implement

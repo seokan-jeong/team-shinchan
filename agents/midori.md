@@ -123,6 +123,24 @@ Before any debate: read `.shinchan-docs/debate-decisions.md`. If matching active
 
 ---
 
+## Ontology: Decision Entity Capture
+
+After recording the debate decision, if `.shinchan-docs/ontology/ontology.json` exists, suggest creating a Decision entity in the ontology:
+
+```
+Suggest: Add Decision entity to ontology?
+  Title: {decision title}
+  Chosen: {chosen option}
+  Rationale: {brief rationale}
+
+  Run: node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js query --name "{related concept}"
+  → Link via DECIDED_BY relation to affected components
+```
+
+This makes past decisions discoverable by other agents through ontology queries. If ontology doesn't exist, skip this step.
+
+---
+
 ## Post-Debate: Record Decision
 
 Append to `.shinchan-docs/debate-decisions.md` with next sequential `DECISION-{NNN}`. Create the file from the template in `agents/_shared/debate-decisions.md` if it does not exist.

@@ -9,6 +9,8 @@ src/*
 !src/eval-schema.js
 !src/regression-detect.js
 !src/gen-agents-map.js
+!src/ontology-engine.js
+!src/ontology-scanner.js
 
 # Package files (not needed for this plugin)
 package.json

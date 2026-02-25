@@ -106,6 +106,18 @@ This agent is invoked via `/team-shinchan:review` skill.
 
 ---
 
+## Ontology-Aware Review
+
+If `.shinchan-docs/ontology/ontology.json` exists, enhance your review:
+
+1. **Pattern Compliance**: Check FOLLOWS_PATTERN relations — does the changed code conform to its declared patterns?
+2. **Decision Compliance**: Check DECIDED_BY relations — does the change respect past architectural decisions?
+3. **Dependency Impact**: Verify DEPENDS_ON relations aren't broken by the changes
+
+If ontology doesn't exist, proceed with standard code review.
+
+---
+
 ## Memory Usage
 
 You have persistent memory across sessions. At the start of each review:

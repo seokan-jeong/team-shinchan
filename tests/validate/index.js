@@ -22,6 +22,7 @@ const hookRegistration = require('./hook-registration');
 const skillCommandParity = require('./skill-command-parity');
 const versionConsistency = require('./version-consistency');
 const agentsMap = require('./agents-map');
+const ontologyIntegrity = require('./ontology-integrity');
 
 async function runAllValidations() {
   console.log('\n╔════════════════════════════════════════╗');
@@ -46,7 +47,8 @@ async function runAllValidations() {
     hookRegistration: 0,
     skillCommandParity: 0,
     versionConsistency: 0,
-    agentsMap: 0
+    agentsMap: 0,
+    ontologyIntegrity: 0
   };
 
   const times = {
@@ -67,7 +69,8 @@ async function runAllValidations() {
     hookRegistration: 0,
     skillCommandParity: 0,
     versionConsistency: 0,
-    agentsMap: 0
+    agentsMap: 0,
+    ontologyIntegrity: 0
   };
 
   // Run agent schema validation
@@ -161,6 +164,11 @@ async function runAllValidations() {
   results.agentsMap = agentsMap.runValidation();
   times.agentsMap = Date.now() - start;
 
+  // Run ontology integrity validation
+  start = Date.now();
+  results.ontologyIntegrity = ontologyIntegrity.runValidation();
+  times.ontologyIntegrity = Date.now() - start;
+
   // Summary
   const totalErrors = Object.values(results).reduce((a, b) => a + b, 0);
   const totalTime = Object.values(times).reduce((a, b) => a + b, 0);
@@ -186,6 +194,7 @@ async function runAllValidations() {
   console.log(`║  Skill-Cmd Parity:   ${results.skillCommandParity === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.skillCommandParity).padStart(5)}ms  ║`);
   console.log(`║  Version Consist.:   ${results.versionConsistency === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.versionConsistency).padStart(5)}ms  ║`);
   console.log(`║  Agents Map:         ${results.agentsMap === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.agentsMap).padStart(5)}ms  ║`);
+  console.log(`║  Ontology Integrity: ${results.ontologyIntegrity === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.ontologyIntegrity).padStart(5)}ms  ║`);
   console.log('╠════════════════════════════════════════════════╣');
 
   if (totalErrors === 0) {

@@ -197,6 +197,14 @@
             "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/load-kb.md"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/ontology-auto-build.md"
+          }
+        ]
       }
     ],
     "SessionEnd": [

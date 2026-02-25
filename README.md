@@ -10,7 +10,7 @@
 
 15 specialist agents with structured workflows, budget controls, analytics, eval, and self-learning.
 
-[![Version](https://img.shields.io/badge/version-4.0.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
+[![Version](https://img.shields.io/badge/version-4.1.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.ai)
 ![GitHub stars](https://img.shields.io/github/stars/seokan-jeong/team-shinchan?style=social)
@@ -47,6 +47,7 @@ Team-Shinchan is built on 5 Harness Engineering principles:
 Load the right knowledge at the right time.
 
 - **load-kb** hook injects project knowledge base at session start
+- **Project Ontology** auto-builds a knowledge graph of your codebase (entities, relations, dependencies)
 - **AGENTS.md** auto-generated map of all 15 agents with roles and capabilities
 - **Session bridging** via `session-wrap` and `resume` for cross-session continuity
 - **Self-learning memory** accumulates project conventions over time

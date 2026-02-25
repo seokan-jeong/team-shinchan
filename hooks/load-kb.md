@@ -49,7 +49,25 @@ At session start, load KB summary, past learnings, and detect any interrupted wo
 
 4. **Silent**: If no interrupted workflows found, skip silently.
 
-### 4. Regression Alert
+### 4. Load Ontology Summary
+
+1. **Check**: If `.shinchan-docs/ontology/ontology.json` exists, read it.
+2. **Parse**: Extract entity count, relation count, module names, domain concepts.
+3. **Display**:
+
+```
+🔬 [Ontology] {N} entities, {M} relations
+   Modules: {module1}, {module2}, ...
+   Domains: {domain1}, {domain2}, ...
+```
+
+4. **KB Freshness**: If `kb-summary.md` is older than `ontology.json` (compare mtime), regenerate it:
+   - Run: `node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js gen-kb`
+   - Display: `🔬 [Ontology] kb-summary.md refreshed from ontology`
+
+5. **Silent**: If no ontology exists, skip silently (graceful degradation).
+
+### 5. Regression Alert
 
 1. **Check**: If `.shinchan-docs/eval-history.jsonl` exists, scan for regressions.
 2. **Quick scan**: Read the file, group records by agent. For each agent with 5+ evaluations, compute a moving average (last 5) for each dimension. Flag if the latest score drops 1+ points below that average.
@@ -67,8 +85,9 @@ At session start, load KB summary, past learnings, and detect any interrupted wo
 
 1. KB Summary (first)
 2. Learnings (second)
-3. Regression Alert (third - warns about declining agents)
-4. Interrupted Workflows (last - highest priority alert)
+3. Ontology Summary (third - project structure context)
+4. Regression Alert (fourth - warns about declining agents)
+5. Interrupted Workflows (last - highest priority alert)
 
 ## Apply Rules
 

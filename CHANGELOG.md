@@ -2,6 +2,36 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.1.0] - 2026-02-25
+
+### New Features
+- **Project Ontology System**: Auto-build knowledge graph of any codebase at session start
+  - `src/ontology-engine.js`: Core CRUD + query + merge engine (entities, relations, impact analysis, health score, Mermaid diagrams, evolution tracking)
+  - `src/ontology-scanner.js`: Regex-based code scanner detecting 7 entity types (Module, Component, DomainConcept, API, DataModel, Configuration, TestSuite) and 3 relation types (PART_OF, DEPENDS_ON, TESTED_BY)
+  - `hooks/ontology-auto-build.md`: SessionStart hook — auto-init + scan when no ontology exists, incremental update via git diff when it does
+  - **Auto-Build First**: Users never need to run ontology commands — it builds silently on first session
+- **Ontology Skill/Command**: `/team-shinchan:ontology` — show, query, add, remove, scan, gen-kb, diagram
+- **Impact Analysis Skill/Command**: `/team-shinchan:impact-analysis` — cascade dependency analysis with risk assessment (HIGH/MEDIUM/LOW)
+- **Health Score**: Architecture health 0-100 (connectivity, test coverage, documentation, modularity)
+- **Mermaid Diagrams**: Auto-generate module dependency, domain concept, and entity neighborhood diagrams
+- **Evolution Tracking**: Ontology change history analysis from JSONL logs
+
+### Agent Integration
+- **Shinnosuke**: Ontology-aware routing — queries impact scope before delegation
+- **Nene**: DEPENDS_ON depth-2 traversal for impact-based phase splitting
+- **Action Kamen**: FOLLOWS_PATTERN and DECIDED_BY compliance checks
+- **Misae**: Reverse DEPENDS_ON fan-in analysis for risk assessment
+- **Shiro**: DomainConcept → IMPLEMENTS mapping for instant file discovery
+- **Midori**: Decision entity auto-capture after debate conclusions
+
+### Improvements
+- **load-kb**: Now loads ontology summary + auto-refreshes kb-summary.md when stale
+- **change-tracker**: Ontology update reminder on file modifications
+- **Ontology Integrity Validator**: 7-check data validation (ID uniqueness, type validity, reference integrity, orphan detection)
+
+### Component Counts
+- 40 skills, 40 commands, 13 hooks, 19 validators, 7 src scripts, 15 agents
+
 ## [4.0.0] - 2026-02-25
 
 ### Repositioning

@@ -1,0 +1,42 @@
+{
+  "layers": {
+    "orchestration": ["shinnosuke", "himawari", "midori"],
+    "execution": ["bo", "kazama"],
+    "specialist": ["aichan", "bunta", "masao"],
+    "advisory": ["hiroshi", "nene", "misae", "actionkamen"],
+    "utility": ["shiro", "masumi", "ume"]
+  },
+  "allowed_calls": {
+    "orchestration": ["execution", "specialist", "advisory", "utility"],
+    "execution": ["utility"],
+    "specialist": ["utility"],
+    "advisory": ["utility"],
+    "utility": []
+  },
+  "exceptions": [
+    {
+      "from": "execution",
+      "to": "advisory",
+      "agent": "actionkamen",
+      "reason": "Review is callable from all layers"
+    },
+    {
+      "from": "specialist",
+      "to": "advisory",
+      "agent": "actionkamen",
+      "reason": "Review is callable from all layers"
+    },
+    {
+      "from": "execution",
+      "to": "orchestration",
+      "agent": "midori",
+      "reason": "Kazama can trigger debate via Midori on architecture conflicts"
+    },
+    {
+      "from": "orchestration",
+      "to": "advisory",
+      "agent": "hiroshi",
+      "reason": "Midori delegates synthesis to Hiroshi during debates"
+    }
+  ]
+}

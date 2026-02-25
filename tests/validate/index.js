@@ -21,6 +21,7 @@ const tokenBudget = require('./token-budget');
 const hookRegistration = require('./hook-registration');
 const skillCommandParity = require('./skill-command-parity');
 const versionConsistency = require('./version-consistency');
+const agentsMap = require('./agents-map');
 
 async function runAllValidations() {
   console.log('\n╔════════════════════════════════════════╗');
@@ -44,7 +45,8 @@ async function runAllValidations() {
     tokenBudget: 0,
     hookRegistration: 0,
     skillCommandParity: 0,
-    versionConsistency: 0
+    versionConsistency: 0,
+    agentsMap: 0
   };
 
   const times = {
@@ -64,7 +66,8 @@ async function runAllValidations() {
     tokenBudget: 0,
     hookRegistration: 0,
     skillCommandParity: 0,
-    versionConsistency: 0
+    versionConsistency: 0,
+    agentsMap: 0
   };
 
   // Run agent schema validation
@@ -153,6 +156,11 @@ async function runAllValidations() {
   results.versionConsistency = versionConsistency.runValidation();
   times.versionConsistency = Date.now() - start;
 
+  // Run AGENTS.md map validation
+  start = Date.now();
+  results.agentsMap = agentsMap.runValidation();
+  times.agentsMap = Date.now() - start;
+
   // Summary
   const totalErrors = Object.values(results).reduce((a, b) => a + b, 0);
   const totalTime = Object.values(times).reduce((a, b) => a + b, 0);
@@ -177,6 +185,7 @@ async function runAllValidations() {
   console.log(`║  Hook Registration:  ${results.hookRegistration === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.hookRegistration).padStart(5)}ms  ║`);
   console.log(`║  Skill-Cmd Parity:   ${results.skillCommandParity === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.skillCommandParity).padStart(5)}ms  ║`);
   console.log(`║  Version Consist.:   ${results.versionConsistency === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.versionConsistency).padStart(5)}ms  ║`);
+  console.log(`║  Agents Map:         ${results.agentsMap === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.agentsMap).padStart(5)}ms  ║`);
   console.log('╠════════════════════════════════════════════════╣');
 
   if (totalErrors === 0) {

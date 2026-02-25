@@ -5,6 +5,7 @@ event: PreToolUse
 ---
 
 # Workflow Guard
+<!-- Hard Guardrail Matrix — Architectural Constraint -->
 
 **Runs BEFORE every tool use. Enforces stage restrictions.**
 

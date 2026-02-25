@@ -68,6 +68,24 @@ Nene: phase breakdown + AC. Shiro: impact analysis. Create PROGRESS.md.
 2. Action Kamen → Final verification
 3. Report completion
 
+## Layer Dependency Guard
+
+Before delegating to any agent, check `agents/_shared/layer-map.json` (if it exists):
+
+1. Determine the **source agent's layer** (the agent performing the delegation)
+2. Determine the **target agent's layer** (the agent being delegated to)
+3. Check if the call is allowed per `allowed_calls` rules and `exceptions`
+4. If the call **violates** layer rules, include a WARNING in the output:
+   ```
+   ⚠️ LAYER WARNING: {source}({sourceLayer}) → {target}({targetLayer}) is not in allowed_calls.
+   Proceeding anyway — review layer-map.json if this delegation should be formalized.
+   ```
+5. If `layer-map.json` does not exist, skip this check entirely
+
+This is advisory only — violations produce warnings, not blocks.
+
+---
+
 ## Debate Triggers
 
 Trigger: 2+ approaches, architecture change, breaking patterns, perf vs readability, security.

@@ -2,6 +2,37 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.0.0] - 2026-02-25
+
+### Repositioning
+- **Agent Harness**: Repositioned from "AI development team" to "Agent Harness for Claude Code"
+- **Harness Engineering Principles**: README structured around 5 principles — Context Engineering, Architectural Constraints, Guardrails & Quality Gates, Feedback Loops, State Management
+- **Documentation**: README, Getting Started, Workflow Guide updated with Harness terminology
+
+### New Features
+- **Analytics** (`src/analytics.js`): Trace ID generation, event tracking, agent performance metrics
+- **Analytics Skill/Command**: `/team-shinchan:analytics` for viewing trace data and agent metrics
+- **Budget Guard** (`hooks/budget-guard.md`): Token budget enforcement with 80% warning and 100% hard stop
+- **Budget Skill/Command**: `/team-shinchan:budget` for checking token budget status
+- **Harness Lint** (`src/harness-lint.js`): Static analysis of plugin structure — detects orphaned skills, broken refs, stale configs
+- **Lint-Harness Skill/Command**: `/team-shinchan:lint-harness` for running harness structural checks
+- **Eval System** (`src/eval-schema.js`, `src/regression-detect.js`): Schema validation and regression detection for agent outputs
+- **Eval Skill/Command**: `/team-shinchan:eval` for running eval checks
+- **AGENTS.md**: Auto-generated agent map documenting all 15 agents with roles, layers, tools, and capabilities
+- **Agent Map Generator** (`src/gen-agents-map.js`): Script to regenerate AGENTS.md from agent source files
+- **Layer Map** (`agents/_shared/layer-map.json`): Defines 5 architectural layers (Orchestration, Execution, Specialist, Advisory, Utility)
+- **Layer Enforcement Validator**: Ensures agents operate within their designated layer
+- **Agents-Map Validator**: Validates AGENTS.md stays in sync with agent source files
+
+### Improvements
+- **Session Wrap**: Enhanced with Work Tracker integration for auto-summary on session end
+- **load-kb**: Alerts when knowledge base is stale or missing
+- **Auto-Retrospective**: Now includes eval data in retrospective analysis
+- **Terminology**: Harness Engineering subtitles added to workflow-guard ("Hard Guardrail Matrix") and self-check ("Quality Gate")
+
+### Component Counts
+- 38 skills, 38 commands, 12 hooks, 19 validators, 5 src scripts, 15 agents, 4 rule categories (54 rules)
+
 ## [3.12.0] - 2026-02-24
 
 ### Removed

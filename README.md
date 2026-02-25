@@ -1,46 +1,106 @@
 <div align="center">
 
-# 🖍️ Team-Shinchan
+# Team-Shinchan
 
 <img src="https://i.pinimg.com/1200x/1c/06/b0/1c06b009abbb5c764ba8335b827e3421.jpg" alt="Shinchan" width="600"/>
 
-### *"Stop doing everything yourself. Get a team of AI specialists."*
+### The Agent Harness for Claude Code
 
-**15 AI agents that debate decisions, plan systematically, execute in parallel, and learn from your project.**
+**Guardrails, Observability, and Quality Gates for AI-Powered Development**
 
-[![Version](https://img.shields.io/badge/version-3.12.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
+15 specialist agents with structured workflows, budget controls, analytics, eval, and self-learning.
+
+[![Version](https://img.shields.io/badge/version-4.0.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.ai)
 ![GitHub stars](https://img.shields.io/github/stars/seokan-jeong/team-shinchan?style=social)
 
-[**Try It**](#try-it-in-2-minutes) • [**Commands**](#commands) • [**The Team**](#the-team-15-agents) • [**How It Works**](#how-skills-work)
+[**Try It**](#try-it-in-2-minutes) | [**Features**](#harness-engineering) | [**Commands**](#commands) | [**The Team**](#15-specialized-agents)
 
 </div>
 
 ---
 
-## What is Team-Shinchan?
+## Why an Agent Harness?
 
-Team-Shinchan is a **Claude Code plugin** that gives you **15 specialist AI agents** working as an organized team.
+AI agents are powerful but unpredictable. Without constraints, they hallucinate architecture, skip reviews, blow through token budgets, and forget past decisions. An **Agent Harness** solves this by wrapping agents in guardrails, quality gates, and feedback loops -- the same way a test harness wraps code in assertions.
 
-Instead of one AI doing everything, you get experts in frontend, backend, DevOps, planning, code review, and more. They **debate architectural decisions**, **execute tasks in parallel** (5x faster), and **remember your project's conventions** so you don't repeat yourself.
+Team-Shinchan turns Claude Code into a **harnessed multi-agent system** where 15 specialists debate, plan, execute, and learn -- all within well-defined boundaries.
 
-No more context-switching between roles. No more forgetting past decisions. No more reviewing your own code.
+| Without a Harness | With Team-Shinchan |
+|---|---|
+| Agents skip stages, jump to code | Workflow Guard enforces stage-tool matrix |
+| No visibility into agent behavior | Analytics with trace IDs track every action |
+| Unlimited token burn | Budget Guard caps spend per session |
+| No quality signal on the harness itself | Harness Lint checks plugin integrity |
+| Past decisions forgotten | Memory + session bridging persist context |
+| Code reviewed ad-hoc (or not at all) | Action Kamen reviews every phase (mandatory) |
 
 ---
 
-## Before / After
+## Harness Engineering
 
-| Without Team-Shinchan | With Team-Shinchan |
-|----------------------|---------------------|
-| ❌ You plan alone | ✅ Nene creates structured multi-phase plans |
-| ❌ You review your own code | ✅ Action Kamen reviews every change |
-| ❌ You forget past decisions | ✅ Memory system remembers conventions & preferences |
-| ❌ Sequential execution (slow) | ✅ Parallel execution (5x faster) |
-| ❌ No design debate | ✅ Expert panel debates trade-offs before coding |
-| ❌ Ad-hoc task tracking | ✅ Structured workflow with documentation |
-| ❌ Repeat the same context | ✅ Self-learning from retrospectives |
-| ❌ Requires CLAUDE.md setup | ✅ Works standalone — just install the plugin |
+Team-Shinchan is built on 5 Harness Engineering principles:
+
+### 1. Context Engineering
+
+Load the right knowledge at the right time.
+
+- **load-kb** hook injects project knowledge base at session start
+- **AGENTS.md** auto-generated map of all 15 agents with roles and capabilities
+- **Session bridging** via `session-wrap` and `resume` for cross-session continuity
+- **Self-learning memory** accumulates project conventions over time
+
+### 2. Architectural Constraints
+
+Hard boundaries that prevent structural drift.
+
+- **Workflow Guard** -- stage-tool matrix blocks code edits during planning (PreToolUse hook)
+- **Layer Enforcement** -- validator ensures agents stay in their architectural layer
+- **Rules System** -- 54 rules across coding (14), security (14), testing (13), git (13)
+- **Stage-tool matrix** -- 6 tools x 4 stages, enforced automatically
+
+### 3. Guardrails and Quality Gates
+
+Automated checks that prevent bad outcomes.
+
+- **Security Hook** -- blocks secrets, destructive git, sensitive files, large files
+- **Budget Guard** -- token budget enforcement with alerts at 80% and hard stop at 100%
+- **Deny List** -- 12 pattern rules blocking dangerous operations
+- **Self-Check** -- completion checklist all execution agents must pass
+- **Action Kamen** -- mandatory code review at every phase boundary
+
+### 4. Feedback Loops
+
+Observability and continuous improvement.
+
+- **Analytics** -- trace IDs, event tracking, agent performance metrics (`src/analytics.js`)
+- **Harness Lint** -- static analysis of the harness itself (`src/harness-lint.js`)
+- **Eval** -- schema validation and regression detection (`src/eval-schema.js`, `src/regression-detect.js`)
+- **Auto-Retrospective** -- extracts learnings after every completed task
+- **Garbage Collection** -- lint detects orphaned skills, broken refs, stale configs
+
+### 5. State Management
+
+Durable state across sessions and workflows.
+
+- **WORKFLOW_STATE.yaml** -- structured state file with stage, phase, and progress
+- **Trace IDs** -- every agent action tagged for end-to-end traceability
+- **Session Wrap** -- auto-summary on session end, persisted to work tracker
+- **Resume** -- interrupted workflows resume from last checkpoint
+- **Work Tracker** -- JSONL event log with auto-rotation at 10K lines
+
+---
+
+## v4.0.0 Highlights
+
+- **Analytics and Trace IDs** -- `src/analytics.js` tracks agent events with unique trace IDs for end-to-end observability
+- **Budget Guard** -- `budget-guard.md` hook enforces token budget limits per session with 80%/100% thresholds
+- **Harness Lint** -- `src/harness-lint.js` static analysis validates plugin structure integrity (orphans, broken refs, stale configs)
+- **Eval System** -- `src/eval-schema.js` + `src/regression-detect.js` for schema validation and regression detection
+- **AGENTS.md** -- auto-generated agent map with `src/gen-agents-map.js` and `agents-map` validator
+- **Layer Enforcement** -- `agents/_shared/layer-map.json` + `layer-enforcement` validator
+- **Repositioning** -- from "AI development team" to "Agent Harness" with Harness Engineering principles
 
 ---
 
@@ -70,72 +130,17 @@ git clone https://github.com/seokan-jeong/team-shinchan.git ~/.claude/plugins/te
 /team-shinchan:help
 ```
 
-If you see the help menu, you're ready to go.
+If you see the help menu, you are ready to go.
 
 ### What's Next?
 
-- Read the [Getting Started Guide](docs/getting-started.md) for your first task
+- Read the [Getting Started Guide](docs/getting-started.md)
 - Try `/team-shinchan:start {your task}` to see the full workflow
 - Use `/team-shinchan:debate` for design decisions
 
 ---
 
-## Use Cases
-
-### 1. Debate-Driven Design Decisions
-
-```
-User: Add OAuth2 authentication
-
-💭 [Shinnosuke] Design decision needed. Starting debate...
-
-   🎀 [Aichan] JWT is better for frontend SPA
-   🍜 [Bunta] Session is simpler for backend
-   👔 [Hiroshi] Hybrid approach: JWT + refresh tokens
-
-   ✅ Consensus: JWT with refresh token rotation
-```
-
-### 2. Parallel Execution for Speed
-
-```
-User: ulw fix all TypeScript errors
-
-⚡ Running in parallel:
-├─ 😪 [Bo] Fixing src/auth/*.ts (3 errors)
-├─ 😪 [Bo] Fixing src/api/*.ts (4 errors)
-└─ 😪 [Bo] Fixing src/utils/*.ts (5 errors)
-
-✅ Completed in 2 minutes (vs ~10 minutes sequential)
-```
-
-### 3. Work Tracker (JSONL Log)
-
-```
-# Every event is logged to .shinchan-docs/work-tracker.jsonl
-
-{"ts":"2026-02-24T06:00:00Z","type":"agent_start","agent":"bo","session":"session-abc1"}
-{"ts":"2026-02-24T06:00:05Z","type":"file_change","agent":null,"session":"session-abc1","data":{"file":"src/auth.ts","action":"modify"}}
-{"ts":"2026-02-24T06:01:00Z","type":"agent_done","agent":"bo","session":"session-abc1"}
-
-# Query with: /team-shinchan:work-log --last 20 --agent bo
-```
-
-### 4. Self-Learning Memory
-
-```
-# Week 1
-User: Use Zustand for state management
-🧠 Learned: "Prefer Zustand over Redux"
-
-# Week 2
-User: Add user preferences feature
-🎀 [Aichan] Implementing with Zustand (remembered!)
-```
-
----
-
-## The Team (15 Agents)
+## 15 Specialized Agents
 
 <table>
 <tr>
@@ -190,7 +195,7 @@ User: Add user preferences feature
 
 ## Commands
 
-33 commands across workflow, specialist, and utility categories:
+38 commands across workflow, specialist, and utility categories:
 
 ### Workflow Commands
 | Command | Description |
@@ -204,7 +209,7 @@ User: Add user preferences feature
 | `/team-shinchan:bigproject` | Large project with Himawari |
 | `/team-shinchan:status` | Show workflow status |
 
-### Analysis & Planning
+### Analysis and Planning
 | Command | Description |
 |---------|-------------|
 | `/team-shinchan:debate` | Trigger expert debate (via Midori) |
@@ -220,7 +225,7 @@ User: Add user preferences feature
 | `/team-shinchan:implement` | Execute code changes |
 | `/team-shinchan:frontend` | Frontend/UI development |
 | `/team-shinchan:backend` | Backend/API development |
-| `/team-shinchan:devops` | Infrastructure & DevOps |
+| `/team-shinchan:devops` | Infrastructure and DevOps |
 | `/team-shinchan:review` | Code review |
 | `/team-shinchan:vision` | Image/PDF analysis |
 
@@ -235,13 +240,22 @@ User: Add user preferences feature
 | `/team-shinchan:verify-memory` | Verify memory system |
 | `/team-shinchan:verify-budget` | Verify token budget |
 
-### Memory & Utility
+### Harness (New in v4.0.0)
+| Command | Description |
+|---------|-------------|
+| `/team-shinchan:analytics` | View agent analytics and trace data |
+| `/team-shinchan:budget` | Check token budget status |
+| `/team-shinchan:lint-harness` | Lint the harness for structural issues |
+| `/team-shinchan:eval` | Run eval checks and regression detection |
+
+### Memory and Utility
 | Command | Description |
 |---------|-------------|
 | `/team-shinchan:memories` | View learned memories |
 | `/team-shinchan:learn` | Add to memory |
 | `/team-shinchan:forget` | Remove memory |
 | `/team-shinchan:work-log` | Query work tracker events |
+| `/team-shinchan:session-summary` | View session summary |
 | `/team-shinchan:manage-skills` | Manage plugin skills |
 | `/team-shinchan:help` | Show help |
 
@@ -249,7 +263,7 @@ User: Add user preferences feature
 
 ## Quick Triggers
 
-No commands needed - just say:
+No commands needed -- just say:
 
 | Say This | Activates |
 |----------|-----------|
@@ -263,223 +277,68 @@ No commands needed - just say:
 
 ## How Skills Work
 
-**Skills are not just documentation - they automatically invoke specialist agents.**
+**Skills are not just documentation -- they automatically invoke specialist agents.**
 
 ```
 /team-shinchan:start
-       │
-       ▼
-┌──────────────────────────────────────┐
-│  Task(subagent_type="shinnosuke")    │  ← Auto-invoked
-└──────────────────┬───────────────────┘
-                   ▼
-┌──────────────────────────────────────┐
-│  Shinnosuke orchestrates:            │
-│  ├─ Nene (planning)                  │
-│  ├─ Shiro (exploration)              │
-│  ├─ Bo/Aichan/Bunta (implementation) │
-│  └─ Action Kamen (review)            │
-└──────────────────────────────────────┘
+       |
+       v
++--------------------------------------+
+|  Task(subagent_type="shinnosuke")    |  <- Auto-invoked
++------------------+-------------------+
+                   v
++--------------------------------------+
+|  Shinnosuke orchestrates:            |
+|  +-- Nene (planning)                 |
+|  +-- Shiro (exploration)             |
+|  +-- Bo/Aichan/Bunta (implementation)|
+|  +-- Action Kamen (review)           |
++--------------------------------------+
 ```
 
 | Skill | Auto-Invokes |
 |-------|--------------|
-| `/start` | Shinnosuke → Full workflow |
-| `/plan` | Nene → Structured planning |
-| `/analyze` | Hiroshi → Deep analysis |
-| `/deepsearch` | Shiro → Masumi |
-| `/debate` | Midori → Expert panel |
-| `/autopilot` | Shinnosuke → Autonomous mode |
-| `/ultrawork` | Shinnosuke → Parallel execution |
-| `/ralph` | Kazama → Persistent loop |
-| `/implement` | Bo → Code execution |
-| `/frontend` | Aichan → Frontend/UI |
-| `/backend` | Bunta → Backend/API |
-| `/devops` | Masao → Infrastructure |
-| `/review` | Action Kamen → Code review |
-| `/requirements` | Misae → Requirements analysis |
-| `/bigproject` | Himawari → Large project orchestration |
+| `/start` | Shinnosuke -> Full workflow |
+| `/plan` | Nene -> Structured planning |
+| `/analyze` | Hiroshi -> Deep analysis |
+| `/deepsearch` | Shiro -> Masumi |
+| `/debate` | Midori -> Expert panel |
+| `/autopilot` | Shinnosuke -> Autonomous mode |
+| `/ultrawork` | Shinnosuke -> Parallel execution |
+| `/ralph` | Kazama -> Persistent loop |
+| `/implement` | Bo -> Code execution |
+| `/frontend` | Aichan -> Frontend/UI |
+| `/backend` | Bunta -> Backend/API |
+| `/devops` | Masao -> Infrastructure |
+| `/review` | Action Kamen -> Code review |
+| `/requirements` | Misae -> Requirements analysis |
+| `/bigproject` | Himawari -> Large project orchestration |
 
 **You run the skill, agents do the work.**
 
 ---
 
-## Quick Fix Path
+## Plugin Inventory
 
-For simple fixes (typo, null check, import fix), Team-Shinchan skips the full workflow:
-
-```
-User: "Fix the null check in user.ts line 42"
-
-👦 [Shinnosuke] Quick fix detected → Delegating to Bo
-😪 [Bo] Added null check: user?.avatar
-🦸 [Action Kamen] APPROVED ✅
-
-Done! No REQUESTS.md or PROGRESS.md needed.
-```
-
-**Criteria** (ALL must be true): ≤3 files affected, no design decisions, clear unambiguous fix.
+| Component | Count | Location |
+|-----------|-------|----------|
+| Agents | 15 | `agents/` |
+| Skills | 38 | `skills/` |
+| Commands | 38 | `commands/` |
+| Hooks | 12 | `hooks/` |
+| Validators | 19 | `tests/validate/` |
+| Rules | 4 categories (54 rules) | `rules/` |
+| Src Scripts | 5 | `src/` |
 
 ---
 
-## Integrated Workflow
-
-Team-Shinchan follows a structured 4-stage workflow for every non-trivial task, ensuring quality and completeness.
-
-### Overview
-
-```
-User Request
-     │
-     ▼
-┌─────────────────────────────────────────────────────────┐
-│ Stage 1: REQUIREMENTS                                   │
-│ Nene + Misae clarify requirements, debate if needed     │
-│ Output: .shinchan-docs/{id}/REQUESTS.md                  │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│ Stage 2: PLANNING                                       │
-│ Nene breaks into phases, Shiro analyzes impact          │
-│ Output: .shinchan-docs/{id}/PROGRESS.md                  │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│ Stage 3: EXECUTION (per phase)                          │
-│ Bo/Aichan/Bunta/Masao implement                         │
-│ Action Kamen reviews each phase (MANDATORY)             │
-│ Output: Phase retrospectives in PROGRESS.md             │
-└─────────────────────┬───────────────────────────────────┘
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│ Stage 4: COMPLETION                                     │
-│ Masumi writes docs, Action Kamen final review           │
-│ Output: RETROSPECTIVE.md + IMPLEMENTATION.md            │
-└─────────────────────────────────────────────────────────┘
-```
-
-**Want more details?** See the [full workflow guide](docs/workflow-guide.md) for stage-by-stage pseudo-code and checklists.
-
-### When Debate Triggers
-
-| Situation | Debate? |
-|-----------|---------|
-| 2+ valid implementation approaches | ✅ Yes |
-| Architecture change | ✅ Yes |
-| Breaking existing patterns | ✅ Yes |
-| Performance vs Readability tradeoff | ✅ Yes |
-| Simple CRUD operation | ❌ No |
-| Clear bug fix | ❌ No |
-
-### Document Structure
-
-Every task creates a documentation folder:
-
-```
-.shinchan-docs/
-└── ISSUE-123/              # or feature-auth-001/
-    ├── REQUESTS.md         # What we're building
-    ├── PROGRESS.md         # Phase-by-phase progress
-    ├── RETROSPECTIVE.md    # What we learned
-    └── IMPLEMENTATION.md   # Technical details
-```
-
----
-
-## Self-Learning System
-
-Team-Shinchan gets smarter with every task through automatic retrospection.
-
-### Learning Cycle
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                   Learning Cycle                         │
-└─────────────────────────────────────────────────────────┘
-
-Task Complete ──→ Auto-Retrospective ──→ Save Learning
-                         │
-                         ↓
-                  .shinchan-docs/learnings.md
-                         │
-                         ↓
-New Session ────→ Load Learnings ────→ Apply to Work
-```
-
-### What Gets Learned
-
-| Category | Example |
-|----------|---------|
-| **Preferences** | "User prefers Zustand over Redux" |
-| **Patterns** | "Use early returns for validation" |
-| **Conventions** | "This project uses pnpm, not npm" |
-| **Mistakes** | "Always null-check before .map()" |
-| **Decisions** | "JWT with refresh token rotation" |
-
-### Manual Commands
-
-```bash
-# View what's been learned
-/team-shinchan:memories
-
-# Manually teach something
-/team-shinchan:learn "Always use TypeScript strict mode"
-
-# Remove outdated learning
-/team-shinchan:forget
-```
-
----
-
-## What's New in v3.12.0
-
-- **Dashboard Removed** — Replaced HTTP dashboard with zero-dependency JSONL work tracker (`write-tracker.sh`).
-- **Work Tracker** — All agent events logged to `.shinchan-docs/work-tracker.jsonl` with auto-rotation at 10K lines.
-- **Work Log Skill** — `/team-shinchan:work-log` to query events by agent, type, or session.
-- **Zero External Dependencies** — No MCP server, no curl, no port discovery. Just a shell script appending to a file.
-
----
-
-## FAQ
-
-### Does this replace Claude Code?
-
-No. Team-Shinchan is a **plugin** that enhances Claude Code by adding specialized agents and workflows. You still use Claude Code as normal, but now you have a team of experts instead of one generalist.
-
-### Is it free?
-
-Yes, Team-Shinchan is **MIT licensed** and free to use. Agent calls consume your Claude Code API credits (same as any other Claude conversation). The complexity of your task determines the number of calls.
-
-### How many API calls does it make?
-
-**Quick fixes:** ~3 calls (Bo implements → Action Kamen reviews → done)
-**Standard tasks:** 10-30 calls (requirements → planning → execution → completion)
-**Complex tasks with debates:** 20-50 calls (includes expert panel discussions)
-
-Each call is purposeful and documented in the workflow.
-
-### Can I use individual agents without the full workflow?
-
-Yes. Each skill works standalone:
-- `/team-shinchan:analyze` → Just Hiroshi (deep analysis)
-- `/team-shinchan:plan` → Just Nene (planning)
-- `/team-shinchan:deepsearch` → Just Shiro + Masumi (search)
-
-Or let Shinnosuke orchestrate the full workflow with `/team-shinchan:start`.
-
-### Does it work with other AI tools?
-
-Currently **Claude Code only**. Team-Shinchan is designed specifically for Claude Code's plugin architecture and uses Claude's multi-agent capabilities.
-
----
-
-## Quality & Testing
+## Quality and Testing
 
 Team-Shinchan is validated by 3 tiers of automated testing:
 
 | Tier | Tests | What It Checks |
 |------|-------|----------------|
-| Static Validators | 17 | Schema, cross-refs, consistency, API contracts, token budget |
+| Static Validators | 19 | Schema, cross-refs, consistency, API contracts, token budget, layer enforcement, agents-map |
 | Agent Behavior (promptfoo) | 25 | Individual agent role adherence |
 | E2E Workflow | 11 | Full workflow scenarios (5 types) |
 
@@ -490,6 +349,35 @@ Team-Shinchan is validated by 3 tiers of automated testing:
 # Run all tests (requires ANTHROPIC_API_KEY)
 ./run-tests.sh all
 ```
+
+---
+
+## FAQ
+
+### Does this replace Claude Code?
+
+No. Team-Shinchan is a **plugin** that enhances Claude Code by adding specialized agents, guardrails, and observability. You still use Claude Code as normal, but now with harnessed agents instead of one generalist.
+
+### Is it free?
+
+Yes, Team-Shinchan is **MIT licensed** and free to use. Agent calls consume your Claude Code API credits (same as any other Claude conversation). The Budget Guard helps you control spend.
+
+### How many API calls does it make?
+
+**Quick fixes:** ~3 calls (Bo implements -> Action Kamen reviews -> done)
+**Standard tasks:** 10-30 calls (requirements -> planning -> execution -> completion)
+**Complex tasks with debates:** 20-50 calls (includes expert panel discussions)
+
+Each call is purposeful, traced, and documented in the workflow.
+
+### Can I use individual agents without the full workflow?
+
+Yes. Each skill works standalone:
+- `/team-shinchan:analyze` -> Just Hiroshi (deep analysis)
+- `/team-shinchan:plan` -> Just Nene (planning)
+- `/team-shinchan:deepsearch` -> Just Shiro + Masumi (search)
+
+Or let Shinnosuke orchestrate the full workflow with `/team-shinchan:start`.
 
 ---
 
@@ -509,8 +397,8 @@ MIT License
 
 <div align="center">
 
-**Team-Shinchan** - Shinchan and friends debate, learn, and grow together!
+**Team-Shinchan** -- The Agent Harness for Claude Code
 
-*Built with love for the Claude Code community*
+*Guardrails, Observability, and Quality Gates for AI-Powered Development*
 
 </div>

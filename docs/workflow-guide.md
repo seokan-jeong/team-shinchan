@@ -3,6 +3,21 @@
 Detailed stage-by-stage reference for the Team-Shinchan 4-stage workflow.
 
 > This document describes the 4-stage workflow referenced by orchestration hooks and agent prompts.
+> The workflow is a core part of the **Agent Harness** -- enforcing Architectural Constraints (stage-tool matrix) and Quality Gates (mandatory review) at every step.
+
+---
+
+## Harness Features (v4.0.0)
+
+The following harness features integrate with the workflow stages:
+
+| Feature | Stage Integration | Harness Principle |
+|---------|------------------|-------------------|
+| **Analytics** (`/team-shinchan:analytics`) | All stages -- trace IDs tag every agent action | Feedback Loops |
+| **Budget Guard** (`/team-shinchan:budget`) | All stages -- alerts at 80%, blocks at 100% | Guardrails |
+| **Harness Lint** (`/team-shinchan:lint-harness`) | Completion -- verify plugin structural integrity | Feedback Loops |
+| **Eval** (`/team-shinchan:eval`) | Completion -- schema validation + regression detection | Feedback Loops |
+| **Layer Enforcement** | All stages -- agents stay in designated layers | Architectural Constraints |
 
 ---
 

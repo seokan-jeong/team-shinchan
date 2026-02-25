@@ -81,6 +81,32 @@ Write the summary to the determined output path using this template:
 - {HH:MM}: {type} - {description}
 ```
 
+### 6b. Budget Status (conditional)
+
+If the active workflow has a `budget` section in WORKFLOW_STATE.yaml, add a Budget Status section to the summary. If no budget section exists, skip this entirely.
+
+1. Read `budget.total`, `budget.phase`, `budget.used_total`, `budget.used_phase` from WORKFLOW_STATE.yaml
+2. Calculate session turns (same count as step 2 — events where type is `tool_use`, `file_change`, or `delegation`)
+3. Calculate effective totals:
+   ```
+   effective_total = budget.used_total + session_turns
+   effective_phase = budget.used_phase + session_turns
+   ```
+4. Determine status for each: `On Track` (<80%), `WARNING` (80-99%), `EXCEEDED` (>=100%)
+5. Append to the summary template:
+
+```markdown
+## Budget Status
+| Metric | Used | Max | Pct | Status |
+|--------|------|-----|-----|--------|
+| Total turns | {effective_total} | {budget.total} | {pct}% | {status} |
+| Phase turns | {effective_phase} | {budget.phase} | {pct}% | {status} |
+
+Session turns: {session_turns}
+```
+
+6. Update WORKFLOW_STATE.yaml: set `budget.used_total = effective_total` and `budget.used_phase = effective_phase` to persist accumulated counts for the next session.
+
 ### 7. Confirm
 
 Output a brief confirmation:

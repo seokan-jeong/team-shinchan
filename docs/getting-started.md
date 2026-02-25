@@ -1,6 +1,6 @@
 # Getting Started with Team-Shinchan
 
-Welcome! This guide walks you through your first experience with Team-Shinchan in under 5 minutes.
+Welcome! This guide walks you through your first experience with Team-Shinchan -- the Agent Harness for Claude Code -- in under 5 minutes.
 
 ## Prerequisites
 
@@ -124,6 +124,19 @@ These are saved locally and auto-loaded in every session.
 - Team-Shinchan enforces a 4-stage workflow
 - You can't write code during the Requirements stage
 - Follow the stage prompts to progress naturally
+
+## Harness Features (v4.0.0)
+
+Team-Shinchan v4.0.0 adds Agent Harness capabilities:
+
+| Command | What It Does |
+|---------|-------------|
+| `/team-shinchan:analytics` | View trace IDs and agent performance metrics |
+| `/team-shinchan:budget` | Check token budget status (alerts at 80%, stops at 100%) |
+| `/team-shinchan:lint-harness` | Lint plugin structure for orphans, broken refs, stale configs |
+| `/team-shinchan:eval` | Run schema validation and regression detection |
+
+These features work automatically in the background. Use the commands above to inspect their data.
 
 ## Next Steps
 

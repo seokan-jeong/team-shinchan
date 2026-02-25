@@ -2,9 +2,9 @@
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "team-shinchan",
   "metadata": {
-    "description": "Turn Claude Code into a full AI development team. 15 specialist agents debate decisions, plan systematically, execute in parallel, and learn from your project conventions."
+    "description": "The Agent Harness for Claude Code — Guardrails, Observability, and Quality Gates for AI-Powered Development. 15 specialist agents with structured workflows, budget controls, analytics, and self-learning."
   },
-  "description": "Turn Claude Code into a full AI development team. 15 specialist agents debate decisions, plan systematically, execute in parallel, and learn from your project conventions.",
+  "description": "The Agent Harness for Claude Code — Guardrails, Observability, and Quality Gates for AI-Powered Development. 15 specialist agents with structured workflows, budget controls, analytics, and self-learning.",
   "owner": {
     "name": "seokan",
     "email": "kd04199@gmail.com"
@@ -12,18 +12,24 @@
   "plugins": [
     {
       "name": "team-shinchan",
-      "version": "3.12.0",
-      "description": "Turn Claude Code into a full AI development team. 15 specialist agents debate decisions, plan systematically, execute in parallel, and learn from your project conventions.",
+      "version": "4.0.0",
+      "description": "The Agent Harness for Claude Code — Guardrails, Observability, and Quality Gates for AI-Powered Development. 15 specialist agents with structured workflows, budget controls, analytics, and self-learning.",
       "category": "productivity",
       "source": "./",
       "repository": "https://github.com/seokan-jeong/team-shinchan.git",
       "homepage": "https://github.com/seokan-jeong/team-shinchan",
       "tags": [
+        "agent-harness",
+        "guardrails",
+        "observability",
+        "quality-gates",
         "multi-agent",
         "orchestration",
         "self-learning",
         "memory",
-        "reflection",
+        "analytics",
+        "budget-guard",
+        "eval",
         "shinchan",
         "workflow",
         "automation",

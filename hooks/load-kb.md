@@ -49,11 +49,26 @@ At session start, load KB summary, past learnings, and detect any interrupted wo
 
 4. **Silent**: If no interrupted workflows found, skip silently.
 
+### 4. Regression Alert
+
+1. **Check**: If `.shinchan-docs/eval-history.jsonl` exists, scan for regressions.
+2. **Quick scan**: Read the file, group records by agent. For each agent with 5+ evaluations, compute a moving average (last 5) for each dimension. Flag if the latest score drops 1+ points below that average.
+3. **Display** (if regression found):
+
+```
+!! [Team-Shinchan] Performance regression detected:
+   Agent: {agent} — {dimension} dropped to {score} (avg: {avg})
+   Run /team-shinchan:eval --agent {agent} for details.
+```
+
+4. **Silent**: If no eval history or no regressions, skip silently.
+
 ## Execution Order
 
 1. KB Summary (first)
 2. Learnings (second)
-3. Interrupted Workflows (last - highest priority alert)
+3. Regression Alert (third - warns about declining agents)
+4. Interrupted Workflows (last - highest priority alert)
 
 ## Apply Rules
 

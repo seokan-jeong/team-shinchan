@@ -1,4 +1,5 @@
 # Self-Check Before Completion
+<!-- Quality Gate — Guardrails & Quality Gates -->
 
 All execution agents MUST run this checklist before reporting task completion.
 

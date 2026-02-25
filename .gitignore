@@ -3,7 +3,12 @@ node_modules/
 
 # Build output (legacy, no longer needed)
 dist/
-src/
+src/*
+!src/analytics.js
+!src/harness-lint.js
+!src/eval-schema.js
+!src/regression-detect.js
+!src/gen-agents-map.js
 
 # Package files (not needed for this plugin)
 package.json

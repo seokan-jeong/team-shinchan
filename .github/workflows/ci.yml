@@ -19,6 +19,8 @@ jobs:
         run: |
           cd tests/validate
           node index.js
+      - name: Check AGENTS.md freshness
+        run: node src/gen-agents-map.js --check
 
   promptfoo-tests:
     runs-on: ubuntu-latest

@@ -20,7 +20,8 @@ const KNOWN_SKILLS = [
   'requirements', 'vision', 'bigproject', 'verify-implementation', 'manage-skills',
   'verify-agents', 'verify-skills', 'verify-consistency',
   'verify-workflow', 'verify-memory', 'verify-budget', 'research', 'work-log',
-  'session-summary'
+  'session-summary',
+  'eval'
 ];
 
 function getActualAgents() {

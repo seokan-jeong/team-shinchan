@@ -17,6 +17,7 @@ HOOK_EVENT="${HOOK_EVENT:-unknown}"
 DOCS_DIR="${PWD}/.shinchan-docs"
 TRACKER_FILE="${DOCS_DIR}/work-tracker.jsonl"
 SESSION_ID_FILE="${DOCS_DIR}/.session-id"
+TRACE_ID_FILE="${DOCS_DIR}/.trace-id"
 MAX_LINES=10000
 
 # Ensure .shinchan-docs directory exists
@@ -42,7 +43,7 @@ fi
 
 # ── Transform & Append ─────────────────────────────────────────────────────────
 if command -v node &>/dev/null; then
-  LINE=$(echo "$INPUT" | HOOK_EVENT="$HOOK_EVENT" SESSION_ID_FILE="$SESSION_ID_FILE" node -e "
+  LINE=$(echo "$INPUT" | HOOK_EVENT="$HOOK_EVENT" SESSION_ID_FILE="$SESSION_ID_FILE" TRACE_ID_FILE="$TRACE_ID_FILE" node -e "
     const chunks = [];
     process.stdin.on('data', c => chunks.push(c));
     process.stdin.on('end', () => {
@@ -56,11 +57,18 @@ if command -v node &>/dev/null; then
 
       const event = process.env.HOOK_EVENT || 'unknown';
       const sessionIdFile = process.env.SESSION_ID_FILE || '';
+      const traceIdFile = process.env.TRACE_ID_FILE || '';
 
       // Read session ID
       let sessionId = null;
       if (sessionIdFile) {
         try { sessionId = fs.readFileSync(sessionIdFile, 'utf-8').trim(); } catch(e) {}
+      }
+
+      // Read trace ID (optional — backward compatible)
+      let traceId = null;
+      if (traceIdFile) {
+        try { traceId = fs.readFileSync(traceIdFile, 'utf-8').trim(); } catch(e) {}
       }
 
       // Extract agent name from agent_type (e.g. 'team-shinchan:bo' -> 'bo')
@@ -135,13 +143,15 @@ if command -v node &>/dev/null; then
           data.raw = JSON.stringify(input).slice(0, 200);
       }
 
-      const line = JSON.stringify({
+      const obj = {
         ts: new Date().toISOString(),
         type,
         agent,
         session: sessionId,
         data: Object.keys(data).length > 0 ? data : undefined
-      });
+      };
+      if (traceId) obj.trace = traceId;
+      const line = JSON.stringify(obj);
       console.log(line);
     });
   " 2>/dev/null)

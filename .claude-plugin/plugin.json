@@ -1,7 +1,7 @@
 {
   "name": "team-shinchan",
-  "description": "Turn Claude Code into a full AI development team. 15 specialist agents debate decisions, plan systematically, execute in parallel, and learn from your project conventions.",
-  "version": "3.12.0",
+  "description": "The Agent Harness for Claude Code — Guardrails, Observability, and Quality Gates for AI-Powered Development. 15 specialist agents with structured workflows, budget controls, analytics, and self-learning.",
+  "version": "4.0.0",
   "author": {
     "name": "seokan",
     "url": "https://github.com/seokan-jeong"
@@ -13,11 +13,17 @@
   "keywords": [
     "claude-code",
     "plugin",
+    "agent-harness",
+    "guardrails",
+    "observability",
+    "quality-gates",
     "multi-agent",
     "orchestration",
     "self-learning",
     "memory",
-    "reflection",
+    "analytics",
+    "budget-guard",
+    "eval",
     "shinchan",
     "workflow",
     "automation",

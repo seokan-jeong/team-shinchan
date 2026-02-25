@@ -45,6 +45,14 @@
         "hooks": [
           {
             "type": "prompt",
+            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/budget-guard.md"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "prompt",
             "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/workflow-guard.md"
           }
         ]

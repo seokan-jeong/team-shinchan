@@ -18,8 +18,8 @@ const ENTITY_TYPES = {
   Module:        { prefix: 'mod',  props: ['name','path','description','layer','domain'] },
   Component:     { prefix: 'comp', props: ['name','type_detail','file_path','line_range','visibility','complexity'] },
   DomainConcept: { prefix: 'dom',  props: ['name','definition','aliases','bounded_context'] },
-  API:           { prefix: 'api',  props: ['method','path','handler','auth_required','version'] },
-  DataModel:     { prefix: 'data', props: ['name','fields','table_name','relationships'] },
+  API:           { prefix: 'api',  props: ['name','method','path','handler','auth_required','version'] },
+  DataModel:     { prefix: 'data', props: ['name','file_path','fields','table_name','relationships'] },
   Decision:      { prefix: 'dec',  props: ['title','date','options_considered','chosen','rationale','doc_id'] },
   Pattern:       { prefix: 'pat',  props: ['name','description','examples','anti_patterns'] },
   Dependency:    { prefix: 'dep',  props: ['name','version','purpose','dep_type'] },
@@ -601,9 +601,12 @@ function cli() {
       break;
     }
     case 'related': {
-      const entityId = args[1];
-      if (!entityId) { console.log('Usage: ontology-engine related <entityId>'); return; }
-      const result = getRelated(root, entityId);
+      const entityArg = args[1];
+      if (!entityArg) { console.log('Usage: ontology-engine related <entityId|name>'); return; }
+      let relId = entityArg;
+      const ontoR = load(root);
+      if (ontoR) { const byName = ontoR.entities.find(e => e.id !== entityArg && (e.name || '').toLowerCase() === entityArg.toLowerCase()); if (byName) relId = byName.id; }
+      const result = getRelated(root, relId);
       console.log(JSON.stringify(result, null, 2));
       break;
     }
@@ -625,10 +628,20 @@ function cli() {
       break;
     }
     case 'impact': {
-      const entityId = args[1];
-      if (!entityId) { console.log('Usage: ontology-engine impact <entityId> [--depth N]'); return; }
+      const entityArg = args[1];
+      if (!entityArg) { console.log('Usage: ontology-engine impact <entityId|name> [--depth N]'); return; }
       let depth = 2;
       for (let i = 2; i < args.length; i += 2) { if (args[i] === '--depth') depth = parseInt(args[i + 1]) || 2; }
+      // Resolve name to ID if not a direct ID match
+      let entityId = entityArg;
+      const onto = load(root);
+      if (onto) {
+        const byId = onto.entities.find(e => e.id === entityArg);
+        if (!byId) {
+          const byName = onto.entities.find(e => (e.name || '').toLowerCase() === entityArg.toLowerCase());
+          if (byName) entityId = byName.id;
+        }
+      }
       const result = impactAnalysis(root, entityId, { depth });
       if (!result) { console.log('Entity not found or no ontology.'); return; }
       console.log(`Impact Analysis: ${result.target.name || result.target.title}`);

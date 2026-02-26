@@ -99,6 +99,27 @@ Header: `━━━ 😪 [Bo] {status} ━━━` | Use Summary/Details/Next Step
 
 ---
 
+## Ontology Auto-Update
+
+**구현 완료 후 반드시 실행** (ontology가 존재하는 경우):
+
+Phase의 모든 코드 변경이 끝나면, 온톨로지를 자동으로 갱신한다:
+```bash
+# 1. 온톨로지 존재 확인
+if [ -f .shinchan-docs/ontology/ontology.json ]; then
+  # 2. 재스캔
+  node ${CLAUDE_PLUGIN_ROOT}/src/ontology-scanner.js . --format json > /tmp/ontology-rescan.json
+  # 3. 병합
+  node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js merge /tmp/ontology-rescan.json
+  # 4. KB 갱신
+  node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js gen-kb
+fi
+```
+
+이 작업은 **Phase 완료 보고 전에** 실행한다. 실패해도 구현 결과에는 영향 없음 (silent skip).
+
+---
+
 ## Memory Usage
 
 You have persistent memory (local scope). At the start of each task:

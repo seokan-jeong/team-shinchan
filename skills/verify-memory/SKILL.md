@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:verify-memory
 description: Validate memory system configuration and file structure
-user-invocable: true
+user-invocable: false
 ---
 
 # ⚠️ MANDATORY EXECUTION - DO NOT SKIP

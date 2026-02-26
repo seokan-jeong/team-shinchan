@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:eval
 description: View agent evaluation history and detect performance regressions.
-user-invocable: true
+user-invocable: false
 ---
 
 # Eval Skill

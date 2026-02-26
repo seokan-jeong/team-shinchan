@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:research
 description: Research and documentation with Masumi (Librarian). Use for web research, documentation lookup, and knowledge gathering.
-user-invocable: true
+user-invocable: false
 ---
 
 # EXECUTE IMMEDIATELY

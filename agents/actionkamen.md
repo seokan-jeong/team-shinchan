@@ -108,13 +108,35 @@ This agent is invoked via `/team-shinchan:review` skill.
 
 ## Ontology-Aware Review
 
-If `.shinchan-docs/ontology/ontology.json` exists, enhance your review:
+**리뷰 시작 시 반드시 실행** (ontology가 존재하는 경우):
 
-1. **Pattern Compliance**: Check FOLLOWS_PATTERN relations — does the changed code conform to its declared patterns?
-2. **Decision Compliance**: Check DECIDED_BY relations — does the change respect past architectural decisions?
-3. **Dependency Impact**: Verify DEPENDS_ON relations aren't broken by the changes
+### Step 1: 온톨로지 존재 확인 + 건강도 체크
+```bash
+if [ -f .shinchan-docs/ontology/ontology.json ]; then
+  node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js health
+fi
+```
+Health Score 결과를 리뷰 리포트 하단에 포함한다.
 
-If ontology doesn't exist, proceed with standard code review.
+### Step 2: 변경된 컴포넌트의 의존성 검증
+변경된 파일에 해당하는 컴포넌트를 식별하고 관계를 확인:
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js related "{변경된컴포넌트}"
+```
+- **DEPENDS_ON**: 의존 대상이 변경으로 인해 깨지지 않았는지 확인
+- **TESTED_BY**: 관련 테스트가 업데이트되었는지 확인
+- **FOLLOWS_PATTERN**: 선언된 패턴을 준수하는지 확인
+
+### Step 3: 리뷰 리포트에 온톨로지 섹션 추가
+```markdown
+## Ontology Health
+- Score: {N}/100
+- Test Coverage: {N}/25
+- Connectivity: {N}/25
+- {suggestions}
+```
+
+ontology가 없으면 standard code review로 진행.
 
 ---
 

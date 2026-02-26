@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:lint-harness
 description: Run plugin consistency checks — agent frontmatter, structural integrity, drift detection.
-user-invocable: true
+user-invocable: false
 ---
 
 # Lint Harness Skill

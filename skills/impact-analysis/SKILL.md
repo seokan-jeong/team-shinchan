@@ -1,7 +1,7 @@
 ---
 name: impact-analysis
 description: Analyze cascade impact of changing a component using the ontology dependency graph
-user-invocable: true
+user-invocable: false
 ---
 
 # Impact Analysis Skill

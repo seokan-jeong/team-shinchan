@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:verify-budget
 description: Validate token budget compliance for all configuration files
-user-invocable: true
+user-invocable: false
 ---
 
 # ⚠️ MANDATORY EXECUTION - DO NOT SKIP

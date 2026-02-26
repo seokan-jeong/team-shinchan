@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:vision
 description: Image and PDF analysis with Ume. Used for "analyze this image", "read this PDF", "screenshot", "mockup" requests.
-user-invocable: true
+user-invocable: false
 ---
 
 # EXECUTE IMMEDIATELY

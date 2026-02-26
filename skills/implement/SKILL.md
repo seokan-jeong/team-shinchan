@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:implement
 description: Quick code implementation with Bo. Used for "implement", "code this", "write code", "fix" requests.
-user-invocable: true
+user-invocable: false
 ---
 
 # EXECUTE IMMEDIATELY

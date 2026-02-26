@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:verify-consistency
 description: Validate cross-references, stage matrix, and debate configuration consistency
-user-invocable: true
+user-invocable: false
 ---
 
 # ⚠️ MANDATORY EXECUTION - DO NOT SKIP

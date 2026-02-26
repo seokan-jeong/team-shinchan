@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:verify-skills
 description: Validate skill schema, format compliance, and input validation rules
-user-invocable: true
+user-invocable: false
 ---
 
 # ⚠️ MANDATORY EXECUTION - DO NOT SKIP

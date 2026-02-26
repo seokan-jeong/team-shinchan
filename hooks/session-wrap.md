@@ -107,7 +107,17 @@ Session turns: {session_turns}
 
 6. Update WORKFLOW_STATE.yaml: set `budget.used_total = effective_total` and `budget.used_phase = effective_phase` to persist accumulated counts for the next session.
 
-### 7. Confirm
+### 7. Ontology Refresh
+
+If file_change events exist AND `.shinchan-docs/ontology/ontology.json` exists, run:
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/src/ontology-scanner.js "${PWD}" --format json > /tmp/ont-rescan.json && \
+node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js merge /tmp/ont-rescan.json && \
+node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js gen-kb
+```
+Append `Ontology: refreshed` to confirmation. Skip silently if either condition unmet.
+
+### 8. Confirm
 
 Output a brief confirmation:
 ```

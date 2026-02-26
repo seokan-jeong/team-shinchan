@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:verify-workflow
 description: Validate workflow state schema, error handling, part numbering, and quick-fix paths
-user-invocable: true
+user-invocable: false
 ---
 
 # ⚠️ MANDATORY EXECUTION - DO NOT SKIP

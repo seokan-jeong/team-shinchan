@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:frontend
 description: Frontend development with Aichan. Used for "UI", "component", "React", "CSS", "styling" requests.
-user-invocable: true
+user-invocable: false
 ---
 
 # EXECUTE IMMEDIATELY

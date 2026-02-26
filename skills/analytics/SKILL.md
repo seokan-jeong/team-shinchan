@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:analytics
 description: Analyze work tracker JSONL data. Compute agent metrics, session stats, event distribution, and delegation graphs.
-user-invocable: true
+user-invocable: false
 ---
 
 # Analytics Skill

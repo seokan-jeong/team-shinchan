@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:devops
 description: DevOps and infrastructure with Masao. Used for "CI/CD", "Docker", "deploy", "pipeline" requests.
-user-invocable: true
+user-invocable: false
 ---
 
 # EXECUTE IMMEDIATELY

@@ -111,14 +111,22 @@ Each phase: `## Phase N: {Title} (GAP-X)`, agent/dependency, `### Rationale` (MA
 
 ## Ontology-Aware Planning
 
-If `.shinchan-docs/ontology/ontology.json` exists, use it during planning:
+**Planning 시작 시** `.shinchan-docs/ontology/ontology.json`가 존재하면 아래를 실행:
 
-1. **Impact Analysis**: Query DEPENDS_ON relations (depth 2) from the change target to identify all affected modules and components
-2. **Phase Splitting**: Group affected entities by Module to create natural phase boundaries
-3. **Test Discovery**: Use TESTED_BY relations to identify relevant test suites for each phase's AC
-4. **Risk Identification**: High fan-in entities (many incoming DEPENDS_ON) = higher risk to modify
+```bash
+# 1. 영향 분석
+node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js impact "{변경대상}" --depth 2
+# 2. 관련 엔티티 조회
+node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js related "{변경대상}"
+```
 
-If ontology doesn't exist, proceed with standard code-reading analysis.
+결과 활용:
+- **Risk** → Phase 분할 기준 (HIGH=세분화, LOW=통합)
+- **Direct deps** → 같은 Phase에 배치, **TESTED_BY** → AC에 포함
+- **Fan-in** 높으면 인터페이스 변경 신중히
+- 각 Phase `### Rationale`에 impact 결과 포함
+
+ontology 없으면 standard code-reading analysis로 진행.
 
 ---
 

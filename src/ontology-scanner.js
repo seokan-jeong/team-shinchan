@@ -41,6 +41,10 @@ const CRE=[[/export\s+(?:default\s+)?(?:class|function|const|let|var)\s+(\w+)/g,
 [/^class\s+([A-Z]\w+)/gm,'class','internal'],[/^def\s+([a-zA-Z_]\w+)\s*\(/gm,'py','export'],
 [/^class\s+([A-Z]\w+)\s*[:(]/gm,'pycls','export'],[/module\.exports\.(\w+)\s*=/g,'cjs','export'],
 [/^func\s+([A-Za-z]\w+)/gm,'gofn','export']];
+const DEXP=/module\.exports\s*=\s*\{([^}]+)\}/g;
+function scanDestructuredExports(content){const out=[];DEXP.lastIndex=0;let m;
+while((m=DEXP.exec(content))!==null){for(const n of m[1].split(','))
+{const t=n.trim().split(/[\s:]/)[0];if(t&&/^[A-Z]/.test(t))out.push(t)}}return out}
 function scanComps(files){const out=[],seen=new Set();
 for(const f of files){let c;try{c=fs.readFileSync(f.fp,'utf-8')}catch(_){continue}
 for(const[re,td,vis]of CRE){if(f.ext==='.py'&&(td==='export'||td==='cjs'))continue;
@@ -50,7 +54,10 @@ const k=n+':'+f.rp;if(seen.has(k))continue;seen.add(k);
 let v=vis,t=td;if(td==='class'&&/export\s+/.test(c.slice(Math.max(0,m.index-20),m.index)))v='export';
 if(td==='export'){const s=c.slice(m.index,m.index+60);t=/class\b/.test(s)?'class':/function\b/.test(s)?'function':/const\b/.test(s)?'const':'variable'}
 if(td==='py')t='function';if(td==='pycls')t='class';if(td==='gofn')t='func';if(td==='cjs')t='commonjs';
-out.push({name:n,type_detail:t,file_path:f.rp,visibility:v})}}}return out}
+out.push({name:n,type_detail:t,file_path:f.rp,visibility:v})}}
+// Detect destructured CommonJS exports: module.exports = { Name1, Name2 }
+const dex=scanDestructuredExports(c);for(const n of dex){const k=n+':'+f.rp;
+if(!seen.has(k)){seen.add(k);out.push({name:n,type_detail:'commonjs',file_path:f.rp,visibility:'export'})}}}return out}
 
 function scanDC(files){const map=new Map(),re=/\b([A-Z][a-z]+(?:[A-Z][a-z]+)+)\b/g;
 for(const f of files){if(f.ext==='.md')continue;let c;try{c=fs.readFileSync(f.fp,'utf-8')}catch(_){continue}
@@ -97,22 +104,35 @@ const E=[];let ix=0;const mM=new Map(),cM=new Map(),tM=new Map();
 for(const m of mods){const id=`tmp-mod-${ix++}`;mM.set(m.path,id);E.push({id,type:'Module',name:m.name,path:m.path,description:m.description,domain:m.domain})}
 for(const c of comps){const id=`tmp-comp-${ix++}`;cM.set(c.file_path+':'+c.name,id);E.push({id,type:'Component',name:c.name,type_detail:c.type_detail,file_path:c.file_path,visibility:c.visibility})}
 for(const d of dcs)E.push({id:`tmp-dc-${ix++}`,type:'DomainConcept',name:d.name,definition:d.definition});
-for(const a of apis)E.push({id:`tmp-api-${ix++}`,type:'API',method:a.method,path:a.path,handler:a.handler});
+for(const a of apis)E.push({id:`tmp-api-${ix++}`,type:'API',name:`${a.method} ${a.path}`,method:a.method,path:a.path,handler:a.handler});
 for(const d of models)E.push({id:`tmp-dm-${ix++}`,type:'DataModel',name:d.name,file_path:d.file_path});
 for(const c of cfgs)E.push({id:`tmp-cfg-${ix++}`,type:'Configuration',name:c.name,file_path:c.file_path});
 for(const t of tests){const id=`tmp-test-${ix++}`;tM.set(t.file_path,id);E.push({id,type:'TestSuite',name:t.name,test_type:t.test_type,file_path:t.file_path})}
 const R=[];let ri=0;
 for(const c of comps){let d=P.dirname(c.file_path);while(d&&d!=='.'){if(mM.has(d)){R.push({id:`tmp-rel-${ri++}`,from:cM.get(c.file_path+':'+c.name),relation:'PART_OF',to:mM.get(d)});break}d=P.dirname(d)}}
-const f2c=new Map();for(const c of comps){const k=c.file_path,l=f2c.get(k)||[];l.push(cM.get(k+':'+c.name));f2c.set(k,l)}
-for(const dep of scanDeps(files)){const fi=f2c.get(dep.from)||[];if(!fi.length)continue;
-const tr=P.normalize(P.join(P.dirname(dep.from),dep.to));let ti=f2c.get(tr)||[];
-if(!ti.length)for(const x of['.js','.ts','.jsx','.tsx','.mjs','/index.js','/index.ts']){ti=f2c.get(tr+x)||[];if(ti.length)break}
+const f2e=new Map();
+for(const c of comps){const k=c.file_path,l=f2e.get(k)||[];l.push(cM.get(k+':'+c.name));f2e.set(k,l)}
+for(const d of models){const k=d.file_path;if(!f2e.has(k)){const id=E.find(e=>e.type==='DataModel'&&e.file_path===k);if(id)f2e.set(k,[id.id])}}
+for(const dep of scanDeps(files)){const fi=f2e.get(dep.from)||[];if(!fi.length)continue;
+const tr=P.normalize(P.join(P.dirname(dep.from),dep.to));let ti=f2e.get(tr)||[];
+if(!ti.length)for(const x of['.js','.ts','.jsx','.tsx','.mjs','.cjs','/index.js','/index.ts']){ti=f2e.get(tr+x)||[];if(ti.length)break}
 if(ti.length)R.push({id:`tmp-rel-${ri++}`,from:fi[0],relation:'DEPENDS_ON',to:ti[0],dep_type:dep.dt})}
 const fset=new Set(files.map(f=>f.rp));
-for(const t of tests){let src=t.file_path.replace(/\.(test|spec)\.([jt]sx?|mjs|cjs)$/,'.$2');
+for(const t of tests){const tid=tM.get(t.file_path);if(!tid)continue;
+// Strategy 1: require/import analysis in test file
+let c;try{c=fs.readFileSync(P.join(root,t.file_path),'utf-8')}catch(_){c=''}
+const tDeps=[];for(const[re]of IRE){re.lastIndex=0;let m;while((m=re.exec(c))!==null)
+if(m[1][0]==='.'||m[1][0]==='/')tDeps.push(P.normalize(P.join(P.dirname(t.file_path),m[1])))}
+let matched=false;for(const td of tDeps){let resolved=null;
+if(f2e.has(td))resolved=td;else for(const x of['.js','.ts','.jsx','.tsx','.mjs','.cjs','/index.js','/index.ts'])
+{if(f2e.has(td+x)){resolved=td+x;break}}
+if(resolved){const si=(f2e.get(resolved)||[])[0];if(si){R.push({id:`tmp-rel-${ri++}`,from:si,relation:'TESTED_BY',to:tid});matched=true}}}
+if(matched)continue;
+// Strategy 2: filename matching (same directory or cross-directory)
+let src=t.file_path.replace(/\.(test|spec)\.([jt]sx?|mjs|cjs)$/,'.$2');
 const py=t.name.match(/^test_(.+\.py)$/);if(py)src=t.file_path.replace(t.name,py[1]);
 const go=t.name.match(/^(.+)_test\.go$/);if(go)src=t.file_path.replace(t.name,go[1]+'.go');
-if(fset.has(src)){const si=(f2c.get(src)||[])[0],tid=tM.get(t.file_path);if(si&&tid)R.push({id:`tmp-rel-${ri++}`,from:si,relation:'TESTED_BY',to:tid})}}
+if(fset.has(src)){const si=(f2e.get(src)||[])[0];if(si)R.push({id:`tmp-rel-${ri++}`,from:si,relation:'TESTED_BY',to:tid})}}
 return{entities:E,relations:R,meta:{scanned_at:new Date().toISOString(),project_root:root,files_scanned:files.length,files_skipped:sk,incremental:!!opts.incremental}}}
 
 function formatSummary(r){const ec={},rc={};

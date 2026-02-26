@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:bigproject
 description: Large-scale project orchestration with Himawari. Used for "big project", "multi-phase", "complex implementation" requests.
-user-invocable: true
+user-invocable: false
 ---
 
 # EXECUTE IMMEDIATELY

@@ -1,7 +1,7 @@
 ---
 name: ontology
 description: Query, manage, and visualize the project-level ontology
-user-invocable: true
+user-invocable: false
 ---
 
 # Ontology Skill

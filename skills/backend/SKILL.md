@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:backend
 description: Backend development with Bunta. Used for "API", "database", "server", "endpoint" requests.
-user-invocable: true
+user-invocable: false
 ---
 
 # EXECUTE IMMEDIATELY

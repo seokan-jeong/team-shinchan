@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:requirements
 description: Hidden requirements analysis with Misae. Used for "what am I missing", "risks", "edge cases", "before I start" requests.
-user-invocable: true
+user-invocable: false
 ---
 
 # EXECUTE IMMEDIATELY

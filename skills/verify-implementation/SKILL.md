@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:verify-implementation
 description: Execute all verify-* skills sequentially to generate integrated validation report.
-user-invocable: true
+user-invocable: false
 ---
 
 # MANDATORY EXECUTION - DO NOT SKIP

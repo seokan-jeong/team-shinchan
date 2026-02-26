@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:manage-skills
 description: Analyze changes and ensure verify-* skill coverage. Maintains verification pipeline integrity.
-user-invocable: true
+user-invocable: false
 ---
 
 # MANDATORY EXECUTION - DO NOT SKIP

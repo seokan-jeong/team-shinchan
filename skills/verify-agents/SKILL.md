@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:verify-agents
 description: Validate agent schema compliance and shared reference integrity
-user-invocable: true
+user-invocable: false
 ---
 
 # ⚠️ MANDATORY EXECUTION - DO NOT SKIP

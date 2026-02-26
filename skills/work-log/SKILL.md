@@ -1,7 +1,7 @@
 ---
 name: team-shinchan:work-log
 description: Query work tracker JSONL events. Filter by recency, agent, event type, or session ID.
-user-invocable: true
+user-invocable: false
 ---
 
 # Work Log Skill

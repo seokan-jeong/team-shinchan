@@ -10,7 +10,7 @@
 
 15 specialist agents with structured workflows, project ontology, budget controls, analytics, and self-learning.
 
-[![Version](https://img.shields.io/badge/version-4.1.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
+[![Version](https://img.shields.io/badge/version-4.1.1-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.ai)
 ![GitHub stars](https://img.shields.io/github/stars/seokan-jeong/team-shinchan?style=social)
@@ -94,7 +94,17 @@ Durable state across sessions and workflows.
 
 ---
 
-## What's New in v4.1.0
+## What's New in v4.1.1
+
+### UX Overhaul — Focus, Narration, Minimal Commands
+
+- **5 user commands only**: `start`, `resume`, `autopilot`, `review`, `help` — 35 internal skills hidden from user
+- **Workflow drift prevention**: active workflow forces all messages to stay in context; no more silent derailment
+- **Agent narration**: Shinnosuke announces every delegation (who, why, result, next step) so users always know what's happening
+- **Ontology scanner fixes**: 4 bugs fixed (Component detection, DEPENDS_ON, TESTED_BY, API names)
+- **Agent auto-integration**: Nene/Bo/ActionKamen now auto-run ontology commands without user intervention
+
+### v4.1.0 — Project Ontology
 
 ### Project Ontology -- Auto-Build Knowledge Graph
 

@@ -2,6 +2,18 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.1.1] - 2026-02-26
+
+### Bug Fixes
+- **Ontology Scanner**: Fix 4 critical bugs — Component detection for `module.exports = { Name }`, DEPENDS_ON wiring for DataModel files, TESTED_BY cross-directory matching via import analysis, API entity missing `name` field
+- **Ontology Engine**: Add `name` to API schema props, `file_path` to DataModel schema props, support entity name lookup in impact/related CLI
+
+### Improvements
+- **Workflow Drift Prevention**: Enforce active workflow context in orchestrator hook — block "Simple question"/"Quick fix" classification when workflow is active, always show current position, guide back after unrelated questions
+- **Agent Narration Rule**: Shinnosuke must announce every delegation (before: who/why, after: result/next step) and show Phase progress at every transition
+- **Agent Auto-Integration**: Nene auto-runs impact/related during planning, Bo auto-rescans after phase completion, ActionKamen auto-checks health during review, session-wrap auto-refreshes ontology on session end
+- **Minimal User Commands**: Reduce user-facing commands from 40 to 5 (`start`, `resume`, `autopilot`, `review`, `help`); 35 internal skills set to `user-invocable: false`
+
 ## [4.1.0] - 2026-02-25
 
 ### New Features

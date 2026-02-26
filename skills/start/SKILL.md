@@ -88,8 +88,17 @@ Task(subagent_type="team-shinchan:misae", model="sonnet",
 
 If Misae finds gaps: show to user, ask "Add these to requirements?". If yes, update REQUESTS.md. If no, proceed.
 
-### Step 2B: Invoke Shinnosuke for Stages 2-4
+### Step 2B: Stage Transition Narration
 
+**Shinnosuke 호출 전에 사용자에게 직접 알린다:**
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👦 [Shinnosuke] Stage 1 완료 ✅ 요구사항 확정됨
+→ Stage 2: Planning 시작합니다. Nene가 Phase를 설계합니다.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Then invoke Shinnosuke:
 ```typescript
 Task(subagent_type="team-shinchan:shinnosuke", model="opus",
   prompt="Continue from Stage 2 via /team-shinchan:start.

@@ -79,11 +79,19 @@ Check for issue ID in request/branch. If found: `ISSUE-{id}`. Otherwise: `{branc
 Nene: phase breakdown + AC. Shiro: impact analysis. Create PROGRESS.md.
 
 ### Stage 3 - Execution (per phase)
+**매 Phase마다 사용자에게 현재 위치를 알린다:**
+```
+👦 [Shinnosuke] Phase {N}/{total} 시작: {phase_title} → {agent}에게 위임
+```
 1. Shiro → impact analysis
 2. Design needed? → Debate (Midori)
 3. Delegate: Frontend→Aichan, Backend→Bunta, DevOps→Masao, General→Bo
 4. Action Kamen → Review (MANDATORY)
 5. Update PROGRESS.md
+**Phase 완료 후:**
+```
+👦 [Shinnosuke] Phase {N}/{total} 완료 ✅ → 다음: {next_phase or "리뷰"}
+```
 
 ### Stage 4 - Completion (auto-proceed, no user prompt)
 1. Masumi → RETROSPECTIVE.md + IMPLEMENTATION.md

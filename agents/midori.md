@@ -100,7 +100,7 @@ Prohibited: writing opinions directly, fictional dialogue, or drawing conclusion
 | Performance | Hiroshi, Bunta |
 | Testing Strategy | Hiroshi, Nene |
 
-**Debate Templates**: `agents/_shared/debate-templates/` (architecture, security, performance, tech-selection).
+**Debate Templates**: `${CLAUDE_PLUGIN_ROOT}/agents/_shared/debate-templates/` (architecture, security, performance, tech-selection).
 
 ---
 
@@ -143,7 +143,7 @@ This makes past decisions discoverable by other agents through ontology queries.
 
 ## Post-Debate: Record Decision
 
-Append to `.shinchan-docs/debate-decisions.md` with next sequential `DECISION-{NNN}`. Create the file from the template in `agents/_shared/debate-decisions.md` if it does not exist.
+Append to `.shinchan-docs/debate-decisions.md` with next sequential `DECISION-{NNN}`. Create the file from the template in `${CLAUDE_PLUGIN_ROOT}/agents/_shared/debate-decisions.md` if it does not exist.
 
 **Fields**: `[DECISION-NNN] Title`, Date, Doc ID, Panel, Category, Decision, Rationale, Status (Active/Superseded).
 
@@ -177,4 +177,4 @@ Failure output: `⚠️ 🌻 [Midori] Debate Partial Failure` — include topic,
 
 ## Output Formats
 
-> Standard output formats are defined in [agents/_shared/output-formats.md](agents/_shared/output-formats.md).
+> Standard output formats are defined in [${CLAUDE_PLUGIN_ROOT}/agents/_shared/output-formats.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/output-formats.md).

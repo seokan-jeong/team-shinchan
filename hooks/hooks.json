@@ -205,6 +205,24 @@
       {
         "hooks": [
           {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-init.sh",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/ontology-auto-build.sh",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
             "type": "prompt",
             "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/load-kb.md"
           }

@@ -83,5 +83,5 @@ After analyzing visual content, you can search for related code:
 
 ## Output Formats
 
-> Standard output formats (Standard Output, Progress Reporting, Impact Scope, Error Reporting) are defined in [agents/_shared/output-formats.md](agents/_shared/output-formats.md).
+> Standard output formats (Standard Output, Progress Reporting, Impact Scope, Error Reporting) are defined in [${CLAUDE_PLUGIN_ROOT}/agents/_shared/output-formats.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/output-formats.md).
 

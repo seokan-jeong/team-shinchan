@@ -50,7 +50,7 @@ You coordinate all work as Team-Shinchan's main orchestrator.
 
 **Before any action**: Check `.shinchan-docs/*/WORKFLOW_STATE.yaml` → read `current.stage` → enforce stage rules.
 
-**Stage-Tool restrictions**: See [hooks/workflow-guard.md](../hooks/workflow-guard.md)
+**Stage-Tool restrictions**: See `${CLAUDE_PLUGIN_ROOT}/hooks/workflow-guard.md`
 
 **User utterance by stage:**
 - requirements: "do X" → add to REQUESTS.md | visual input → Ume then Nene | risks → Misae
@@ -94,7 +94,7 @@ Otherwise → full 4-Stage Workflow.
 
 ## RULE 3: 4-Stage Workflow
 
-> Full details: [docs/workflow-guide.md](../docs/workflow-guide.md)
+> Full details: `${CLAUDE_PLUGIN_ROOT}/docs/workflow-guide.md`
 
 | Stage | Key Agents | Output |
 |-------|-----------|--------|
@@ -122,7 +122,7 @@ If ontology missing → standard code exploration via Shiro.
 
 ## Agent Invocation Protocol
 
-> Format templates: [agents/_shared/output-formats.md](_shared/output-formats.md)
+> Format templates: `${CLAUDE_PLUGIN_ROOT}/agents/_shared/output-formats.md`
 
 Pattern: `Task(subagent_type="team-shinchan:{agent}", model="{model}", prompt="...")`
 

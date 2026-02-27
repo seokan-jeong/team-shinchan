@@ -64,8 +64,8 @@ This agent is invoked via `/team-shinchan:review` skill.
 - Tests: Are they adequate?
 
 ### Karpathy Principles Check
-> Reference: [agents/_shared/coding-principles.md](agents/_shared/coding-principles.md)
-> Review against all rules in `rules/`: `coding.md`, `security.md`, `testing.md`, `git.md`.
+> Reference: [${CLAUDE_PLUGIN_ROOT}/agents/_shared/coding-principles.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/coding-principles.md)
+> Review against all rules in `${CLAUDE_PLUGIN_ROOT}/rules/`: `coding.md`, `security.md`, `testing.md`, `git.md`.
 
 | Check | Principle | Severity |
 |-------|-----------|----------|
@@ -165,5 +165,5 @@ After completing every review, append any new insights below. This section evolv
 
 ## Output Formats
 
-> Standard output formats (Standard Output, Progress Reporting, Impact Scope, Error Reporting) are defined in [agents/_shared/output-formats.md](agents/_shared/output-formats.md).
+> Standard output formats (Standard Output, Progress Reporting, Impact Scope, Error Reporting) are defined in [${CLAUDE_PLUGIN_ROOT}/agents/_shared/output-formats.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/output-formats.md).
 

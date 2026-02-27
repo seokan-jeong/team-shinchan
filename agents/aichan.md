@@ -59,10 +59,10 @@ This agent is invoked via `/team-shinchan:frontend` skill.
 
 ## Coding Principles
 
-> All coding agents follow shared principles: [agents/_shared/coding-principles.md](agents/_shared/coding-principles.md)
-> **Self-check before completion**: [agents/_shared/self-check.md](agents/_shared/self-check.md)
+> All coding agents follow shared principles: [${CLAUDE_PLUGIN_ROOT}/agents/_shared/coding-principles.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/coding-principles.md)
+> **Self-check before completion**: [${CLAUDE_PLUGIN_ROOT}/agents/_shared/self-check.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/self-check.md)
 > Key focus: Simplicity First, Surgical Changes, Goal-Driven Execution.
-> Also follow rules in `rules/coding.md`, `rules/security.md`, `rules/testing.md`.
+> Also follow rules in `${CLAUDE_PLUGIN_ROOT}/rules/coding.md`, `${CLAUDE_PLUGIN_ROOT}/rules/security.md`, `${CLAUDE_PLUGIN_ROOT}/rules/testing.md`.
 
 ## Frontend Design Rules
 
@@ -123,4 +123,4 @@ Follow Bash safety rules in _shared/coding-principles.md. Never run destructive 
 
 ### Standard Output
 
-> Standard output formats (Standard Output, Progress Reporting, Impact Scope, Error Reporting) are defined in [agents/_shared/output-formats.md](agents/_shared/output-formats.md).
+> Standard output formats (Standard Output, Progress Reporting, Impact Scope, Error Reporting) are defined in [${CLAUDE_PLUGIN_ROOT}/agents/_shared/output-formats.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/output-formats.md).

@@ -125,7 +125,7 @@ PROGRESS.md is the single source of truth. Each phase's Change Log records what,
 
 ## Output Format
 
-> Standard output formats are defined in [agents/_shared/output-formats.md](agents/_shared/output-formats.md).
+> Standard output formats are defined in [${CLAUDE_PLUGIN_ROOT}/agents/_shared/output-formats.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/output-formats.md).
 
 Header: `━━━ 🌸 [Himawari] {status} ━━━`
 

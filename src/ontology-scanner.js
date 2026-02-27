@@ -4,7 +4,7 @@
 'use strict';
 const fs=require('fs'),P=require('path'),{execSync}=require('child_process');
 const S=s=>new Set(s.split(' '));
-const EXTS=S('.js .jsx .ts .tsx .py .go .java .rb .rs .mjs .cjs .md');
+const EXTS=S('.js .jsx .ts .tsx .py .go .java .rb .rs .mjs .cjs .md .sh .json');
 const MODS=S('src lib app pages api components services models controllers routes hooks utils helpers middleware config test tests __tests__ agents skills commands');
 const SKIP=S('node_modules dist build .git .shinchan-docs coverage .next __pycache__');
 const FW=S('React Component PureComponent Fragment Suspense StrictMode Express Router Next Nuxt Vue Angular Module Injectable Controller Service Middleware Guard Pipe Exception FastAPI Flask Django Spring Nest Koa Hapi Promise Error TypeError RangeError Map Set Array Object String Number Boolean Date RegExp Buffer EventEmitter Stream Transform Readable Writable');
@@ -59,9 +59,10 @@ out.push({name:n,type_detail:t,file_path:f.rp,visibility:v})}}
 const dex=scanDestructuredExports(c);for(const n of dex){const k=n+':'+f.rp;
 if(!seen.has(k)){seen.add(k);out.push({name:n,type_detail:'commonjs',file_path:f.rp,visibility:'export'})}}}return out}
 
+const SKIP_DC=S('PreToolUse PostToolUse SubagentStart SubagentStop SessionStart SessionEnd UserPromptSubmit DataModel DataModels TestSuite DomainConcept TodoWrite AskUserQuestion DevOps AvgDur EnterPlanMode ExitPlanMode TaskCreate TaskUpdate TaskList TaskGet TaskStop NotebookEdit WebFetch WebSearch');
 function scanDC(files){const map=new Map(),re=/\b([A-Z][a-z]+(?:[A-Z][a-z]+)+)\b/g;
-for(const f of files){if(f.ext==='.md')continue;let c;try{c=fs.readFileSync(f.fp,'utf-8')}catch(_){continue}
-re.lastIndex=0;let m;while((m=re.exec(c))!==null){const n=m[1];if(!FW.has(n)&&n.length>=4&&n.length<=40&&!map.has(n))map.set(n,f.rp)}}
+for(const f of files){if(f.ext==='.md'||f.ext==='.json'||f.ext==='.sh')continue;let c;try{c=fs.readFileSync(f.fp,'utf-8')}catch(_){continue}
+re.lastIndex=0;let m;while((m=re.exec(c))!==null){const n=m[1];if(!FW.has(n)&&!SKIP_DC.has(n)&&n.length>=4&&n.length<=40&&!map.has(n))map.set(n,f.rp)}}
 return[...map].map(([n,fp])=>({name:n,definition:`Domain concept inferred from ${fp}`}))}
 
 const ARE=[/(?:app|router)\.(get|post|put|delete|patch|options|head)\s*\(\s*['"`]([^'"`]+)['"`]/g,
@@ -117,6 +118,29 @@ for(const dep of scanDeps(files)){const fi=f2e.get(dep.from)||[];if(!fi.length)c
 const tr=P.normalize(P.join(P.dirname(dep.from),dep.to));let ti=f2e.get(tr)||[];
 if(!ti.length)for(const x of['.js','.ts','.jsx','.tsx','.mjs','.cjs','/index.js','/index.ts']){ti=f2e.get(tr+x)||[];if(ti.length)break}
 if(ti.length)R.push({id:`tmp-rel-${ri++}`,from:fi[0],relation:'DEPENDS_ON',to:ti[0],dep_type:dep.dt})}
+// ── Plugin-Aware Relations: .md/.sh cross-references ──
+for(const f of files){if(f.ext!=='.md'&&f.ext!=='.sh')continue;
+let c;try{c=fs.readFileSync(f.fp,'utf-8')}catch(_){continue}
+const fi=f2e.get(f.rp)||[];const fromMod=mM.get(P.dirname(f.rp));
+const fromId=fi.length?fi[0]:fromMod;if(!fromId)continue;
+// Match ${CLAUDE_PLUGIN_ROOT}/path/to/file or backtick paths like `hooks/file.sh`
+const refRe=/\$\{CLAUDE_PLUGIN_ROOT\}\/([^\s"'`\)]+)|`([a-zA-Z][\w\-\/]+\.\w+)`/g;
+let rm;while((rm=refRe.exec(c))!==null){const ref=rm[1]||rm[2];if(!ref)continue;
+// Find target entity by file_path match
+let tid=null;for(const[k,v]of f2e){if(k===ref||k.endsWith('/'+ref)){tid=v[0];break}}
+if(!tid){const tmod=mM.get(P.dirname(ref));if(tmod&&tmod!==fromId)tid=tmod}
+if(tid&&tid!==fromId)R.push({id:`tmp-rel-${ri++}`,from:fromId,relation:'DEPENDS_ON',to:tid,dep_type:'reference'})}}
+// ── hooks.json registration relations ──
+const hjPath=P.join(root,'hooks','hooks.json');
+if(fs.existsSync(hjPath)){try{const hj=JSON.parse(fs.readFileSync(hjPath,'utf-8'));
+const hooksDir=mM.get('hooks');
+for(const[event,entries]of Object.entries(hj.hooks||{})){for(const entry of entries){
+for(const h of(entry.hooks||[])){let ref=null;
+if(h.command){const cm=h.command.match(/\$\{CLAUDE_PLUGIN_ROOT\}\/(.+?)(?:\s|$)/);if(cm)ref=cm[1]}
+if(h.prompt_file){const pm=h.prompt_file.match(/\$\{CLAUDE_PLUGIN_ROOT\}\/(.+)/);if(pm)ref=pm[1]}
+if(!ref)continue;let tid=null;for(const[k,v]of f2e){if(k===ref){tid=v[0];break}}
+if(!tid){const tmod=mM.get(P.dirname(ref));if(tmod)tid=tmod}
+if(tid&&hooksDir&&tid!==hooksDir)R.push({id:`tmp-rel-${ri++}`,from:hooksDir,relation:'DEPENDS_ON',to:tid,dep_type:'hook-registration'})}}}}catch(_){}}
 const fset=new Set(files.map(f=>f.rp));
 for(const t of tests){const tid=tM.get(t.file_path);if(!tid)continue;
 // Strategy 1: require/import analysis in test file

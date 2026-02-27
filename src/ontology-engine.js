@@ -412,9 +412,9 @@ function healthScore(projectRoot) {
   const relationCount = onto.relations.length;
   if (entityCount === 0) return { total: 0, scores: {}, suggestions: ['Run ontology scan to populate data'] };
 
-  // 1. Connectivity (0-25): ratio of relations to entities
-  const connRatio = Math.min(relationCount / Math.max(entityCount, 1), 3);
-  scores.connectivity = Math.round((connRatio / 3) * 25);
+  // 1. Connectivity (0-25): ratio of relations to entities (target: 1.5 per entity)
+  const connRatio = Math.min(relationCount / Math.max(entityCount, 1), 1.5);
+  scores.connectivity = Math.round((connRatio / 1.5) * 25);
 
   // 2. Test Coverage (0-25): % of components with TESTED_BY
   const components = onto.entities.filter(e => e.type === 'Component');

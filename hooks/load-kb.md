@@ -38,10 +38,9 @@ Loading is **phase-aware**: when an active workflow exists, only relevant contex
 ### 3. Ontology Summary + GC
 
 1. Read `.shinchan-docs/ontology/ontology.json` if it exists.
-2. **Skip if**: Stage is `requirements` (ontology not needed yet).
-3. Run GC: `node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js gc` (cleans stale entities).
-4. Display: `🔬 [Ontology] {N} entities, {M} relations`
-5. **KB Freshness**: If `kb-summary.md` is older than `ontology.json`, regenerate it:
+2. Run GC: `node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js gc` (cleans stale entities).
+3. The ontology status report is displayed by `ontology-auto-build.md` (runs after this hook). Do not duplicate it here.
+4. **KB Freshness**: If `kb-summary.md` is older than `ontology.json`, regenerate it:
    - Run: `node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js gen-kb`
 
 ### 4. Regression Alert

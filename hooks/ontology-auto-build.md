@@ -23,9 +23,8 @@ If ontology.json does NOT exist:
 3. Run: `node ${CLAUDE_PLUGIN_ROOT}/src/ontology-scanner.js ${PWD} --format json > /tmp/ontology-scan.json`
 4. Run: `node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js merge /tmp/ontology-scan.json`
 5. Run: `node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js gen-kb`
-6. Run: `node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js summary`
-7. Write current timestamp to `.shinchan-docs/ontology/.last-scan`
-8. Display summary: `🔬 [Ontology] Built: {N} entities, {M} relations`
+6. Write current timestamp to `.shinchan-docs/ontology/.last-scan`
+7. Proceed to **Step 3: Health Check & Report**.
 
 ### 2B. Ontology Exists — Incremental Update
 
@@ -40,19 +39,63 @@ If ontology.json EXISTS:
    - Run incremental scan: `node ${CLAUDE_PLUGIN_ROOT}/src/ontology-scanner.js ${PWD} --incremental <commit> --format json > /tmp/ontology-scan.json`
    - Run: `node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js merge /tmp/ontology-scan.json`
    - Update `.shinchan-docs/ontology/.last-scan`
-   - Display: `🔬 [Ontology] Updated: +{N} entities, +{M} relations`
+   - Proceed to **Step 3: Health Check & Report**.
 4. If no changes:
-   - Display: `🔬 [Ontology] Up to date ({N} entities, {M} relations)`
+   - Display: `🔬 [Ontology] Up to date`
+   - Proceed to **Step 3: Health Check & Report** (show summary only, skip health details).
 
-### 3. Load Summary to Context
+### 3. Health Check & Report (ALWAYS)
 
-After build or update, display a brief ontology context:
+Run health check and display a user-friendly status report.
+
+1. Run: `node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js summary`
+2. Run: `node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js health`
+3. Display the following report:
+
 ```
-🔬 [Ontology] {entityCount} entities, {relationCount} relations
-   Modules: {list of module names}
-   Domains: {list of unique domains}
-   Top components: {top 5 most connected}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔬 Project Ontology Status
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 {entityCount} entities | {relationCount} relations
+   Modules: {module names}
+   Components: {N} | APIs: {N} | DataModels: {N} | Tests: {N}
+
+🏥 Health: {total}/100
+   Connectivity:  {score}/25 {bar}
+   Test Coverage: {score}/25 {bar}
+   Documentation: {score}/25 {bar}
+   Modularity:    {score}/25 {bar}
+{suggestions if health < 70}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+Where `{bar}` is a visual bar using block characters:
+- 20-25: `████████` (excellent)
+- 15-19: `██████░░` (good)
+- 10-14: `████░░░░` (fair)
+- 0-9:   `██░░░░░░` (needs attention)
+
+4. **If health < 70**: Display top 2 suggestions from health check.
+5. **If health >= 70**: Display nothing extra (clean report).
+6. **If this was a full build (2A)**: Append `✅ First build complete!` to the report.
+7. **If this was an incremental update (2B with changes)**: Append `🔄 Updated with {N} new commits` to the report.
+
+### 4. Verify Build Integrity
+
+After build or update (NOT on "up to date"), verify:
+
+1. **Entity check**: `entityCount > 0` — if zero entities after a build, display:
+   ```
+   ⚠️ [Ontology] Build produced 0 entities. This project may not have recognizable code patterns.
+   ```
+2. **Relation check**: if `relationCount == 0` but `entityCount > 5`, display:
+   ```
+   ⚠️ [Ontology] No relations detected between {N} entities. Dependency analysis will be limited.
+   ```
+3. **Scanner error check**: if the scan output file is empty or invalid JSON, display:
+   ```
+   ⚠️ [Ontology] Scanner produced invalid output. Ontology may be incomplete.
+   ```
 
 ## Graceful Degradation
 

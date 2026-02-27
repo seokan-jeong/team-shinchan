@@ -2,6 +2,12 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.2.2] - 2026-02-28
+
+### Bug Fixes
+- **Ontology not building in marketplace installs**: Plugin command hooks (`type: "command"`) are not executed by Claude Code in marketplace installs. Simplified `ontology-auto-build.md` prompt hook to invoke the `.sh` script via Bash, ensuring ontology builds regardless.
+- **Silent hook failures**: Removed `-u` flag from `set -euo pipefail` to prevent unbound variable crashes in hook scripts.
+
 ## [4.2.1] - 2026-02-27
 
 ### Bug Fixes

@@ -76,8 +76,26 @@ process.stdin.on('end', () => {
     }
   }
 
-  // ── Rule 4: Large File Staging (warn only — no block) ──
-  // Large file check would need filesystem access; skip for now as it's advisory.
+  // ── Rule 4: Large File Staging (warn only) ──
+  if (toolName === 'Bash' && /git\s+add/.test(command)) {
+    // Extract file paths after 'git add' (skip flags)
+    const parts = command.replace(/git\s+add\s*/, '').split(/\s+/).filter(p => p && !p.startsWith('-'));
+    for (const p of parts) {
+      try {
+        const resolved = require('path').resolve(p);
+        const stat = require('fs').statSync(resolved);
+        if (stat.size > 10 * 1024 * 1024) { // 10MB
+          console.log(JSON.stringify({
+            decision: 'block',
+            reason: 'SECURITY BLOCK: File \"' + p + '\" is ' + Math.round(stat.size / 1048576) + 'MB (>10MB). Large files should not be committed to git. Use .gitignore or Git LFS.'
+          }));
+          return;
+        }
+      } catch(e) {
+        // File doesn't exist or can't stat — skip
+      }
+    }
+  }
 
   // All checks passed — allow
   process.exit(0);

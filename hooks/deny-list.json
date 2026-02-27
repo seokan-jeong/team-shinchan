@@ -58,5 +58,15 @@
     "tool": "Bash",
     "pattern": "dd if=.* of=/dev/",
     "reason": "Prevents raw disk writes via dd"
+  },
+  {
+    "tool": "Bash",
+    "pattern": "git add \\.$|git add -A",
+    "reason": "Git R-11: Stage files explicitly with git add <specific-files>, not git add . or git add -A"
+  },
+  {
+    "tool": "Bash",
+    "pattern": "\\beval\\(",
+    "reason": "Security R-10: No eval() with untrusted input — use safe alternatives"
   }
 ]

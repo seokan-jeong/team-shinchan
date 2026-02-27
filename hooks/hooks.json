@@ -46,6 +46,24 @@
       {
         "hooks": [
           {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/agent-tool-guard.sh",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/budget-guard.sh",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
             "type": "prompt",
             "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/budget-guard.md"
           }
@@ -65,6 +83,26 @@
           {
             "type": "prompt",
             "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/workflow-guard.md"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/transition-gate.sh",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/transition-gate.sh",
+            "timeout": 10
           }
         ]
       },
@@ -158,6 +196,15 @@
       {
         "hooks": [
           {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/trace-init.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
             "type": "prompt",
             "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/shinnosuke-orchestrate.md"
           }
@@ -180,6 +227,15 @@
             "command": "HOOK_EVENT=Stop ${CLAUDE_PLUGIN_ROOT}/hooks/write-tracker.sh",
             "async": true,
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-wrap.sh",
+            "timeout": 15
           }
         ]
       },

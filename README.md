@@ -10,7 +10,7 @@
 
 15 specialist agents with structured workflows, project ontology, budget controls, analytics, and self-learning.
 
-[![Version](https://img.shields.io/badge/version-4.3.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
+[![Version](https://img.shields.io/badge/version-4.3.1-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.ai)
 ![GitHub stars](https://img.shields.io/github/stars/seokan-jeong/team-shinchan?style=social)

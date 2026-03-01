@@ -2,6 +2,20 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.3.1] - 2026-03-01
+
+### Fixed
+- **BASH_SOURCE path resolution**: Use `${BASH_SOURCE[0]:-$0}` fallback for reliable path resolution when hooks are invoked via `bash <script>` (deny-check, layer-guard, session-init, session-wrap, ontology-auto-build)
+- **run.cjs stdin timeout**: Increased from 50ms to 200ms with `readable` event detection to prevent intermittent hook failures
+- **run.cjs exit code propagation**: Now propagates exit code 2 for block decisions (tofu-at convention)
+- **Sandboxed environment compatibility**: Use `${TMPDIR:-/tmp}` instead of hardcoded `/tmp` in ontology-auto-build
+- **gzip availability check**: Verify `gzip` exists before background compression in write-tracker
+- **openssl fallback**: Robust trace ID generation when `openssl` is unavailable in trace-init
+
+### Added
+- **Hook execution validator** (`tests/validate/hook-execution.js`): 109-assertion automated test suite covering JSON schema, file existence, permissions, run.cjs wrapper, stdin piping, and block detection
+- **matcher field enforcement**: All 32 hook entries now have explicit `"matcher"` field for reliable hook loading
+
 ## [4.3.0] - 2026-02-28
 
 ### Added

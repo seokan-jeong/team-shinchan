@@ -72,7 +72,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/budget-guard.md"
+            "prompt": "${CLAUDE_PLUGIN_ROOT}/hooks/budget-guard.md"
           }
         ]
       },
@@ -91,7 +91,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/workflow-guard.md"
+            "prompt": "${CLAUDE_PLUGIN_ROOT}/hooks/workflow-guard.md"
           }
         ]
       },
@@ -140,7 +140,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/coding-reminder.md"
+            "prompt": "${CLAUDE_PLUGIN_ROOT}/hooks/coding-reminder.md"
           }
         ]
       },
@@ -149,7 +149,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/coding-reminder.md"
+            "prompt": "${CLAUDE_PLUGIN_ROOT}/hooks/coding-reminder.md"
           }
         ]
       }
@@ -177,7 +177,7 @@
           },
           {
             "type": "prompt",
-            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/change-tracker.md"
+            "prompt": "${CLAUDE_PLUGIN_ROOT}/hooks/change-tracker.md"
           }
         ]
       },
@@ -192,15 +192,15 @@
           },
           {
             "type": "prompt",
-            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/change-tracker.md"
+            "prompt": "${CLAUDE_PLUGIN_ROOT}/hooks/change-tracker.md"
           },
           {
             "type": "prompt",
-            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/auto-verify.md"
+            "prompt": "${CLAUDE_PLUGIN_ROOT}/hooks/auto-verify.md"
           },
           {
             "type": "prompt",
-            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/version-check.md"
+            "prompt": "${CLAUDE_PLUGIN_ROOT}/hooks/version-check.md"
           }
         ]
       }
@@ -232,7 +232,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/shinnosuke-orchestrate.md"
+            "prompt": "${CLAUDE_PLUGIN_ROOT}/hooks/shinnosuke-orchestrate.md"
           }
         ]
       },
@@ -241,7 +241,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/correction-capture.md"
+            "prompt": "${CLAUDE_PLUGIN_ROOT}/hooks/correction-capture.md"
           }
         ]
       }
@@ -273,7 +273,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/session-wrap.md"
+            "prompt": "${CLAUDE_PLUGIN_ROOT}/hooks/session-wrap.md"
           }
         ]
       },
@@ -282,7 +282,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/auto-retrospective.md"
+            "prompt": "${CLAUDE_PLUGIN_ROOT}/hooks/auto-retrospective.md"
           }
         ]
       }
@@ -324,7 +324,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/load-kb.md"
+            "prompt": "${CLAUDE_PLUGIN_ROOT}/hooks/load-kb.md"
           }
         ]
       },
@@ -333,7 +333,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt_file": "${CLAUDE_PLUGIN_ROOT}/hooks/ontology-auto-build.md"
+            "prompt": "${CLAUDE_PLUGIN_ROOT}/hooks/ontology-auto-build.md"
           }
         ]
       }

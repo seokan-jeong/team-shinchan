@@ -20,7 +20,7 @@ function getHookMdFiles() {
 function getRegisteredMdFiles(hooksJson) {
   const registered = new Set();
   const jsonStr = JSON.stringify(hooksJson);
-  // Extract all .md filenames referenced in prompt_file fields
+  // Extract all .md filenames referenced in prompt fields
   const pattern = /hooks\/([^"]+\.md)/g;
   let match;
   while ((match = pattern.exec(jsonStr)) !== null) {

@@ -104,8 +104,8 @@ events.forEach(event => {
         const shMatch = h.command.match(/hooks\/[\w-]+\.sh/g);
         if (shMatch) shMatch.forEach(s => commandScripts.add(s));
       }
-      if (h.type === 'prompt' && h.prompt_file) {
-        const mdMatch = h.prompt_file.match(/hooks\/[\w-]+\.md/);
+      if (h.type === 'prompt' && h.prompt) {
+        const mdMatch = h.prompt.match(/hooks\/[\w-]+\.md/);
         if (mdMatch) promptFiles.add(mdMatch[0]);
       }
     });

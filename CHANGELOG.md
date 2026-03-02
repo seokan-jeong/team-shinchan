@@ -2,6 +2,13 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.4.0] - 2026-03-02
+
+### Fixed
+- **CRITICAL: All prompt hooks erroring** — prompt `"prompt"` field is literal text sent to the model, NOT a file path. `${CLAUDE_PLUGIN_ROOT}` is only resolved in command hooks. All 14 prompt hooks now have their .md content inlined directly into hooks.json.
+- **run.cjs stdin race condition** — simplified to `data`/`end`/`error` events with timeout fallback; removed problematic `readable` + `destroy` pattern
+- **workflow-guard `.shinchan-docs/` exception** — workflow infrastructure writes are now always allowed regardless of stage
+
 ## [4.3.3] - 2026-03-02
 
 ### Fixed

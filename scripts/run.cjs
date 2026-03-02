@@ -62,8 +62,11 @@ runScript(scriptPath, envOverrides);
 
 function runScript(script, envVars) {
   const chunks = [];
-  process.stdin.on('data', c => chunks.push(c));
-  process.stdin.on('end', () => {
+  let ended = false;
+
+  function spawnChild() {
+    if (ended) return;
+    ended = true;
     const stdinData = Buffer.concat(chunks);
     const child = spawn('bash', [script], {
       env: { ...process.env, ...envVars },
@@ -80,25 +83,26 @@ function runScript(script, envVars) {
 
     child.on('close', (code) => {
       if (stdout.trim()) process.stdout.write(stdout);
-      // Propagate exit code: 0 = allow, 2 = block (tofu-at convention)
       process.exit(code === 2 ? 2 : 0);
     });
 
     child.on('error', () => {
       process.exit(0);
     });
-  });
+  }
 
-  // Handle case where stdin is already ended or empty
-  // Use 'readable' event for robust detection; fallback timeout at 200ms
-  process.stdin.once('readable', () => {
-    if (process.stdin.read() === null && !chunks.length) {
-      process.stdin.emit('end');
-    }
-  });
-  setTimeout(() => {
-    if (!chunks.length) {
-      process.stdin.emit('end');
-    }
-  }, 200);
+  process.stdin.on('data', c => chunks.push(c));
+  process.stdin.on('end', spawnChild);
+
+  // If stdin is already closed or empty, fire after short timeout
+  if (process.stdin.readableEnded) {
+    spawnChild();
+  } else {
+    setTimeout(() => {
+      if (!ended) {
+        try { process.stdin.destroy(); } catch (e) {}
+        spawnChild();
+      }
+    }, 200);
+  }
 }

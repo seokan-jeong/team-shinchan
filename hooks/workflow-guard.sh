@@ -75,6 +75,10 @@ process.stdin.on('end', () => {
     // Bash: block destructive commands, allow read-only
     if (toolName === 'Bash') {
       const cmd = toolInput.command || '';
+      // Exception: mkdir for .shinchan-docs is always allowed
+      if (/^mkdir\\s+(-p\\s+)?(\\.shinchan-docs|.*\\.shinchan-docs)/.test(cmd.trim())) {
+        process.exit(0);
+      }
       const destructive = /\\b(rm|mv|cp|mkdir|chmod|chown|git\\s+(commit|push|add|reset|merge|rebase|checkout)|echo\\s.*>|sed\\s+-i|npm\\s+(install|publish|run\\s+build)|npx|yarn\\s+add)\\b/;
       if (destructive.test(cmd)) {
         console.log(JSON.stringify({

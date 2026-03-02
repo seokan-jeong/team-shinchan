@@ -26,13 +26,17 @@ event: PreToolUse
 | TodoWrite | BLOCK | BLOCK | OK | BLOCK |
 | Bash | BLOCK | BLOCK | OK | BLOCK |
 
-*Stage 1 Write exception: ONLY `.shinchan-docs/*/WORKFLOW_STATE.yaml` allowed (interview state).
-**Completion Write: ONLY `.shinchan-docs/**` or `*.md` files.
+## Exceptions (ALWAYS ALLOWED regardless of stage)
+
+- **Write/Edit to `.shinchan-docs/`** — workflow state, interview docs, REQUESTS.md, PROGRESS.md, WORKFLOW_STATE.yaml
+- **Bash `mkdir -p .shinchan-docs/`** — creating workflow folders
+
+These exceptions exist because `.shinchan-docs/` is workflow infrastructure, not project code.
 
 ## Absolute Rule
 
-In requirements/planning: Edit, Write, Bash, TodoWrite = **BLOCK. NO EXCEPTIONS.**
-Even if user asks. Even if you think it's needed.
+In requirements/planning: Edit, Write, Bash, TodoWrite targeting **project code** = **BLOCK.**
+`.shinchan-docs/` writes are exempt (see Exceptions above).
 
 ## Stage 1 Interpretation Guard
 

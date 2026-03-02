@@ -12,7 +12,7 @@
   "plugins": [
     {
       "name": "team-shinchan",
-      "version": "4.3.2",
+      "version": "4.3.3",
       "description": "The Agent Harness for Claude Code — Guardrails, Observability, and Quality Gates for AI-Powered Development. 15 specialist agents with structured workflows, budget controls, analytics, and self-learning.",
       "category": "productivity",
       "source": "./",

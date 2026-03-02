@@ -2,6 +2,13 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.3.3] - 2026-03-02
+
+### Fixed
+- **Hook errors in external projects** — `run.cjs` stdin race condition where `readable` event consumed data before `data` event, causing all command hooks to error
+- **workflow-guard blocking `.shinchan-docs/` writes** — prompt hook had "NO EXCEPTIONS" rule that blocked WORKFLOW_STATE.yaml creation during requirements stage; added `.shinchan-docs/` exception for workflow infrastructure
+- **`mkdir .shinchan-docs/` blocked** — workflow-guard.sh now allows `mkdir` targeting `.shinchan-docs/` during requirements/planning stages
+
 ## [4.3.2] - 2026-03-01
 
 ### Fixed

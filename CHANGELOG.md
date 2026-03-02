@@ -2,6 +2,11 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.4.1] - 2026-03-02
+
+### Fixed
+- **Remove all 14 prompt hooks** — prompt hooks make extra Haiku API calls and require `{"ok": true}` JSON responses; our hooks never returned this format, causing "hook error" on every tool use. SessionStart prompt hooks additionally crash with "ToolUseContext required". All guardrail logic already handled by command hooks (shell scripts). 32 → 22 hooks, 39KB → 6.7KB hooks.json.
+
 ## [4.4.0] - 2026-03-02
 
 ### Fixed

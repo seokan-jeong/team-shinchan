@@ -105,8 +105,8 @@ events.forEach(event => {
         if (shMatch) shMatch.forEach(s => commandScripts.add(s));
       }
       if (h.type === 'prompt' && h.prompt) {
-        const mdMatch = h.prompt.match(/hooks\/[\w-]+\.md/);
-        if (mdMatch) promptFiles.add(mdMatch[0]);
+        // Prompt hooks should be inlined, not file paths
+        promptFiles.add(h.prompt);
       }
     });
   });
@@ -121,12 +121,15 @@ commandScripts.forEach(script => {
   }
 });
 
-promptFiles.forEach(file => {
-  const fullPath = path.join(ROOT_DIR, file);
-  if (fs.existsSync(fullPath)) {
-    ok(`${file} exists`);
+// Prompt hooks should be inlined content, not bare file paths
+promptFiles.forEach(prompt => {
+  const isBareFilePath = /^\$\{CLAUDE_PLUGIN_ROOT\}\/hooks\/[\w-]+\.md$/.test(prompt.trim());
+  if (isBareFilePath) {
+    fail(`Prompt hook is a file path, not inlined content: ${prompt.trim()}`);
+  } else if (prompt.length >= 50) {
+    ok(`Inlined prompt (${prompt.length} chars)`);
   } else {
-    fail(`${file} MISSING`);
+    fail(`Prompt too short (${prompt.length} chars)`);
   }
 });
 
@@ -177,16 +180,16 @@ commandScripts.forEach(script => {
 
 // ── 4. Prompt File Readability ──
 
-section('4. Prompt Files');
+section('4. Prompt Content Validation');
 
-promptFiles.forEach(file => {
-  const fullPath = path.join(ROOT_DIR, file);
-  if (!fs.existsSync(fullPath)) return;
-  const content = fs.readFileSync(fullPath, 'utf-8').trim();
-  if (content.length > 0) {
-    ok(`${file} (${content.length} chars)`);
+promptFiles.forEach(prompt => {
+  const isBareFilePath2 = /^\$\{CLAUDE_PLUGIN_ROOT\}\/hooks\/[\w-]+\.md$/.test(prompt.trim());
+  if (isBareFilePath2) {
+    fail(`Prompt is a file path, not inlined: ${prompt.trim()}`);
+  } else if (prompt.length >= 50) {
+    ok(`Inlined prompt content (${prompt.length} chars)`);
   } else {
-    fail(`${file} is empty`);
+    warn(`Short prompt content (${prompt.length} chars)`);
   }
 });
 

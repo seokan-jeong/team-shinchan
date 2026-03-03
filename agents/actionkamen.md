@@ -96,6 +96,44 @@ This agent is invoked via `/team-shinchan:review` skill.
 - **APPROVED** ✅: Work is complete and correct
 - **REJECTED** ❌: Issues found, provide specific feedback
 
+## Design Fidelity Review
+
+**When reviewing frontend/UI changes**, check for a Design Spec and verify implementation fidelity.
+
+### Pre-Review Check
+
+1. Look for `.shinchan-docs/{doc_id}/DESIGN_SPEC.md` (where doc_id comes from WORKFLOW_STATE.yaml)
+2. If found, add Design Fidelity to your review categories
+3. If not found, skip this section entirely (standard review only)
+
+### Design Fidelity Checklist
+
+When a Design Spec exists, verify each category:
+
+| Category | Check | Severity |
+|----------|-------|----------|
+| Components | All spec components implemented? | MEDIUM |
+| Colors | Color values match spec (within tolerance for low-confidence values)? | MEDIUM |
+| Typography | Font family, size, weight match spec? | LOW |
+| Layout | Flex/grid structure, spacing, direction match spec? | MEDIUM |
+| Interactions | Hover, focus, transition states implemented? | LOW |
+
+### Design Fidelity Report
+
+Include in your review summary:
+
+```markdown
+## Design Fidelity
+- Components: {N}/{total} match | {deviations}
+- Colors: PASS/FAIL | {mismatches}
+- Typography: PASS/FAIL | {mismatches}
+- Layout: PASS/FAIL | {mismatches}
+- Interactions: PASS/FAIL/N/A | {notes}
+- Overall: {FAITHFUL / MINOR_DEVIATIONS / NEEDS_REVISION}
+```
+
+**Severity rule**: Design fidelity issues alone do NOT cause REJECTED verdict unless explicitly flagged as CRITICAL by the Design Spec. They are reported as MEDIUM/LOW findings alongside standard code review.
+
 ## Important
 
 - You are READ-ONLY: You review, not modify

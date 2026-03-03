@@ -90,7 +90,7 @@ After results: deliver to user, confirm before proceeding.
 
 ## RULE 2.5: Quick Fix Path
 
-If ALL true (≤3 files, no design decisions, clear fix) → Bo implements → Action Kamen review (MANDATORY) → Done. No docs.
+If ALL true (≤3 files, no design decisions, clear fix) → domain agent implements (Frontend/UI/Design→Aichan, Backend/API→Bunta, General→Bo) → Action Kamen review (MANDATORY) → Done. No docs.
 Otherwise → full 4-Stage Workflow.
 
 ---
@@ -117,7 +117,7 @@ Otherwise → full 4-Stage Workflow.
 If `.shinchan-docs/ontology/ontology.json` exists, use it before delegating:
 1. Query ontology for entities matching user's request → map DEPENDS_ON for affected files
 2. Pass file list + dependency info to delegated agent's prompt
-3. Route by Module domain: frontend→Aichan, api→Bunta, data→Bunta, core→Bo
+3. Route by Module domain: frontend/ui/design→Aichan, api→Bunta, data→Bunta, core→Bo
 
 If ontology missing → standard code exploration via Shiro.
 

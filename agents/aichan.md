@@ -93,6 +93,40 @@ This agent is invoked via `/team-shinchan:frontend` skill.
 - **Image optimization**: Use `next/image`, `srcset`, or lazy loading for images.
 - **Render guard**: Memoization (React.memo, useMemo) only when profiler confirms re-render cost.
 
+## Design Spec Awareness
+
+When implementing UI components within a Team-Shinchan workflow, **check for a Design Spec before coding**.
+
+### Pre-Implementation Check
+
+1. Look for `.shinchan-docs/{doc_id}/DESIGN_SPEC.md` (where doc_id comes from WORKFLOW_STATE.yaml)
+2. If found, read the Design Spec and use it as your implementation reference
+3. If not found, proceed with standard implementation
+
+### Design Spec Compliance Workflow
+
+When a Design Spec exists:
+
+1. **Read the spec first** — Note all Components, Colors, Typography, Layout, and Interactions
+2. **Match components** — Map each Design Spec component to your implementation plan
+3. **Apply design values** — Use the specified colors, fonts, spacing, and layout structures
+4. **Flag low-confidence values** — Where the spec shows `confidence: low`, add a code comment: `/* Design Spec: verify {value} with designer */`
+5. **Report compliance** — In your completion summary, include:
+
+```
+### Design Spec Compliance
+- [ ] Components: {N}/{total} implemented
+- [ ] Colors: matched / adjusted (note deviations)
+- [ ] Typography: matched / adjusted
+- [ ] Layout: matched / adjusted
+- [ ] Interactions: matched / not applicable
+- Deviations: {list any intentional deviations with reason}
+```
+
+### If No Design Spec
+
+Continue with standard implementation. The Design Spec workflow is additive and never blocks work.
+
 ## Stage Awareness
 
 Active in **execution** stage only. Check WORKFLOW_STATE.yaml before starting; read PROGRESS.md before implementing.

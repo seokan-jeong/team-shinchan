@@ -42,12 +42,15 @@ Proceed to Step 1 (classify request).
 | Type | Action |
 |------|--------|
 | Simple question | Answer directly, no workflow |
-| Quick fix (≤3 files, no design decisions, clear fix) | Bo implements → Action Kamen review, skip docs |
+| Quick fix (≤3 files, no design decisions, clear fix) | Domain agent implements (Frontend/UI/Design→Aichan, Backend/API→Bunta, General→Bo) → Action Kamen review, skip docs |
 | Standard task | Full 4-stage Workflow |
 | Complex/Multi-phase | Full Workflow + Debate |
 
 **Classification**: ≤3 files, no design decisions, clear fix → Lite (Quick Fix). Otherwise → Full.
-**Bo vs Specialists**: Domain-specific (React, API, CI/CD) → specialist. General → Bo.
+**Bo vs Specialists**: Domain-specific → specialist. General → Bo.
+  - Frontend/UI (React, Vue, CSS, styling, design, UI, component, 디자인, 화면, 레이아웃) → Aichan
+  - Backend/API (REST, GraphQL, database, server, endpoint) → Bunta
+  - DevOps/Infra (CI/CD, Docker, deploy, pipeline) → Masao
 **Kazama**: Use /ralph for complex phases requiring 30+ min focused work.
 
 ## Skill → Agent Routing
@@ -63,7 +66,7 @@ Proceed to Step 1 (classify request).
 | /vision | ume | /bigproject | himawari |
 | /research | masumi | | |
 
-**Domain routing**: Code exploration→shiro, Analysis→hiroshi, Planning→nene, Code writing→bo, Frontend→aichan, Backend→bunta, Infra→masao, Verification→actionkamen
+**Domain routing**: Code exploration→shiro, Analysis→hiroshi, Planning→nene, Code writing→bo, Frontend/UI/Design→aichan, Backend/API→bunta, Infra/DevOps→masao, Verification→actionkamen
 
 ## Step 2: Full Workflow Stages
 
@@ -85,7 +88,7 @@ Nene: phase breakdown + AC. Shiro: impact analysis. Create PROGRESS.md.
 ```
 1. Shiro → impact analysis
 2. Design needed? → Debate (Midori)
-3. Delegate: Frontend→Aichan, Backend→Bunta, DevOps→Masao, General→Bo
+3. Delegate: Frontend/UI/Design→Aichan, Backend/API→Bunta, DevOps/Infra→Masao, General→Bo
 4. Action Kamen → Review (MANDATORY)
 5. Update PROGRESS.md
 **Phase 완료 후:**

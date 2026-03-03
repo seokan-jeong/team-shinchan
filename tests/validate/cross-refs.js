@@ -23,7 +23,8 @@ const KNOWN_SKILLS = [
   'session-summary',
   'eval',
   'ontology',
-  'impact-analysis'
+  'impact-analysis',
+  'design-review'
 ];
 
 function getActualAgents() {

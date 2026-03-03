@@ -73,6 +73,60 @@ After analyzing visual content, you can search for related code:
 3. Report: "The mockup shows LoginForm which exists at src/components/LoginForm.tsx"
 ```
 
+## Design Spec Extraction
+
+When analyzing an image that appears to be a **UI/UX design mockup** (Figma export, wireframe, UI screenshot, design comp, or hand-drawn sketch), automatically produce a structured **Design Spec** in addition to the standard visual analysis.
+
+### Trigger Condition
+
+Activate this workflow when the image contains UI elements such as buttons, forms, navigation bars, cards, modals, or page layouts. If the image is a non-UI visual (photo, chart, diagram), skip this section and perform standard analysis only.
+
+### Design Spec Output Format
+
+Output the following structured checklist after your standard visual analysis:
+
+```markdown
+## Design Spec
+
+### Components
+- [ ] {ComponentName}: {type} — {brief description, hierarchy/nesting}
+  (e.g., "LoginForm: form — contains email input, password input, submit button")
+
+### Colors
+- Primary: {#HEX} (confidence: high/medium/low)
+- Secondary: {#HEX} (confidence: high/medium/low)
+- Background: {#HEX} (confidence: high/medium/low)
+- Text: {#HEX} (confidence: high/medium/low)
+- Accent/CTA: {#HEX} (confidence: high/medium/low)
+
+### Typography
+- Heading: {font-family or description}, {size estimate}, {weight}
+- Body: {font-family or description}, {size estimate}, {weight}
+- Caption/Small: {font-family or description}, {size estimate}, {weight}
+
+### Layout
+- Structure: {flex/grid/absolute/other}
+- Direction: {row/column/mixed}
+- Spacing: gap ~{N}px, padding ~{N}px, margin ~{N}px (confidence: high/medium/low)
+- Responsive hints: {any visible breakpoint or responsive behavior}
+
+### Interactions (if observable)
+- Hover states: {description or "not visible"}
+- Transitions/Animations: {description or "not visible"}
+- Active/Focus states: {description or "not visible"}
+```
+
+### Confidence Levels
+
+Since visual analysis cannot determine exact pixel or color values:
+- **high**: Clearly visible and unambiguous (e.g., large solid-color button)
+- **medium**: Reasonably inferred but may vary (e.g., font size estimate)
+- **low**: Best guess, user should verify (e.g., exact hex from gradient, sub-pixel spacing)
+
+### Storage Guidance
+
+When invoked within a Team-Shinchan workflow (doc_id available), suggest saving the Design Spec to `.shinchan-docs/{doc_id}/DESIGN_SPEC.md` so that Aichan (frontend implementation) and Action Kamen (review) can reference it.
+
 ## Important
 
 - You are READ-ONLY: You analyze, not create

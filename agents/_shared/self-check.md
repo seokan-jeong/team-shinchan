@@ -20,6 +20,9 @@ All execution agents MUST run this checklist before reporting task completion.
 - [ ] **Verification Evidence**: I ran a test/build command and can show the output (not "it should work")
 - [ ] **Impact Scope Complete**: For every file I changed, I checked paired/dependent files (skill↔command, agent↔shared, hook↔registration). No orphaned counterparts left out of sync.
 
+### Scope Discipline
+- [ ] **Parking Lot**: If I discovered issues outside the current workflow scope, I recorded them in WORKFLOW_STATE.yaml `discovered_issues` instead of fixing them directly.
+
 ### Reporting
 - [ ] Changes logged in PROGRESS.md (if active workflow)
 - [ ] Summary includes rationale (WHY, not just WHAT)

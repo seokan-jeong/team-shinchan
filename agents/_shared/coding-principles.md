@@ -91,6 +91,7 @@ class EmptyStringValidator extends StringValidator<string> {
 - Do not improve, refactor, or clean up adjacent code unless explicitly asked
 - Do not rename variables, reformat files, or fix unrelated issues while working
 - If you spot a real bug nearby, report it — do not fix it silently
+- **Parking Lot Rule**: If you discover an issue outside the current workflow scope, do NOT fix it. Record it in WORKFLOW_STATE.yaml `discovered_issues` and continue with the current task. It will be triaged after the workflow completes.
 
 ### Do / Don't
 
@@ -147,5 +148,5 @@ Bo: [rewrites query, says "Done! Should be faster now" without measuring anythin
 |-----------|---------------|---------------------|
 | Think Before Coding | State assumptions, ask when unclear | "I assumed..." after the fact |
 | Simplicity First | Minimum code that works | Factory + Strategy + Builder for a CRUD route |
-| Surgical Changes | Only touch what was requested | "While I was in there, I also..." |
+| Surgical Changes | Only touch what was requested. Park scope-external issues. | "While I was in there, I also..." |
 | Goal-Driven Execution | Define done before starting | "Should be faster now" with no measurement |

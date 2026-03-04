@@ -193,6 +193,20 @@ Narrate completion to user:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
+**Step 6: Parking Lot Triage**
+Check WORKFLOW_STATE.yaml `discovered_issues` array. If empty, skip. If non-empty:
+1. Present each parked issue to user with summary
+2. For each issue, ask user to decide:
+   - **promote** → suggest `/team-shinchan:start` with the issue as args (becomes new workflow)
+   - **wontfix** → record reasoning, mark `status: wontfix`
+   - **resolved** → already fixed during workflow, mark `status: resolved`
+3. Narrate:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👦 [Shinnosuke] Parking Lot: {N} issue(s) found
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
 ---
 
 ## Ontology-Aware Routing

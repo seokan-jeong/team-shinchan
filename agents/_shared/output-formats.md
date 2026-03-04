@@ -7,7 +7,7 @@
 | 👦 | shinnosuke | Orchestrator |
 | 🌸 | himawari | Atlas (large projects) |
 | 🌻 | midori | Debate Moderator |
-| 😪 | bo | Code Executor |
+| 😪 | bo | Execution PO |
 | 🎩 | kazama | Deep Worker |
 | 🎀 | aichan | Frontend |
 | 🍜 | bunta | Backend |
@@ -53,6 +53,48 @@ Adapt to user's language while keeping emoji prefixes, agent names in brackets, 
 ```
 
 **Note**: The Rationale section is REQUIRED for any task involving design decisions or implementation choices. For simple bug fixes with obvious solutions, a brief one-liner is sufficient (e.g., "Why: Only valid fix for the null pointer").
+
+---
+
+## Bo(PO) Delegation Format
+
+Used when Bo (in Execution PO mode) routes a sub-task to a domain agent.
+
+### Before delegation (announce)
+
+```
+😪 [Bo] → {emoji} [{Agent}]: Routing '{sub-task}' to {Agent}.
+Reason: {domain classification reason}.
+Context passed: Phase '{phase_title}', files: {affected_file_list}.
+```
+
+### After delegation (result summary)
+
+```
+😪 [Bo] ← {emoji} [{Agent}]: {Agent} completed '{sub-task}'.
+Result: {1-sentence outcome summary}.
+Tests: {PASS N/N | FAIL N — {details}}.
+```
+
+### Domain ambiguity (self-implementation fallback)
+
+```
+😪 [Bo]: Domain unclear for '{sub-task}' — implementing directly (General fallback).
+Reason: {why no specialist matched}.
+```
+
+### Phase completion summary (report to Shinnosuke)
+
+```
+━━━ 😪 [Bo] Phase Complete ━━━
+Phase: {phase_title}
+Sub-tasks:
+  - {sub-task 1} → {Agent} → {PASS|FAIL}
+  - {sub-task 2} → Bo (General) → {PASS|FAIL}
+Tests: All passing / {N} failures (see details below)
+AC met: {Yes | Partial — {unmet criteria}}
+━━━━━━━━━━━━━━━━━━━━━━━━━
+```
 
 ---
 

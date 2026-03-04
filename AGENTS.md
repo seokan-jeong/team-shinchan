@@ -23,19 +23,19 @@
 |-------|-------|------|-------|-----------|-------|------------|
 | actionkamen | advisory | Reviewer that verifies and approves all work | opus | Read, Glob, Grep... | 20 | plan |
 | aichan | specialist | Frontend Specialist for UI/UX development | sonnet | Read, Write, Edit... | 30 | acceptEdits |
-| bo | execution | Task Executor that handles code writing and mod... | sonnet | Read, Write, Edit... | 30 | acceptEdits |
+| bo | execution | Execution PO that coordinates domain specialist... | sonnet | Read, Write, Edit... | 50 | acceptEdits |
 | bunta | specialist | Backend Specialist for API and database develop... | sonnet | Read, Write, Edit... | 30 | acceptEdits |
-| himawari | orchestration | Master Orchestrator for large-scale complex pro... | opus | Read, Glob, Grep... | - | - |
+| himawari | orchestration | Master Orchestrator for large-scale complex pro... | opus | Read, Glob, Grep... | 30 | plan |
 | hiroshi | advisory | Senior Advisor (Oracle) providing strategic adv... | opus | Read, Glob, Grep... | 15 | plan |
 | kazama | execution | Autonomous Deep Worker for complex long-running... | opus | Read, Write, Edit... | 50 | acceptEdits |
 | masao | specialist | DevOps Specialist for infrastructure and deploy... | sonnet | Read, Write, Edit... | 25 | acceptEdits |
 | masumi | utility | Librarian for documentation and information search | sonnet | Read, Glob, Grep... | 20 | plan |
-| midori | orchestration | Debate Moderator - Facilitates expert debates t... | sonnet | Read, Write, Glob... | 25 | - |
-| misae | advisory | Pre-Planning Analyst (Metis) that discovers hid... | sonnet | Read, Glob, Grep... | - | - |
+| midori | orchestration | Debate Moderator - Facilitates expert debates t... | sonnet | Read, Write, Glob... | 25 | plan |
+| misae | advisory | Requirements Analyst that interviews users, col... | sonnet | Read, Write, Glob... | 20 | plan |
 | nene | advisory | Strategic Planner that creates comprehensive im... | opus | Read, Write, Glob... | 20 | plan |
-| shinnosuke | orchestration | Main Orchestrator that coordinates all work and... | opus | Read, Glob, Grep... | - | - |
+| shinnosuke | orchestration | Main Orchestrator that coordinates all work and... | opus | Read, Glob, Grep... | 40 | plan |
 | shiro | utility | Fast Explorer for quick codebase navigation and... | haiku | Read, Glob, Grep... | 10 | plan |
-| ume | utility | Multimodal Analyst for image and PDF analysis | sonnet | Read, Glob, Grep... | - | - |
+| ume | utility | Multimodal Analyst for image and PDF analysis | sonnet | Read, Glob, Grep... | 15 | plan |
 
 ## Call Flow
 
@@ -65,7 +65,7 @@
 | Strategic advice / debug | hiroshi |
 | Code review | actionkamen |
 | Documentation search | masumi |
-| General coding | bo |
+| Execution PO / general coding | bo |
 | Frontend (React/Vue) | aichan |
 | Backend (API/DB) | bunta |
 | DevOps (CI/CD/Infra) | masao |

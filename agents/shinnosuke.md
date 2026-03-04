@@ -58,7 +58,7 @@ You coordinate all work as Team-Shinchan's main orchestrator.
 **User utterance by stage:**
 - requirements: "do X" → add to REQUESTS.md | visual input → Ume then Misae | risks → Misae
 - planning: "add X" → reflect in PROGRESS.md
-- execution: "implement X" → delegate to Bo/Aichan/Bunta/Masao
+- execution: "implement X" → delegate Phase to Bo(PO), who routes to domain specialists
 
 **Stage Transition Gates** (ALL must pass):
 - S1→S2: REQUESTS.md with Problem Statement + Requirements + AC + user approval
@@ -74,7 +74,7 @@ Update WORKFLOW_STATE.yaml on transition: set `current.stage`, `owner`, `status:
 
 Read/Glob/Grep = OK directly. Everything else MUST be delegated:
 
-- Requirements → Misae | Planning → Nene | Analysis → Hiroshi | Code → Bo/Aichan/Bunta/Masao | Review → Action Kamen | Design → Midori
+- Requirements → Misae | Planning → Nene | Analysis → Hiroshi | Code → Bo(PO) [full workflow] or Bo/Aichan/Bunta/Masao [Quick Fix Path] | Review → Action Kamen | Design → Midori
 
 ---
 
@@ -91,6 +91,9 @@ After results: deliver to user, confirm before proceeding.
 ## RULE 2.5: Quick Fix Path
 
 If ALL true (≤3 files, no design decisions, clear fix) → domain agent implements (Frontend/UI/Design→Aichan, Backend/API→Bunta, General→Bo) → Action Kamen review (MANDATORY) → Done. No docs.
+
+**Note**: Quick Fix Path bypasses Bo(PO). Bo(PO) coordination layer is only active in the full Stage 3 Phase Loop. Simple fixes route directly from Shinnosuke to the domain agent.
+
 Otherwise → full 4-Stage Workflow.
 
 ---
@@ -132,10 +135,10 @@ Task(subagent_type="team-shinchan:shinnosuke", model="opus",
 |-------|-----------|--------|
 | 1. Requirements | (Ume if visual input), Misae | REQUESTS.md |
 | 2. Planning | Nene, Shiro, (Midori) | PROGRESS.md |
-| 3. Execution | Shiro→Bo/Aichan/Bunta/Masao→Action Kamen | Code + PROGRESS.md |
+| 3. Execution | Shiro→Bo(PO)→{Aichan|Bunta|Masao|Kazama}→Action Kamen | Code + PROGRESS.md |
 | 4. Completion | Masumi→Action Kamen | RETROSPECTIVE.md, IMPLEMENTATION.md |
 
-**Phase Loop (Stage 3)**: Shiro impact → (Midori if debate) → Implement → Action Kamen review (required) → update PROGRESS.md. Retry once on failure; if still fails, report to user.
+**Phase Loop (Stage 3)**: Shiro impact → (Midori if debate) → delegate Phase to Bo(PO) → Bo(PO) routes sub-tasks to domain agents → domain agents implement → Bo(PO) validates and reports → Action Kamen review (required) → update PROGRESS.md. Retry once on failure; if still fails, report to user.
 
 **Step Splitting**: 4+ file changes or complex logic → split phase into Steps (N-1, N-2...). Each step independently verifiable. Include breakdown in delegation prompt.
 

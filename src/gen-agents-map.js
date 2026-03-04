@@ -89,7 +89,7 @@ function generate() {
     '| Strategic advice / debug | hiroshi |',
     '| Code review | actionkamen |',
     '| Documentation search | masumi |',
-    '| General coding | bo |',
+    '| Execution PO / general coding | bo |',
     '| Frontend (React/Vue) | aichan |',
     '| Backend (API/DB) | bunta |',
     '| DevOps (CI/CD/Infra) | masao |',

@@ -37,6 +37,24 @@
       "to": "advisory",
       "agent": "hiroshi",
       "reason": "Midori delegates synthesis to Hiroshi during debates"
+    },
+    {
+      "from": "execution",
+      "to": "specialist",
+      "agent": "aichan",
+      "reason": "Bo(PO) routes frontend sub-tasks to Aichan during Stage 3 execution"
+    },
+    {
+      "from": "execution",
+      "to": "specialist",
+      "agent": "bunta",
+      "reason": "Bo(PO) routes backend/API sub-tasks to Bunta during Stage 3 execution"
+    },
+    {
+      "from": "execution",
+      "to": "specialist",
+      "agent": "masao",
+      "reason": "Bo(PO) routes DevOps/CI sub-tasks to Masao during Stage 3 execution"
     }
   ]
 }

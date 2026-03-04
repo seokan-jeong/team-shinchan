@@ -46,7 +46,7 @@ Stage: {current_stage} ({n}/4) | Phase: {current_phase|N/A} | Owner: {current_ow
 | requirements | Nene | Opus | REQUESTS.md + interview state |
 | planning | Nene | Opus | REQUESTS.md + PROGRESS.md |
 | execution | Bo/Specialist | Sonnet | REQUESTS.md + PROGRESS.md + phase tasks |
-| completion | Masumi + Action Kamen | Sonnet + Opus | All docs |
+| completion | Bo + Action Kamen | Sonnet + Opus | All docs |
 
 **Execution routing**: frontend -> Aichan, backend -> Bunta, infra -> Masao, default -> Bo.
 

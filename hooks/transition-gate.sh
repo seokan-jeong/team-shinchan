@@ -52,94 +52,109 @@ process.stdin.on('end', () => {
     }
   }
 
-  if (!stageMatch) {
-    process.exit(0); // No stage change detected
+  // Detect status change (completed/done)
+  let statusMatch = newContent.match(/status:\\s*([\\w]+)/);
+  if (!statusMatch && toolName === 'Edit' && toolInput.old_string && toolInput.new_string) {
+    const oldHasStatus = /status:\\s*\\w+/.test(toolInput.old_string);
+    const newIsStatus = /^\\s*(active|paused|completed|done|blocked)\\s*$/.test(toolInput.new_string.trim());
+    if (oldHasStatus && newIsStatus) {
+      statusMatch = [null, toolInput.new_string.trim()];
+    }
   }
-  const newStage = stageMatch[1].trim();
+  const newStatus = statusMatch ? statusMatch[1].trim() : '';
 
-  // Read current WORKFLOW_STATE.yaml to get current stage
-  let currentStage = '';
-  try {
-    const current = fs.readFileSync(filePath, 'utf-8');
-    const cm = current.match(/^\\s*stage:\\s*(\\w+)/m);
-    if (cm) currentStage = cm[1].trim();
-  } catch(e) {
-    // File doesn't exist yet (new workflow) — allow
-    process.exit(0);
+  if (!stageMatch && !['completed', 'done'].includes(newStatus)) {
+    process.exit(0); // No stage change or completion status detected
   }
 
-  // If stage isn't changing, allow
-  if (currentStage === newStage) {
-    process.exit(0);
-  }
+  const newStage = stageMatch ? stageMatch[1].trim() : '';
 
   // Get doc directory
   const docDir = path.dirname(filePath);
-
-  // Stage transition gate checks
-  const stageOrder = ['requirements', 'planning', 'execution', 'completion'];
-  const currentIdx = stageOrder.indexOf(currentStage);
-  const newIdx = stageOrder.indexOf(newStage);
-
-  // Only check forward transitions
-  if (newIdx <= currentIdx || currentIdx === -1 || newIdx === -1) {
-    process.exit(0);
-  }
-
   const missing = [];
 
-  // Gate: requirements -> planning
-  if (currentStage === 'requirements' && newStage === 'planning') {
-    const reqFile = path.join(docDir, 'REQUESTS.md');
-    if (!fs.existsSync(reqFile)) {
-      missing.push('REQUESTS.md does not exist');
-    } else {
-      const content = fs.readFileSync(reqFile, 'utf-8');
-      if (!content.match(/problem|목표|objective/i)) {
-        missing.push('REQUESTS.md missing Problem Statement / Objective');
-      }
-      if (!content.match(/requirement|요구사항|기능/i)) {
-        missing.push('REQUESTS.md missing Requirements section');
-      }
-    }
-  }
-
-  // Gate: planning -> execution
-  if (currentStage === 'planning' && newStage === 'execution') {
-    const reqFile = path.join(docDir, 'REQUESTS.md');
-    const progFile = path.join(docDir, 'PROGRESS.md');
-    if (!fs.existsSync(reqFile)) {
-      missing.push('REQUESTS.md does not exist');
-    }
-    if (!fs.existsSync(progFile)) {
-      missing.push('PROGRESS.md does not exist');
-    } else {
-      const content = fs.readFileSync(progFile, 'utf-8');
-      if (!content.match(/phase|단계/i)) {
-        missing.push('PROGRESS.md missing Phase definitions');
-      }
-    }
-  }
-
-  // Gate: execution -> completion
-  if (currentStage === 'execution' && newStage === 'completion') {
-    const progFile = path.join(docDir, 'PROGRESS.md');
-    if (!fs.existsSync(progFile)) {
-      missing.push('PROGRESS.md does not exist');
-    }
-    // Check WORKFLOW_STATE.yaml history for action_kamen review
+  // === Stage transition gates ===
+  if (stageMatch && newStage) {
+    let currentStage = '';
     try {
-      const yaml = fs.readFileSync(filePath, 'utf-8');
-      if (!yaml.includes('action_kamen') && !yaml.includes('verify_implementation')) {
-        missing.push('No Action Kamen review recorded in workflow history');
-      }
+      const current = fs.readFileSync(filePath, 'utf-8');
+      const cm = current.match(/^\\s*stage:\\s*(\\w+)/m);
+      if (cm) currentStage = cm[1].trim();
     } catch(e) {}
+
+    if (currentStage !== newStage) {
+      const stageOrder = ['requirements', 'planning', 'execution', 'completion'];
+      const currentIdx = stageOrder.indexOf(currentStage);
+      const newIdx = stageOrder.indexOf(newStage);
+
+      if (newIdx > currentIdx && currentIdx !== -1 && newIdx !== -1) {
+        // Gate: requirements -> planning
+        if (currentStage === 'requirements' && newStage === 'planning') {
+          const reqFile = path.join(docDir, 'REQUESTS.md');
+          if (!fs.existsSync(reqFile)) {
+            missing.push('REQUESTS.md does not exist');
+          } else {
+            const content = fs.readFileSync(reqFile, 'utf-8');
+            if (!content.match(/problem|목표|objective/i)) {
+              missing.push('REQUESTS.md missing Problem Statement / Objective');
+            }
+            if (!content.match(/requirement|요구사항|기능/i)) {
+              missing.push('REQUESTS.md missing Requirements section');
+            }
+          }
+        }
+
+        // Gate: planning -> execution
+        if (currentStage === 'planning' && newStage === 'execution') {
+          const reqFile = path.join(docDir, 'REQUESTS.md');
+          const progFile = path.join(docDir, 'PROGRESS.md');
+          if (!fs.existsSync(reqFile)) {
+            missing.push('REQUESTS.md does not exist');
+          }
+          if (!fs.existsSync(progFile)) {
+            missing.push('PROGRESS.md does not exist');
+          } else {
+            const content = fs.readFileSync(progFile, 'utf-8');
+            if (!content.match(/phase|단계/i)) {
+              missing.push('PROGRESS.md missing Phase definitions');
+            }
+          }
+        }
+
+        // Gate: execution -> completion
+        if (currentStage === 'execution' && newStage === 'completion') {
+          const progFile = path.join(docDir, 'PROGRESS.md');
+          if (!fs.existsSync(progFile)) {
+            missing.push('PROGRESS.md does not exist');
+          }
+          try {
+            const yaml = fs.readFileSync(filePath, 'utf-8');
+            if (!yaml.includes('action_kamen') && !yaml.includes('verify_implementation')) {
+              missing.push('No Action Kamen review recorded in workflow history');
+            }
+          } catch(e) {}
+        }
+      }
+    }
+  }
+
+  // === Status completion gate ===
+  // Block status: completed/done unless RETROSPECTIVE.md + IMPLEMENTATION.md exist
+  if (['completed', 'done'].includes(newStatus)) {
+    const retroFile = path.join(docDir, 'RETROSPECTIVE.md');
+    const implFile = path.join(docDir, 'IMPLEMENTATION.md');
+    if (!fs.existsSync(retroFile)) {
+      missing.push('RETROSPECTIVE.md does not exist — required before marking workflow as completed');
+    }
+    if (!fs.existsSync(implFile)) {
+      missing.push('IMPLEMENTATION.md does not exist — required before marking workflow as completed');
+    }
   }
 
   if (missing.length > 0) {
     console.log(JSON.stringify({
       decision: 'block',
-      reason: 'TRANSITION GATE: Cannot advance from \"' + currentStage + '\" to \"' + newStage + '\". Missing prerequisites:\\n- ' + missing.join('\\n- ')
+      reason: 'TRANSITION GATE: Blocked. Missing prerequisites:\\n- ' + missing.join('\\n- ')
     }));
     return;
   }

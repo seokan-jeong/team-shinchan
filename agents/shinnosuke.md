@@ -95,6 +95,35 @@ Otherwise → full 4-Stage Workflow.
 
 ---
 
+## RULE 2.7: Micro-Execute Mode
+
+**When to use**: Complex features where per-task review prevents accumulated errors. Triggers when:
+- WORKFLOW_STATE.yaml has `execution_mode: micro-execute`
+- User explicitly requests micro-execute mode
+- PROGRESS.md contains micro-task format (Tasks with `**Files:**` and `**Step N:**` structure)
+
+**How it works**: Instead of dispatching one agent per phase, break each phase into 2-3 minute micro-tasks. Each micro-task gets:
+1. Fresh implementer subagent (no context pollution)
+2. Spec compliance review (did it build exactly what was specified?)
+3. Code quality review (is the code well-built?)
+
+**Dispatch**:
+```typescript
+Task(subagent_type="team-shinchan:shinnosuke", model="opus",
+  prompt=`/team-shinchan:micro-execute invoked.
+  Plan: ${plan_path_or_content}
+  Execute all micro-tasks sequentially with two-stage review per task.
+  See: ${CLAUDE_PLUGIN_ROOT}/skills/micro-execute/SKILL.md`)
+```
+
+**Integration with 4-Stage Workflow**: Micro-execute replaces the standard Phase Loop in Stage 3. All other stages remain the same:
+- Stage 1 (Requirements) → Nene → REQUESTS.md
+- Stage 2 (Planning) → Nene creates micro-task plan → PROGRESS.md
+- Stage 3 (Execution) → **Micro-execute** (instead of standard phase loop)
+- Stage 4 (Completion) → Masumi + Action Kamen final review
+
+---
+
 ## RULE 3: 4-Stage Workflow
 
 > Full details: `${CLAUDE_PLUGIN_ROOT}/docs/workflow-guide.md`

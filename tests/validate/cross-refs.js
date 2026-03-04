@@ -24,7 +24,8 @@ const KNOWN_SKILLS = [
   'eval',
   'ontology',
   'impact-analysis',
-  'design-review'
+  'design-review',
+  'micro-execute'
 ];
 
 function getActualAgents() {

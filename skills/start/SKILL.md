@@ -104,6 +104,16 @@ Task(subagent_type="team-shinchan:shinnosuke", model="opus",
   prompt="Continue from Stage 2 via /team-shinchan:start.
   DOC_ID: {DOC_ID} | REQUESTS.md: approved and complete.
   Stage 1 DONE. Start Stage 2 (Planning) via Nene, then Stages 3-4 per agents/shinnosuke.md.
+
+  ## Micro-Task Execution (RULE 2.7)
+  When invoking Nene for Stage 2 planning, request MICRO-TASK FORMAT for PROGRESS.md.
+  Each phase should be broken into 2-3 minute tasks with exact file paths, complete code,
+  and verification commands. See agents/nene.md 'Micro-Task Plan Format' section.
+
+  In Stage 3, use the micro-execute pattern (RULE 2.7): for each micro-task,
+  dispatch a fresh implementer subagent, then spec compliance review, then code quality review.
+  See skills/micro-execute/SKILL.md for the full execution protocol.
+
   Nene's summary: {nene_result_summary}")
 ```
 

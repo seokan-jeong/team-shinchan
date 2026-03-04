@@ -110,6 +110,56 @@ Each phase: `## Phase N: {Title} (GAP-X)`, agent/dependency, `### Rationale` (MA
 
 ---
 
+## Micro-Task Plan Format (for micro-execute mode)
+
+When the orchestrator requests a **micro-task plan** (or when `execution_mode: micro-execute` is specified), break each phase into 2-3 minute micro-tasks. This format enables per-task subagent dispatch with two-stage review.
+
+### Micro-Task Template
+
+```markdown
+### Task N: [Component Name]
+
+**Files:**
+- Create: `exact/path/to/new-file.ts`
+- Modify: `exact/path/to/existing.ts:42-58`
+- Test: `tests/exact/path/to/test.ts`
+
+**Step 1: [Specific action — e.g., "Write the failing test"]**
+[Complete code block or exact instructions]
+
+**Step 2: Verify**
+Run: `npm test -- tests/path/test.ts`
+Expected: PASS (or FAIL with specific message if TDD)
+
+**Step 3: Commit** (optional)
+`git add [files] && git commit -m "[descriptive message]"`
+```
+
+### Rules for Micro-Task Plans
+
+1. **2-3 minute scope**: Each task is ONE focused change. If it takes longer, split it.
+2. **Exact file paths**: Never "add a file somewhere" — always `exact/path/to/file.ext`
+3. **Complete code**: Not "add validation" but the actual validation code
+4. **Verification commands**: Exact command + expected output. No ambiguity.
+5. **Zero context assumption**: Write as if the implementer knows NOTHING about the project
+6. **Dependency order**: Later tasks may depend on earlier ones. Mark dependencies explicitly.
+7. **TDD encouraged**: For new features, prefer "write test → run (expect fail) → implement → run (expect pass)" pattern
+
+### When to Use Micro-Task Format
+
+- Orchestrator explicitly requests it
+- `execution_mode: micro-execute` in WORKFLOW_STATE.yaml
+- Complex features that benefit from per-task review
+- High-risk changes where spec compliance matters
+
+### When NOT to Use
+
+- Simple 1-2 file changes (use standard phase format)
+- Quick fixes (use Quick Fix Path)
+- Trivial tasks under 5 minutes total
+
+---
+
 ## Ontology-Aware Planning
 
 **Planning 시작 시** `.shinchan-docs/ontology/ontology.json`가 존재하면 아래를 실행:

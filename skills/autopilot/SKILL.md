@@ -37,9 +37,12 @@ Complete autonomously without user intervention:
 
 1. Create WORKFLOW_STATE.yaml (stage: requirements)
 2. Auto-analyze requirements with Misae
-3. Create plan with Nene (REQUESTS.md, PROGRESS.md)
-4. Distribute tasks to appropriate agents (Bo/Aichan/Bunta/Masao)
-5. Action Kamen verification
+3. Create plan with Nene in MICRO-TASK FORMAT (REQUESTS.md, PROGRESS.md)
+   - Each phase broken into 2-3 minute tasks with exact file paths, code, and verification commands
+4. Execute using micro-execute pattern (RULE 2.7 in agents/shinnosuke.md):
+   - For each micro-task: fresh implementer subagent → spec compliance review → code quality review
+   - See skills/micro-execute/SKILL.md for full protocol
+5. Action Kamen final verification
 6. Auto-fix issues when discovered
 
 ## Stage Rule Compliance

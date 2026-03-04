@@ -48,7 +48,7 @@ updated: "{ISO timestamp}"
 current:
   stage: requirements
   phase: null
-  owner: nene
+  owner: misae
   status: active
 
 stage_rules:
@@ -74,25 +74,23 @@ history:
 📄 WORKFLOW_STATE.yaml ✅
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📋 Stage 1: Requirements
-👤 Owner: Nene
+👤 Owner: Misae
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-## 5. Execute Immediately: Invoke Nene
+## 5. Execute Immediately: Invoke Misae
 
 ```typescript
 Task(
-  subagent_type="team-shinchan:nene",
-  model="opus",
-  prompt="Starting Stage 1 requirements gathering.
+  subagent_type="team-shinchan:misae",
+  model="sonnet",
+  prompt="Starting Stage 1: Requirements via /team-shinchan:start.
 
 DOC_ID: {DOC_ID}
-User request: {args}
-
-Write REQUESTS.md and interview the user.
-Record all '~do this' requests as requirements (not implementation).
-
-First question: 'What problem do you want to solve?'"
+WORKFLOW_STATE: .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml
+Mission: Interview user, collect requirements, analyze hidden risks, create REQUESTS.md (Problem, FR/NFR, Scope, Hidden Requirements, Risks, AC), get approval.
+On approval: set current.stage to 'planning', return summary.
+User request: {args}"
 )
 ```
 
@@ -102,7 +100,7 @@ First question: 'What problem do you want to solve?'"
 
 - ❌ Only describing the above steps
 - ❌ Proceeding without creating WORKFLOW_STATE.yaml
-- ❌ Proceeding directly without invoking Nene
+- ❌ Proceeding directly without invoking Misae
 
 ## Usage
 

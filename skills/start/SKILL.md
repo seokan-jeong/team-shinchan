@@ -26,7 +26,7 @@ updated: "{timestamp}"
 current:
   stage: requirements
   phase: null
-  owner: nene
+  owner: misae
   status: active
   interview: { step: 0, collected_count: 0, last_question: null }
 history:
@@ -58,35 +58,25 @@ Task(subagent_type="team-shinchan:ume", model="sonnet",
 
 Store result as `{vision_context}`. Skip if no visual input.
 
-### Step 2A: Requirements - Invoke Nene DIRECTLY
+### Step 2A: Requirements - Invoke Misae DIRECTLY
 
-**CRITICAL: Do NOT invoke Shinnosuke for Stage 1. Invoke Nene directly (1-level instead of 2-level).**
+**CRITICAL: Do NOT invoke Shinnosuke for Stage 1. Invoke Misae directly (1-level instead of 2-level).**
 
 ```typescript
-Task(subagent_type="team-shinchan:nene", model="opus",
+Task(subagent_type="team-shinchan:misae", model="sonnet",
   prompt="Starting Stage 1: Requirements via /team-shinchan:start.
   DOC_ID: {DOC_ID} | WORKFLOW_STATE: .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml
   Visual Analysis: {vision_context or 'None'}
-  Mission: Interview user, create REQUESTS.md (Problem, FR/NFR, Scope, AC), get approval.
+  Mission: Interview user, collect requirements, analyze hidden risks, create REQUESTS.md (Problem, FR/NFR, Scope, Hidden Requirements, Risks, AC), get approval.
   If visual analysis provided, use as starting point and validate with user.
   On approval: set current.stage to 'planning', return summary.
   User request: {args}")
 ```
 
-### Step 2A-post: Hidden Requirements (Misae)
+### Step 2A-post: Requirements Complete
 
-**After Nene returns REQUESTS.md draft, before user approval:**
-
-```typescript
-Task(subagent_type="team-shinchan:misae", model="sonnet",
-  prompt="Analyze .shinchan-docs/{DOC_ID}/REQUESTS.md for hidden requirements.
-  Check: STRIDE threats, edge cases, scalability, implicit deps, 80/20 simplification.
-  Output: Hidden Requirements (max 5), Risks (with severity), Recommendations.
-  If well-covered, say so briefly.
-  Nene's summary: {nene_result_summary}")
-```
-
-If Misae finds gaps: show to user, ask "Add these to requirements?". If yes, update REQUESTS.md. If no, proceed.
+Misae has already performed hidden requirements analysis as part of Stage 1. No separate analysis needed.
+If Misae's REQUESTS.md is approved, proceed directly to Step 2B.
 
 ### Step 2B: Stage Transition Narration
 
@@ -122,5 +112,5 @@ Task(subagent_type="team-shinchan:shinnosuke", model="opus",
 
 - Only explaining without executing
 - Skipping folder/YAML creation
-- Invoking Shinnosuke for Stage 1 (must use Nene directly)
-- Gathering requirements without invoking Nene
+- Invoking Shinnosuke for Stage 1 (must use Misae directly)
+- Gathering requirements without invoking Misae

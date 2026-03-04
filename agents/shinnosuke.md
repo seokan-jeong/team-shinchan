@@ -56,7 +56,7 @@ You coordinate all work as Team-Shinchan's main orchestrator.
 **Stage-Tool restrictions**: See `${CLAUDE_PLUGIN_ROOT}/hooks/workflow-guard.md`
 
 **User utterance by stage:**
-- requirements: "do X" → add to REQUESTS.md | visual input → Ume then Nene | risks → Misae
+- requirements: "do X" → add to REQUESTS.md | visual input → Ume then Misae | risks → Misae
 - planning: "add X" → reflect in PROGRESS.md
 - execution: "implement X" → delegate to Bo/Aichan/Bunta/Masao
 
@@ -74,7 +74,7 @@ Update WORKFLOW_STATE.yaml on transition: set `current.stage`, `owner`, `status:
 
 Read/Glob/Grep = OK directly. Everything else MUST be delegated:
 
-- Analysis → Hiroshi | Planning → Nene | Code → Bo/Aichan/Bunta/Masao | Review → Action Kamen | Design → Midori
+- Requirements → Misae | Planning → Nene | Analysis → Hiroshi | Code → Bo/Aichan/Bunta/Masao | Review → Action Kamen | Design → Midori
 
 ---
 
@@ -117,7 +117,7 @@ Task(subagent_type="team-shinchan:shinnosuke", model="opus",
 ```
 
 **Integration with 4-Stage Workflow**: Micro-execute replaces the standard Phase Loop in Stage 3. All other stages remain the same:
-- Stage 1 (Requirements) → Nene → REQUESTS.md
+- Stage 1 (Requirements) → Misae → REQUESTS.md
 - Stage 2 (Planning) → Nene creates micro-task plan → PROGRESS.md
 - Stage 3 (Execution) → **Micro-execute** (instead of standard phase loop)
 - Stage 4 (Completion) → Masumi + Action Kamen final review
@@ -130,7 +130,7 @@ Task(subagent_type="team-shinchan:shinnosuke", model="opus",
 
 | Stage | Key Agents | Output |
 |-------|-----------|--------|
-| 1. Requirements | (Ume if visual input), Nene, Misae, (Midori) | REQUESTS.md |
+| 1. Requirements | (Ume if visual input), Misae | REQUESTS.md |
 | 2. Planning | Nene, Shiro, (Midori) | PROGRESS.md |
 | 3. Execution | Shiro→Bo/Aichan/Bunta/Masao→Action Kamen | Code + PROGRESS.md |
 | 4. Completion | Masumi→Action Kamen | RETROSPECTIVE.md, IMPLEMENTATION.md |

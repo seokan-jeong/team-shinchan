@@ -33,13 +33,13 @@ Note: `tool` tier is set when user explicitly passes `--tier tool` or AI detects
 2. **Append** to `.shinchan-docs/learnings.md` (create if missing):
 
 ```markdown
-## [YYYY-MM-DD HH:MM] {category}: {title}
-
-**Context**: Manually taught by user
-**Tier**: {auto-mapped tier}
-**Learning**: {content}
-**Confidence**: high
-**Tags**: #{auto-generated tags}
+### [{category}] {title}
+- **Date**: {YYYY-MM-DD}
+- **Source**: manual
+- **Tier**: {auto-mapped tier}
+- **Confidence**: high
+- **Tags**: #{auto-generated tags}
+- **Insight**: {content}
 
 ---
 ```

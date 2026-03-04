@@ -22,9 +22,13 @@ If a correction pattern is detected:
 
 Format for learnings entry:
 ```
-### [Date] Correction: {brief description}
+### [mistake] Correction: {brief description}
+- **Date**: {YYYY-MM-DD}
+- **Source**: correction-capture
 - **Tier**: procedural
-- **Mistake**: {what went wrong}
-- **Correct**: {what should have been done}
-- **Prevention**: {how to avoid next time}
+- **Confidence**: high
+- **Tags**: #{relevant tags}
+- **Insight**: Mistake: {what went wrong}. Correct: {what should have been done}. Prevention: {how to avoid next time}
+
+---
 ```

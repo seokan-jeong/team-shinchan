@@ -18,6 +18,7 @@ All execution agents MUST run this checklist before reporting task completion.
 - [ ] Tests run and pass (if applicable)
 - [ ] No unrelated formatting changes
 - [ ] **Verification Evidence**: I ran a test/build command and can show the output (not "it should work")
+- [ ] **Impact Scope Complete**: For every file I changed, I checked paired/dependent files (skill↔command, agent↔shared, hook↔registration). No orphaned counterparts left out of sync.
 
 ### Reporting
 - [ ] Changes logged in PROGRESS.md (if active workflow)

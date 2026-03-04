@@ -27,6 +27,55 @@ function getCommandFiles() {
     .sort();
 }
 
+/**
+ * Extract YAML frontmatter value from markdown content
+ */
+function extractFrontmatter(content, key) {
+  const match = content.match(new RegExp(`^---[\\s\\S]*?^${key}:\\s*(.+?)$[\\s\\S]*?^---`, 'm'));
+  return match ? match[1].trim().replace(/^["']|["']$/g, '') : null;
+}
+
+/**
+ * Check content sync between skill SKILL.md and command .md
+ * Detects drift in key fields (agent names, owner references, subagent_type)
+ */
+function checkContentSync(skillName, errors, warnings) {
+  const skillPath = path.join(SKILLS_DIR, skillName, 'SKILL.md');
+  const cmdPath = path.join(COMMANDS_DIR, `${skillName}.md`);
+
+  if (!fs.existsSync(skillPath) || !fs.existsSync(cmdPath)) return;
+
+  const skillContent = fs.readFileSync(skillPath, 'utf8');
+  const cmdContent = fs.readFileSync(cmdPath, 'utf8');
+
+  // Check 1: subagent_type references should match
+  const skillAgents = [...skillContent.matchAll(/subagent_type\s*=\s*"([^"]+)"/g)].map(m => m[1]).sort();
+  const cmdAgents = [...cmdContent.matchAll(/subagent_type\s*=\s*"([^"]+)"/g)].map(m => m[1]).sort();
+
+  if (skillAgents.length > 0 && cmdAgents.length > 0) {
+    if (JSON.stringify(skillAgents) !== JSON.stringify(cmdAgents)) {
+      warnings.push(`${skillName}: subagent_type mismatch — skill has [${skillAgents.join(', ')}] but command has [${cmdAgents.join(', ')}]`);
+    }
+  }
+
+  // Check 2: owner references in YAML blocks should match
+  const skillOwners = [...skillContent.matchAll(/owner:\s*(\w+)/g)].map(m => m[1]);
+  const cmdOwners = [...cmdContent.matchAll(/owner:\s*(\w+)/g)].map(m => m[1]);
+
+  if (skillOwners.length > 0 && cmdOwners.length > 0) {
+    const skillSet = [...new Set(skillOwners)].sort();
+    const cmdSet = [...new Set(cmdOwners)].sort();
+    if (JSON.stringify(skillSet) !== JSON.stringify(cmdSet)) {
+      warnings.push(`${skillName}: owner mismatch — skill has [${skillSet.join(', ')}] but command has [${cmdSet.join(', ')}]`);
+    }
+  }
+
+  // Check 3: user-invocable field should match between skill and command
+  const skillInvocable = extractFrontmatter(skillContent, 'user-invocable');
+  // Command files are always user-facing, so if skill says user-invocable: false,
+  // the command should not contain direct user invocation patterns (this is just informational)
+}
+
 function runValidation() {
   console.log('========================================');
   console.log('  Skill-Command Parity Validation');
@@ -71,8 +120,28 @@ function runValidation() {
     }
   });
 
-  if (warnings.length === 0) {
+  if (warnings.filter(w => w.includes('no matching skill')).length === 0) {
     console.log('  \x1b[32m✓\x1b[0m No orphaned command files found');
+  }
+
+  // Content sync check between paired skill/command files
+  console.log('\nChecking skill-command content sync...');
+  let syncIssues = 0;
+  skillDirs.forEach(skill => {
+    if (commandFiles.includes(skill)) {
+      const prevLen = warnings.length;
+      checkContentSync(skill, errors, warnings);
+      if (warnings.length > prevLen) {
+        syncIssues++;
+        warnings.slice(prevLen).forEach(w => {
+          console.log(`  \x1b[33m!\x1b[0m ${w}`);
+        });
+      }
+    }
+  });
+
+  if (syncIssues === 0) {
+    console.log('  \x1b[32m✓\x1b[0m No content drift detected');
   }
 
   console.log('\n----------------------------------------');

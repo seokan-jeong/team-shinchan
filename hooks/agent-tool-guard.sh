@@ -79,6 +79,10 @@ process.stdin.on('end', () => {
 
     for (const { pat, desc } of destructivePatterns) {
       if (pat.test(command)) {
+        // Exception: allow .shinchan-docs/ operations (state/docs) for all read-only agents
+        if (/\\.shinchan-docs\\//.test(command)) {
+          process.exit(0);
+        }
         // Exception: actionkamen can run test/lint commands (only if the entire command is a test)
         if (currentAgent === 'actionkamen') {
           const trimCmd = command.trim();

@@ -2,6 +2,15 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.8.0] - 2026-03-04
+
+### Changed
+- **Bo** — Redesigned from "Task Executor" to "Execution PO". Receives Phases from Shinnosuke, routes sub-tasks to domain specialists (Aichan/Bunta/Masao/Kazama) via Domain Routing Table, validates results, and reports back. maxTurns 30→50, memory local→project.
+- **Shinnosuke** — Stage 3 Phase Loop updated: delegates Phases to Bo(PO) instead of routing directly to domain agents. RULE 0/1/2.5/3 updated. Quick Fix Path (RULE 2.5) explicitly bypasses Bo(PO).
+- **layer-map.json** — 3 execution→specialist exceptions added (aichan, bunta, masao) for Bo(PO) delegation
+- **output-formats.md** — Bo(PO) Delegation Format section added (before/after delegation, domain ambiguity, phase completion summary)
+- **AGENTS.md** — Regenerated to reflect Bo's new role and maxTurns
+
 ## [4.7.0] - 2026-03-04
 
 ### Added

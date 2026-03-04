@@ -133,11 +133,51 @@ if (activeYaml) {
   } catch(e) {}
 }
 
+// ── Tool Cache Cleanup (FR-6) ──
+let cleaned = 0;
+try {
+  const toolCacheDirs = [];
+  if (docDir) toolCacheDirs.push(path.join(docDir, 'tool-cache'));
+  toolCacheDirs.push(path.join(docsDir, 'tool-cache'));
+
+  let ttlDays = 7;
+  if (activeYaml) {
+    try {
+      const yamlContent = fs.readFileSync(activeYaml, 'utf-8');
+      const ttlMatch = yamlContent.match(/tool_cache_ttl_days:\s*(\d+)/);
+      if (ttlMatch) ttlDays = parseInt(ttlMatch[1]);
+    } catch(e) {}
+  }
+
+  const ttlMs = ttlDays * 24 * 60 * 60 * 1000;
+  const cutoff = Date.now() - ttlMs;
+
+  for (const cacheDir of toolCacheDirs) {
+    try {
+      if (!fs.existsSync(cacheDir)) continue;
+      const cacheFiles = fs.readdirSync(cacheDir);
+      for (const f of cacheFiles) {
+        const fp = path.join(cacheDir, f);
+        try {
+          const stat = fs.statSync(fp);
+          if (stat.isFile() && stat.mtimeMs < cutoff) {
+            fs.unlinkSync(fp);
+            cleaned++;
+          }
+        } catch(e) {} // silently skip undeletable files
+      }
+    } catch(e) {} // silently skip unreadable dirs
+  }
+} catch(e) {}
+
 // ── Output ──
 console.log('[Session Wrap] Summary saved to ' + summaryPath);
 console.log('  Duration: ' + durationMin + 'min | Agents: ' + agentCount + ' | Files: ' + files.size + ' | Events: ' + events.length + ' | Turns: ' + turnEvents);
 if (activeYaml) {
   console.log('  Budget counters updated (+' + turnEvents + ' turns)');
+}
+if (cleaned > 0) {
+  console.log('  Tool cache: ' + cleaned + ' expired file(s) removed (TTL: ' + ttlDays + 'd)');
 }
 " 2>/dev/null || true)
 

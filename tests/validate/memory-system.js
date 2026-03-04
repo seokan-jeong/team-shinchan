@@ -86,6 +86,52 @@ function runValidation() {
     }
   }
 
+  // Check tier field support in hook/skill files
+  console.log('\nChecking tier field support...');
+  const tierFiles = [
+    { path: 'hooks/auto-retrospective.md', name: 'auto-retrospective hook' },
+    { path: 'hooks/load-kb.md', name: 'load-kb hook' },
+    { path: 'skills/learn/SKILL.md', name: 'learn skill' },
+  ];
+  for (const { path: filePath, name } of tierFiles) {
+    const fullPath = path.join(ROOT_DIR, filePath);
+    if (fs.existsSync(fullPath)) {
+      const content = fs.readFileSync(fullPath, 'utf-8');
+      if (/tier/i.test(content)) {
+        console.log(`  \x1b[32m✓\x1b[0m ${name} has tier support`);
+      } else {
+        errors.push(`${name} missing tier field support`);
+        console.log(`  \x1b[31m✗\x1b[0m ${name} missing tier support`);
+      }
+    }
+  }
+
+  // Validate tier field values in learnings.md (if it exists in project)
+  console.log('\nChecking learnings.md tier values...');
+  const projectLearnPath = path.join(ROOT_DIR, '.shinchan-docs/learnings.md');
+  if (fs.existsSync(projectLearnPath)) {
+    const learnContent = fs.readFileSync(projectLearnPath, 'utf-8');
+    const tierMatches = learnContent.match(/\*\*Tier\*\*:\s*(\w+)/g) || [];
+    const validTiers = ['preference', 'procedural', 'tool'];
+    let invalidTiers = [];
+    for (const match of tierMatches) {
+      const tierValue = match.replace(/\*\*Tier\*\*:\s*/, '').trim();
+      if (!validTiers.includes(tierValue)) {
+        invalidTiers.push(tierValue);
+      }
+    }
+    if (tierMatches.length === 0) {
+      console.log('  \x1b[33m-\x1b[0m No tier fields found (backward compatible — OK)');
+    } else if (invalidTiers.length > 0) {
+      errors.push(`Invalid tier values found: ${invalidTiers.join(', ')}`);
+      console.log(`  \x1b[31m✗\x1b[0m Invalid tier values: ${invalidTiers.join(', ')}`);
+    } else {
+      console.log(`  \x1b[32m✓\x1b[0m All ${tierMatches.length} tier values are valid`);
+    }
+  } else {
+    console.log('  \x1b[33m-\x1b[0m No learnings.md found (skipped)');
+  }
+
   console.log('\n----------------------------------------');
   console.log(`Errors: ${errors.length}`);
   console.log('----------------------------------------\n');

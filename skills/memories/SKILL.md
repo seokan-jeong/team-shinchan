@@ -41,29 +41,32 @@ Or just work - I learn automatically after tasks!
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📌 PREFERENCES ({count})
+🔹 PREFERENCE TIER ({count}) — always loaded
 • Use Zustand over Redux [high] #state-management
 • Prefer functional components [high] #react
 
-📌 PATTERNS ({count})
-• Early returns for validation [high] #typescript
-• Repository pattern for data access [medium] #architecture
+🔸 PROCEDURAL TIER ({count}) — project-scoped
+  📌 PATTERNS ({count})
+  • Early returns for validation [high] #typescript
+  • Repository pattern for data access [medium] #architecture
+  📌 CONVENTIONS ({count})
+  • Use pnpm, not npm [high] #tooling
+  • camelCase for functions [high] #naming
+  📌 MISTAKES ({count})
+  • Always null-check before .map() [high] #typescript
+  📌 DECISIONS ({count})
+  • JWT with refresh token rotation [high] #auth
 
-📌 CONVENTIONS ({count})
-• Use pnpm, not npm [high] #tooling
-• camelCase for functions [high] #naming
-
-📌 MISTAKES ({count})
-• Always null-check before .map() [high] #typescript
-
-📌 DECISIONS ({count})
-• JWT with refresh token rotation [high] #auth
+🔧 TOOL TIER ({count}) — execution-stage only
+• Always pass --json to gh CLI [high] #github
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 💡 These learnings are applied automatically.
 🗑️ Use /team-shinchan:forget to remove outdated ones.
 ```
+
+**Filter by tier** (`/memories --tier preference`): Show only entries matching the specified tier.
 
 **Filtered view** (`/memories pattern`):
 

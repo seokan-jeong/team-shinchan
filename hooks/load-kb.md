@@ -27,12 +27,44 @@ Loading is **phase-aware**: when an active workflow exists, only relevant contex
 ### 2. Load Learnings
 
 - Read `.shinchan-docs/learnings.md` if it exists.
-- **Stage-aware filtering**:
-  - `requirements`: Load only `convention` and `preference` categories
-  - `planning`: Load `pattern` and `convention` categories
-  - `execution`: Load `pattern` and `mistake` categories (most relevant to coding)
-  - `completion`: Load all categories
-  - No active workflow: Load all (last 20, high-confidence first)
+
+#### 2a. Stage-Aware Category Filtering
+
+- `requirements`: Load only `convention` and `preference` categories
+- `planning`: Load `pattern` and `convention` categories
+- `execution`: Load `pattern` and `mistake` categories (most relevant to coding)
+- `completion`: Load all categories
+- No active workflow: Load all (last 20, high-confidence first)
+
+#### 2b. Tier-Aware Loading
+
+Each learning entry has an optional `tier` field (`preference` | `procedural` | `tool`). Entries without a `tier` field default to `procedural`.
+
+**Tier priority weights:**
+- `preference` (weight 3): Always loaded first, regardless of stage
+- `procedural` (weight 2): Default tier, medium priority
+- `tool` (weight 1): Loaded only during `execution` stage; skipped otherwise
+
+#### 2c. Relevance Scoring Algorithm
+
+Score each learning entry instead of loading by recency alone:
+
+```
+score = (tier_weight * 3) + (stage_category_match * 2) + (tag_overlap_count * 1)
+```
+
+- `tier_weight`: preference=3, procedural=2, tool=1 (tool=0 if stage != execution)
+- `stage_category_match`: 1 if category is in stage's preferred list, else 0
+- `tag_overlap_count`: number of learning tags matching context keywords (from WORKFLOW_STATE.yaml phase and REQUESTS.md)
+
+Sort descending by score; tie-break by recency. Display top 5.
+
+**Opt-out:** Set `load_kb_relevance: false` in WORKFLOW_STATE.yaml to revert to recency-based loading.
+
+**Fallback:** If no active workflow or node unavailable, use recency-based loading (last 5).
+
+**Note:** Tool output cache files (`.shinchan-docs/tool-cache/`) are NOT loaded at session start — they are referenced inline and retrieved on-demand.
+
 - Display top 5 items.
 
 ### 3. Ontology Summary + GC

@@ -23,6 +23,7 @@ If a correction pattern is detected:
 Format for learnings entry:
 ```
 ### [Date] Correction: {brief description}
+- **Tier**: procedural
 - **Mistake**: {what went wrong}
 - **Correct**: {what should have been done}
 - **Prevention**: {how to avoid next time}

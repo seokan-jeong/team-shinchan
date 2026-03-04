@@ -19,14 +19,16 @@ user-invocable: false
 
 1. **Auto-Categorize** based on keywords:
 
-| Keywords | Category |
-|----------|----------|
-| prefer, like, want | `preference` |
-| pattern, approach, way | `pattern` |
-| always, never, rule, use | `convention` |
-| error, mistake, avoid | `mistake` |
-| decided, architecture | `decision` |
-| other | `insight` |
+| Keywords | Category | Tier |
+|----------|----------|------|
+| prefer, like, want | `preference` | `preference` |
+| pattern, approach, way | `pattern` | `procedural` |
+| always, never, rule, use | `convention` | `procedural` |
+| error, mistake, avoid | `mistake` | `procedural` |
+| decided, architecture | `decision` | `procedural` |
+| other | `insight` | `procedural` |
+
+Note: `tool` tier is set when user explicitly passes `--tier tool` or AI detects tool-specific phrasing (CLI flags, tool config patterns).
 
 2. **Append** to `.shinchan-docs/learnings.md` (create if missing):
 
@@ -34,6 +36,7 @@ user-invocable: false
 ## [YYYY-MM-DD HH:MM] {category}: {title}
 
 **Context**: Manually taught by user
+**Tier**: {auto-mapped tier}
 **Learning**: {content}
 **Confidence**: high
 **Tags**: #{auto-generated tags}

@@ -125,6 +125,18 @@ Output a brief confirmation:
   Duration: {N} minutes | Agents: {count} | Files: {count} | Events: {count}
 ```
 
+### 9. Tool Cache Cleanup (FR-6)
+
+Prevent unbounded growth of tool output cache files:
+
+1. Scan both `{doc_id}/tool-cache/` and `.shinchan-docs/tool-cache/` directories
+2. Read `tool_cache_ttl_days` from active WORKFLOW_STATE.yaml (default: 7 days)
+3. Delete files with modification time older than the TTL threshold
+4. Silently skip undeletable files (permissions, file locks)
+5. Log cleanup count to session summary output: `Tool cache: {N} expired file(s) removed (TTL: {days}d)`
+
+**Graceful degradation:** If no tool-cache directories exist, skip silently. If TTL config is absent, use default 7 days.
+
 ## Rules
 
 - Do NOT fail if work-tracker.jsonl is missing or empty; silently skip

@@ -45,12 +45,18 @@ Create file if missing with header: `# Team-Shinchan Learnings`
 ### [{category}] {title}
 - **Date**: {YYYY-MM-DD}
 - **Source**: {DOC_ID}
+- **Tier**: {preference|procedural|tool}
 - **Confidence**: {high|medium|low}
 - **Tags**: {comma-separated}
 - **Insight**: {description}
 
 ---
 ```
+
+**Tier mapping from category:**
+- `preference` category → `preference` tier
+- `mistake`, `pattern`, `convention`, `insight`, `decision` → `procedural` tier
+- Explicitly tool-related learnings (tool CLI flags, tool config) → `tool` tier
 
 ### 4. Output Summary
 

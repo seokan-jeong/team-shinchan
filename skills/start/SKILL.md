@@ -103,7 +103,8 @@ Then invoke Shinnosuke:
 Task(subagent_type="team-shinchan:shinnosuke", model="opus",
   prompt="Continue from Stage 2 via /team-shinchan:start.
   DOC_ID: {DOC_ID} | REQUESTS.md: approved and complete.
-  Stage 1 DONE. Start Stage 2 (Planning) via Nene, then Stages 3-4 per agents/shinnosuke.md.
+  Stage 1 DONE. Start Stage 2 (Planning) via Nene, then Stage 3 (Execution), then Stage 4 (Completion).
+  CRITICAL: After Stage 3, you MUST execute Stage 4 — write RETROSPECTIVE.md, IMPLEMENTATION.md, and run final Action Kamen review. See 'Stage 4: Completion' section in agents/shinnosuke.md.
 
   ## Micro-Task Execution (RULE 2.7)
   When invoking Nene for Stage 2 planning, request MICRO-TASK FORMAT for PROGRESS.md.

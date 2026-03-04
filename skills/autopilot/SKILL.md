@@ -42,7 +42,10 @@ Complete autonomously without user intervention:
 4. Execute using micro-execute pattern (RULE 2.7 in agents/shinnosuke.md):
    - For each micro-task: fresh implementer subagent → spec compliance review → code quality review
    - See skills/micro-execute/SKILL.md for full protocol
-5. Action Kamen final verification
+5. After all execution phases complete, run Stage 4 (Completion):
+   - Write RETROSPECTIVE.md (summary, decisions, learnings) via Bo
+   - Write IMPLEMENTATION.md (overview, architecture, files changed) via Bo
+   - Action Kamen final verification of entire workflow
 6. Auto-fix issues when discovered
 
 ## Stage Rule Compliance

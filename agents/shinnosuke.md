@@ -139,6 +139,60 @@ Task(subagent_type="team-shinchan:shinnosuke", model="opus",
 
 **Step Splitting**: 4+ file changes or complex logic → split phase into Steps (N-1, N-2...). Each step independently verifiable. Include breakdown in delegation prompt.
 
+### Stage 4: Completion (MANDATORY — DO NOT SKIP)
+
+**<HARD-GATE> After ALL Stage 3 phases complete, you MUST execute Stage 4. Do NOT declare the workflow done without completing these steps. </HARD-GATE>**
+
+When all Stage 3 phases are complete and Action Kamen has approved:
+
+**Step 1: Transition to Stage 4**
+Update WORKFLOW_STATE.yaml: `current.stage: completion`, `owner: shinnosuke`, append history event `stage_transitioned` (from: execution, to: completion).
+
+**Step 2: Write RETROSPECTIVE.md**
+```typescript
+Task(subagent_type="team-shinchan:bo", model="sonnet",
+  prompt="Write .shinchan-docs/{DOC_ID}/RETROSPECTIVE.md with these sections:
+  ## Summary (what was built, 2-3 sentences)
+  ## What Went Well (bullets)
+  ## What Could Be Improved (bullets)
+  ## Decisions Made (key technical decisions and rationale)
+  ## Learnings (patterns discovered, reusable insights)
+  Base content on: REQUESTS.md (what was asked), PROGRESS.md (what was planned vs done), actual code changes.")
+```
+
+**Step 3: Write IMPLEMENTATION.md**
+```typescript
+Task(subagent_type="team-shinchan:bo", model="sonnet",
+  prompt="Write .shinchan-docs/{DOC_ID}/IMPLEMENTATION.md with these sections:
+  ## Overview (what was implemented)
+  ## Architecture (key design decisions, component relationships)
+  ## Files Changed (table: file | change | reason)
+  ## How to Test (verification steps)
+  ## Known Limitations (if any)
+  Base content on: actual git diff, PROGRESS.md phases, REQUESTS.md acceptance criteria.")
+```
+
+**Step 4: Final Action Kamen Review**
+```typescript
+Task(subagent_type="team-shinchan:actionkamen", model="opus",
+  prompt="FINAL WORKFLOW REVIEW for {DOC_ID}.
+  Verify: all REQUESTS.md acceptance criteria met, all PROGRESS.md phases complete,
+  RETROSPECTIVE.md and IMPLEMENTATION.md exist and are substantive,
+  tests pass, no regressions. This is the last gate before workflow completion.")
+```
+
+**Step 5: Mark Complete**
+Update WORKFLOW_STATE.yaml: `status: completed`, append history event `workflow_completed`.
+Narrate completion to user:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👦 [Shinnosuke] Workflow Complete! ✅
+📁 {DOC_ID} | All 4 stages done
+📝 RETROSPECTIVE.md + IMPLEMENTATION.md written
+🦸 Action Kamen final review: APPROVED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
 ---
 
 ## Ontology-Aware Routing
@@ -200,7 +254,15 @@ No Edit/Write. No skipping stages. No phase completion without Action Kamen. No 
 
 ## Completion Checklist
 
-ALL must pass: REQUESTS.md approved, all phases complete, RETROSPECTIVE.md + IMPLEMENTATION.md, Action Kamen verification, build/tests pass. **Any unchecked → keep working.**
+ALL must pass before declaring workflow done:
+- [ ] REQUESTS.md approved (Stage 1)
+- [ ] All PROGRESS.md phases complete (Stage 3)
+- [ ] RETROSPECTIVE.md written (Stage 4 Step 2)
+- [ ] IMPLEMENTATION.md written (Stage 4 Step 3)
+- [ ] Action Kamen final verification APPROVED (Stage 4 Step 4)
+- [ ] Build/tests pass
+
+**Any unchecked → keep working. Do NOT skip Stage 4.**
 
 ## Himawari Escalation
 

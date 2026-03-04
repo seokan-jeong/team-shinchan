@@ -2,6 +2,28 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.7.0] - 2026-03-04
+
+### Added
+- **TDD Enforcement skill** — RED-GREEN-REFACTOR Iron Law with rationalization counters (7 entries), anti-patterns, and exception handling. Adopted from obra/superpowers.
+- **Systematic Debugging skill** — 4-phase root-cause process (investigate, analyze, hypothesize, implement) with escalation rule (3+ failures → restart). Adopted from obra/superpowers.
+- **Verification-Before-Completion skill** — Blocks completion claims without evidence. Red flags list, verification template, 4 checkpoint triggers. Strengthens self-check.md with evidence checkbox.
+- **Parking Lot mechanism** — Discovered issues during execution are recorded in WORKFLOW_STATE.yaml `discovered_issues` instead of being fixed immediately. Triaged in Stage 4 Step 6 (promote/wontfix/resolved).
+- **Scope Guard hook** — PreToolUse WARNING (not block) when Edit/Write targets files not listed in PROGRESS.md during execution stage. Guides agents to use parking lot for out-of-scope discoveries.
+- **Mandatory Impact Scope Analysis** — Nene must grep for cross-references and paired files before writing any phase plan. Prevents missed file pairs (skill↔command, agent↔shared).
+- **Skill-command content sync validator** — skill-command-parity.js now detects content drift (subagent_type mismatch, owner mismatch) between paired files.
+
+### Changed
+- **Bo, Kazama** — Required Sub-Skills section added: must use TDD, systematic debugging, and verification skills during implementation
+- **Action Kamen** — Verification Evidence Check added to review criteria (rejects completion reports without evidence)
+- **Nene** — Micro-task rules strengthened: 2-5 min scope, RED-GREEN commit cycle (Rule 8), rejection criteria for ambiguous instructions (Rule 9), Plan Quality Gate table
+- **Coding Principles** — Surgical Changes now includes Parking Lot Rule: park scope-external issues, don't fix directly
+- **Self-check** — Added Impact Scope Complete and Scope Discipline (parking lot) checkboxes
+
+### Fixed
+- **commands/start.md** — Stage 1 owner changed from nene to misae (was out of sync with skills/start/SKILL.md)
+- **Misae** — Added Task tool for subagent delegation (Shiro/Ume) during Stage 1
+
 ## [4.6.0] - 2026-03-04
 
 ### Added

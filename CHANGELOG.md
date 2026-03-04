@@ -2,6 +2,23 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.6.0] - 2026-03-04
+
+### Added
+- **Micro-execute skill** — Breaks implementation into 2-3 minute micro-tasks with fresh subagent per task. Two-stage review per task: spec compliance then code quality. Retry limits and final integration review. Inspired by obra/superpowers subagent-driven-development pattern.
+- **Subagent prompt templates** — Reusable structured prompts for implementer, spec-reviewer, and code-quality-reviewer in `agents/_shared/micro-task-prompts/`
+- **Stage 4 completion enforcement** — HARD-GATE ensures RETROSPECTIVE.md and IMPLEMENTATION.md are always written. Bo writes docs, Action Kamen does final review.
+
+### Changed
+- **Misae expanded to Stage 1 owner** — Now handles full requirements gathering: user interviews, REQUESTS.md creation, STRIDE analysis, and hidden requirements discovery
+- **Nene simplified to Stage 2 only** — Focused purely on PROGRESS.md planning from approved requirements. Removed interview and requirements logic.
+- **Start workflow** — Stage 1 now routes to Misae (was Nene). Separate Misae post-analysis step removed (integrated into Misae's flow).
+- **Autopilot workflow** — Updated to use micro-execute pattern and explicit Stage 4 completion
+
+### Fixed
+- **Stage 4 silently skipped** — Shinnosuke had no executable logic for Stage 4 transition. Added 5-step completion sequence with HARD-GATE.
+- **KNOWN_SKILLS drift** — Synced layer-enforcement.js with cross-refs.js (added eval, ontology, impact-analysis, design-review)
+
 ## [4.4.1] - 2026-03-02
 
 ### Fixed

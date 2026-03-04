@@ -135,12 +135,11 @@ if (activeYaml) {
 
 // ── Tool Cache Cleanup (FR-6) ──
 let cleaned = 0;
+let ttlDays = 7;
 try {
   const toolCacheDirs = [];
   if (docDir) toolCacheDirs.push(path.join(docDir, 'tool-cache'));
   toolCacheDirs.push(path.join(docsDir, 'tool-cache'));
-
-  let ttlDays = 7;
   if (activeYaml) {
     try {
       const yamlContent = fs.readFileSync(activeYaml, 'utf-8');

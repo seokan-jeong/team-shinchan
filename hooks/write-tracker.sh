@@ -92,6 +92,8 @@ if command -v node &>/dev/null; then
           type = 'agent_done';
           agent = extractAgent(input.agent_type);
           data.content = (input.last_assistant_message || '').slice(0, 500);
+          // Clear current agent to restore parent (orchestrator) context
+          try { fs.unlinkSync(process.cwd() + '/.shinchan-docs/.current-agent'); } catch(e) {}
           break;
 
         case 'PostToolUse':

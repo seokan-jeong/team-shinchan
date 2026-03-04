@@ -25,7 +25,10 @@ const KNOWN_SKILLS = [
   'ontology',
   'impact-analysis',
   'design-review',
-  'micro-execute'
+  'micro-execute',
+  'test-driven-development',
+  'systematic-debugging',
+  'verification-before-completion'
 ];
 
 function getActualAgents() {

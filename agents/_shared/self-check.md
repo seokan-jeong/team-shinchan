@@ -17,6 +17,7 @@ All execution agents MUST run this checklist before reporting task completion.
 - [ ] No unnecessary abstractions or patterns added
 - [ ] Tests run and pass (if applicable)
 - [ ] No unrelated formatting changes
+- [ ] **Verification Evidence**: I ran a test/build command and can show the output (not "it should work")
 
 ### Reporting
 - [ ] Changes logged in PROGRESS.md (if active workflow)
@@ -35,3 +36,11 @@ Ask yourself:
 1. "Did I change ONLY what was asked?" (Surgical)
 2. "Is this the simplest solution?" (Simplicity)
 3. "Can I prove it works?" (Goal-Driven)
+
+## Red Flags -- STOP and Verify
+
+If your completion report contains any of these words, you have NOT verified:
+
+> **"should work"** | **"probably fine"** | **"seems to"** | **"looks correct"** | **"I believe"** | **"likely"**
+
+Replace every red-flag phrase with an actual command + output. See `team-shinchan:verification-before-completion` for the full verification protocol and evidence template.

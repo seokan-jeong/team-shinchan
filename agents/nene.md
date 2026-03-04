@@ -85,21 +85,25 @@ When the orchestrator requests a **micro-task plan** (or when `execution_mode: m
 
 **Step 2: Verify**
 Run: `npm test -- tests/path/test.ts`
-Expected: PASS (or FAIL with specific message if TDD)
+Expected RED result: `FAIL — [specific assertion error message]`
+Expected GREEN result: `PASS — N tests passed, 0 failed`
 
-**Step 3: Commit** (optional)
-`git add [files] && git commit -m "[descriptive message]"`
+**Step 3: Commit**
+Commit message: `[type]: [descriptive message]`
+`git add [files] && git commit -m "[type]: [descriptive message]"`
 ```
 
 ### Rules for Micro-Task Plans
 
-1. **2-3 minute scope**: Each task is ONE focused change. If it takes longer, split it.
+1. **2-5 minute scope**: Each task is ONE focused change. If it takes longer, split it.
 2. **Exact file paths**: Never "add a file somewhere" — always `exact/path/to/file.ext`
 3. **Complete code**: Not "add validation" but the actual validation code
 4. **Verification commands**: Exact command + expected output. No ambiguity.
 5. **Zero context assumption**: Write as if the implementer knows NOTHING about the project
 6. **Dependency order**: Later tasks may depend on earlier ones. Mark dependencies explicitly.
 7. **TDD encouraged**: For new features, prefer "write test → run (expect fail) → implement → run (expect pass)" pattern
+8. **RED-GREEN commit cycle**: Each task that adds or modifies behavior must follow: write failing test -> verify RED (test fails) -> implement -> verify GREEN (test passes) -> commit. Reference: team-shinchan:test-driven-development
+9. **Rejection criteria**: A task is INVALID if it contains any of: "add appropriate validation", "implement the logic", "update as needed", or any instruction that requires the implementer to make design decisions. Plans must contain the actual code or exact instructions.
 
 ### When to Use Micro-Task Format
 
@@ -144,6 +148,20 @@ ontology 없으면 standard code-reading analysis로 진행.
 - No ambiguous terms
 - All risks have mitigations
 - **Complexity Check**: Can 80% of the value be achieved with 30% of the effort? If yes, start with the simpler approach.
+
+## Plan Quality Gate (Micro-Task Mode)
+
+Before outputting a micro-task plan, verify EVERY task against:
+
+| Check | Pass Criteria | Fail Example |
+|-------|---------------|--------------|
+| File paths | All paths are exact (relative to project root) | "add a test file" |
+| Code completeness | Complete code blocks or exact shell commands | "add validation logic" |
+| Verification | Exact command + expected output | "verify it works" |
+| Task scope | 2-5 minutes of work | Phase-level blocks (30+ min) |
+| TDD cycle | Test-first for behavior changes | "implement then test" |
+
+If ANY task fails, rewrite it before including in the plan.
 
 ## Important
 

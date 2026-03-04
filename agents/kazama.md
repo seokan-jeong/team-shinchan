@@ -20,6 +20,9 @@ tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 memory: project
 skills:
   - ultrawork
+  - test-driven-development
+  - systematic-debugging
+  - verification-before-completion
 maxTurns: 50
 permissionMode: acceptEdits
 isolation: worktree
@@ -66,6 +69,16 @@ Follow Bash safety rules in _shared/coding-principles.md. Never run destructive 
 - Run all tests after changes to verify no regressions
 - Report test results in completion summary
 - If tests fail, fix the issue before reporting completion
+
+## Required Sub-Skills
+
+These skills are MANDATORY during implementation. Do not skip them.
+
+| Skill | When | Protocol |
+|-------|------|----------|
+| test-driven-development | Writing new code or fixing bugs | RED-GREEN-REFACTOR: write failing test, implement, verify pass |
+| systematic-debugging | Any test failure or unexpected behavior | 4-phase: investigate, analyze, hypothesize, implement |
+| verification-before-completion | Before reporting task done | Run test/build, read output, report evidence |
 
 ## When to Use Kazama
 

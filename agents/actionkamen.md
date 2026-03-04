@@ -20,6 +20,7 @@ tools: ["Read", "Glob", "Grep", "Bash"]
 memory: project
 skills:
   - review
+  - verification-before-completion
 maxTurns: 20
 permissionMode: plan
 ---
@@ -62,6 +63,11 @@ This agent is invoked via `/team-shinchan:review` skill.
 - Security: Any vulnerabilities?
 - Performance: Any issues?
 - Tests: Are they adequate?
+
+### Verification Evidence Check
+- Did the implementer provide actual test/build command output?
+- Are there any "red flag" words ("should", "probably", "seems to") in the completion report?
+- If no evidence: REJECT with reason "No verification evidence provided"
 
 ### Karpathy Principles Check
 > Reference: [${CLAUDE_PLUGIN_ROOT}/agents/_shared/coding-principles.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/coding-principles.md)

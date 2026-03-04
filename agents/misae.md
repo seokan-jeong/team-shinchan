@@ -19,7 +19,7 @@ maxTurns: 20
 permissionMode: plan
 memory: project
 color: brown
-tools: ["Read", "Write", "Glob", "Grep", "Bash", "AskUserQuestion"]
+tools: ["Read", "Write", "Glob", "Grep", "Bash", "Task", "AskUserQuestion"]
 ---
 
 # Misae - Team-Shinchan Requirements Analyst

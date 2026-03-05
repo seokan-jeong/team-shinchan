@@ -128,6 +128,28 @@ function runValidation() {
     } else {
       console.log(`  \x1b[32m✓\x1b[0m All ${tierMatches.length} tier values are valid`);
     }
+    // Check heading format: entries must use ### [ (3 hashes), not ## [ (2 hashes)
+    console.log('\nChecking heading format...');
+    const badHeadings = learnContent.split('\n').filter(line => /^## \[/.test(line));
+    if (badHeadings.length > 0) {
+      errors.push(`Invalid heading format: ${badHeadings.length} line(s) use ## [ instead of ### [`);
+      console.log(`  \x1b[31m✗\x1b[0m ${badHeadings.length} invalid heading(s) found (use ### [ not ## [)`);
+    } else {
+      console.log('  \x1b[32m✓\x1b[0m All headings use correct ### [ format');
+    }
+
+    // Check that every entry has a Tier field
+    console.log('\nChecking Tier field presence...');
+    const entryBlocks = learnContent.split(/\n---\n/).filter(b => /^### \[/.test(b.trim()));
+    const missingTier = entryBlocks.filter(b => !/\*\*Tier\*\*:/.test(b));
+    if (missingTier.length > 0) {
+      errors.push(`${missingTier.length} learning entry(ies) missing **Tier**: field`);
+      console.log(`  \x1b[31m✗\x1b[0m ${missingTier.length} entry(ies) missing **Tier** field`);
+    } else if (entryBlocks.length > 0) {
+      console.log(`  \x1b[32m✓\x1b[0m All ${entryBlocks.length} entries have **Tier** field`);
+    } else {
+      console.log('  \x1b[33m-\x1b[0m No entries found to check');
+    }
   } else {
     console.log('  \x1b[33m-\x1b[0m No learnings.md found (skipped)');
   }

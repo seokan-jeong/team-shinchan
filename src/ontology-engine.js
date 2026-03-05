@@ -352,6 +352,36 @@ function generateKbSummary(projectRoot) {
     lines.push('');
   }
 
+  // Plugin Entities
+  const pluginDirs = [
+    { dir: 'agents', label: 'Agents' },
+    { dir: 'hooks', label: 'Hooks' },
+    { dir: 'skills', label: 'Skills' }
+  ];
+  const pluginLines = [];
+  for (const { dir, label } of pluginDirs) {
+    const dirPath = path.join(projectRoot, dir);
+    if (fs.existsSync(dirPath)) {
+      try {
+        const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+        let names;
+        if (dir === 'skills') {
+          names = entries.filter(e => e.isDirectory()).map(e => e.name);
+        } else {
+          names = entries.filter(e => e.isFile()).map(e => e.name);
+        }
+        if (names.length > 0) {
+          pluginLines.push(`- **${label}** (${names.length}): ${names.join(', ')}`);
+        }
+      } catch { /* silent */ }
+    }
+  }
+  if (pluginLines.length > 0) {
+    lines.push('## Plugin Entities', '');
+    lines.push(...pluginLines);
+    lines.push('');
+  }
+
   const content = lines.join('\n');
   const kbDir = path.dirname(kbPath(projectRoot));
   if (!fs.existsSync(kbDir)) fs.mkdirSync(kbDir, { recursive: true });
@@ -432,14 +462,24 @@ function healthScore(projectRoot) {
   // 4. Modularity (0-25): low coupling (few cross-module deps), no orphans
   const orphans = onto.entities.filter(e => !onto.relations.some(r => r.from === e.id || r.to === e.id));
   const orphanPenalty = Math.min(orphans.length / Math.max(entityCount, 1), 0.5) * 25;
-  // Detect circular deps
+  // Detect circular deps — each cycle counted once via visitedCycles
   let cycles = 0;
+  const visitedCycles = new Set();
   for (const e of onto.entities) {
+    if (visitedCycles.has(e.id)) continue;
     const visited = new Set();
     const stack = [e.id];
     while (stack.length > 0) {
       const cur = stack.pop();
-      if (visited.has(cur)) { if (cur === e.id && visited.size > 1) { cycles++; break; } continue; }
+      if (visited.has(cur)) {
+        if (cur === e.id && visited.size > 1) {
+          cycles++;
+          // Mark all entities in this cycle so they are not re-counted
+          for (const id of visited) visitedCycles.add(id);
+          break;
+        }
+        continue;
+      }
       visited.add(cur);
       const deps = onto.relations.filter(r => r.relation === 'DEPENDS_ON' && r.from === cur).map(r => r.to);
       stack.push(...deps);

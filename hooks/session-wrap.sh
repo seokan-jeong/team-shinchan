@@ -184,4 +184,31 @@ if [ -n "$OUTPUT" ]; then
   echo "$OUTPUT"
 fi
 
+# ── Ontology Refresh ──────────────────────────────────────────────────
+ONTO_FILE="${DOCS_DIR}/ontology/ontology.json"
+if [ -f "$ONTO_FILE" ] && [ -f "$TRACKER_FILE" ] && [ -f "$SESSION_ID_FILE" ]; then
+  SESSION_ID=$(cat "$SESSION_ID_FILE" 2>/dev/null || true)
+  if [ -n "$SESSION_ID" ]; then
+    HAS_FILE_CHANGES=$(node -e "
+const fs = require('fs');
+try {
+  const lines = fs.readFileSync('${TRACKER_FILE}', 'utf-8').trim().split('\n').filter(Boolean);
+  const sid = '${SESSION_ID}';
+  const found = lines.some(l => { try { const e = JSON.parse(l); return e.session === sid && e.type === 'file_change'; } catch { return false; } });
+  process.exit(found ? 0 : 1);
+} catch { process.exit(1); }
+" 2>/dev/null && echo "yes" || echo "no")
+    if [ "$HAS_FILE_CHANGES" = "yes" ]; then
+      TMP_SCAN="${TMPDIR:-/tmp}/ontology-scan-$$.json"
+      node "${PLUGIN_ROOT}/src/ontology-scanner.js" "${PROJECT_ROOT}" --format json > "$TMP_SCAN" 2>/dev/null || true
+      if [ -s "$TMP_SCAN" ]; then
+        node "${PLUGIN_ROOT}/src/ontology-engine.js" merge "$TMP_SCAN" 2>/dev/null || true
+      fi
+      node "${PLUGIN_ROOT}/src/ontology-engine.js" gen-kb 2>/dev/null || true
+      rm -f "$TMP_SCAN"
+      echo "[Session Wrap] Ontology refreshed (file changes detected)"
+    fi
+  fi
+fi
+
 exit 0

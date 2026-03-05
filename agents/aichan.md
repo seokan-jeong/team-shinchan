@@ -21,6 +21,7 @@ skills:
   - frontend
 maxTurns: 30
 permissionMode: acceptEdits
+memory: project
 ---
 
 # Aichan - Team-Shinchan Frontend Specialist

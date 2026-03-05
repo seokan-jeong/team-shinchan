@@ -131,6 +131,9 @@ console.log(out.join('\n'));
       ITEMS=$(grep "^### \[" "$LEARN_FILE" 2>/dev/null | tail -5 | sed 's/^### /• /')
     fi
     OUTPUT="${OUTPUT}📚 [Team-Shinchan] Loaded ${COUNT} learnings from memory\n${ITEMS}\n💡 Applying these learnings to this session.\n"
+    if [ "$COUNT" -gt 50 ] 2>/dev/null; then
+      echo "💡 Learnings count is ${COUNT}. Consider running /team-shinchan:forget to prune old entries."
+    fi
   fi
 fi
 

@@ -19,6 +19,7 @@ maxTurns: 15
 permissionMode: plan
 color: plum
 tools: ["Read", "Glob", "Grep", "WebFetch"]
+memory: project
 ---
 
 # Ume - Team-Shinchan Multimodal Analyst

@@ -19,6 +19,7 @@ color: teal
 tools: ["Read", "Write", "Glob", "Task"]
 maxTurns: 25
 permissionMode: plan
+memory: project
 ---
 
 # Midori - Debate Moderator

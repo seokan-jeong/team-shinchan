@@ -56,7 +56,7 @@ if(td==='export'){const s=c.slice(m.index,m.index+60);t=/class\b/.test(s)?'class
 if(td==='py')t='function';if(td==='pycls')t='class';if(td==='gofn')t='func';if(td==='cjs')t='commonjs';
 out.push({name:n,type_detail:t,file_path:f.rp,visibility:v})}}
 // Detect destructured CommonJS exports: module.exports = { Name1, Name2 }
-const dex=scanDestructuredExports(c);for(const n of dex){const k=n+':'+f.rp;
+const dex=(f.ext!=='.md'&&f.ext!=='.sh'&&f.ext!=='.json')?scanDestructuredExports(c):[];for(const n of dex){const k=n+':'+f.rp;
 if(!seen.has(k)){seen.add(k);out.push({name:n,type_detail:'commonjs',file_path:f.rp,visibility:'export'})}}}return out}
 
 const SKIP_DC=S('PreToolUse PostToolUse SubagentStart SubagentStop SessionStart SessionEnd UserPromptSubmit DataModel DataModels TestSuite DomainConcept TodoWrite AskUserQuestion DevOps AvgDur EnterPlanMode ExitPlanMode TaskCreate TaskUpdate TaskList TaskGet TaskStop NotebookEdit WebFetch WebSearch');

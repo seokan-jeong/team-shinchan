@@ -21,6 +21,7 @@ skills:
   - backend
 maxTurns: 30
 permissionMode: acceptEdits
+memory: project
 ---
 
 # Bunta - Team-Shinchan Backend Specialist

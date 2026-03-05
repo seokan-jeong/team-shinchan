@@ -19,6 +19,7 @@ color: white
 tools: ["Read", "Glob", "Grep", "Bash"]
 maxTurns: 10
 permissionMode: plan
+memory: project
 ---
 
 # Shiro - Team-Shinchan Fast Explorer

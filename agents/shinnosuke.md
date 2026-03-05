@@ -133,6 +133,7 @@ Task(subagent_type="team-shinchan:shinnosuke", model="opus",
 
 | Stage | Key Agents | Output |
 |-------|-----------|--------|
+| 0. Brainstorm (optional) | Hiroshi | brainstorm-output.md |
 | 1. Requirements | (Ume if visual input), Misae | REQUESTS.md |
 | 2. Planning | Nene, Shiro, (Midori) | PROGRESS.md |
 | 3. Execution | Shiro→Bo(PO)→{Aichan|Bunta|Masao|Kazama}→Action Kamen | Code + PROGRESS.md |

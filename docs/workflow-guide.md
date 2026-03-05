@@ -21,6 +21,28 @@ The following harness features integrate with the workflow stages:
 
 ---
 
+## Pre-Workflow: Skill Chain (Recommended Path)
+
+Before starting the 4-stage workflow, use the skill chain for better requirements coverage:
+
+```
+/team-shinchan:brainstorm "your problem"      Step 0: Explore problem space (optional but recommended)
+/team-shinchan:requirements "chosen approach" Step 1: Collect requirements with Misae
+/team-shinchan:start                          Step 2-4: Full workflow (planning → execution → completion)
+```
+
+| Step | Command | Agent | Output | When to Use |
+|------|---------|-------|--------|-------------|
+| 0 (optional) | `/team-shinchan:brainstorm` | Hiroshi | `brainstorm-output.md` | When the problem space is unclear or you want to explore alternatives before committing |
+| 1 | `/team-shinchan:requirements` | Misae | `REQUESTS.md` | Always — defines what to build |
+| 2-4 | `/team-shinchan:start` | Full team | All workflow docs | Always — orchestrates the full build |
+
+**Why brainstorm first?** Users often arrive with a solution framed ("add X feature") rather than a problem ("I want earlier alignment on direction"). Running brainstorm first reframes the problem, surfaces alternatives, and feeds better context into the requirements interview — leading to higher-quality REQUESTS.md with fewer missed constraints.
+
+**Brainstorm is advisory**: You can skip it and run `/team-shinchan:requirements` directly. The requirements skill will note that no brainstorm was found but will continue.
+
+---
+
 ## Stage 1: Requirements
 
 ```python

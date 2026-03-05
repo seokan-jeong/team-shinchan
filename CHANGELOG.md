@@ -2,6 +2,20 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.9.0] - 2026-03-05
+
+### Added
+- **Brainstorm skill** — New `/team-shinchan:brainstorm` skill for structured problem exploration before requirements. Invokes Hiroshi to produce: Problem Reframe, 2-4 Alternative Approaches (with pros/cons), Recommendation. Output saved as `brainstorm-output.md` for use by requirements skill.
+- **Brainstorm command** — `commands/brainstorm.md` paired command file for skill registration
+
+### Changed
+- **Misae** — Socratic interview mode: exactly ONE question per turn, each with 2-3 concrete alternatives. IMMUTABLE RULES updated. Interview flow revised from batch questions to 5 sequential turns.
+- **Bo** — Two-stage review (spec compliance + code quality via Action Kamen) generalized from micro-execute to standard Phase Loop. maxTurns 50→80. Phase Complexity Rule added (5+ sub-tasks → split into Steps).
+- **requirements skill** — Step 0 brainstorm check: references prior brainstorm-output.md if found (advisory, not blocking)
+- **Shinnosuke** — RULE 3 workflow table updated to show Brainstorm (Stage 0, optional) as pre-workflow step
+- **workflow-guide.md** — Pre-Workflow Skill Chain section added: brainstorm → requirements → start chain documented
+- **cross-refs.js** — `brainstorm` added to KNOWN_SKILLS array
+
 ## [4.8.0] - 2026-03-04
 
 ### Changed

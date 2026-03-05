@@ -23,7 +23,7 @@ skills:
   - test-driven-development
   - systematic-debugging
   - verification-before-completion
-maxTurns: 50
+maxTurns: 80
 permissionMode: acceptEdits
 ---
 
@@ -72,6 +72,8 @@ When a sub-task doesn't match any specialist domain, or when invoked via /team-s
 | Complex / Multi-file / Refactor | Cross-domain refactor, debugging spanning 5+ files, architecture change | `team-shinchan:kazama` |
 | General / Unclear domain | Does not match above patterns, or explicitly "general" | Bo (direct implementation) |
 
+**Phase Complexity Rule**: If a Phase has 5 or more sub-tasks, tell Shinnosuke to split into Steps (N-1, N-2...) BEFORE delegation. Each step should have ≤ 4 sub-tasks. This prevents maxTurns overflow in two-stage review mode.
+
 ## PO Workflow
 
 When operating as Execution PO (receiving a Phase from Shinnosuke):
@@ -83,10 +85,29 @@ When operating as Execution PO (receiving a Phase from Shinnosuke):
    - Pass: Phase title, Phase AC, affected file list, relevant PROGRESS.md section (verbatim)
    - Do NOT paraphrase; append clarifications as explicit additions noted separately
 5. **COLLECT** result from domain agent
-6. **VALIDATE**: tests passed, no regressions, AC met — if validation fails → Partial Failure Handling
-7. **NARRATE** result summary after each delegation
-8. **AGGREGATE** all sub-task outcomes into Phase summary
-9. **REPORT** to Shinnosuke: which agent handled which sub-task, results, test evidence
+6a. **SPEC REVIEW**: Dispatch Action Kamen to verify spec compliance for this sub-task
+    Task(subagent_type="team-shinchan:actionkamen", model="opus",
+      prompt=`SPEC COMPLIANCE REVIEW
+      Original spec: ${phase_ac_for_subtask}
+      Implementer report: ${domain_agent_report}
+      Read the actual changed files. Verify: every spec requirement implemented, no extra scope, verification command was run.
+      Verdict: PASS or FAIL with specific issues.`)
+    IF FAIL: re-dispatch domain agent with issues → re-run spec review. Max 1 retry.
+    IF still FAIL after retry: escalate to Shinnosuke.
+
+6b. **QUALITY REVIEW**: (Only after spec PASS) Dispatch Action Kamen for code quality
+    Task(subagent_type="team-shinchan:actionkamen", model="opus",
+      prompt=`CODE QUALITY REVIEW (spec already PASSED)
+      Changed files: ${changed_files}
+      Check: naming, DRY, error handling, project conventions, security, testability.
+      CRITICAL issues must fix. IMPORTANT issues note. MINOR issues log only.
+      Verdict: APPROVED or NEEDS_FIXES with severity.`)
+    IF NEEDS_FIXES with CRITICAL: re-dispatch domain agent → re-run quality review. Max 1 retry.
+
+7. **VALIDATE**: tests passed, no regressions, AC met — if validation fails → Partial Failure Handling
+8. **NARRATE** result summary after each delegation
+9. **AGGREGATE** all sub-task outcomes into Phase summary
+10. **REPORT** to Shinnosuke: which agent handled which sub-task, results, test evidence
 
 ### Direct Implementation Workflow
 When implementing directly (General domain or /team-shinchan:implement):
@@ -128,6 +149,17 @@ IF domain agent returns failure:
      "😪 [Bo] Phase partial failure: '{sub-task}' failed after 2 attempts via {Agent}.
       Error: {error summary}. Remaining sub-tasks: {list}. Escalating."
 3. Shinnosuke decides: retry, reassign, or abort phase
+
+IF spec review (step 6a) returns FAIL:
+1. Re-dispatch the domain agent with the specific issues listed by Action Kamen
+2. Re-run spec review (Action Kamen) on the updated output
+3. IF still FAIL after 1 retry: escalate to Shinnosuke with FAIL reason and unmet spec items
+
+IF quality review (step 6b) returns NEEDS_FIXES with CRITICAL severity:
+1. Re-dispatch the domain agent with the critical issues listed by Action Kamen
+2. Re-run quality review (Action Kamen) on the updated code
+3. IF still NEEDS_FIXES with CRITICAL after 1 retry: escalate to Shinnosuke with severity details
+4. IMPORTANT and MINOR quality issues: note in Phase summary but do NOT block or retry
 
 ## Coding Standards
 
@@ -182,6 +214,7 @@ Sub-tasks:
   - {sub-task 1} → {Agent} → {PASS|FAIL}
   - {sub-task 2} → Bo (General) → {PASS|FAIL}
 Tests: All passing / {N} failures (see details below)
+Sub-task reviews: All passed (spec + quality) / {N} needed retry / {N} escalated
 AC met: {Yes | Partial — {unmet criteria}}
 ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```

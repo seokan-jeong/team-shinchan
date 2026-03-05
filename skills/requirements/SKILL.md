@@ -6,6 +6,18 @@ user-invocable: false
 
 # EXECUTE IMMEDIATELY
 
+## Step 0: Check for Prior Brainstorm Output (Advisory)
+
+Look for brainstorm output in the current session:
+
+If `.shinchan-docs/*/brainstorm-output.md` exists:
+  Read the brainstorm output.
+  Note to user: "Prior brainstorm found — using it to seed the requirements interview."
+  Include in Misae's prompt: "A brainstorm was completed. Summary: [brainstorm-output content]. Use this as context for the requirements interview."
+Else:
+  Note to user: "No prior brainstorm found. For deeper requirements coverage, consider running /team-shinchan:brainstorm first. Continuing with requirements interview."
+  (Continue to Step 1 regardless — brainstorm is optional)
+
 ## Step 1: Validate Input
 
 ```

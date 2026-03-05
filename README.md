@@ -94,30 +94,26 @@ Durable state across sessions and workflows.
 
 ---
 
-## What's New in v4.3
+## What's New
 
-### v4.3.2 — Hooks Finally Work (Critical Fix)
+### v4.9.0 — Socratic Interview, Two-Stage Review, Brainstorm Skill
 
-The root cause of hooks never loading in marketplace installs was found and fixed:
+- **Brainstorm skill** — New `/team-shinchan:brainstorm` for structured problem exploration before requirements. Hiroshi reframes the problem, surfaces 2-4 alternatives with pros/cons, and recommends a path.
+- **Misae Socratic mode** — Exactly ONE question per turn, each with 2-3 concrete alternatives. No more batch questions. IMMUTABLE RULES enforced.
+- **Bo two-stage review** — Spec compliance + code quality review (via Action Kamen) generalized from micro-execute to all Phase Loop executions. maxTurns 50→80.
+- **Skill chain** — Documented workflow: `brainstorm → requirements → start`. Requirements skill auto-checks for prior brainstorm output.
 
-- **`prompt_file` → `prompt`**: Claude Code expects `"prompt"` field for prompt-type hooks, not `"prompt_file"`. This schema mismatch caused ALL 32 hooks to be silently rejected.
-- **Duplicate hooks file**: Removed explicit `"hooks"` field from plugin.json — auto-discovery handles `hooks/hooks.json` natively, and the duplicate caused a fatal load error.
+### v4.8.0 — Bo Execution PO Redesign
 
-### v4.3.0–4.3.1 — Hook Execution Reliability
-
-- **Node.js hook runner** (`scripts/run.cjs`): Cross-platform wrapper for reliable hook execution — stdin piping, env var injection, exit code 2 propagation
-- **Commit lint hook**: Enforces conventional commit format (`type(scope): description`, 72-char limit)
-- **Branch naming rule**: Enforces `{type}/{description}` branch convention
-- **Dependency pinning check**: Blocks `"*"` and `"latest"` in package.json
-- **Agent memory expansion**: 10/15 agents now have persistent project memory
-- **109-assertion hook test suite**: Automated validation of all hook scripts
-- **BASH_SOURCE fallback**, **stdin timeout tuning**, **gzip/openssl checks**
+- **Bo redesigned** from Task Executor to Execution PO — manages sub-task delegation, progress tracking, and Phase completion summaries
+- **Completion docs enforcement** — hook blocks `status: completed` without RETROSPECTIVE.md and IMPLEMENTATION.md
 
 ### Earlier Highlights
 
-- **v4.2.0**: 18 enforcement gaps closed — budget hard stop, stage transition gates, read-only agent enforcement, deny-list expansion
-- **v4.1.0**: Project Ontology — auto-build knowledge graph at session start, impact analysis, 6 agents enhanced
-- **v4.0.0**: Harness foundation — analytics, trace IDs, budget guard, harness lint, eval system, 5-layer architecture
+- **v4.3.x**: Hook execution reliability — Node.js runner, commit lint, 109-assertion test suite
+- **v4.2.0**: 18 enforcement gaps closed — budget hard stop, stage transition gates, read-only agent enforcement
+- **v4.1.0**: Project Ontology — auto-build knowledge graph, impact analysis
+- **v4.0.0**: Harness foundation — analytics, trace IDs, budget guard, harness lint, 5-layer architecture
 
 ---
 
@@ -152,6 +148,7 @@ If you see the help menu, you are ready to go.
 ### What's Next?
 
 - Read the [Getting Started Guide](docs/getting-started.md)
+- Try `/team-shinchan:brainstorm {problem}` to explore before building
 - Try `/team-shinchan:start {your task}` to see the full workflow
 - Use `/team-shinchan:debate` for design decisions
 
@@ -173,7 +170,7 @@ If you see the help menu, you are ready to go.
 ### Execution
 | Agent | Role |
 |-------|------|
-| **Bo** | Code Executor |
+| **Bo** | Execution PO |
 | **Kazama** | Deep Worker |
 
 </td>
@@ -212,7 +209,7 @@ If you see the help menu, you are ready to go.
 
 ## Commands
 
-41 commands across workflow, specialist, and utility categories:
+42 commands across workflow, specialist, and utility categories:
 
 ### Workflow Commands
 | Command | Description |
@@ -229,6 +226,7 @@ If you see the help menu, you are ready to go.
 ### Analysis and Planning
 | Command | Description |
 |---------|-------------|
+| `/team-shinchan:brainstorm` | Explore problem space before requirements |
 | `/team-shinchan:debate` | Trigger expert debate (via Midori) |
 | `/team-shinchan:plan` | Planning session |
 | `/team-shinchan:analyze` | Deep analysis |
@@ -289,6 +287,7 @@ No commands needed -- just say:
 | "ulw", "fast", "parallel" | Ultrawork (parallel mode) |
 | "until done", "complete it" | Ralph (persistence mode) |
 | "autopilot", "auto" | Autopilot (autonomous) |
+| "brainstorm", "explore" | Brainstorm (problem exploration) |
 | "debate", "pros and cons" | Debate system |
 | "analyze", "debug", "why" | Deep analysis |
 
@@ -299,6 +298,9 @@ No commands needed -- just say:
 **Skills are not just documentation -- they automatically invoke specialist agents.**
 
 ```
+/team-shinchan:brainstorm  (optional — explore problem space)
+       |
+       v
 /team-shinchan:start
        |
        v
@@ -308,16 +310,19 @@ No commands needed -- just say:
                    v
 +--------------------------------------+
 |  Shinnosuke orchestrates:            |
+|  +-- Misae (Socratic requirements)   |
 |  +-- Nene (planning)                 |
 |  +-- Shiro (exploration)             |
-|  +-- Bo/Aichan/Bunta (implementation)|
-|  +-- Action Kamen (review)           |
+|  +-- Bo(PO) → domain agent →         |
+|       Action Kamen (2-stage review)  |
+|  +-- Masumi (completion docs)        |
 +--------------------------------------+
 ```
 
 | Skill | Auto-Invokes |
 |-------|--------------|
 | `/start` | Shinnosuke -> Full workflow |
+| `/brainstorm` | Hiroshi -> Problem exploration |
 | `/plan` | Nene -> Structured planning |
 | `/analyze` | Hiroshi -> Deep analysis |
 | `/deepsearch` | Shiro -> Masumi |
@@ -344,8 +349,8 @@ No commands needed -- just say:
 | Component | Count | Location |
 |-----------|-------|----------|
 | Agents | 15 | `agents/` |
-| Skills | 41 | `skills/` |
-| Commands | 41 | `commands/` |
+| Skills | 42 | `skills/` |
+| Commands | 42 | `commands/` |
 | Hooks | 22 command hooks | `hooks/` |
 | Validators | 23 | `tests/validate/` |
 | Rules | 4 categories (54 rules) | `rules/` |

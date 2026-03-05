@@ -2,6 +2,21 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.9.1] - 2026-03-05
+
+### Fixed
+- **Memory system** — learnings.md heading format `##` → `###` (session-init.sh was loading 0 entries due to format mismatch)
+- **Memory system** — Backfilled `**Tier**: procedural` in all 45 learnings entries (tier-aware scoring was degraded)
+- **Memory system** — Added `memory: project` to 5 agents (aichan, bunta, midori, shiro, ume)
+- **Ontology** — session-wrap.sh ontology refresh now calls ontology-scanner.js correctly (was calling non-existent `scan` command)
+- **Ontology** — Scanner no longer runs `scanDestructuredExports` on .md/.sh/.json files (eliminated false positive components)
+- **Ontology** — Cycle detection in healthScore() no longer double-counts (modularity score corrected)
+
+### Added
+- **memory-system.js** — Heading format and Tier field validation checks
+- **session-init.sh** — Prune suggestion when learnings count exceeds 50
+- **ontology-engine.js** — Plugin Entities section in KB summary (agents, hooks, skills by name)
+
 ## [4.9.0] - 2026-03-05
 
 ### Added

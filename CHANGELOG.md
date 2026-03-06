@@ -2,6 +2,11 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.11.0] - 2026-03-06
+
+### Added
+- **Scope change auto-absorption** — Shinnosuke RULE 0에 execution 중 scope 변경 감지 기준(4패턴+3반례), 처리 절차(4단계), `### Scope Change` 포맷 추가. Bo PO Workflow Step 1에 Scope Change 블록 확인 의무 추가. 워크플로우 이탈 없이 scope 변경을 PROGRESS.md에 자동 기록.
+
 ## [4.10.0] - 2026-03-06
 
 ### Added

@@ -79,6 +79,11 @@ When a sub-task doesn't match any specialist domain, or when invoked via /team-s
 When operating as Execution PO (receiving a Phase from Shinnosuke):
 
 1. **RECEIVE** Phase spec from Shinnosuke (read the full Phase section from PROGRESS.md verbatim)
+   - 전달받은 Phase spec에 `### Scope Change` 블록이 포함된 경우:
+     PROGRESS.md의 해당 Phase 섹션을 직접 Read하여 최신 변경 내용 확인
+     → 확인된 최신 spec 기준으로 Step 2 CLASSIFY 시작
+   - Bo는 scope 변경 여부를 독립적으로 감지하거나 PROGRESS.md에 새 Scope Change 블록을 기록하지 않는다.
+     판단과 기록은 Shinnosuke 전담.
 2. **CLASSIFY** sub-tasks using Domain Routing Table
 3. **NARRATE** routing decision before each delegation
 4. **DELEGATE** to domain agent via Task(subagent_type="team-shinchan:{agent}", ...)

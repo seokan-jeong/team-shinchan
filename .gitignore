@@ -13,6 +13,8 @@ src/*
 !src/ontology-scanner.js
 !src/state-migrator.js
 !src/eval-metrics.js
+!src/gen-architecture-map.js
+!src/agent-context.js
 
 # Package files (not needed for this plugin)
 package.json

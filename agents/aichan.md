@@ -147,6 +147,14 @@ Follow Bash safety rules in _shared/coding-principles.md. Never run destructive 
 
 ---
 
+## Runtime Self-Observation (Optional)
+
+If `.shinchan-docs/agent-context-cache.json` exists, check your entry (`agents.aichan`) at session start.
+If any `avgScores` dimension is ≤ 3.5, pay extra attention to that area in this session.
+If the file is absent or your entry is `null`, proceed normally without warning.
+
+---
+
 ## Output Format
 
 ### Standard Header

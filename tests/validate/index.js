@@ -170,7 +170,11 @@ async function runAllValidations() {
   times.ontologyIntegrity = Date.now() - start;
 
   // Summary
-  const totalErrors = Object.values(results).reduce((a, b) => a + b, 0);
+  // Note: tokenBudget stores warning count (not error count) — exclude from totalErrors
+  // Warnings are advisory only and do not indicate validation failure.
+  const { tokenBudget: tokenWarnings, ...errorResults } = results;
+  const totalErrors = Object.values(errorResults).reduce((a, b) => a + b, 0);
+  const totalWarnings = tokenWarnings;
   const totalTime = Object.values(times).reduce((a, b) => a + b, 0);
 
   console.log('╔════════════════════════════════════════════════╗');
@@ -197,8 +201,10 @@ async function runAllValidations() {
   console.log(`║  Ontology Integrity: ${results.ontologyIntegrity === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.ontologyIntegrity).padStart(5)}ms  ║`);
   console.log('╠════════════════════════════════════════════════╣');
 
-  if (totalErrors === 0) {
+  if (totalErrors === 0 && totalWarnings === 0) {
     console.log('║  \x1b[32m✓ All validations passed!\x1b[0m                      ║');
+  } else if (totalErrors === 0) {
+    console.log(`║  \x1b[32m✓ All validations passed!\x1b[0m (\x1b[33m${totalWarnings} warning(s)\x1b[0m)  ║`);
   } else {
     console.log(`║  \x1b[31m✗ ${totalErrors} validation(s) failed\x1b[0m                      ║`);
   }

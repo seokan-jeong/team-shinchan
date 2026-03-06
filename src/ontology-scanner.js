@@ -27,6 +27,19 @@ F.push({fp,rp,nm:e.name,ext})}})(root,0);return{F,sk}}
 
 function dom(p){const l=p.toLowerCase();return/test|__tests__|spec/.test(l)?'testing':/api|routes|controllers/.test(l)?'api':/models|entities|schemas/.test(l)?'data':/components|pages|views|ui/.test(l)?'frontend':/services|lib|utils|helpers/.test(l)?'core':/middleware|hooks/.test(l)?'middleware':/config/.test(l)?'configuration':/agents|skills|commands/.test(l)?'plugin':'general'}
 
+// inferLayer: path-based automatic layer inference (FR-2.2)
+// - agents/, skills/, hooks/ → 'global' (plugin-wide)
+// - src/ → 'domain' (business logic)
+// - root-level files, tests/ → 'local' (project-specific)
+// - otherwise → null (unclassified, handled as 'unclassified' by HR-1)
+function inferLayer(filePath){
+  const p=filePath.replace(/\\/g,'/');
+  if(/^(agents|skills|hooks|commands)\//.test(p))return 'global';
+  if(/^src\//.test(p))return 'domain';
+  if(/^(tests?|__tests__|spec)\//.test(p)||!/\//.test(p))return 'local';
+  return null;
+}
+
 function scanMods(root){const out=[];
 function chk(d,dp){if(dp>1)return;let es;try{es=fs.readdirSync(d,{withFileTypes:true})}catch(_){return}
 for(const e of es){if(!e.isDirectory()||SKIP.has(e.name)||(dp===0&&!MODS.has(e.name)))continue;
@@ -102,13 +115,13 @@ const{F:all,sk}=walk(root,gi),files=changed?all.filter(f=>changed.has(f.rp)):all
 const mods=scanMods(root),comps=scanComps(files),dcs=scanDC(files),apis=scanAPIs(files);
 const models=scanModels(files),cfgs=scanCfg(root,gi),tests=scanTests(files);
 const E=[];let ix=0;const mM=new Map(),cM=new Map(),tM=new Map();
-for(const m of mods){const id=`tmp-mod-${ix++}`;mM.set(m.path,id);E.push({id,type:'Module',name:m.name,path:m.path,description:m.description,domain:m.domain})}
-for(const c of comps){const id=`tmp-comp-${ix++}`;cM.set(c.file_path+':'+c.name,id);E.push({id,type:'Component',name:c.name,type_detail:c.type_detail,file_path:c.file_path,visibility:c.visibility})}
+for(const m of mods){const id=`tmp-mod-${ix++}`;mM.set(m.path,id);const ml=inferLayer(m.path);E.push({id,type:'Module',name:m.name,path:m.path,description:m.description,domain:m.domain,...(ml?{layer:ml}:{})})}
+for(const c of comps){const id=`tmp-comp-${ix++}`;cM.set(c.file_path+':'+c.name,id);const cl=inferLayer(c.file_path);E.push({id,type:'Component',name:c.name,type_detail:c.type_detail,file_path:c.file_path,visibility:c.visibility,...(cl?{layer:cl}:{})})}
 for(const d of dcs)E.push({id:`tmp-dc-${ix++}`,type:'DomainConcept',name:d.name,definition:d.definition});
-for(const a of apis)E.push({id:`tmp-api-${ix++}`,type:'API',name:`${a.method} ${a.path}`,method:a.method,path:a.path,handler:a.handler});
-for(const d of models)E.push({id:`tmp-dm-${ix++}`,type:'DataModel',name:d.name,file_path:d.file_path});
-for(const c of cfgs)E.push({id:`tmp-cfg-${ix++}`,type:'Configuration',name:c.name,file_path:c.file_path});
-for(const t of tests){const id=`tmp-test-${ix++}`;tM.set(t.file_path,id);E.push({id,type:'TestSuite',name:t.name,test_type:t.test_type,file_path:t.file_path})}
+for(const a of apis){const al=inferLayer(a.handler||'');E.push({id:`tmp-api-${ix++}`,type:'API',name:`${a.method} ${a.path}`,method:a.method,path:a.path,handler:a.handler,...(al?{layer:al}:{})})}
+for(const d of models){const dl=inferLayer(d.file_path||'');E.push({id:`tmp-dm-${ix++}`,type:'DataModel',name:d.name,file_path:d.file_path,...(dl?{layer:dl}:{})})}
+for(const c of cfgs){const cfl=inferLayer(c.file_path||'');E.push({id:`tmp-cfg-${ix++}`,type:'Configuration',name:c.name,file_path:c.file_path,...(cfl?{layer:cfl}:{})})}
+for(const t of tests){const id=`tmp-test-${ix++}`;tM.set(t.file_path,id);const tl=inferLayer(t.file_path);E.push({id,type:'TestSuite',name:t.name,test_type:t.test_type,file_path:t.file_path,...(tl?{layer:tl}:{})})}
 const R=[];let ri=0;
 for(const c of comps){let d=P.dirname(c.file_path);while(d&&d!=='.'){if(mM.has(d)){R.push({id:`tmp-rel-${ri++}`,from:cM.get(c.file_path+':'+c.name),relation:'PART_OF',to:mM.get(d)});break}d=P.dirname(d)}}
 const f2e=new Map();

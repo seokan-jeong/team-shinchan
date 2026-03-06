@@ -39,10 +39,25 @@ function checkDrift(){
   const cks=[],files=lsmd(D('agents')).filter(f=>f!=='_shared');
   for(const f of files){const t=rf(path.join(D('agents'),f)),h=t&&t.includes('output-formats');cks.push(ck('outfmt: '+f,h,h?'ok':'miss'))}
   for(const n of EX){const t=rf(path.join(D('agents'),n+'.md')),h=t&&t.includes('self-check');cks.push(ck('selfchk: '+n,h,h?'ok':'miss'))}
-  const pj=rf(D('plugin.json')),rm=rf(D('README.md')),cl=rf(D('CHANGELOG.md'));
+  const pj=rf(D('.claude-plugin/plugin.json')),rm=rf(D('README.md')),cl=rf(D('CHANGELOG.md'));
   let pv;if(pj)try{pv=JSON.parse(pj).version}catch{}
   if(pv){const rv=rm&&rm.match(/version[- ]([\d.]+)/i);if(rv)cks.push(ck('ver: README',rv[1]===pv,rv[1]===pv?pv:pv+' vs '+rv[1]));
     const cv=cl&&cl.match(/## \[([\d.]+)\]/);if(cv)cks.push(ck('ver: CHANGELOG',cv[1]===pv,cv[1]===pv?pv:pv+' vs '+cv[1]))}
+  // ARCHITECTURE.md staleness check
+  const archPath=path.join(ROOT,'ARCHITECTURE.md');
+  const archExists=fs.existsSync(archPath);
+  cks.push(ck('arch: exists',archExists,archExists?'ok':'missing — run: node src/gen-architecture-map.js --write'));
+  if(archExists){
+    try{
+      const archMtime=fs.statSync(archPath).mtimeMs;
+      const agentFiles=lsmd(D('agents')).filter(f=>f!=='_shared').map(f=>path.join(D('agents'),f));
+      const scriptFiles=[path.join(ROOT,'src','gen-architecture-map.js')];
+      const allFiles=[...agentFiles,...scriptFiles];
+      const latestMtime=Math.max(...allFiles.map(f=>{try{return fs.statSync(f).mtimeMs;}catch{return 0;}}));
+      const fresh=archMtime>=latestMtime;
+      cks.push(ck('arch: fresh',fresh,fresh?'ok':'stale — run: node src/gen-architecture-map.js --write'));
+    }catch(e){cks.push(ck('arch: fresh',false,'stat error: '+e.message));}
+  }
   return{category:'drift',label:'Drift Detection',checks:cks};
 }
 

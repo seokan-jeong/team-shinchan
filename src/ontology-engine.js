@@ -14,18 +14,25 @@ const HISTORY_FILE = 'ontology-history.jsonl';
 const KB_FILE = '.shinchan-docs/kb-summary.md';
 
 // ─── Schema Constants ───────────────────────────────────────────────
+// layer field valid values: 'global' | 'domain' | 'local' | null (unclassified)
+// - global: plugin-wide (agents/, skills/, hooks/)
+// - domain: business logic (src/)
+// - local: project-specific (root files, tests/)
+// Existing entities without 'layer' field are treated as 'unclassified' (HR-1 backward compat)
 const ENTITY_TYPES = {
   Module:        { prefix: 'mod',  props: ['name','path','description','layer','domain'] },
-  Component:     { prefix: 'comp', props: ['name','type_detail','file_path','line_range','visibility','complexity'] },
-  DomainConcept: { prefix: 'dom',  props: ['name','definition','aliases','bounded_context'] },
-  API:           { prefix: 'api',  props: ['name','method','path','handler','auth_required','version'] },
-  DataModel:     { prefix: 'data', props: ['name','file_path','fields','table_name','relationships'] },
-  Decision:      { prefix: 'dec',  props: ['title','date','options_considered','chosen','rationale','doc_id'] },
-  Pattern:       { prefix: 'pat',  props: ['name','description','examples','anti_patterns'] },
-  Dependency:    { prefix: 'dep',  props: ['name','version','purpose','dep_type'] },
-  Configuration: { prefix: 'conf', props: ['name','file_path','env_specific','secrets'] },
-  TestSuite:     { prefix: 'test', props: ['name','test_type','coverage_target','file_path'] }
+  Component:     { prefix: 'comp', props: ['name','type_detail','file_path','line_range','visibility','complexity','layer'] },
+  DomainConcept: { prefix: 'dom',  props: ['name','definition','aliases','bounded_context','layer'] },
+  API:           { prefix: 'api',  props: ['name','method','path','handler','auth_required','version','layer'] },
+  DataModel:     { prefix: 'data', props: ['name','file_path','fields','table_name','relationships','layer'] },
+  Decision:      { prefix: 'dec',  props: ['title','date','options_considered','chosen','rationale','doc_id','layer'] },
+  Pattern:       { prefix: 'pat',  props: ['name','description','examples','anti_patterns','layer'] },
+  Dependency:    { prefix: 'dep',  props: ['name','version','purpose','dep_type','layer'] },
+  Configuration: { prefix: 'conf', props: ['name','file_path','env_specific','secrets','layer'] },
+  TestSuite:     { prefix: 'test', props: ['name','test_type','coverage_target','file_path','layer'] }
 };
+
+const VALID_LAYERS = ['global', 'domain', 'local'];
 
 const RELATION_TYPES = {
   DEPENDS_ON:      { props: ['dep_type','strength'], desc: 'A depends on B' },
@@ -155,6 +162,11 @@ function query(projectRoot, opts = {}) {
     });
   }
   if (opts.id) results = results.filter(e => e.id === opts.id);
+  // layer filter: treat missing/null layer as 'unclassified' (HR-1 backward compat)
+  if (opts.layer) {
+    const filterLayer = opts.layer;
+    results = results.filter(e => (e.layer ?? 'unclassified') === filterLayer);
+  }
   return results;
 }
 
@@ -203,6 +215,12 @@ function summary(projectRoot) {
   for (const e of onto.entities) {
     typeDist[e.type] = (typeDist[e.type] || 0) + 1;
   }
+  // Layer distribution: treat missing/null layer as 'unclassified' (HR-1)
+  const layerDistribution = {};
+  for (const e of onto.entities) {
+    const l = e.layer ?? 'unclassified';
+    layerDistribution[l] = (layerDistribution[l] || 0) + 1;
+  }
   // Top connected entities
   const connCount = {};
   for (const r of onto.relations) {
@@ -216,7 +234,7 @@ function summary(projectRoot) {
       const e = onto.entities.find(x => x.id === id);
       return { id, name: e ? (e.name || e.title) : id, connections: count };
     });
-  return { entityCount, relationCount, typeDist, topConnected, updated: onto.meta.updated };
+  return { entityCount, relationCount, typeDist, layerDistribution, topConnected, updated: onto.meta.updated };
 }
 
 // ─── Merge ──────────────────────────────────────────────────────────
@@ -496,7 +514,23 @@ function healthScore(projectRoot) {
   if (scores.documentation < 10) suggestions.push('Add DomainConcept entities and module descriptions');
   if (scores.modularity < 15) suggestions.push('Reduce orphan entities and circular dependencies');
 
-  return { total, scores, suggestions, orphanCount: orphans.length, cycleCount: cycles };
+  // Layer-level connectivity breakdown (does not affect existing 'total' score — HR-1)
+  const layerHealth = {};
+  const allLayers = ['global', 'domain', 'local', 'unclassified'];
+  for (const l of allLayers) {
+    const layerEntities = onto.entities.filter(e => (e.layer ?? 'unclassified') === l);
+    if (layerEntities.length === 0) continue;
+    const connectedInLayer = layerEntities.filter(e =>
+      onto.relations.some(r => r.from === e.id || r.to === e.id)
+    ).length;
+    layerHealth[l] = {
+      entities: layerEntities.length,
+      connected: connectedInLayer,
+      connectivity: Math.round((connectedInLayer / layerEntities.length) * 100)
+    };
+  }
+
+  return { total, scores, suggestions, orphanCount: orphans.length, cycleCount: cycles, layerHealth };
 }
 
 // ─── Garbage Collection ─────────────────────────────────────────────
@@ -674,6 +708,8 @@ function cli() {
       console.log(`Entities: ${s.entityCount} | Relations: ${s.relationCount}`);
       console.log('Type distribution:');
       for (const [t, c] of Object.entries(s.typeDist)) console.log(`  ${t}: ${c}`);
+      console.log('Layer distribution:');
+      for (const [l, c] of Object.entries(s.layerDistribution)) console.log(`  ${l}: ${c}`);
       if (s.topConnected.length > 0) {
         console.log('Top connected:');
         for (const tc of s.topConnected) console.log(`  ${tc.name}: ${tc.connections} connections`);
@@ -686,6 +722,7 @@ function cli() {
         if (args[i] === '--type') opts.type = args[i + 1];
         if (args[i] === '--name') opts.name = args[i + 1];
         if (args[i] === '--id') opts.id = args[i + 1];
+        if (args[i] === '--layer') opts.layer = args[i + 1];
       }
       const results = query(root, opts);
       console.log(JSON.stringify(results, null, 2));
@@ -746,6 +783,12 @@ function cli() {
       if (!h) { console.log('No ontology found.'); return; }
       console.log(`Health Score: ${h.total}/100`);
       for (const [k, v] of Object.entries(h.scores)) console.log(`  ${k}: ${v}/25`);
+      if (h.layerHealth && Object.keys(h.layerHealth).length > 0) {
+        console.log('Layer connectivity:');
+        for (const [l, lh] of Object.entries(h.layerHealth)) {
+          console.log(`  ${l}: ${lh.connectivity}% (${lh.connected}/${lh.entities} entities connected)`);
+        }
+      }
       if (h.suggestions.length > 0) { console.log('Suggestions:'); h.suggestions.forEach(s => console.log(`  - ${s}`)); }
       break;
     }
@@ -776,7 +819,7 @@ function cli() {
 if (require.main === module) cli();
 
 module.exports = {
-  ENTITY_TYPES, RELATION_TYPES,
+  ENTITY_TYPES, RELATION_TYPES, VALID_LAYERS,
   init, load, save,
   addEntity, removeEntity, addRelation, removeRelation,
   query, getRelated, summary,

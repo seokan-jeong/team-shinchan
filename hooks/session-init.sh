@@ -179,6 +179,24 @@ if [ -f "$EVAL_FILE" ] && command -v node &>/dev/null; then
   fi
 fi
 
+# ── 5. Agent Context Cache ───────────────────────────────────────────
+# Generates .shinchan-docs/agent-context-cache.json for runtime self-observation (FR-3.2).
+# Uses --all-json flag for compact output. Runs with timeout to prevent session slowdown (R-3).
+CONTEXT_CACHE="${DOCS_DIR}/agent-context-cache.json"
+AGENT_CONTEXT_SCRIPT="${PLUGIN_ROOT}/src/agent-context.js"
+if command -v node &>/dev/null && [ -f "$AGENT_CONTEXT_SCRIPT" ]; then
+  # Run in background (async) to avoid blocking session start.
+  # Write to temp file first, then atomically move to avoid partial reads.
+  (
+    CACHE_TMP="${CONTEXT_CACHE}.tmp.$$"
+    if timeout 5 node "$AGENT_CONTEXT_SCRIPT" --all-json > "$CACHE_TMP" 2>/dev/null; then
+      mv "$CACHE_TMP" "$CONTEXT_CACHE" 2>/dev/null || true
+    else
+      rm -f "$CACHE_TMP" 2>/dev/null || true
+    fi
+  ) &
+fi
+
 # ── Output ───────────────────────────────────────────────────────────
 if [ -n "$OUTPUT" ]; then
   echo -e "$OUTPUT"

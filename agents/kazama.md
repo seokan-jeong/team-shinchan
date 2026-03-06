@@ -134,6 +134,14 @@ When encountering failures during persistent execution:
 
 ---
 
+## Runtime Self-Observation (Optional)
+
+If `.shinchan-docs/agent-context-cache.json` exists, check your entry (`agents.kazama`) at session start.
+If any `avgScores` dimension is ≤ 3.5, pay extra attention to that area in this session.
+If the file is absent or your entry is `null`, proceed normally without warning.
+
+---
+
 ## Memory Usage
 
 You have persistent memory across sessions. At the start of each task:

@@ -242,6 +242,14 @@ fi
 
 ---
 
+## Runtime Self-Observation (Optional)
+
+If `.shinchan-docs/agent-context-cache.json` exists, check your entry (`agents.bo`) at session start.
+If any `avgScores` dimension is ≤ 3.5, pay extra attention to that area in this session.
+If the file is absent or your entry is `null`, proceed normally without warning.
+
+---
+
 ## Memory Usage
 
 You have persistent memory (project scope). At the start of each task:

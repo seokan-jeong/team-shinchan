@@ -2,6 +2,18 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.10.0] - 2026-03-06
+
+### Added
+- **ARCHITECTURE.md** — Auto-generated plugin architecture map (`src/gen-architecture-map.js`) with agent hierarchy, 4-stage workflow, invariant rules, boundaries, and entry points. Supports `--write`/`--check` flags for CI integration.
+- **Ontology 3-layer** — `layer` field (global/domain/local) added to ontology entities. Path-based auto-inference in scanner: agents/skills/hooks → global, src/ → domain, tests/ → local. Layer-aware `query --layer`, `summary`, and `healthScore` outputs.
+- **Agent self-observation** — `src/agent-context.js` provides per-agent performance summaries from eval-history and work-tracker. Session-init caches results. 5 execution agents (bo, aichan, bunta, masao, kazama) now check their own performance history at session start.
+- **harness-lint** — `arch: exists` and `arch: fresh` staleness checks for ARCHITECTURE.md
+
+### Fixed
+- **harness-lint** — plugin.json path corrected from `D('plugin.json')` to `D('.claude-plugin/plugin.json')` (ver: README/CHANGELOG checks now work)
+- **validate/index.js** — Token budget warnings/errors separation bug fixed
+
 ## [4.9.1] - 2026-03-05
 
 ### Fixed

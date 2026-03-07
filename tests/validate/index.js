@@ -23,6 +23,11 @@ const skillCommandParity = require('./skill-command-parity');
 const versionConsistency = require('./version-consistency');
 const agentsMap = require('./agents-map');
 const ontologyIntegrity = require('./ontology-integrity');
+const agentRouting = require('./agent-routing');
+const workflowGuardBehavior = require('./workflow-guard-behavior');
+const transitionGateBehavior = require('./transition-gate-behavior');
+const agentToolGuardBehavior = require('./agent-tool-guard-behavior');
+const layerGuardBehavior = require('./layer-guard-behavior');
 
 async function runAllValidations() {
   console.log('\n╔════════════════════════════════════════╗');
@@ -48,7 +53,12 @@ async function runAllValidations() {
     skillCommandParity: 0,
     versionConsistency: 0,
     agentsMap: 0,
-    ontologyIntegrity: 0
+    ontologyIntegrity: 0,
+    agentRouting: 0,
+    workflowGuardBehavior: 0,
+    transitionGateBehavior: 0,
+    agentToolGuardBehavior: 0,
+    layerGuardBehavior: 0
   };
 
   const times = {
@@ -70,7 +80,12 @@ async function runAllValidations() {
     skillCommandParity: 0,
     versionConsistency: 0,
     agentsMap: 0,
-    ontologyIntegrity: 0
+    ontologyIntegrity: 0,
+    agentRouting: 0,
+    workflowGuardBehavior: 0,
+    transitionGateBehavior: 0,
+    agentToolGuardBehavior: 0,
+    layerGuardBehavior: 0
   };
 
   // Run agent schema validation
@@ -169,9 +184,32 @@ async function runAllValidations() {
   results.ontologyIntegrity = ontologyIntegrity.runValidation();
   times.ontologyIntegrity = Date.now() - start;
 
+  // Run agent routing validation
+  start = Date.now();
+  results.agentRouting = agentRouting.runValidation();
+  times.agentRouting = Date.now() - start;
+
+  // Run behavioral validators (hooks runtime behavior)
+  start = Date.now();
+  results.workflowGuardBehavior = workflowGuardBehavior.runValidation();
+  times.workflowGuardBehavior = Date.now() - start;
+
+  start = Date.now();
+  results.transitionGateBehavior = transitionGateBehavior.runValidation();
+  times.transitionGateBehavior = Date.now() - start;
+
+  start = Date.now();
+  results.agentToolGuardBehavior = agentToolGuardBehavior.runValidation();
+  times.agentToolGuardBehavior = Date.now() - start;
+
+  start = Date.now();
+  results.layerGuardBehavior = layerGuardBehavior.runValidation();
+  times.layerGuardBehavior = Date.now() - start;
+
   // Summary
   // Note: tokenBudget stores warning count (not error count) — exclude from totalErrors
   // Warnings are advisory only and do not indicate validation failure.
+  // agentRouting returns error count directly (0 = PASS, > 0 = FAIL).
   const { tokenBudget: tokenWarnings, ...errorResults } = results;
   const totalErrors = Object.values(errorResults).reduce((a, b) => a + b, 0);
   const totalWarnings = tokenWarnings;
@@ -199,6 +237,11 @@ async function runAllValidations() {
   console.log(`║  Version Consist.:   ${results.versionConsistency === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.versionConsistency).padStart(5)}ms  ║`);
   console.log(`║  Agents Map:         ${results.agentsMap === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.agentsMap).padStart(5)}ms  ║`);
   console.log(`║  Ontology Integrity: ${results.ontologyIntegrity === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.ontologyIntegrity).padStart(5)}ms  ║`);
+  console.log(`║  Agent Routing:      ${results.agentRouting === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.agentRouting).padStart(5)}ms  ║`);
+  console.log(`║  WF Guard Behavior:  ${results.workflowGuardBehavior === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.workflowGuardBehavior).padStart(5)}ms  ║`);
+  console.log(`║  Transition Gate:    ${results.transitionGateBehavior === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.transitionGateBehavior).padStart(5)}ms  ║`);
+  console.log(`║  Agent Tool Guard:   ${results.agentToolGuardBehavior === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.agentToolGuardBehavior).padStart(5)}ms  ║`);
+  console.log(`║  Layer Guard:        ${results.layerGuardBehavior === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.layerGuardBehavior).padStart(5)}ms  ║`);
   console.log('╠════════════════════════════════════════════════╣');
 
   if (totalErrors === 0 && totalWarnings === 0) {

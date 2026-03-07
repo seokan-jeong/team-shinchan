@@ -15,6 +15,8 @@ src/*
 !src/eval-metrics.js
 !src/gen-architecture-map.js
 !src/agent-context.js
+!src/statusline/
+!src/statusline/index.js
 
 # Package files (not needed for this plugin)
 package.json
@@ -54,7 +56,6 @@ npm-debug.log*
 
 # Team-Shinchan data (local only - workflow docs, learnings, feedback)
 .shinchan-docs/
-shinchan-docs/
 .team-shinchan/
 ~/
 

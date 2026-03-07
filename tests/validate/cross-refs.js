@@ -29,7 +29,8 @@ const KNOWN_SKILLS = [
   'micro-execute',
   'test-driven-development',
   'systematic-debugging',
-  'verification-before-completion'
+  'verification-before-completion',
+  'setup-hud'
 ];
 
 function getActualAgents() {

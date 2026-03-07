@@ -19,7 +19,8 @@ const KNOWN_SKILLS = [
   'verify-implementation', 'manage-skills', 'verify-agents', 'verify-skills',
   'verify-consistency', 'verify-workflow', 'verify-memory', 'verify-budget',
   'research', 'work-log', 'session-summary',
-  'eval', 'ontology', 'impact-analysis', 'design-review', 'micro-execute'
+  'eval', 'ontology', 'impact-analysis', 'design-review', 'micro-execute',
+  'setup-hud'
 ];
 
 function getLayerForAgent(agent, layers) {

@@ -318,7 +318,8 @@ function checkSubagentRouting(errors, warnings) {
     'verify-consistency', 'verify-workflow', 'verify-memory', 'verify-budget',
     'research', 'work-log', 'session-summary',
     'eval', 'ontology', 'impact-analysis', 'design-review', 'micro-execute',
-    'micro-execute', 'shinnosuke'  // shinnosuke can reference itself for stage completion
+    'micro-execute', 'shinnosuke',  // shinnosuke can reference itself for stage completion
+    'setup-hud'
   ]);
 
   console.log(`  Found ${referenced.size} team-shinchan: references in shinnosuke.md`);

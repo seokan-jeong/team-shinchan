@@ -2,6 +2,13 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.13.0] - 2026-03-08
+
+### Added
+- **Statusline HUD** (`src/statusline/index.js`): 2-line compact HUD using Claude Code's native statusLine API. Displays model, active workflow DOC_ID, stage, agent name, Todo progress (Line 1), and context usage bar with ANSI color coding, session cost, and elapsed time (Line 2).
+- `/team-shinchan:setup-hud` command: installs/removes the HUD by writing `statusLine` configuration to `~/.claude/settings.json`. Detects plugin path at runtime (cache vs `--plugin-dir` mode). Confirms before overwriting existing statusLine configs.
+- Zero npm dependencies; Node.js built-in only (`fs`, `path`). Graceful degradation when `.shinchan-docs/` is absent.
+
 ## [4.12.0] - 2026-03-07
 
 ### Added

@@ -2,6 +2,16 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.12.0] - 2026-03-07
+
+### Added
+- **Behavioral validators** — 5 new runtime behavior test validators for hard-guard hooks: `workflow-guard-behavior.js` (16 cases), `transition-gate-behavior.js` (13 cases), `agent-tool-guard-behavior.js` (14 cases), `layer-guard-behavior.js` (12 cases), `agent-routing.js` (40+ static checks). Total 54 behavioral test cases integrated into `index.js` (24 validators, ~7s).
+
+### Discovered
+- **HR-1 [Medium]**: `layer-guard.sh` defaults to `shinnosuke` (most-privileged) when `.current-agent` missing — privilege escalation path
+- **HR-3 [Low]**: `transition-gate.sh` bypassed on new `WORKFLOW_STATE.yaml` creation
+- **[Low]**: Reverse stage transitions not gated (undocumented)
+
 ## [4.11.0] - 2026-03-06
 
 ### Added

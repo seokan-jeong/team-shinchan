@@ -21,7 +21,18 @@ const path = require('path');
 // ─── Constants ──────────────────────────────────────────────────────
 const TAIL_LINES = 200;      // for transcript Todo parsing (HR-3)
 const BAR_WIDTH = 10;         // ████░░░░░░ width
-const DOCS_DIR = path.join(process.cwd(), '.shinchan-docs');
+
+/**
+ * Resolve .shinchan-docs directory from stdin cwd or process.cwd() fallback.
+ * Claude Code may execute the statusline script from a different cwd than the project.
+ */
+let DOCS_DIR = path.join(process.cwd(), '.shinchan-docs');
+
+function resolveDocsDir(stdinCwd) {
+  if (stdinCwd) {
+    DOCS_DIR = path.join(stdinCwd, '.shinchan-docs');
+  }
+}
 
 // ANSI color codes
 const RESET = '\x1b[0m';
@@ -320,6 +331,9 @@ async function main() {
   try {
     // Read stdin (async)
     const stdin = await readStdin();
+
+    // Resolve docs dir from stdin cwd (Claude Code may run script from different cwd)
+    resolveDocsDir(stdin?.cwd);
 
     // Parallel sync reads
     const agentName = readCurrentAgent();

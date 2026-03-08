@@ -326,8 +326,11 @@ async function main() {
     const workflowState = readWorkflowState();
     const todos = readTranscriptTodos(stdin?.transcript_path);
 
+    // Fallback: use workflowState.owner when .current-agent file is missing
+    const displayAgent = agentName || (workflowState && workflowState.owner) || null;
+
     // Render output
-    console.log(buildLine1(stdin, agentName, workflowState, todos));
+    console.log(buildLine1(stdin, displayAgent, workflowState, todos));
     console.log(buildLine2(stdin));
   } catch {
     renderFallback();
@@ -339,8 +342,9 @@ if (process.stdin.isTTY) {
   try {
     const agentName = readCurrentAgent();
     const workflowState = readWorkflowState();
+    const displayAgent = agentName || (workflowState && workflowState.owner) || null;
     const todos = { completed: 0, total: 0 };
-    console.log(buildLine1(null, agentName, workflowState, todos));
+    console.log(buildLine1(null, displayAgent, workflowState, todos));
     console.log(buildLine2(null));
   } catch {
     renderFallback();

@@ -2,6 +2,12 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.13.1] - 2026-03-08
+
+### Fixed
+- **Statusline HUD**: use stdin `cwd` instead of `process.cwd()` to resolve `.shinchan-docs/` — fixes workflow state not showing when Claude Code runs the script from a different working directory
+- **Statusline HUD**: fallback to `WORKFLOW_STATE.yaml` owner field when `.current-agent` file is missing
+
 ## [4.13.0] - 2026-03-08
 
 ### Added

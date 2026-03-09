@@ -73,15 +73,16 @@ process.stdin.on('end', () => {
   const docDir = path.dirname(filePath);
   const missing = [];
 
+  // Read current stage from disk (shared by stage transition gate + status completion gate)
+  let currentStage = '';
+  try {
+    const current = fs.readFileSync(filePath, 'utf-8');
+    const cm = current.match(/^\\s*stage:\\s*(\\w+)/m);
+    if (cm) currentStage = cm[1].trim();
+  } catch(e) {}
+
   // === Stage transition gates ===
   if (stageMatch && newStage) {
-    let currentStage = '';
-    try {
-      const current = fs.readFileSync(filePath, 'utf-8');
-      const cm = current.match(/^\\s*stage:\\s*(\\w+)/m);
-      if (cm) currentStage = cm[1].trim();
-    } catch(e) {}
-
     if (currentStage !== newStage) {
       const stageOrder = ['requirements', 'planning', 'execution', 'completion'];
       const currentIdx = stageOrder.indexOf(currentStage);
@@ -141,6 +142,9 @@ process.stdin.on('end', () => {
   // === Status completion gate ===
   // Block status: completed/done unless RETROSPECTIVE.md + IMPLEMENTATION.md exist
   if (['completed', 'done'].includes(newStatus)) {
+    if (currentStage !== 'completion') {
+      missing.push('current.stage is \"' + currentStage + '\" — must be \"completion\" before marking workflow as completed. Transition to Stage 4 (completion) first.');
+    }
     const retroFile = path.join(docDir, 'RETROSPECTIVE.md');
     const implFile = path.join(docDir, 'IMPLEMENTATION.md');
     if (!fs.existsSync(retroFile)) {

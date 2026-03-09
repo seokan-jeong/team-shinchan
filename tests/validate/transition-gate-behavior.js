@@ -24,6 +24,9 @@
  *  TC-5: execution→completion WITHOUT Action Kamen review     → BLOCK
  *  TC-6: status:completed WITHOUT RETROSPECTIVE/IMPLEMENTATION → BLOCK
  *  TC-7: execution→requirements (reverse transition)          → document behavior
+ *  TC-8: status:completed from stage=execution (artifacts ok) → BLOCK (stage!=completion)
+ *  TC-9: combined stage:completion+status:completed from exec → BLOCK (on-disk stage!=completion)
+ *  TC-10: Edit status:completed from stage=planning           → BLOCK (stage!=completion)
  *  HR-3: WORKFLOW_STATE.yaml does not exist on disk           → document behavior
  */
 
@@ -560,6 +563,106 @@ function runValidation() {
           '  Unexpected path — gate blocked even on new file creation.',
           `  reason: ${(result.reason || '').slice(0, 120)}`
         ].join('\n'));
+      }
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  }
+
+  // ── TC-8/9/10: Stage skip prevention — status:completed from non-completion stage ─
+
+  section('4. Stage Skip Prevention — status:completed from non-completion stage');
+
+  // TC-8: status:completed from stage=execution (artifacts present) → BLOCK
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('execution', { includeAKReview: true });
+    try {
+      // Create all completion artifacts — gate should still block because stage !== completion
+      fs.writeFileSync(path.join(docsDir, 'RETROSPECTIVE.md'), '# Retrospective\n\nLessons learned.\n', 'utf-8');
+      fs.writeFileSync(path.join(docsDir, 'IMPLEMENTATION.md'), '# Implementation\n\nFiles changed.\n', 'utf-8');
+
+      const result = runHook(
+        {
+          tool_name: 'Write',
+          tool_input: {
+            file_path: workflowFile,
+            content: '---\nstage: execution\nstatus: completed\n---\n'
+          }
+        },
+        tmpDir
+      );
+      if (result.decision === 'block') {
+        const mentionsStage = (result.reason || '').includes('must be "completion"');
+        if (mentionsStage) {
+          ok('TC-8: status:completed from stage=execution (artifacts present) → BLOCK (stage must be completion)');
+        } else {
+          ok(`TC-8: status:completed from stage=execution → BLOCK (reason: ${(result.reason || '').slice(0, 100)})`);
+        }
+      } else {
+        fail('TC-8: status:completed from stage=execution (artifacts present) → expected BLOCK, got ALLOW');
+      }
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  }
+
+  // TC-9: combined write (stage:completion + status:completed) from execution → BLOCK
+  // The on-disk stage is "execution", so even writing stage:completion + status:completed
+  // simultaneously should be blocked because currentStage (from disk) is still "execution".
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('execution', { includeAKReview: true });
+    try {
+      fs.writeFileSync(path.join(docsDir, 'PROGRESS.md'), '# PROGRESS\n\n## Phase 1\nDone.\n', 'utf-8');
+      fs.writeFileSync(path.join(docsDir, 'RETROSPECTIVE.md'), '# Retrospective\n\nLessons.\n', 'utf-8');
+      fs.writeFileSync(path.join(docsDir, 'IMPLEMENTATION.md'), '# Implementation\n\nDone.\n', 'utf-8');
+
+      const result = runHook(
+        {
+          tool_name: 'Write',
+          tool_input: {
+            file_path: workflowFile,
+            content: '---\nstage: completion\nstatus: completed\n---\n'
+          }
+        },
+        tmpDir
+      );
+      if (result.decision === 'block') {
+        ok('TC-9: combined stage:completion + status:completed from execution → BLOCK (on-disk stage is execution)');
+      } else {
+        fail('TC-9: combined stage:completion + status:completed from execution → expected BLOCK, got ALLOW');
+      }
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  }
+
+  // TC-10: Edit status:completed from stage=planning → BLOCK
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('planning');
+    try {
+      fs.writeFileSync(path.join(docsDir, 'RETROSPECTIVE.md'), '# Retrospective\n\nLessons.\n', 'utf-8');
+      fs.writeFileSync(path.join(docsDir, 'IMPLEMENTATION.md'), '# Implementation\n\nDone.\n', 'utf-8');
+
+      const result = runHook(
+        {
+          tool_name: 'Edit',
+          tool_input: {
+            file_path: workflowFile,
+            old_string: 'status: active',
+            new_string: 'status: completed'
+          }
+        },
+        tmpDir
+      );
+      if (result.decision === 'block') {
+        const mentionsStage = (result.reason || '').includes('must be "completion"');
+        if (mentionsStage) {
+          ok('TC-10: Edit status:completed from stage=planning → BLOCK (stage must be completion)');
+        } else {
+          ok(`TC-10: Edit status:completed from stage=planning → BLOCK (reason: ${(result.reason || '').slice(0, 100)})`);
+        }
+      } else {
+        fail('TC-10: Edit status:completed from stage=planning → expected BLOCK, got ALLOW');
       }
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });

@@ -2,6 +2,12 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.13.2] - 2026-03-09
+
+### Fixed
+- **Transition gate**: block `status: completed` unless current stage is `completion` — prevents skipping Stage 4 (code review, retrospective, implementation docs). Previously only artifact file existence was checked, allowing completion from any stage.
+- Added TC-8/9/10 behavioral tests for stage skip prevention (16/16 passing)
+
 ## [4.13.1] - 2026-03-08
 
 ### Fixed

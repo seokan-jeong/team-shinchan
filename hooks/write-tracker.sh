@@ -77,6 +77,7 @@ if command -v node &>/dev/null; then
       let type = event.toLowerCase();
       let agent = null;
       let data = {};
+      let stepType = null;
 
       switch (event) {
         case 'SubagentStart':
@@ -109,6 +110,11 @@ if command -v node &>/dev/null; then
           } else {
             type = 'tool_use';
             data.tool = input.tool_name || 'unknown';
+          }
+          // step_type support (BM-3: ReACT structured logging)
+          // Only add step_type if input provides it (optional field for backward compat)
+          if (input.step_type && ['thought','action','observation','answer'].includes(input.step_type)) {
+            stepType = input.step_type;
           }
           break;
 
@@ -157,6 +163,7 @@ if command -v node &>/dev/null; then
         data: Object.keys(data).length > 0 ? data : undefined
       };
       if (traceId) obj.trace = traceId;
+      if (stepType) obj.step_type = stepType;  // BM-3: optional ReACT step field
       const line = JSON.stringify(obj);
       console.log(line);
     });

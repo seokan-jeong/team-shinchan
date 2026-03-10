@@ -43,6 +43,14 @@ Trigger a full re-scan of the project.
 - Usage: `/team-shinchan:ontology scan --module src/services`
 - Run scanner and merge results
 
+### auto-scan
+LLM 구동 온톨로지 자동 스캔 — 코드베이스를 분석하여 새 엔티티를 제안.
+- Usage: `/team-shinchan:ontology auto-scan --check` — 발견된 엔티티 후보 리포트 (수정 없음)
+- Usage: `/team-shinchan:ontology auto-scan --write` — 검토 후 ontology.json에 병합
+- Run: `node ${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js auto-scan --check|--write`
+- CI: `bash ${CLAUDE_PLUGIN_ROOT}/scripts/ontology-check.sh` — --check 모드로 차이 보고
+- 주의: --write 실행 전 반드시 --check 결과를 사람이 검토할 것 (LLM 환각 방지)
+
 ### gen-kb
 Regenerate kb-summary.md from ontology.
 - Usage: `/team-shinchan:ontology gen-kb`

@@ -2,6 +2,17 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.14.0] - 2026-03-10
+
+### Added
+- **LLM-driven ontology auto-scan** (BM-1): `auto-scan --check/--write` command in ontology-engine — LLM analyzes codebase to extract entities automatically with hallucination safeguards
+- **ReACT Analysis Protocol** (BM-2): Structured Thought→Action→Observation→Answer cycle for Hiroshi and minimum tool-call principle for Misae
+- **Structured agent step logging** (BM-3): Optional `step_type` field in work-tracker.jsonl for ReACT-style event tracking
+
+### New Files
+- `src/llm-ontology-scanner.js` — LLM scan core with caching and chunking
+- `scripts/ontology-check.sh` — CI wrapper for ontology auto-scan --check
+
 ## [4.13.2] - 2026-03-09
 
 ### Fixed

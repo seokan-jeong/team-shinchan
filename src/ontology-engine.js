@@ -692,7 +692,9 @@ function cli() {
 
   if (!cmd || cmd === '--help') {
     console.log('Usage: ontology-engine <command> [options]');
-    console.log('Commands: init, summary, query, related, merge, gen-kb, impact, health, gc, diagram, evolution');
+    console.log('Commands: init, summary, query, related, merge, gen-kb, impact, health, gc, diagram, evolution, auto-scan');
+    console.log('  auto-scan --check   Report new entities found by LLM scan (no modification)');
+    console.log('  auto-scan --write   Merge new entities into ontology.json');
     return;
   }
 
@@ -811,6 +813,50 @@ function cli() {
       for (const [a, c] of Object.entries(ev.actionDistribution)) console.log(`  ${a}: ${c}`);
       break;
     }
+    case 'auto-scan': {
+      const mode = args[1]; // '--check' or '--write'
+      if (!mode || (mode !== '--check' && mode !== '--write')) {
+        console.log('Usage: ontology-engine auto-scan --check|--write');
+        console.log('  --check  Report new entities found (no modification)');
+        console.log('  --write  Merge new entities into ontology.json');
+        return;
+      }
+      const scannerPath = path.join(__dirname, 'llm-ontology-scanner.js');
+      if (!fs.existsSync(scannerPath)) {
+        console.error('llm-ontology-scanner.js not found in src/');
+        process.exit(1);
+      }
+      const llmScanner = require(scannerPath);
+      const result = llmScanner.autoScan(root, { mode: mode.replace('--', '') });
+      if (!result || !result.candidates) {
+        console.log('Auto-scan: no result (check llm-ontology-scanner.js)');
+        return;
+      }
+      if (mode === '--check') {
+        const { newEntities, existingCount } = llmScanner.diffReport(root, result.candidates);
+        console.log(`Auto-scan --check: ${result.candidates.length} candidate(s) found, ${existingCount} existing entities in ontology`);
+        if (newEntities.length === 0) {
+          console.log('No new entities detected — ontology is up to date.');
+        } else {
+          console.log(`New entities (${newEntities.length}):`);
+          newEntities.forEach(c => {
+            const pathValid = c.file_path ? fs.existsSync(path.join(root, c.file_path)) : null;
+            const confidence = pathValid === true ? 'high' : pathValid === false ? 'low (path not found)' : (c.confidence || 'medium');
+            console.log(`  [${confidence}] ${c.type}: ${c.name || c.title}${c.file_path ? ` (${c.file_path})` : ''}`);
+          });
+        }
+        if (result.meta && result.meta.fromCache) {
+          console.log('(result from cache)');
+        }
+      } else {
+        // --write mode: merge into ontology
+        const scanResult = llmScanner.candidatesToScanResult(result.candidates);
+        const stats = merge(root, scanResult);
+        console.log(`Auto-scan --write: +${stats.added.entities} entities, +${stats.added.relations} relations`);
+        console.log(`Skipped: ${stats.skipped.entities} duplicates`);
+      }
+      break;
+    }
     default:
       console.log(`Unknown command: ${cmd}. Run with --help for usage.`);
   }
@@ -818,11 +864,20 @@ function cli() {
 
 if (require.main === module) cli();
 
+// autoScan: BM-1 LLM-driven ontology scan (delegates to llm-ontology-scanner.js)
+function autoScan(projectRoot, opts) {
+  const scannerPath = path.join(__dirname, 'llm-ontology-scanner.js');
+  if (!fs.existsSync(scannerPath)) return null;
+  const llmScanner = require(scannerPath);
+  return llmScanner.autoScan(projectRoot, opts);
+}
+
 module.exports = {
   ENTITY_TYPES, RELATION_TYPES, VALID_LAYERS,
   init, load, save,
   addEntity, removeEntity, addRelation, removeRelation,
   query, getRelated, summary,
   merge, generateKbSummary, logHistory,
-  impactAnalysis, healthScore, gc, generateMermaid, evolution
+  impactAnalysis, healthScore, gc, generateMermaid, evolution,
+  autoScan  // BM-1: LLM-driven ontology scan
 };

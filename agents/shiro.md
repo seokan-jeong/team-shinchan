@@ -20,6 +20,7 @@ tools: ["Read", "Glob", "Grep", "Bash"]
 maxTurns: 10
 permissionMode: plan
 memory: project
+capabilities: ["codebase-exploration"]
 ---
 
 # Shiro - Team-Shinchan Fast Explorer

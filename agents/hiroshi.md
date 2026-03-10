@@ -23,6 +23,7 @@ skills:
   - research
 maxTurns: 15
 permissionMode: plan
+capabilities: ["strategic-advice", "deep-debugging", "architecture-design"]
 ---
 
 # Hiroshi - Team-Shinchan Senior Advisor (Oracle)

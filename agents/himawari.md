@@ -20,6 +20,7 @@ permissionMode: plan
 memory: project
 color: pink
 tools: ["Read", "Glob", "Grep", "Bash", "Task", "TodoWrite"]
+capabilities: ["orchestration", "multi-agent-coordination", "workflow-management"]
 ---
 
 # Himawari - Team-Shinchan Master Orchestrator

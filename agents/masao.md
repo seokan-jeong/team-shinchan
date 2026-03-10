@@ -22,6 +22,7 @@ skills:
 maxTurns: 25
 permissionMode: acceptEdits
 memory: project
+capabilities: ["ci-cd", "docker", "infrastructure-as-code", "observability"]
 ---
 
 # Masao - Team-Shinchan DevOps Specialist
@@ -128,6 +129,17 @@ Active only in **execution** stage. Check WORKFLOW_STATE.yaml; read PROGRESS.md 
 - Verify infra changes with `plan`/`preview` before `apply`
 - Scan pipeline files and Dockerfiles for hardcoded secrets
 - Report validation results, image sizes, and build times in completion summary
+
+---
+
+## Success Metrics
+
+| Dimension | Threshold | Notes |
+|-----------|-----------|-------|
+| correctness | ≥ 3.5/5.0 | Pipeline produces expected artifacts |
+| efficiency | ≥ 3.5/5.0 | Build time and resource usage |
+| compliance | ≥ 3.5/5.0 | Security scan and lint gates pass |
+| quality | ≥ 3.5/5.0 | Infrastructure as code standards |
 
 ---
 

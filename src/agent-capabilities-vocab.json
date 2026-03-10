@@ -1,0 +1,40 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "updated": "2026-03-10",
+    "note": "Canonical capability tags for all agents. Validator integration planned for v2. Max 30 tags.",
+    "routing_note": "DEFER: capabilities not yet wired to shinnosuke routing logic. See layer-map.json _capabilities_note."
+  },
+  "tags": [
+    "orchestration",
+    "multi-agent-coordination",
+    "planning",
+    "requirements-analysis",
+    "code-review",
+    "react-components",
+    "css-styling",
+    "accessibility",
+    "frontend-performance",
+    "rest-api",
+    "graphql",
+    "database-design",
+    "sql-migrations",
+    "backend-security",
+    "ci-cd",
+    "docker",
+    "infrastructure-as-code",
+    "observability",
+    "complex-refactoring",
+    "deep-debugging",
+    "architecture-design",
+    "multimodal-analysis",
+    "documentation-search",
+    "codebase-exploration",
+    "debate-facilitation",
+    "strategic-advice",
+    "workflow-management",
+    "knowledge-management",
+    "domain-routing",
+    "test-driven-development"
+  ]
+}

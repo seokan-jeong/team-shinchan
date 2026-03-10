@@ -23,6 +23,7 @@ skills:
   - verification-before-completion
 maxTurns: 20
 permissionMode: plan
+capabilities: ["code-review", "requirements-analysis"]
 ---
 
 # Action Kamen - Team-Shinchan Reviewer

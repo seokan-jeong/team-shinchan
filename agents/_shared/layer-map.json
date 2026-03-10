@@ -1,4 +1,5 @@
 {
+  "_capabilities_note": "Agent capabilities are defined in each agent's frontmatter (capabilities: [...]) and the canonical vocabulary is at src/agent-capabilities-vocab.json. Routing integration with capabilities is DEFER — planned for next phase after this baseline establishes vocabulary consensus.",
   "layers": {
     "orchestration": ["shinnosuke", "himawari", "midori"],
     "execution": ["bo", "kazama"],

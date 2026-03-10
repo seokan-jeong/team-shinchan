@@ -20,6 +20,7 @@ permissionMode: plan
 memory: project
 color: yellow
 tools: ["Read", "Glob", "Grep", "Bash", "Task", "TodoWrite"]
+capabilities: ["orchestration", "multi-agent-coordination", "workflow-management", "domain-routing"]
 ---
 
 # Shinnosuke - Team-Shinchan Main Orchestrator

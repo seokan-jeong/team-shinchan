@@ -20,6 +20,7 @@ permissionMode: plan
 memory: project
 color: brown
 tools: ["Read", "Write", "Glob", "Grep", "Bash", "Task", "AskUserQuestion"]
+capabilities: ["requirements-analysis", "workflow-management"]
 ---
 
 # Misae - Team-Shinchan Requirements Analyst

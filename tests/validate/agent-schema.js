@@ -16,6 +16,25 @@ const REQUIRED_PATTERNS = [
   { name: 'Signature Emoji', pattern: /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]/u },
 ];
 
+// Content section completeness checks (warnings only, FR-4.2, NFR-4)
+const CONTENT_SECTION_PATTERNS = [
+  {
+    name: 'Mission',
+    primary: /^##\s+.*(?:mission|core mission)/im,
+    fallback: /^##\s+.*(?:role|purpose|goal)/im
+  },
+  {
+    name: 'Critical Rules',
+    primary: /^##\s+.*(?:critical rules|rules|constraints|immutable)/im,
+    fallback: /^##\s+.*(?:must|never|always)/im
+  },
+  {
+    name: 'Workflow',
+    primary: /^##\s+.*(?:workflow|process|procedure)/im,
+    fallback: /^##\s+.*(?:step|how|execution)/im
+  }
+];
+
 // Forbidden patterns (agents shouldn't have these unless specific role)
 const ROLE_RESTRICTIONS = {
   'shiro.md': {
@@ -55,6 +74,13 @@ function validateAgent(filePath) {
     });
   }
 
+  // Check content section completeness (warnings only)
+  CONTENT_SECTION_PATTERNS.forEach(({ name, primary, fallback }) => {
+    if (!primary.test(content) && !fallback.test(content)) {
+      warnings.push(`[CONTENT] ${fileName}: missing '${name}' section (expected heading matching ${primary})`);
+    }
+  });
+
   // Check for empty or too short content
   if (content.length < 100) {
     errors.push('Content too short (< 100 chars)');
@@ -77,6 +103,7 @@ function runValidation() {
   let hasErrors = false;
   let totalErrors = 0;
   let totalWarnings = 0;
+  let contentWarnings = 0;
 
   files.forEach(file => {
     const result = validateAgent(path.join(AGENTS_DIR, file));
@@ -93,11 +120,15 @@ function runValidation() {
     if (result.warnings.length > 0) {
       totalWarnings += result.warnings.length;
       result.warnings.forEach(w => console.log(`    \x1b[33mWARN: ${w}\x1b[0m`));
+      contentWarnings += result.warnings.filter(w => w.startsWith('[CONTENT]')).length;
     }
   });
 
   console.log('\n----------------------------------------');
   console.log(`Agents: ${files.length} | Errors: ${totalErrors} | Warnings: ${totalWarnings}`);
+  if (contentWarnings > 0) {
+    console.log(`\u26a0\ufe0f  ${contentWarnings} content section warning(s) — run locally to review`);
+  }
   console.log('----------------------------------------\n');
 
   return hasErrors ? 1 : 0;

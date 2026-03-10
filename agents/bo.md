@@ -25,6 +25,7 @@ skills:
   - verification-before-completion
 maxTurns: 80
 permissionMode: acceptEdits
+capabilities: ["domain-routing", "orchestration", "code-review", "test-driven-development"]
 ---
 
 # Bo - Team-Shinchan Execution PO
@@ -202,6 +203,17 @@ These skills are MANDATORY during implementation. Do not skip them.
 ## Version Bump Protocol
 
 Version bumps must be atomic: update all 4 files together — `plugin.json`, `marketplace.json`, `README.md` badge, and `CHANGELOG.md` heading.
+
+---
+
+## Success Metrics
+
+| Dimension | Threshold | Notes |
+|-----------|-----------|-------|
+| correctness | ≥ 3.5/5.0 | Phase deliverables match REQUESTS.md specs |
+| efficiency | ≥ 3.5/5.0 | Delegation vs self-execution balance |
+| compliance | ≥ 3.5/5.0 | PROGRESS.md phase loop adherence |
+| quality | ≥ 3.5/5.0 | Code review pass rate on first submission |
 
 ---
 

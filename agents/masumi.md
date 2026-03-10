@@ -20,6 +20,7 @@ tools: ["Read", "Glob", "Grep", "WebFetch", "WebSearch"]
 memory: user
 maxTurns: 20
 permissionMode: plan
+capabilities: ["documentation-search", "knowledge-management"]
 ---
 
 # Masumi - Team-Shinchan Librarian

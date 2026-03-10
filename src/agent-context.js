@@ -151,6 +151,22 @@ function getWorkStats(agentName) {
   return { avgDuration, errorPatterns: topErrors, sessionCount, delegationCount };
 }
 
+// ─── Baseline / Regression Detection ────────────────────────────────
+
+/**
+ * Load per-agent performance thresholds from agent-metrics-baseline.json.
+ * Returns parsed JSON object or null on any error (R-1, NFR-2).
+ */
+function loadBaseline() {
+  try {
+    const baselinePath = path.join(__dirname, 'agent-metrics-baseline.json');
+    const raw = fs.readFileSync(baselinePath, 'utf-8');
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
 // ─── Main Summary Builder ────────────────────────────────────────────
 
 function buildAgentContext(agentName) {
@@ -181,6 +197,28 @@ function buildAgentContext(agentName) {
     ? Object.entries(avgScores).filter(([, v]) => v !== null && v <= 3.5).map(([k]) => k)
     : [];
 
+  // Regression detection against baseline thresholds (NFR-2, R-1)
+  let regression = null;
+  try {
+    const baseline = loadBaseline();
+    const agentKey = agentName.toLowerCase();
+    if (baseline && baseline[agentKey] && avgScores) {
+      const dims = ['correctness', 'efficiency', 'compliance', 'quality'];
+      let anyBelow = false;
+      for (const dim of dims) {
+        const score = avgScores[dim];
+        const threshold = baseline[agentKey][dim];
+        if (typeof score === 'number' && typeof threshold === 'number' && score < threshold) {
+          anyBelow = true;
+          break;
+        }
+      }
+      regression = anyBelow;
+    }
+  } catch {
+    regression = null;
+  }
+
   const elapsed = Date.now() - t0;
 
   return {
@@ -190,6 +228,7 @@ function buildAgentContext(agentName) {
     recentEvals: evalHistory,
     avgScores,
     weakDimensions,
+    regression,
     workStats: {
       avgDurationSec: workStats.avgDuration,
       sessionCount: workStats.sessionCount,

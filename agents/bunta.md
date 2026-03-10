@@ -22,6 +22,7 @@ skills:
 maxTurns: 30
 permissionMode: acceptEdits
 memory: project
+capabilities: ["rest-api", "graphql", "database-design", "sql-migrations", "backend-security"]
 ---
 
 # Bunta - Team-Shinchan Backend Specialist
@@ -117,6 +118,17 @@ Active only in **execution** stage. Check WORKFLOW_STATE.yaml; read PROGRESS.md 
 - Verify no raw SQL injection vectors: search for string concatenation in queries
 - Test with edge-case inputs: empty strings, null, extremely long strings, special characters
 - Report test results and any security observations in completion summary
+
+---
+
+## Success Metrics
+
+| Dimension | Threshold | Notes |
+|-----------|-----------|-------|
+| correctness | ≥ 3.5/5.0 | API contracts match spec |
+| efficiency | ≥ 3.5/5.0 | Query optimization, N+1 prevention |
+| compliance | ≥ 3.5/5.0 | Auth/security patterns followed |
+| quality | ≥ 3.5/5.0 | Error handling coverage |
 
 ---
 

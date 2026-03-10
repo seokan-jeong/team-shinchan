@@ -16,6 +16,8 @@ src/*
 !src/gen-architecture-map.js
 !src/agent-context.js
 !src/llm-ontology-scanner.js
+!src/agent-capabilities-vocab.json
+!src/agent-metrics-baseline.json
 !src/statusline/
 !src/statusline/index.js
 

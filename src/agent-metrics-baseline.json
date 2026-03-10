@@ -1,0 +1,38 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "description": "Per-agent performance thresholds for regression detection",
+    "dimensions": ["correctness", "efficiency", "compliance", "quality"],
+    "updated": "2026-03-10"
+  },
+  "bo": {
+    "correctness": 3.5,
+    "efficiency": 3.5,
+    "compliance": 3.5,
+    "quality": 3.5
+  },
+  "aichan": {
+    "correctness": 3.5,
+    "efficiency": 3.5,
+    "compliance": 3.5,
+    "quality": 3.5
+  },
+  "bunta": {
+    "correctness": 3.5,
+    "efficiency": 3.5,
+    "compliance": 3.5,
+    "quality": 3.5
+  },
+  "masao": {
+    "correctness": 3.5,
+    "efficiency": 3.5,
+    "compliance": 3.5,
+    "quality": 3.5
+  },
+  "kazama": {
+    "correctness": 3.5,
+    "efficiency": 3.5,
+    "compliance": 3.5,
+    "quality": 3.5
+  }
+}

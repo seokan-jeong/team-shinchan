@@ -22,6 +22,7 @@ skills:
 maxTurns: 30
 permissionMode: acceptEdits
 memory: project
+capabilities: ["react-components", "css-styling", "accessibility", "frontend-performance"]
 ---
 
 # Aichan - Team-Shinchan Frontend Specialist
@@ -144,6 +145,17 @@ Follow Bash safety rules in _shared/coding-principles.md. Never run destructive 
 - Verify keyboard navigation works for all interactive elements
 - Verify no console warnings/errors in browser DevTools
 - Report test results and accessibility status in completion summary
+
+---
+
+## Success Metrics
+
+| Dimension | Threshold | Notes |
+|-----------|-----------|-------|
+| correctness | ≥ 3.5/5.0 | UI matches design specs/mockups |
+| efficiency | ≥ 3.5/5.0 | Component reuse over duplication |
+| compliance | ≥ 3.5/5.0 | A11y and responsive requirements met |
+| quality | ≥ 3.5/5.0 | Clean markup, semantic HTML |
 
 ---
 

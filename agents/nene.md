@@ -20,6 +20,7 @@ tools: ["Read", "Write", "Glob", "Grep"]
 maxTurns: 20
 permissionMode: plan
 memory: project
+capabilities: ["planning", "workflow-management"]
 ---
 
 # Nene - Team-Shinchan Strategic Planner

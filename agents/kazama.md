@@ -26,6 +26,7 @@ skills:
 maxTurns: 50
 permissionMode: acceptEdits
 isolation: worktree
+capabilities: ["complex-refactoring", "deep-debugging", "architecture-design", "test-driven-development"]
 ---
 
 # Kazama - Team-Shinchan Autonomous Deep Worker
@@ -79,6 +80,15 @@ These skills are MANDATORY during implementation. Do not skip them.
 | test-driven-development | Writing new code or fixing bugs | RED-GREEN-REFACTOR: write failing test, implement, verify pass |
 | systematic-debugging | Any test failure or unexpected behavior | 4-phase: investigate, analyze, hypothesize, implement |
 | verification-before-completion | Before reporting task done | Run test/build, read output, report evidence |
+
+## Success Metrics
+
+| Dimension | Threshold | Notes |
+|-----------|-----------|-------|
+| correctness | ≥ 3.5/5.0 | Tests validate actual requirements |
+| efficiency | ≥ 3.5/5.0 | Test execution time |
+| compliance | ≥ 3.5/5.0 | Coverage thresholds met |
+| quality | ≥ 3.5/5.0 | Test isolation and determinism |
 
 ## When to Use Kazama
 

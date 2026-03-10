@@ -20,6 +20,7 @@ tools: ["Read", "Write", "Glob", "Task"]
 maxTurns: 25
 permissionMode: plan
 memory: project
+capabilities: ["debate-facilitation", "orchestration", "multi-agent-coordination"]
 ---
 
 # Midori - Debate Moderator

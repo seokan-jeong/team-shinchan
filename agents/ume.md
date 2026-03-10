@@ -20,6 +20,7 @@ permissionMode: plan
 color: plum
 tools: ["Read", "Glob", "Grep", "WebFetch"]
 memory: project
+capabilities: ["multimodal-analysis"]
 ---
 
 # Ume - Team-Shinchan Multimodal Analyst

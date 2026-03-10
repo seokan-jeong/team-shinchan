@@ -99,15 +99,20 @@ function generate() {
   return L.join('\n') + '\n';
 }
 
-const flag = process.argv[2];
-const content = generate();
-if (flag === '--write') {
-  fs.writeFileSync(OUTPUT, content, 'utf-8');
-  console.log(`Wrote AGENTS.md (${content.split('\n').length} lines)`);
-} else if (flag === '--check') {
-  if (!fs.existsSync(OUTPUT)) { console.error('AGENTS.md not found. Run with --write first.'); process.exit(1); }
-  if (fs.readFileSync(OUTPUT, 'utf-8') !== content) { console.error('AGENTS.md is out of date. Run: node src/gen-agents-map.js --write'); process.exit(1); }
-  console.log('AGENTS.md is up to date.');
-} else {
-  process.stdout.write(content);
+// ── Exports ─────────────────────────────────────────────────────────
+module.exports = { generate };
+
+if (require.main === module) {
+  const flag = process.argv[2];
+  const content = generate();
+  if (flag === '--write') {
+    fs.writeFileSync(OUTPUT, content, 'utf-8');
+    console.log(`Wrote AGENTS.md (${content.split('\n').length} lines)`);
+  } else if (flag === '--check') {
+    if (!fs.existsSync(OUTPUT)) { console.error('AGENTS.md not found. Run with --write first.'); process.exit(1); }
+    if (fs.readFileSync(OUTPUT, 'utf-8') !== content) { console.error('AGENTS.md is out of date. Run: node src/gen-agents-map.js --write'); process.exit(1); }
+    console.log('AGENTS.md is up to date.');
+  } else {
+    process.stdout.write(content);
+  }
 }

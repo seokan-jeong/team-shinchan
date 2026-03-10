@@ -16,52 +16,16 @@ const fs = require('fs');
 const readline = require('readline');
 const path = require('path');
 
-// ── Parse CLI args ───────────────────────────────────────────────────────────
-const args = process.argv.slice(2);
-if (args.length === 0 || args[0] === '--help') {
-  console.log(`Usage: node analytics.js <jsonl-path> [options]
-
-Options:
-  --format table     Output as text table instead of JSON
-  --agent <name>     Show detail for a single agent
-  --trace <id>       Show timeline for a specific trace ID
-  --period <N>d      Filter events to the last N days`);
-  process.exit(0);
-}
-
-const jsonlPath = args[0];
-let format = 'json';
-let filterAgent = null;
-let filterTrace = null;
-let periodDays = null;
-
-for (let i = 1; i < args.length; i++) {
-  if (args[i] === '--format' && args[i + 1]) {
-    format = args[++i];
-  } else if (args[i] === '--agent' && args[i + 1]) {
-    filterAgent = args[++i];
-  } else if (args[i] === '--trace' && args[i + 1]) {
-    filterTrace = args[++i];
-  } else if (args[i] === '--period' && args[i + 1]) {
-    const m = args[++i].match(/^(\d+)d$/);
-    if (m) periodDays = parseInt(m[1], 10);
-  }
-}
-
-// ── Graceful file check ──────────────────────────────────────────────────────
-if (!fs.existsSync(jsonlPath)) {
-  console.error(`File not found: ${jsonlPath}`);
-  process.exit(1);
-}
-
-const stat = fs.statSync(jsonlPath);
-if (stat.size === 0) {
-  console.error('File is empty.');
-  process.exit(1);
-}
-
 // ── Read and parse JSONL ─────────────────────────────────────────────────────
-async function parseLines() {
+async function parseLines(jsonlPath) {
+  // Graceful file check
+  if (!fs.existsSync(jsonlPath)) {
+    throw new Error(`File not found: ${jsonlPath}`);
+  }
+  const stat = fs.statSync(jsonlPath);
+  if (stat.size === 0) {
+    throw new Error('File is empty.');
+  }
   const events = [];
   const rl = readline.createInterface({
     input: fs.createReadStream(jsonlPath),
@@ -80,7 +44,8 @@ async function parseLines() {
 }
 
 // ── Filter helpers ───────────────────────────────────────────────────────────
-function applyFilters(events) {
+function applyFilters(events, options = {}) {
+  const { periodDays, filterTrace } = options;
   let filtered = events;
   if (periodDays) {
     const cutoff = new Date(Date.now() - periodDays * 86400000);
@@ -254,6 +219,18 @@ function traceTimeline(events, traceId) {
   };
 }
 
+// ── Exports ─────────────────────────────────────────────────────────────
+module.exports = {
+  parseLines,
+  applyFilters,
+  computeAgentMetrics,
+  computeSessionMetrics,
+  computeEventDistribution,
+  computeDelegationGraph,
+  agentDetail,
+  traceTimeline,
+};
+
 // ── Table formatter ──────────────────────────────────────────────────────────
 function pad(str, len) {
   const s = String(str);
@@ -311,9 +288,11 @@ function printTable(report) {
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
-async function main() {
-  const allEvents = await parseLines();
-  const events = applyFilters(allEvents);
+async function main(options = {}) {
+  const { jsonlPath, format = 'json', filterAgent, filterTrace, periodDays } = options;
+
+  const allEvents = await parseLines(jsonlPath);
+  const events = applyFilters(allEvents, { periodDays, filterTrace });
 
   // Single agent detail mode
   if (filterAgent) {
@@ -379,7 +358,41 @@ async function main() {
   }
 }
 
-main().catch(err => {
-  console.error('Analytics error:', err.message);
-  process.exit(1);
-});
+if (require.main === module) {
+  // ── Parse CLI args ─────────────────────────────────────────────────────────
+  const args = process.argv.slice(2);
+  if (args.length === 0 || args[0] === '--help') {
+    console.log(`Usage: node analytics.js <jsonl-path> [options]
+
+Options:
+  --format table     Output as text table instead of JSON
+  --agent <name>     Show detail for a single agent
+  --trace <id>       Show timeline for a specific trace ID
+  --period <N>d      Filter events to the last N days`);
+    process.exit(0);
+  }
+
+  const jsonlPath = args[0];
+  let format = 'json';
+  let filterAgent = null;
+  let filterTrace = null;
+  let periodDays = null;
+
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === '--format' && args[i + 1]) {
+      format = args[++i];
+    } else if (args[i] === '--agent' && args[i + 1]) {
+      filterAgent = args[++i];
+    } else if (args[i] === '--trace' && args[i + 1]) {
+      filterTrace = args[++i];
+    } else if (args[i] === '--period' && args[i + 1]) {
+      const m = args[++i].match(/^(\d+)d$/);
+      if (m) periodDays = parseInt(m[1], 10);
+    }
+  }
+
+  main({ jsonlPath, format, filterAgent, filterTrace, periodDays }).catch(err => {
+    console.error('Analytics error:', err.message);
+    process.exit(1);
+  });
+}

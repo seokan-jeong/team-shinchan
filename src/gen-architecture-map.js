@@ -302,25 +302,30 @@ function generate() {
   return result;
 }
 
+// ── Exports ─────────────────────────────────────────────────────────
+module.exports = { generate };
+
 // ─── CLI ────────────────────────────────────────────────────────────
 
-const flag = process.argv[2];
-const content = generate();
+if (require.main === module) {
+  const flag = process.argv[2];
+  const content = generate();
 
-if (flag === '--write') {
-  fs.writeFileSync(OUTPUT, content, 'utf-8');
-  const lines = content.split('\n').length;
-  console.log(`Wrote ARCHITECTURE.md (${lines} lines)`);
-} else if (flag === '--check') {
-  if (!fs.existsSync(OUTPUT)) {
-    console.error('ARCHITECTURE.md not found. Run: node src/gen-architecture-map.js --write');
-    process.exit(1);
+  if (flag === '--write') {
+    fs.writeFileSync(OUTPUT, content, 'utf-8');
+    const lines = content.split('\n').length;
+    console.log(`Wrote ARCHITECTURE.md (${lines} lines)`);
+  } else if (flag === '--check') {
+    if (!fs.existsSync(OUTPUT)) {
+      console.error('ARCHITECTURE.md not found. Run: node src/gen-architecture-map.js --write');
+      process.exit(1);
+    }
+    if (fs.readFileSync(OUTPUT, 'utf-8') !== content) {
+      console.error('ARCHITECTURE.md is out of date. Run: node src/gen-architecture-map.js --write');
+      process.exit(1);
+    }
+    console.log('ARCHITECTURE.md is up to date.');
+  } else {
+    process.stdout.write(content);
   }
-  if (fs.readFileSync(OUTPUT, 'utf-8') !== content) {
-    console.error('ARCHITECTURE.md is out of date. Run: node src/gen-architecture-map.js --write');
-    process.exit(1);
-  }
-  console.log('ARCHITECTURE.md is up to date.');
-} else {
-  process.stdout.write(content);
 }

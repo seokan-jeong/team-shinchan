@@ -61,12 +61,17 @@ function checkDrift(){
   return{category:'drift',label:'Drift Detection',checks:cks};
 }
 
+// ── Exports ─────────────────────────────────────────────────────────
+module.exports = { checkAgents, checkStructure, checkDrift };
+
 function outJ(res){const s={total:0,passed:0,failed:0,categories:res.map(r=>{const p=r.checks.filter(x=>x.pass).length,f=r.checks.length-p;return{...r,total:r.checks.length,passed:p,failed:f}})};s.categories.forEach(x=>{s.total+=x.total;s.passed+=x.passed;s.failed+=x.failed});console.log(JSON.stringify(s,null,2));return s.failed}
 function outT(res){let tp=0,tf=0;for(const r of res){const p=r.checks.filter(x=>x.pass).length,f=r.checks.length-p;tp+=p;tf+=f;console.log('\n'+C(1,'=== '+r.label+' ===')+' ('+C(32,p+' pass')+', '+(f?C(31,f+' fail'):'0 fail')+')');for(const x of r.checks)console.log('  '+(x.pass?C(32,'PASS'):C(31,'FAIL'))+'  '+x.check+'  '+C(36,x.details))}console.log('\n'+C(1,'Total:')+' '+C(32,tp+' pass')+', '+(tf?C(31,tf+' fail'):'0 fail')+' / '+(tp+tf)+' checks');return tf}
 
-const a=process.argv.slice(2),ci=a.indexOf('--category'),cat=ci>=0?a[ci+1]:null;
-const fmt=a.includes('--format')?a[a.indexOf('--format')+1]:'json';
-const R={agents:checkAgents,structure:checkStructure,drift:checkDrift};
-const res=cat&&R[cat]?[R[cat]()]:[checkAgents(),checkStructure(),checkDrift()];
-try{const d=path.join(process.cwd(),'.shinchan-docs');if(!fs.existsSync(d))fs.mkdirSync(d,{recursive:true});fs.writeFileSync(path.join(d,'.last-lint'),new Date().toISOString())}catch{}
-process.exit((fmt==='table'?outT(res):outJ(res))>0?1:0);
+if (require.main === module) {
+  const a=process.argv.slice(2),ci=a.indexOf('--category'),cat=ci>=0?a[ci+1]:null;
+  const fmt=a.includes('--format')?a[a.indexOf('--format')+1]:'json';
+  const R={agents:checkAgents,structure:checkStructure,drift:checkDrift};
+  const res=cat&&R[cat]?[R[cat]()]:[checkAgents(),checkStructure(),checkDrift()];
+  try{const d=path.join(process.cwd(),'.shinchan-docs');if(!fs.existsSync(d))fs.mkdirSync(d,{recursive:true});fs.writeFileSync(path.join(d,'.last-lint'),new Date().toISOString())}catch{}
+  process.exit((fmt==='table'?outT(res):outJ(res))>0?1:0);
+}

@@ -133,6 +133,49 @@ if (activeYaml) {
   } catch(e) {}
 }
 
+// ── PROGRESS.md Snapshot (FR-6, FR-7, FR-8) ──
+if (docDir && activeYaml) {
+  const progressMd = path.join(docDir, 'PROGRESS.md');
+  if (fs.existsSync(progressMd)) {
+    try {
+      // Extract stage from WORKFLOW_STATE.yaml
+      const yamlContent = fs.readFileSync(activeYaml, 'utf-8');
+      // Strip comments before parsing (MEMORY lesson: YAML 파싱 주의)
+      const yamlNoComments = yamlContent.replace(/#.*/g, '');
+
+      const stageMatch = yamlNoComments.match(/^\s*stage:\s*(.+)$/m);
+      const phaseMatch = yamlNoComments.match(/^\s*phase:\s*(.+)$/m);
+
+      const stage = stageMatch ? stageMatch[1].trim().replace(/[\"']/g, '') : 'unknown';
+      const phase = phaseMatch ? phaseMatch[1].trim().replace(/[\"']/g, '') || 'none' : 'none';
+
+      // Only snapshot if stage is execution (FR-8: skip requirements/planning)
+      if (stage === 'execution') {
+        const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 16);
+
+        const snapshot = \`
+
+## [Snapshot] \${timestamp}
+
+**Workflow**: \${docId}
+**Stage**: \${stage}
+**Phase**: \${phase}
+
+**Session Metrics**:
+- Duration: \${durationMin} minutes
+- Agents: \${agentCount} (\${agentSummary})
+- Files changed: \${files.size}
+- Delegations: \${delegations}
+- Total events: \${events.length}
+\`;
+
+        fs.appendFileSync(progressMd, snapshot);
+        console.log('[Session Wrap] PROGRESS.md snapshot recorded (stage=' + stage + ', phase=' + phase + ')');
+      }
+    } catch(e) {} // graceful: skip on error (NFR-3)
+  }
+}
+
 // ── Tool Cache Cleanup (FR-6) ──
 let cleaned = 0;
 let ttlDays = 7;

@@ -23,7 +23,7 @@
 |-------|-------|------|-------|-----------|-------|------------|
 | actionkamen | advisory | Reviewer that verifies and approves all work | opus | Read, Glob, Grep... | 20 | plan |
 | aichan | specialist | Frontend Specialist for UI/UX development | sonnet | Read, Write, Edit... | 30 | acceptEdits |
-| bo | execution | Execution PO that coordinates domain specialist... | sonnet | Read, Write, Edit... | 50 | acceptEdits |
+| bo | execution | Execution PO that coordinates domain specialist... | sonnet | Read, Write, Edit... | 80 | acceptEdits |
 | bunta | specialist | Backend Specialist for API and database develop... | sonnet | Read, Write, Edit... | 30 | acceptEdits |
 | himawari | orchestration | Master Orchestrator for large-scale complex pro... | opus | Read, Glob, Grep... | 30 | plan |
 | hiroshi | advisory | Senior Advisor (Oracle) providing strategic adv... | opus | Read, Glob, Grep... | 15 | plan |

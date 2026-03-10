@@ -82,6 +82,12 @@ This agent is invoked via `/team-shinchan:review` skill.
 | 가정이 검증되었는가? | Think Before Coding | MEDIUM |
 | 성공 기준이 정의되고 충족되었는가? | Goal-Driven Execution | MEDIUM |
 | 구현 에이전트가 self-check를 수행했는가? | Self-Check Compliance | MEDIUM |
+| LLM이 오해할 수 있는 패턴이 있는가? | LLM_COMPREHENSION_RISK | MEDIUM |
+
+LLM_COMPREHENSION_RISK 대상 패턴:
+- 매직 넘버 (문맥 없는 리터럴 숫자)
+- 암시적 타입 변환 (형변환 연산자 없이 타입이 바뀌는 경우)
+- 3단계 이상 간접 참조 (a.b.c.d 형태의 깊은 체인)
 
 ### Plan Review
 - Completeness: All aspects covered?
@@ -91,12 +97,56 @@ This agent is invoked via `/team-shinchan:review` skill.
 
 ## Severity Levels
 
-| Level | Action |
-|-------|--------|
-| CRITICAL | Reject, must fix |
-| HIGH | Reject, must fix |
-| MEDIUM | Warn, suggest fix |
-| LOW | Note, optional fix |
+| Level | Action Directive | Action |
+|-------|-----------------|--------|
+| CRITICAL | MUST | Reject, must fix immediately |
+| HIGH | MUST | Reject, must fix before merge |
+| MEDIUM | SHOULD | Warn, strongly recommend fix |
+| LOW | COULD | Note, optional improvement |
+
+### Action Directives
+
+- **MUST**: 반드시 수정 — CRITICAL/HIGH 심각도 이슈. 수정 없이 APPROVED 불가.
+- **SHOULD**: 권장 수정 — MEDIUM 심각도 이슈. 미수정 시 APPROVED 가능하나 WARNING 포함.
+- **COULD**: 선택 개선 — LOW 심각도 이슈. 미수정 시 APPROVED 가능.
+
+## Intent Markers
+
+코드 주석에 인라인 마커를 사용하면 해당 패턴에 대한 QR 체크가 억제된다.
+
+### 지원 마커
+
+| Marker | 의미 | 억제 대상 |
+|--------|------|-----------|
+| `:PERF:` | 성능 최적화 의도 | Performance 카테고리 이슈 |
+| `:UNSAFE:` | 의도적 unsafe 패턴 | Security 카테고리 이슈 |
+| `:SCHEMA:` | 스키마 의도적 위반 | 구조 관련 Code Quality 이슈 |
+
+### 사용 형식
+
+```
+// :PERF: O(n^2) but n < 10 always — nested search intentional
+// :UNSAFE: raw SQL — parameterized query breaks ORM here
+// :SCHEMA: denormalized for read performance — agreed in ADR-03
+```
+
+형식: `:MARKER: [what]; [why]` — 마커 뒤에 이유를 반드시 명시한다.
+
+### Intent Marker 감사 로그
+
+리뷰 시 마커가 발견되면 반드시 아래 섹션을 출력한다:
+
+```markdown
+## Intent Marker Audit Log
+| Marker | Location | Rationale Found | Assessment |
+|--------|----------|-----------------|------------|
+| :PERF: | src/search.js:42 | "n < 10 always" | VALID |
+| :UNSAFE: | api/auth.js:88 | (none) | WARNING — 근거 부족 |
+```
+
+마커가 없으면 이 섹션을 생략한다.
+
+**WARNING 조건**: 마커 옆 주석에 이유가 명시되지 않은 경우. WARNING은 APPROVED 판정을 막지 않으나 리뷰 리포트에 반드시 포함한다.
 
 ## Verdicts
 

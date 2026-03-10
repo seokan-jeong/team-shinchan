@@ -43,7 +43,7 @@ Perform thorough review covering:
 ## Review Output Requirements
 
 - Show review process in real-time
-- List all issues found with severity (CRITICAL/HIGH/MEDIUM/LOW)
+- List all issues found with severity (CRITICAL/HIGH -> MUST fix; MEDIUM -> SHOULD fix; LOW -> COULD fix)
 - Provide specific file:line references
 - Give actionable fix recommendations
 - Final verdict: APPROVED ✅ or REJECTED ❌

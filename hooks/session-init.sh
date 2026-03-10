@@ -16,14 +16,39 @@ fi
 
 OUTPUT=""
 
-# ── 1. KB Summary ────────────────────────────────────────────────────
+# ── 1. KB Summary (tier-aware if node available) ──────────────────────
 KB_FILE="${DOCS_DIR}/kb-summary.md"
 if [ -f "$KB_FILE" ]; then
   PATTERNS=$(grep -c '^\- \*\*' "$KB_FILE" 2>/dev/null || true)
   PATTERNS="${PATTERNS:-0}"
   DECISIONS=$(grep -c 'Decision' "$KB_FILE" 2>/dev/null || true)
   DECISIONS="${DECISIONS:-0}"
+
+  # Tier-aware excerpt: critical sections first, then procedural
+  KB_EXCERPT=""
+  if command -v node &>/dev/null; then
+    KB_EXCERPT=$(KB_FILE="$KB_FILE" node -e "
+const fs = require('fs');
+const raw = fs.readFileSync(process.env.KB_FILE, 'utf-8');
+// Split on tier markers: '## Tier: critical', '## Tier: procedural', etc.
+const sections = raw.split(/^##\s+Tier:\s*/im).filter(Boolean);
+if (sections.length <= 1) { process.exit(0); } // No tier structure — skip
+const sorted = sections.sort((a, b) => {
+  const tierA = a.match(/^(\w+)/)?.[1]?.toLowerCase() || 'procedural';
+  const tierB = b.match(/^(\w+)/)?.[1]?.toLowerCase() || 'procedural';
+  const order = { critical: 0, preference: 1, procedural: 2, tool: 3 };
+  return (order[tierA] ?? 2) - (order[tierB] ?? 2);
+});
+// Output first 10 lines of each tier section (summary only)
+const excerpt = sorted.map(s => s.trim().split('\n').slice(0, 10).join('\n')).join('\n---\n');
+console.log(excerpt);
+" 2>/dev/null || true)
+  fi
+
   OUTPUT="${OUTPUT}📚 [Team-Shinchan] Knowledge Base loaded (${PATTERNS} patterns, ${DECISIONS} decisions)\n"
+  if [ -n "$KB_EXCERPT" ]; then
+    OUTPUT="${OUTPUT}${KB_EXCERPT}\n"
+  fi
 fi
 
 # ── 2. Learnings (tier-aware + relevance scoring) ────────────────────

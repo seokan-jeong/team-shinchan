@@ -137,3 +137,41 @@ Report at every step: task start, file findings, decisions, phase completions, e
 | Critical | `🚨 [{Agent}] Analysis Blocked` | Cannot continue; include Blocker, Impact, Need from User |
 | Incomplete | `⚠️ [{Agent}] Incomplete Analysis` | Can proceed with caveats; include Missing, Assessment, Confidence |
 | Info | `ℹ️ [{Agent}] Note` | Additional perspective |
+
+---
+
+## Action Kamen Review Format
+
+### Severity to Action Directive Mapping
+
+Action Kamen 리뷰의 이슈 분류는 두 축을 사용한다:
+
+| Severity | Action Directive | Meaning |
+|----------|-----------------|---------|
+| CRITICAL | MUST | 반드시 수정 — merge 불가 |
+| HIGH | MUST | 반드시 수정 — merge 불가 |
+| MEDIUM | SHOULD | 권장 수정 — WARNING 포함 APPROVED 가능 |
+| LOW | COULD | 선택 개선 — APPROVED 가능 |
+
+### Review Output Structure
+
+```
+## Review: {scope}
+
+### Issues Found
+
+| # | Severity | Directive | File:Line | Issue | Fix |
+|---|----------|-----------|-----------|-------|-----|
+| 1 | CRITICAL | MUST | src/auth.js:42 | {issue} | {fix} |
+| 2 | MEDIUM | SHOULD | utils/helper.js:10 | {issue} | {fix} |
+
+### Intent Marker Audit Log (마커 존재 시만)
+| Marker | Location | Rationale Found | Assessment |
+|--------|----------|-----------------|------------|
+
+### Verdict
+APPROVED / REJECTED
+
+**MUST fixes required** (REJECTED 시): {list}
+**SHOULD warnings** (APPROVED 시도 포함 가능): {list}
+```

@@ -253,6 +253,13 @@ function merge(projectRoot, scanResult) {
     });
     if (existing) {
       idMap[ent.id] = existing.id;
+      // Update existing entity with new properties (e.g., layer field)
+      const typeDef = ENTITY_TYPES[ent.type];
+      if (typeDef) {
+        for (const p of typeDef.props) {
+          if (ent[p] !== undefined && existing[p] === undefined) existing[p] = ent[p];
+        }
+      }
       stats.skipped.entities++;
     } else {
       const typeDef = ENTITY_TYPES[ent.type];

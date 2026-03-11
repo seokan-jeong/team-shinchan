@@ -34,9 +34,9 @@ function dom(p){const l=p.toLowerCase();return/test|__tests__|spec/.test(l)?'tes
 // - otherwise → null (unclassified, handled as 'unclassified' by HR-1)
 function inferLayer(filePath){
   const p=filePath.replace(/\\/g,'/');
-  if(/^(agents|skills|hooks|commands)\//.test(p))return 'global';
-  if(/^src\//.test(p))return 'domain';
-  if(/^(tests?|__tests__|spec)\//.test(p)||!/\//.test(p))return 'local';
+  if(/^(agents|skills|hooks|commands)(\/|$)/.test(p))return 'global';
+  if(/^src(\/|$)/.test(p))return 'domain';
+  if(/^(tests?|__tests__|spec)(\/|$)/.test(p)||!/\//.test(p))return 'local';
   return null;
 }
 
@@ -76,7 +76,7 @@ const SKIP_DC=S('PreToolUse PostToolUse SubagentStart SubagentStop SessionStart 
 function scanDC(files){const map=new Map(),re=/\b([A-Z][a-z]+(?:[A-Z][a-z]+)+)\b/g;
 for(const f of files){if(f.ext==='.md'||f.ext==='.json'||f.ext==='.sh')continue;let c;try{c=fs.readFileSync(f.fp,'utf-8')}catch(_){continue}
 re.lastIndex=0;let m;while((m=re.exec(c))!==null){const n=m[1];if(!FW.has(n)&&!SKIP_DC.has(n)&&n.length>=4&&n.length<=40&&!map.has(n))map.set(n,f.rp)}}
-return[...map].map(([n,fp])=>({name:n,definition:`Domain concept inferred from ${fp}`}))}
+return[...map].map(([n,fp])=>({name:n,definition:`Domain concept inferred from ${fp}`,file_path:fp}))}
 
 const ARE=[/(?:app|router)\.(get|post|put|delete|patch|options|head)\s*\(\s*['"`]([^'"`]+)['"`]/g,
 /@(?:app|router)\.(get|post|put|delete|patch)\s*\(\s*['"`]([^'"`]+)['"`]/g];
@@ -98,7 +98,7 @@ try{for(const e of fs.readdirSync(root,{withFileTypes:true}))if(e.isFile()&&!ign
 const cd=P.join(root,'config');if(fs.existsSync(cd))try{for(const e of fs.readdirSync(cd,{withFileTypes:true}))if(e.isFile())out.push({name:e.name,file_path:'config/'+e.name})}catch(_){}
 return out}
 
-function scanTests(files){return files.filter(f=>/\.(test|spec)\.[jt]sx?$|^test_\w+\.py$|\w+_test\.go$/.test(f.nm)).map(f=>{
+function scanTests(files){return files.filter(f=>/\.(test|spec)\.[jt]sx?$|^test_\w+\.py$|\w+_test\.go$|^tests?\/.*\.[jt]sx?$/.test(f.rp)).map(f=>{
 const p=f.rp.toLowerCase();return{name:f.nm,test_type:/e2e|cypress|playwright/.test(p)?'e2e':/integration/.test(p)?'integration':'unit',file_path:f.rp}})}
 
 const IRE=[[/import\s+[\s\S]*?\s+from\s+['"`]([^'"`]+)['"`]/g,'import'],[/import\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/g,'import'],
@@ -117,7 +117,7 @@ const models=scanModels(files),cfgs=scanCfg(root,gi),tests=scanTests(files);
 const E=[];let ix=0;const mM=new Map(),cM=new Map(),tM=new Map();
 for(const m of mods){const id=`tmp-mod-${ix++}`;mM.set(m.path,id);const ml=inferLayer(m.path);E.push({id,type:'Module',name:m.name,path:m.path,description:m.description,domain:m.domain,...(ml?{layer:ml}:{})})}
 for(const c of comps){const id=`tmp-comp-${ix++}`;cM.set(c.file_path+':'+c.name,id);const cl=inferLayer(c.file_path);E.push({id,type:'Component',name:c.name,type_detail:c.type_detail,file_path:c.file_path,visibility:c.visibility,...(cl?{layer:cl}:{})})}
-for(const d of dcs)E.push({id:`tmp-dc-${ix++}`,type:'DomainConcept',name:d.name,definition:d.definition});
+for(const d of dcs){const dcl=inferLayer(d.file_path||'');E.push({id:`tmp-dc-${ix++}`,type:'DomainConcept',name:d.name,definition:d.definition,...(dcl?{layer:dcl}:{})})}
 for(const a of apis){const al=inferLayer(a.handler||'');E.push({id:`tmp-api-${ix++}`,type:'API',name:`${a.method} ${a.path}`,method:a.method,path:a.path,handler:a.handler,...(al?{layer:al}:{})})}
 for(const d of models){const dl=inferLayer(d.file_path||'');E.push({id:`tmp-dm-${ix++}`,type:'DataModel',name:d.name,file_path:d.file_path,...(dl?{layer:dl}:{})})}
 for(const c of cfgs){const cfl=inferLayer(c.file_path||'');E.push({id:`tmp-cfg-${ix++}`,type:'Configuration',name:c.name,file_path:c.file_path,...(cfl?{layer:cfl}:{})})}

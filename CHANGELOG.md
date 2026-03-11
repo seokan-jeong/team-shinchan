@@ -2,6 +2,18 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.14.1] - 2026-03-11
+
+### Fixed
+- **inferLayer() regex**: match paths without trailing slash — fixes 92% of entities missing layer field
+- **DomainConcept layer**: `scanDC()` now tracks `file_path` and calls `inferLayer()`
+- **Test file detection**: recognize `tests/` directory files — 28 TestSuite entities now detected
+- **merge() property update**: existing entities receive new properties during merge
+
+### Results
+- Layer coverage: 7% → 99%
+- TestSuite detection: 0 → 28
+
 ## [4.14.0] - 2026-03-10
 
 ### Added

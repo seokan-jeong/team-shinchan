@@ -24,6 +24,18 @@ If args is a task description:
   Generate micro-task plan inline (see Step 2)
 ```
 
+### Rubric Override Detection
+
+After parsing args, check for a `rubric:` field (YAML-style or as part of a plan file frontmatter):
+
+```
+If args contains a `rubric:` field:
+  rubric_override = parsed rubric definition
+  Announce: "Custom rubric detected: {rubric_override item names}"
+Else:
+  rubric_override = null  (Action Kamen uses default 3-item rubric)
+```
+
 ## Step 2: Parse or Generate Micro-Task Plan
 
 ### If plan_source exists (PROGRESS.md or plan file):
@@ -139,6 +151,9 @@ ${task_description}
 ## Expected File Changes
 ${file_list}
 
+## Rubric Override (optional)
+${rubric_override || '(none — use default 3-item rubric from actionkamen.md)'}
+
 ## Implementer Report
 ${implementer_report}
 
@@ -183,6 +198,9 @@ ${task_description}
 
 ## Changed Files
 ${changed_files}
+
+## Rubric Override (optional)
+${rubric_override || '(none — use default 3-item rubric from actionkamen.md)'}
 
 ## Focus (NOT checking if right thing was built — only if built WELL)
 1. Code Quality: naming, DRY, focused functions, error handling

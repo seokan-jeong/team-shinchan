@@ -165,6 +165,165 @@ Use lightweight mode for simple debates; full process for complex ones.
 
 ---
 
+## Competitive Code Workflow
+
+When invoked with competitive-code mode (from `skills/debate/SKILL.md`):
+
+### Pre-Flight Checks (run before any worktree operations)
+
+**Step CC-0a: Fetch EnterWorktree schema (HR-3)**
+
+```
+ToolSearch("select:EnterWorktree,ExitWorktree")
+```
+
+If ToolSearch returns error or schema not found:
+- Announce: "EnterWorktree tool not available. Falling back to parallel Task without worktree isolation."
+- Run fallback: dispatch N Bo Tasks in parallel without worktree isolation (standard parallel Task pattern). Jump to CC-2 (Action Kamen judging).
+
+If ToolSearch succeeds: proceed with worktree-isolated workflow.
+
+**Step CC-0b: Reset .current-agent (HR-1)**
+
+Before ANY parallel Task calls:
+
+```
+Write file: .shinchan-docs/.current-agent
+Content: midori
+```
+
+This ensures layer-guard correctly tracks midori as the active orchestrator even after Bo Tasks complete and modify .current-agent.
+
+### Worktree Execution
+
+**Step CC-1: Create worktrees and dispatch Bo agents**
+
+For each i in 1..N (sequential worktree creation, then parallel Task dispatch):
+
+Create worktree:
+
+```
+EnterWorktree(
+  branch: "competitive-{doc_id}-bo-{i}-{timestamp}",
+  path: ".shinchan-docs/worktrees/competitive-{doc_id}-bo-{i}"
+)
+```
+
+Store: `worktree_paths[i]` = returned path, `worktree_branches[i]` = branch name.
+
+After ALL worktrees created, dispatch Bo Tasks in parallel:
+
+```typescript
+// Run all N Tasks in parallel
+Task(subagent_type="team-shinchan:bo", model="sonnet",
+  prompt=`You are Bo-{i}. Implement the following in your isolated worktree.
+
+## Implementation Request
+${implementation_request}
+
+## Your Worktree
+Path: ${worktree_paths[i]}
+Branch: ${worktree_branches[i]}
+
+## Instructions
+1. All file changes must be made within your worktree path.
+2. Complete the implementation fully.
+3. Run available tests or verification commands.
+4. Return a text report: what you implemented, files changed, verification output, any concerns.
+
+## Anti-Patterns
+- Do not reference other Bo implementations.
+- Do not modify files outside your worktree path.`)
+```
+
+Store results as `bo_reports[i]`.
+
+### Judging
+
+**Step CC-2: Action Kamen judges all implementations**
+
+```typescript
+Task(subagent_type="team-shinchan:actionkamen", model="opus",
+  prompt=`You are judging ${N} competing implementations for the same request.
+
+## Implementation Request
+${implementation_request}
+
+## Implementations to Judge
+${bo_reports.map((r, i) => `### Bo-${i+1}\n${r}`).join('\n\n')}
+
+## Instructions
+1. Score EACH implementation using the default rubric (Correctness/Completeness/Quality, 1-5 each).
+2. Output a score comparison table:
+   | Implementation | Correctness | Completeness | Quality | Total |
+   |----------------|-------------|--------------|---------|-------|
+   | Bo-1 | N/5 | N/5 | N/5 | N/15 |
+   | Bo-2 | N/5 | N/5 | N/5 | N/15 |
+3. Announce winner: highest total score. If tie: prefer higher Correctness, then Completeness.
+4. Output: WINNER: Bo-{N} with score {X}/15.`)
+```
+
+Store: `winner_index`, `winner_score`, `score_table`.
+
+### Merge and Cleanup
+
+**Step CC-3: Merge winner, clean up all worktrees**
+
+This step uses a try-finally equivalent: cleanup MUST run even if merge fails (NFR-3, R-3).
+
+**Merge winner** (only if worktree-isolated mode — skip if fallback mode):
+
+Delegate merge to Bo (midori does not have Bash tool):
+
+```typescript
+Task(subagent_type="team-shinchan:bo", model="sonnet",
+  prompt=`Merge the winning branch into the current branch.
+
+Run: git merge ${worktree_branches[winner_index]}
+
+If merge conflicts occur, resolve them and report. If merge fails entirely, report the error.`)
+```
+
+If merge fails: record failure, still proceed to cleanup.
+
+**Cleanup ALL worktrees** (run for every worktree, normal and error path):
+
+For each i in 1..N:
+
+```
+ExitWorktree(path: worktree_paths[i])
+```
+
+Even if ExitWorktree fails for one worktree: continue cleanup for remaining worktrees. Report any cleanup failures in the final output.
+
+**Step CC-4: Record decision (FR-3.7)**
+
+Append to `.shinchan-docs/debate-decisions.md`:
+
+```
+[DECISION-NNN] Competitive Code: {implementation_request summary}
+Date: {date}
+Doc ID: {doc_id}
+Panel: Bo × {N} (competitive execution)
+Judge: Action Kamen (rubric scoring)
+Winner: Bo-{winner_index} ({winner_score}/15)
+Score Table: {score_table}
+Status: Active
+```
+
+### Error Handling (Competitive Code)
+
+| Failure | Recovery |
+|---------|----------|
+| ToolSearch fails (EnterWorktree not found) | Fallback to parallel Task without worktrees; announce clearly |
+| Bo Task fails (1 of N) | Continue with remaining N-1 implementations if ≥2 remain; note missing in judge prompt |
+| Bo Tasks all fail | Exit with error: "All implementations failed. Competitive Code aborted." Run cleanup. |
+| Action Kamen judging fails | Report all Bo scores manually collected, ask user to select winner |
+| Merge fails | Report failure, leave winner branch available for manual merge; cleanup still runs |
+| ExitWorktree fails | Log failure, continue cleanup for other worktrees; report all cleanup failures |
+
+---
+
 ## Error Handling
 
 | Failure | Recovery |

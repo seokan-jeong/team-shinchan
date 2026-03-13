@@ -90,6 +90,13 @@ process.stdin.on('end', () => {
             process.exit(0);
           }
         }
+        // Exception: masumi can run non-destructive probe commands only
+        if (currentAgent === 'masumi') {
+          const trimCmd = command.trim();
+          if (/^(command\\s+-v\\s+\\S+|python3?\\s+-c\\s+.{0,2}import\\s+\\w|yt-dlp\\s+)/.test(trimCmd) && !/[;&|]/.test(trimCmd)) {
+            process.exit(0);
+          }
+        }
         console.log(JSON.stringify({
           decision: 'block',
           reason: 'AGENT TOOL GUARD: Agent \"' + currentAgent + '\" is read-only and cannot run destructive Bash command (' + desc + '). Only read-only commands (git log, git status, git diff, npm list, etc.) are allowed.'

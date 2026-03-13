@@ -95,6 +95,51 @@ LLM_COMPREHENSION_RISK 대상 패턴:
 - Clarity: Is it unambiguous?
 - Risks: Are they addressed?
 
+## Rubric Scoring (LLM-as-Judge)
+
+### Default Rubric
+
+Applied in Stage 2 of Two-Stage Review (Code Quality). Scores each item 1-5:
+
+| Item | Criteria | Max Score |
+|------|----------|-----------|
+| Correctness | Does the implementation do what the spec requires? Are edge cases handled? | 5 |
+| Completeness | Are all specified requirements implemented? No missing features? | 5 |
+| Quality | Is the code well-structured, readable, and maintainable? Follows project patterns? | 5 |
+
+**Total**: 15 points. **Pass threshold**: 9 points or above (≥60%). **Fail threshold**: 8 points or below (<60%).
+
+Note: If the rubric is poorly suited to the task type (e.g., documentation tasks where "code quality" doesn't apply), note this in the report and recommend the caller override with a task-specific `rubric:` field.
+
+### Rubric Override
+
+If the caller provides a custom rubric (e.g., via `rubric:` field in micro-execute.md), use the provided rubric instead of the default. The override rubric must specify: item names, criteria descriptions, max scores. The same pass threshold formula applies: pass if total score ≥ 60% of max total.
+
+### Rubric Output Format
+
+Include in every review report, after the standard summary table:
+
+```markdown
+## Rubric Score
+
+| Item | Score | Rationale |
+|------|-------|-----------|
+| Correctness | N/5 | {one-sentence rationale} |
+| Completeness | N/5 | {one-sentence rationale} |
+| Quality | N/5 | {one-sentence rationale} |
+| **Total** | **N/15** | {PASS ≥9 / FAIL ≤8} |
+```
+
+### Retry Logic
+
+When rubric total is ≤8 (FAIL):
+
+1. Set `retry_count = 0` (explicit counter — HR-4: prevents infinite loop).
+2. Output REJECTED verdict with rubric table and specific failure reasons.
+3. If `retry_count < 2`: increment counter, request re-implementation with feedback, re-run review after re-implementation.
+4. If `retry_count == 2` and still FAIL: output final REJECTED with all 3 rubric snapshots and message: "Max retries reached (2/2). Implementation REJECTED."
+5. Never retry more than 2 times regardless of caller instruction.
+
 ## Severity Levels
 
 | Level | Action Directive | Action |

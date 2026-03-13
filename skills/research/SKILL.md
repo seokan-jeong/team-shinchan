@@ -18,6 +18,14 @@ If args length > 2000 characters:
   Warn user: "Request was truncated to 2000 characters"
 ```
 
+## Step 1b: Detect Mode
+
+Parse mode from args:
+- If args starts with `youtube ` or `article ` or `auto `: extract mode as first word, remainder is the URL/query.
+- If no mode keyword: mode = `auto` for URLs (args starts with `http`), else mode = `search` (standard web search).
+
+Modes `youtube`, `article`, `auto` require a URL. If mode detected but no URL found, ask: "Please provide a URL for {mode} extraction."
+
 ## Step 2: Execute Task
 
 **Do not read further. Execute this Task NOW:**
@@ -29,6 +37,9 @@ Task(
   prompt=`/team-shinchan:research has been invoked.
 
 ## Research Request
+
+Mode: ${mode}  <!-- youtube | article | auto | search -->
+URL/Query: ${target}
 
 Conduct thorough research and provide:
 

@@ -60,6 +60,38 @@ From the filtered session events, calculate:
 | **Delegations** | Count events where `type === "delegation"`. |
 | **Events total** | Total count of all filtered events. |
 
+### Step 3.5: Git Metrics
+
+Run git metrics to include development activity in the summary:
+
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/src/analytics.js --git --format table
+```
+
+Append to summary output:
+
+```
+Git Activity:
+  Commits today: {N}
+  Lines: +{added} / -{deleted}
+  Files changed: {N}
+  Test ratio: {N}%
+  Hotspot files: {top 3 files}
+```
+
+Include in saved SESSION_SUMMARY.md as:
+
+```markdown
+## Git Activity
+| Metric | Value |
+|--------|-------|
+| Commits today | {N} |
+| Lines changed | +{added} / -{deleted} |
+| Files changed | {N} |
+| Test ratio | {N}% |
+| Hotspot files | {file1}, {file2}, {file3} |
+```
+
 ### Step 4: Build and Display Summary
 
 Display the summary in console AND save to file.

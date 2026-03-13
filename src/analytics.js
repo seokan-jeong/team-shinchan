@@ -15,6 +15,7 @@
 const fs = require('fs');
 const readline = require('readline');
 const path = require('path');
+const { execSync } = require('child_process');
 
 // ── Read and parse JSONL ─────────────────────────────────────────────────────
 async function parseLines(jsonlPath) {
@@ -219,6 +220,92 @@ function traceTimeline(events, traceId) {
   };
 }
 
+// ── Git helpers ─────────────────────────────────────────────────────────
+function safeExec(cmd, cwd) {
+  try { return execSync(cmd, { cwd, encoding: 'utf-8', timeout: 5000 }).trim(); } catch { return ''; }
+}
+
+// ── Git metrics ─────────────────────────────────────────────────────────
+function computeGitMetrics(cwd) {
+  const safe = (cmd) => safeExec(cmd, cwd);
+
+  const commitsToday = safe('git log --oneline --since="midnight"').split('\n').filter(Boolean).length;
+  const commitsWeek = safe('git log --oneline --since="7 days ago"').split('\n').filter(Boolean).length;
+
+  // Lines added/deleted from today's commits (sum per-commit stats)
+  let linesAdded = 0, linesDeleted = 0;
+  const logStat = safe('git log --shortstat --since="midnight"');
+  for (const line of logStat.split('\n')) {
+    const insMatch = line.match(/(\d+) insertion/);
+    const delMatch = line.match(/(\d+) deletion/);
+    if (insMatch) linesAdded += parseInt(insMatch[1]);
+    if (delMatch) linesDeleted += parseInt(delMatch[1]);
+  }
+
+  // Files changed today
+  const changedFiles = safe('git log --pretty=format: --name-only --since="midnight"')
+    .split('\n').filter(Boolean);
+  const uniqueFiles = [...new Set(changedFiles)];
+
+  // Hotspot files (top 5 most-changed in last 50 commits)
+  const allFiles = safe('git log --pretty=format: --name-only -50')
+    .split('\n').filter(Boolean);
+  const fileCounts = {};
+  for (const f of allFiles) fileCounts[f] = (fileCounts[f] || 0) + 1;
+  const hotspots = Object.entries(fileCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([file, changes]) => ({ file, changes }));
+
+  // Test ratio
+  const testPattern = /test|spec|__test__|validate/i;
+  const testFiles = uniqueFiles.filter(f => testPattern.test(f));
+  const testRatio = uniqueFiles.length > 0
+    ? Math.round((testFiles.length / uniqueFiles.length) * 100) + '%'
+    : 'N/A';
+
+  // Active hours today
+  const hours = safe('git log --format="%aI" --since="midnight"')
+    .split('\n').filter(Boolean)
+    .map(ts => new Date(ts).getHours());
+  const activeHours = new Set(hours).size;
+
+  return { commits_today: commitsToday, commits_week: commitsWeek, lines_added: linesAdded, lines_deleted: linesDeleted, files_changed: uniqueFiles.length, hotspot_files: hotspots, test_ratio: testRatio, active_hours: activeHours };
+}
+
+// ── Git retro (week-over-week) ──────────────────────────────────────────
+function computeGitRetro(cwd, days = 7) {
+  const safe = (cmd) => safeExec(cmd, cwd);
+
+  function periodStats(since, until) {
+    const untilArg = until ? ` --until="${until}"` : '';
+    const commits = safe(`git log --oneline --since="${since}"${untilArg}`).split('\n').filter(Boolean).length;
+    const files = new Set(safe(`git log --pretty=format: --name-only --since="${since}"${untilArg}`).split('\n').filter(Boolean)).size;
+    const stat = safe(`git log --shortstat --since="${since}"${untilArg}`);
+    let added = 0, deleted = 0;
+    for (const line of stat.split('\n')) {
+      const m = line.match(/(\d+) insertion/); if (m) added += parseInt(m[1]);
+      const d = line.match(/(\d+) deletion/); if (d) deleted += parseInt(d[1]);
+    }
+    return { commits, files, lines_added: added, lines_deleted: deleted };
+  }
+
+  const current = periodStats(`${days} days ago`);
+  const previous = periodStats(`${days * 2} days ago`, `${days} days ago`);
+
+  const pctDelta = (cur, prev) => prev === 0 ? (cur > 0 ? '+∞' : '0%') : `${cur >= prev ? '+' : ''}${Math.round(((cur - prev) / prev) * 100)}%`;
+
+  return {
+    current_period: current,
+    previous_period: previous,
+    delta: {
+      commits: pctDelta(current.commits, previous.commits),
+      files: pctDelta(current.files, previous.files),
+      lines: pctDelta(current.lines_added + current.lines_deleted, previous.lines_added + previous.lines_deleted),
+    }
+  };
+}
+
 // ── Exports ─────────────────────────────────────────────────────────────
 module.exports = {
   parseLines,
@@ -229,6 +316,8 @@ module.exports = {
   computeDelegationGraph,
   agentDetail,
   traceTimeline,
+  computeGitMetrics,
+  computeGitRetro,
 };
 
 // ── Table formatter ──────────────────────────────────────────────────────────
@@ -284,6 +373,33 @@ function printTable(report) {
 
   console.log('\n' + sep);
   console.log(`Total events: ${report.total_events}`);
+  console.log(sep);
+}
+
+// ── Git table formatter ─────────────────────────────────────────────────────
+function printGitTable(metrics, retro) {
+  const sep = '━'.repeat(50);
+  console.log(sep);
+  console.log('  Git Activity Report');
+  console.log(sep);
+  console.log(`  Commits today:   ${metrics.commits_today}`);
+  console.log(`  Commits (7d):    ${metrics.commits_week}`);
+  console.log(`  Lines:           +${metrics.lines_added} / -${metrics.lines_deleted}`);
+  console.log(`  Files changed:   ${metrics.files_changed}`);
+  console.log(`  Test ratio:      ${metrics.test_ratio}`);
+  console.log(`  Active hours:    ${metrics.active_hours}`);
+  if (metrics.hotspot_files.length > 0) {
+    console.log('\n  Hotspot files:');
+    for (const h of metrics.hotspot_files) {
+      console.log(`    ${pad(h.file, 40)} (${h.changes}x)`);
+    }
+  }
+  if (retro) {
+    console.log('\n  Week-over-Week:');
+    console.log(`    Commits: ${retro.current_period.commits} vs ${retro.previous_period.commits} (${retro.delta.commits})`);
+    console.log(`    Files:   ${retro.current_period.files} vs ${retro.previous_period.files} (${retro.delta.files})`);
+    console.log(`    Lines:   ${retro.delta.lines}`);
+  }
   console.log(sep);
 }
 
@@ -361,24 +477,28 @@ async function main(options = {}) {
 if (require.main === module) {
   // ── Parse CLI args ─────────────────────────────────────────────────────────
   const args = process.argv.slice(2);
-  if (args.length === 0 || args[0] === '--help') {
+  if (args.length === 0 || args.includes('--help')) {
     console.log(`Usage: node analytics.js <jsonl-path> [options]
+       node analytics.js --git [--retro <N>d] [--format table]
 
 Options:
   --format table     Output as text table instead of JSON
   --agent <name>     Show detail for a single agent
   --trace <id>       Show timeline for a specific trace ID
-  --period <N>d      Filter events to the last N days`);
+  --period <N>d      Filter events to the last N days
+  --git              Show git activity metrics (no jsonl-path needed)
+  --retro <N>d       Week-over-week comparison for N days (use with --git)`);
     process.exit(0);
   }
 
-  const jsonlPath = args[0];
   let format = 'json';
   let filterAgent = null;
   let filterTrace = null;
   let periodDays = null;
+  let gitMode = false;
+  let retroDays = null;
 
-  for (let i = 1; i < args.length; i++) {
+  for (let i = 0; i < args.length; i++) {
     if (args[i] === '--format' && args[i + 1]) {
       format = args[++i];
     } else if (args[i] === '--agent' && args[i + 1]) {
@@ -388,9 +508,35 @@ Options:
     } else if (args[i] === '--period' && args[i + 1]) {
       const m = args[++i].match(/^(\d+)d$/);
       if (m) periodDays = parseInt(m[1], 10);
+    } else if (args[i] === '--git') {
+      gitMode = true;
+    } else if (args[i] === '--retro' && args[i + 1]) {
+      const rm = args[++i].match(/^(\d+)d$/);
+      if (rm) retroDays = parseInt(rm[1], 10);
     }
   }
 
+  if (gitMode) {
+    const cwd = process.cwd();
+    const metrics = computeGitMetrics(cwd);
+    if (retroDays) {
+      const retro = computeGitRetro(cwd, retroDays);
+      if (format === 'table') {
+        printGitTable(metrics, retro);
+      } else {
+        console.log(JSON.stringify({ git_metrics: metrics, retro }, null, 2));
+      }
+    } else {
+      if (format === 'table') {
+        printGitTable(metrics);
+      } else {
+        console.log(JSON.stringify({ git_metrics: metrics }, null, 2));
+      }
+    }
+    process.exit(0);
+  }
+
+  const jsonlPath = args[0];
   main({ jsonlPath, format, filterAgent, filterTrace, periodDays }).catch(err => {
     console.error('Analytics error:', err.message);
     process.exit(1);

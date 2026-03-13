@@ -86,6 +86,36 @@ Each phase: `## Phase N: {Title} (GAP-X)`, agent/dependency, `### Rationale` (MA
 
 ---
 
+## Mermaid Diagram Requirement
+
+**Every plan MUST include at least one Mermaid diagram** to visualize the architecture or data flow of the planned changes. Choose the most appropriate type:
+
+| Diagram Type | When to Use |
+|-------------|-------------|
+| `flowchart` | Component interactions, data flow |
+| `sequenceDiagram` | API calls, agent delegation, async flows |
+| `stateDiagram-v2` | State machines, workflow transitions |
+| `erDiagram` | Data model relationships |
+| `graph TD` | Dependency trees, module hierarchy |
+
+Include the diagram in the PROGRESS.md under a dedicated `### Architecture Diagram` subsection within the relevant phase. For multi-phase plans, a top-level overview diagram in Phase 1 is sufficient.
+
+Example:
+~~~markdown
+### Architecture Diagram
+```mermaid
+flowchart TD
+    A[User Request] --> B[Skill Router]
+    B --> C[Release Script]
+    C --> D[plugin.json]
+    C --> E[marketplace.json]
+    C --> F[README badge]
+    C --> G[CHANGELOG.md]
+```
+~~~
+
+---
+
 ## Micro-Task Plan Format (for micro-execute mode)
 
 When the orchestrator requests a **micro-task plan** (or when `execution_mode: micro-execute` is specified), break each phase into 2-3 minute micro-tasks. This format enables per-task subagent dispatch with two-stage review.

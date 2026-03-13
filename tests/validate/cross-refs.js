@@ -30,7 +30,12 @@ const KNOWN_SKILLS = [
   'test-driven-development',
   'systematic-debugging',
   'verification-before-completion',
-  'setup-hud'
+  'setup-hud',
+  'release',
+  'analytics',
+  'budget',
+  'lint-harness',
+  'setup'
 ];
 
 function getActualAgents() {

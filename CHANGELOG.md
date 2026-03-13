@@ -2,6 +2,13 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.15.0] - 2026-03-13
+
+### Added
+- **Content extraction pipeline** (BM): masumi gains youtube/article/auto mode with yt-dlp/trafilatura environment probing and WebFetch fallback. agent-tool-guard adds masumi probe-only Bash exception. research/SKILL.md routes mode parameter to masumi.
+- **Rubric LLM-as-Judge** (BM): actionkamen adds 3-item rubric scoring (Correctness/Completeness/Quality, 15pt, ≥9 pass), caller override support, and max-2-retry loop. micro-execute passes rubric: field to reviewers.
+- **Competitive Code mode** (BM): debate/SKILL.md detects competitive triggers and routes to midori. midori orchestrates N Bo agents in worktree isolation, Action Kamen judges with rubric, winner merged via Bo Task, guaranteed cleanup on all paths.
+
 ## [4.14.1] - 2026-03-11
 
 ### Fixed

@@ -65,7 +65,7 @@ function runValidation() {
     return 0;
   }
 
-  const files = fs.readdirSync(SKILLS_DIR).filter(f => f.endsWith('.md'));
+  const files = fs.readdirSync(SKILLS_DIR).filter(f => f.endsWith('.md') && !f.startsWith('.'));
   let hasErrors = false;
   let totalErrors = 0;
   let totalWarnings = 0;

@@ -34,7 +34,7 @@ function runValidation() {
 
   // 2. Every agent file must appear in AGENTS.md
   const agentFiles = fs.readdirSync(AGENTS_DIR)
-    .filter(f => f.endsWith('.md'))
+    .filter(f => f.endsWith('.md') && !f.startsWith('.'))
     .map(f => f.replace('.md', ''));
 
   console.log(`\nChecking ${agentFiles.length} agents listed...`);

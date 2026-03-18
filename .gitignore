@@ -19,8 +19,13 @@ src/*
 !src/release.js
 !src/agent-capabilities-vocab.json
 !src/agent-metrics-baseline.json
+!src/gen-context-files.js
+!src/gen-schemas.js
 !src/statusline/
 !src/statusline/index.js
+
+# Auto-generated context files (local only)
+**/.context.md
 
 # Package files (not needed for this plugin)
 package.json

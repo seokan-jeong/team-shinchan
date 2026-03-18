@@ -222,6 +222,16 @@ if command -v node &>/dev/null && [ -f "$AGENT_CONTEXT_SCRIPT" ]; then
   ) &
 fi
 
+# ── 6. Hierarchical Context Files ──────────────────────────────────
+# Generates .context.md for key directories (agents/, hooks/, skills/, src/).
+# Runs in background to avoid blocking session start (NFR-3: < 3s).
+CONTEXT_SCRIPT="${PLUGIN_ROOT}/src/gen-context-files.js"
+if command -v node &>/dev/null && [ -f "$CONTEXT_SCRIPT" ]; then
+  (
+    timeout 5 node "$CONTEXT_SCRIPT" >/dev/null 2>&1 || true
+  ) &
+fi
+
 # ── Output ───────────────────────────────────────────────────────────
 if [ -n "$OUTPUT" ]; then
   echo -e "$OUTPUT"

@@ -75,6 +75,10 @@ When a sub-task doesn't match any specialist domain, or when invoked via /team-s
 
 **Phase Complexity Rule**: If a Phase has 5 or more sub-tasks, tell Shinnosuke to split into Steps (N-1, N-2...) BEFORE delegation. Each step should have ≤ 4 sub-tasks. This prevents maxTurns overflow in two-stage review mode.
 
+## Context Loading
+
+When working on files in a specific directory (src/, agents/, hooks/, skills/), first check if `{dir}/.context.md` exists. If yes, Read it to understand the directory's purpose, key entities, and common patterns before making changes. This reduces unnecessary exploration and provides faster context.
+
 ## PO Workflow
 
 When operating as Execution PO (receiving a Phase from Shinnosuke):

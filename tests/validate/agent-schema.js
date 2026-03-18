@@ -99,7 +99,7 @@ function runValidation() {
   console.log('  Agent Schema Validation');
   console.log('========================================\n');
 
-  const files = fs.readdirSync(AGENTS_DIR).filter(f => f.endsWith('.md'));
+  const files = fs.readdirSync(AGENTS_DIR).filter(f => f.endsWith('.md') && !f.startsWith('.'));
   let hasErrors = false;
   let totalErrors = 0;
   let totalWarnings = 0;

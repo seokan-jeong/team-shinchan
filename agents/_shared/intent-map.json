@@ -1,0 +1,24 @@
+{
+  "_schema": "1.0",
+  "_description": "Keyword to skill mapping for IntentGate. Keys are lowercase keywords, values are skill names (without team-shinchan: prefix). Explicit skill calls (/team-shinchan:X) always take priority over IntentGate.",
+  "mappings": {
+    "debug": "systematic-debugging",
+    "analyze": "analyze",
+    "test": "test-driven-development",
+    "implement": "implement",
+    "review": "review",
+    "research": "research",
+    "plan": "plan",
+    "release": "release",
+    "autopilot": "autopilot",
+    "benchmark": "benchmark"
+  },
+  "fallback": "domain-routing",
+  "test_cases": [
+    { "input": "debug this error", "expected": "systematic-debugging" },
+    { "input": "analyze impact of this change", "expected": "analyze" },
+    { "input": "write tests for the auth module", "expected": "test-driven-development" },
+    { "input": "/team-shinchan:implement add login", "expected": "SKIP (explicit skill call)" },
+    { "input": "add a dark mode toggle", "expected": "domain-routing (no keyword match)" }
+  ]
+}

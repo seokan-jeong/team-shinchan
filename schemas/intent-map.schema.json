@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Team-Shinchan Intent Map",
+  "description": "Maps keywords to skill names for IntentGate auto-routing",
+  "type": "object",
+  "properties": {
+    "_schema": {
+      "type": "string"
+    },
+    "_description": {
+      "type": "string"
+    },
+    "mappings": {
+      "type": "object",
+      "description": "Keyword (lowercase) → skill name (without team-shinchan: prefix)",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "fallback": {
+      "type": "string",
+      "description": "Action when no keyword matches"
+    },
+    "test_cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "input": {
+            "type": "string"
+          },
+          "expected": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "input",
+          "expected"
+        ]
+      }
+    }
+  },
+  "required": [
+    "mappings"
+  ]
+}

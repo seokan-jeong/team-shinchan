@@ -21,7 +21,7 @@ If args length > 2000 characters:
   Warn user: "Request was truncated to 2000 characters"
 ```
 
-## Step 2: Execute Task
+## Step 2: Execute Task with Boulder Mechanism
 
 **Do not read further. Execute this Task NOW:**
 
@@ -31,27 +31,45 @@ Task(
   model="opus",
   prompt=`/team-shinchan:ralph has been invoked.
 
-## Persistent Execution Until Complete Mode
+## Persistent Execution Until Complete Mode (Boulder v2)
 
-Don't stop until complete:
+Don't stop until complete. Idle detection enabled.
 
+### Core Loop
 1. Check TODO list
 2. Execute next task (delegate to appropriate agent)
 3. Verify results
-4. On failure → Analyze cause → Retry (max 3 retries per task)
-5. On success → Next task
-6. All tasks complete → Action Kamen final verification
-7. Verification fails → Fix and re-verify
+4. **Measurable progress check** (after each iteration):
+   - Compare current state to previous iteration:
+     a. File changes: \`git diff --stat\` output differs from last check
+     b. TODO count: unchecked items \`- [ ]\` in PROGRESS.md decreased
+     c. Phase completion: checked items \`- [x]\` in PROGRESS.md increased
+   - If ANY of (a, b, c) is true → progress detected → reset idle counter to 0
+   - If ALL of (a, b, c) are false → no progress → increment idle counter
+5. **Idle detection**:
+   - If idle counter >= 3: "Idle detected — 3 consecutive iterations with no measurable progress"
+   - Auto-generate continuation prompt with new approach:
+     "Previous approach stalled on [last task]. Trying alternative: [different strategy or next task]."
+   - Apply exponential backoff before retry:
+     - Iteration 1-2: 0 seconds (immediate)
+     - Iteration 3-4: 2 seconds wait
+     - Iteration 5-6: 4 seconds wait
+     - Iteration 7+: min(8 * 2^(iter-7), 60) seconds (max 60s)
+   - Record to boulder-log.jsonl (if .shinchan-docs/{DOC_ID}/ exists):
+     \`{"ts":"ISO8601","iteration":N,"event":"idle_detected","reason":"...","backoff_ms":N}\`
+6. On failure → Analyze cause → Retry (max 3 retries per task)
+7. On success → Next task
+8. All tasks complete → Action Kamen final verification
+9. Verification fails → Fix and re-verify
 
-## Safety Limits
-
-- **Max iterations**: 15 (pause and report if reached)
+### Safety Limits
+- **Max iterations**: 15 (hard limit — "Boulder limit reached — manual intervention required")
 - **Max retries per task**: 3 (report failure if exceeded)
-- **Progress check**: If no measurable progress in 3 consecutive iterations, pause and report to user
-- **Never silently loop** - always show progress
+- **Progress narration**: Every iteration, show current Phase, task, and progress indicator
+- **Log file**: .shinchan-docs/{DOC_ID}/boulder-log.jsonl (append-only JSONL, skip if no active workflow)
+  Format: \`{"ts":"ISO8601","iteration":N,"event":"idle_detected|retry|success|limit_reached","reason":"...","backoff_ms":N}\`
 
-## Completion Conditions
-
+### Completion Conditions
 Complete only when all conditions met:
 - All TODO list items completed
 - Build/tests pass

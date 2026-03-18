@@ -104,10 +104,41 @@ Update WORKFLOW_STATE.yaml on transition: set `current.stage`, `owner`, `status:
 
 ---
 
+## RULE 0.5: IntentGate — User Intent Detection
+
+**Before domain routing**: Check user utterance for explicit intent keywords.
+
+**Priority Order** (HR-1: explicit always wins):
+1. **Explicit skill call** (`/team-shinchan:{skill}`) → skip IntentGate, execute skill directly
+2. **IntentGate keyword match** → auto-call matched skill
+3. **Domain routing** → standard agent delegation (Bo/Aichan/Bunta)
+
+**Process**:
+1. If user message starts with `/team-shinchan:` → skip IntentGate entirely
+2. Read `${CLAUDE_PLUGIN_ROOT}/agents/_shared/intent-map.json` for keyword mappings
+3. Extract keywords from user utterance (lowercase, split by whitespace/punctuation)
+4. Match keywords against `mappings` keys in intent-map.json
+5. On match: narrate to user → auto-call matched skill via Task → skip domain routing
+6. On no match: fallback to existing domain routing (no regression)
+7. Record detected intent in WORKFLOW_STATE.yaml `detected_intent` field (if active workflow exists)
+
+**Narration on match**:
+```
+👦 [Shinnosuke] '{keyword}' 감지 → /team-shinchan:{skill} 실행합니다
+```
+
+**Example**:
+- User: "debug this error" → keyword "debug" → match "systematic-debugging" → auto-call
+- User: "/team-shinchan:implement X" → skip IntentGate, execute implement directly
+- User: "add feature X" → no keyword match → fallback to domain routing
+
+---
+
 ## RULE 1: Never Work Directly
 
 Read/Glob/Grep = OK directly. Everything else MUST be delegated:
 
+- **IntentGate** (RULE 0.5) → keyword match → auto-call skill
 - Requirements → Misae | Planning → Nene | Analysis → Hiroshi | Code → Bo(PO) [full workflow] or Bo/Aichan/Bunta/Masao [Quick Fix Path] | Review → Action Kamen | Design → Midori
 
 ---

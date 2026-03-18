@@ -1,0 +1,180 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Team-Shinchan Workflow State",
+  "description": "Tracks the current state of a Team-Shinchan workflow instance",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "number",
+      "description": "Schema version for migration"
+    },
+    "doc_id": {
+      "type": "string",
+      "description": "Unique workflow document ID (e.g., main-052)"
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "context_budget": {
+      "type": "number",
+      "description": "Maximum context tokens for this workflow"
+    },
+    "current": {
+      "type": "object",
+      "properties": {
+        "stage": {
+          "enum": [
+            "requirements",
+            "planning",
+            "execution",
+            "completion"
+          ]
+        },
+        "phase": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ]
+        },
+        "owner": {
+          "type": "string",
+          "description": "Current agent responsible"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "paused",
+            "completed",
+            "blocked"
+          ]
+        }
+      },
+      "required": [
+        "stage",
+        "owner",
+        "status"
+      ]
+    },
+    "stage_rules": {
+      "type": "object",
+      "description": "Tool permissions per stage",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "allowed_tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "blocked_tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "interpretation": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "interview": {
+      "type": "object"
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "event": {
+            "type": "string"
+          },
+          "agent": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "timestamp",
+          "event"
+        ]
+      }
+    },
+    "detected_intent": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "IntentGate detected skill keyword"
+    },
+    "plan_validation_passed": {
+      "type": "boolean",
+      "description": "Whether Plan Validation Gate passed"
+    },
+    "warnings": {
+      "type": "object",
+      "properties": {
+        "slop_comments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "file": {
+                "type": "string"
+              },
+              "line": {
+                "type": "number"
+              },
+              "pattern": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "discovered_issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "resolved",
+              "wontfix",
+              "promoted"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "doc_id",
+    "current"
+  ]
+}

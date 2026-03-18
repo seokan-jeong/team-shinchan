@@ -411,7 +411,7 @@ function runValidation() {
       );
       fs.writeFileSync(
         path.join(docsDir, 'PROGRESS.md'),
-        '# PROGRESS\n\n## Phase 1\nImplement the feature.\n\n## Phase 2\nWrite tests.\n',
+        '# PROGRESS\n\n## Phase 1: Implement the core feature with full AC coverage\nImplement the feature with proper error handling.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests for all edge cases.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n',
         'utf-8'
       );
 

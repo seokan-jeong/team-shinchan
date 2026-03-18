@@ -119,6 +119,43 @@ process.stdin.on('end', () => {
             if (!content.match(/phase|단계/i)) {
               missing.push('PROGRESS.md missing Phase definitions');
             }
+
+            // Plan Validation Gate — 3 quality checks (FR-2)
+            const phases = content.split(/^## Phase \\d+/m).slice(1);
+
+            // Check 1: Every Phase must have at least 1 AC reference (FR-2.1)
+            for (let i = 0; i < phases.length; i++) {
+              if (!phases[i].match(/AC-\\d+/)) {
+                missing.push('Plan Validation: Phase ' + (i+1) + ' missing Acceptance Criteria (AC) reference');
+              }
+            }
+
+            // Check 2: File references must resolve to existing files (FR-2.2)
+            const fileRefs = content.match(/\`([a-zA-Z0-9_\\-\\/\\.]+\\.(md|js|sh|json|yaml|yml|ts|tsx))\`/g) || [];
+            const projectRoot = path.resolve(docDir, '../..');
+            for (const ref of fileRefs) {
+              const cleaned = ref.replace(/\`/g, '').replace(/:[0-9\\-]+$/, '');
+              if (cleaned.includes('*') || cleaned.includes('{')) continue;
+              if (cleaned.startsWith('$')) continue;
+              if (cleaned.startsWith('#') || cleaned.startsWith('//')) continue;
+              const fullPath = path.join(projectRoot, cleaned);
+              if (!fs.existsSync(fullPath) && !content.includes('Create') && !content.includes('신규')) {
+                // Only warn for files that should exist (not files to be created)
+                // Skip if the Phase section mentions creating this file
+                const refPhase = phases.find(p => p.includes(cleaned));
+                if (refPhase && (refPhase.includes('Create') || refPhase.includes('생성') || refPhase.includes('신규'))) continue;
+                missing.push('Plan Validation: PROGRESS.md references non-existent file: ' + cleaned);
+              }
+            }
+
+            // Check 3: Phase descriptions must be specific enough (FR-2.3)
+            for (let i = 0; i < phases.length; i++) {
+              const firstLine = phases[i].split('\\n').find(l => l.trim().length > 0) || '';
+              const trimmed = firstLine.replace(/^[:#\\s\\(\\)\\w\\-]+/, '').trim();
+              if (firstLine.trim().length < 20) {
+                missing.push('Plan Validation: Phase ' + (i+1) + ' description too short (< 20 chars): \"' + firstLine.trim().substring(0, 40) + '\"');
+              }
+            }
           }
         }
 

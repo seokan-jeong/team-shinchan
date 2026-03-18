@@ -2,6 +2,24 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [4.16.0] - 2026-03-18
+
+### Added
+- **IntentGate** (BM): Shinnosuke RULE 0.5 — keyword-based auto-skill routing before domain routing. `agents/_shared/intent-map.json` with 10 keyword→skill mappings. Explicit skill calls always take priority (HR-1).
+- **Plan Validation Gate** (BM): 3 quality checks added to `transition-gate.sh` for Stage 2→3 transitions — AC references per phase, file reference resolution, phase description specificity (≥20 chars).
+- **Boulder Mechanism** (BM): Ralph v2 with idle detection (3 consecutive iterations without measurable progress), exponential backoff (0s→2s→4s→...→60s max), 15-iteration hard limit, and boulder-log.jsonl logging.
+- **Hierarchical Context Injection** (BM): `src/gen-context-files.js` auto-generates per-directory `.context.md` files on SessionStart using ontology data. Background execution with 5s timeout.
+- **Comment Checker** (BM): PostToolUse hook detects 5 AI slop comment patterns (`// TODO: implement`, `// FIXME:`, etc.) with warn-only decision (never blocks). Registered for Edit/Write matchers.
+- **JSON Schema Generation** (BM): `src/gen-schemas.js` generates 3 JSON schemas (workflow-state, layer-map, intent-map) with `--check` mode for CI staleness detection.
+
+### Changed
+- `.gitignore`: added `**/.context.md` pattern and `src/gen-context-files.js`, `src/gen-schemas.js` whitelist entries
+- `agents/bo.md`: added Context Loading section for `.context.md` awareness
+- Validator filters: `agent-schema.js`, `skill-schema.js`, `agents-map.js` now exclude dot-prefixed files (`.context.md`)
+
+### Fixed
+- `transition-gate-behavior.js` TC-4b fixture updated to pass Plan Validation Gate checks
+
 ## [4.15.0] - 2026-03-13
 
 ### Added

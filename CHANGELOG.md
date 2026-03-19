@@ -4,6 +4,19 @@ All notable changes to Team-Shinchan will be documented in this file.
 
 ## [Unreleased]
 
+## [4.18.0] - 2026-03-19
+
+### Added
+- **Domain-aware `/implement` routing** (BM): `domain-router.json` single source of truth for 4 domains (frontend→Aichan, backend→Bunta, devops→Masao, general→Bo). `/implement` skill auto-detects domain from file extensions, keywords, path patterns.
+- **Delegation guard hook** (BM): `delegation-guard.sh` PreToolUse hook warns when Bo edits domain-specialist files. Advisory mode (exit 0), reads `domain-router.json` for extension matching.
+- **Collaboration score CLI** (BM): `src/collaboration-score.js` scores task complexity 0-100 → solo/delegate/debate routing. Bo references it before Phase execution.
+- **Sparse debate template** (BM): `debate-templates/sparse.md` — 2-agent, max 2-round pattern for quick 2-domain tradeoffs. Added to Midori's Debate Patterns table.
+- **Wave parallel execution** (BM): Shinnosuke Phase Loop groups phases by wave, launches parallel Tasks, isolates failures. Nene's planning now includes wave grouping + file conflict detection.
+- **Artifact dependency gate** (BM): `artifact_dependency` field in Phase specs blocks execution until prerequisite artifacts complete. Priority over wave parallelization.
+
+### Changed
+- **Stage 4 documents → Masumi** (BM): RETROSPECTIVE.md and IMPLEMENTATION.md writing delegated to Masumi (was Bo). Masumi gains `Write` tool and `permissionMode: default`.
+
 ## [4.17.0] - 2026-03-19
 
 ### BREAKING CHANGE

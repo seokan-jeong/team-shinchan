@@ -4,15 +4,23 @@ All notable changes to Team-Shinchan will be documented in this file.
 
 ## [Unreleased]
 
+## [4.17.0] - 2026-03-19
+
 ### BREAKING CHANGE
 - **Git commits deferred to Stage 4 (Completion)**: `git commit` and `git push` are now blocked during Stage 3 (execution) via `workflow-guard.sh`. Commits are deferred to Stage 4 after Action Kamen review passes. Quick Fix paths are unaffected.
 
 ### Added
+- **Plan Mode native integration** (BM): Nene calls `EnterPlanMode`/`ExitPlanMode` in Stage 2 planning. Advisory log in `transition-gate.sh` for requirements→planning transition.
+- **Token usage tracking** (BM): `write-tracker.sh` records `input_tokens`, `output_tokens`, `cache_read_tokens`, `cache_write_tokens` with graceful null fallback. `analytics.js --cost` flag for estimated cost report by model/session.
+- **Agent self-observation feedback loop** (BM): `getFailureHints(agentName)` in `agent-context.js` — detects below-average eval dimensions and auto-injects improvement hints via `session-init.sh`. Max 3 hints, 5s timeout.
+- **Wave-based parallel execution** (BM): `getWaveOrder(projectRoot, taskList)` in `ontology-engine.js` — topological sort via DEPENDS_ON relations, Kahn's algorithm, circular dependency handling. `ultrawork/SKILL.md` Step 2.5 integration.
+- **Intent Gate** (BM): `hooks/intent-gate.sh` classifies UserPromptSubmit complexity (high/medium/low) → `.shinchan-docs/.intent-complexity`. `shinnosuke-orchestrate.md` Step 0.5 reads result for model tier override (Opus/Sonnet, never Haiku).
 - `hooks/workflow-guard.sh`: git commit/push detection and blocking in execution stage, explicit allow in completion stage
 - `tests/validate/workflow-guard-behavior.js`: TC-11 (execution + git commit → BLOCK), TC-12 (completion + git commit → ALLOW), TC-13 (execution + git push → BLOCK)
 
 ### Changed
 - `hooks/workflow-guard.md`: Stage-Tool Matrix updated with git blocking rule for execution stage
+- `hooks/hooks.json`: intent-gate registered in UserPromptSubmit (async: true, timeout: 5)
 - `docs/workflow-guide.md`: Stage 3 section notes commit deferral to Stage 4
 
 ## [4.16.0] - 2026-03-18

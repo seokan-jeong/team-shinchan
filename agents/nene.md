@@ -96,7 +96,46 @@ Before starting, verify:
 
 ## PROGRESS.md Output Format
 
-Each phase: `## Phase N: {Title} (GAP-X)`, agent/dependency, `### Rationale` (MANDATORY - why, alternatives rejected), `### 목표`, `### 변경 사항`, `### 성공 기준` (testable checkboxes), `### Change Log`. 4+ files → split into Steps (N-1, N-2...).
+Each phase: `## Phase N: {Title} (AC-X)`, with the following metadata header:
+
+```markdown
+**Agent**: {agent}
+**Wave**: N | **Parallel**: true/false
+**Depends on**: Phase M / —
+**artifact_dependency**: Phase M의 {파일명} 완성 후 시작 / —
+```
+
+Followed by: `### Rationale` (MANDATORY - why, alternatives rejected), `### 목표`, `### 변경 사항`, `### 성공 기준` (testable checkboxes), `### Change Log`. 4+ files → split into Steps (N-1, N-2...).
+
+## Wave Grouping (Phase 간 의존성 분석)
+
+Phase 목록 확정 후 반드시 wave 그룹핑을 수행한다:
+
+1. **의존성 그래프 작성**: 각 Phase의 입력/출력 아티팩트 파악
+2. **파일 충돌 검사**: 동일 파일을 수정하는 Phase → 반드시 별도 wave에 배치
+3. **Wave 배정**: 같은 Wave = 서로 의존성 없고 파일 충돌 없는 Phase들
+4. **artifact_dependency 설정**: 의존 아티팩트가 있으면 wave 무관하게 블로킹
+5. **Priority**: artifact_dependency > wave parallelization (의존성이 항상 우선)
+
+### Artifact Dependency Auto-Rules
+
+다음 패턴 감지 시 자동으로 artifact_dependency를 설정한다:
+
+| 패턴 | 의존성 방향 |
+|------|-----------|
+| 설정/스키마 파일 생성 Phase | → 해당 파일을 참조하는 모든 구현 Phase는 의존성 설정 |
+| Bunta/Masao가 API 스펙/스키마/인터페이스 작성 Phase | → 해당 파일을 참조하는 Aichan/Bo Phase는 의존성 설정 |
+| Bunta가 DB 마이그레이션 작성 Phase | → 해당 모델 사용하는 구현 Phase는 의존성 설정 |
+| 전문가 스펙 문서(*.spec.md, *.schema.json) 생성 Phase | → 해당 문서를 입력으로 사용하는 모든 구현 Phase는 의존성 설정 |
+
+### Wave 실행 규칙 (Shinnosuke Phase Loop에서 사용)
+
+| 규칙 | 설명 |
+|------|------|
+| 동일 wave | 파일 충돌 없는 Phase는 병렬 Task로 실행 |
+| 의존성 우선 | artifact_dependency가 wave 병렬화보다 항상 우선 |
+| 파일 충돌 금지 | 동일 파일을 수정하는 Phase는 반드시 별도 wave에 배치 |
+| 실패 격리 | 병렬 Task 하나 실패 시 다른 Task 결과는 유지; 실패 Phase만 순차 재실행 |
 
 ---
 

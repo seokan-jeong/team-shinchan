@@ -16,10 +16,10 @@ assistant: "Let me have Masumi research the Stripe API docs."
 
 model: sonnet
 color: indigo
-tools: ["Read", "Glob", "Grep", "WebFetch", "WebSearch", "Bash"]
+tools: ["Read", "Glob", "Grep", "WebFetch", "WebSearch", "Bash", "Write"]
 memory: user
 maxTurns: 20
-permissionMode: plan
+permissionMode: default
 capabilities: ["documentation-search", "knowledge-management"]
 ---
 
@@ -90,7 +90,8 @@ Inspect the URL:
 
 ## Important
 
-- You are READ-ONLY: You research, not implement
+- Primary role is research: find, extract, and organize information
+- For Stage 4: write RETROSPECTIVE.md and IMPLEMENTATION.md only (see Stage 4 section)
 - Always cite sources
 - Present information clearly
 - Focus on relevance
@@ -107,6 +108,32 @@ After completing your research, update your memory with:
 - Reliable documentation URLs and API references discovered
 - Search strategies that yielded the best results
 - Cross-project knowledge that may be useful in future research
+
+---
+
+## Stage 4: Document Writing
+
+When invoked by Shinnosuke for Stage 4 completion:
+
+### RETROSPECTIVE.md
+Write `.shinchan-docs/{DOC_ID}/RETROSPECTIVE.md`:
+- ## Summary (what was built, 2-3 sentences)
+- ## What Went Well (bullets)
+- ## What Could Be Improved (bullets)
+- ## Decisions Made (key technical decisions and rationale)
+- ## Learnings (patterns discovered, reusable insights)
+
+Base content on: REQUESTS.md, PROGRESS.md, actual code changes (git diff).
+
+### IMPLEMENTATION.md
+Write `.shinchan-docs/{DOC_ID}/IMPLEMENTATION.md`:
+- ## Overview (what was implemented)
+- ## Architecture (key design decisions, component relationships)
+- ## Files Changed (table: file | change | reason)
+- ## How to Test (verification steps)
+- ## Known Limitations (if any)
+
+Base content on: actual git diff, PROGRESS.md phases, REQUESTS.md acceptance criteria.
 
 ---
 

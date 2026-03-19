@@ -103,7 +103,7 @@ Prohibited: writing opinions directly, fictional dialogue, or drawing conclusion
 | Performance | Hiroshi, Bunta |
 | Testing Strategy | Hiroshi, Nene |
 
-**Debate Templates**: `${CLAUDE_PLUGIN_ROOT}/agents/_shared/debate-templates/` (architecture, security, performance, tech-selection).
+**Debate Templates**: `${CLAUDE_PLUGIN_ROOT}/agents/_shared/debate-templates/` (architecture, security, performance, tech-selection, sparse).
 
 ---
 
@@ -121,6 +121,7 @@ Before any debate: read `.shinchan-docs/debate-decisions.md`. If matching active
 | Round Table (default) | Standard multi-option | Opinions → feedback → consensus |
 | Dialectic | Clear A vs B | Advocates → rebuttals → Hiroshi synthesis |
 | Expert Panel | Complex multi-domain | Domain experts → cross-review → conclusion |
+| Sparse | 2-domain tradeoff, quick decision, ≤3 panelists | 2 agents only, max 2 rounds → Hiroshi synthesis if needed |
 
 **Rules**: Max 3 rounds (usually 2 sufficient). Opinions: 3-5 sentences each. If consensus fails: Hiroshi exercises final authority. Document important disagreements.
 

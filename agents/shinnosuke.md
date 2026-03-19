@@ -204,7 +204,24 @@ Task(subagent_type="team-shinchan:shinnosuke", model="opus",
 | 3. Execution | Shiro→Bo(PO)→{Aichan|Bunta|Masao|Kazama}→Action Kamen | Code + PROGRESS.md |
 | 4. Completion | Masumi→Action Kamen | RETROSPECTIVE.md, IMPLEMENTATION.md |
 
-**Phase Loop (Stage 3)**: Shiro impact → (Midori if debate) → delegate Phase to Bo(PO) → Bo(PO) routes sub-tasks to domain agents → domain agents implement → Bo(PO) validates and reports → Action Kamen review (required) → update PROGRESS.md. Retry once on failure; if still fails, report to user.
+**Phase Loop (Stage 3)**:
+1. Read PROGRESS.md — extract all Phase specs with wave metadata
+2. Group Phases by wave number (same wave = parallel-safe)
+3. For each wave (ascending order):
+   a. **Artifact Dependency Gate**: For each Phase in this wave, check `artifact_dependency` field.
+      If dependency Phase's AC checkboxes are not all checked → **block** this Phase.
+      Warning: `⚠️ Phase {N} blocked: artifact dependency on Phase {M} not met.`
+      **artifact_dependency always takes priority over wave parallelization.**
+   b. **Parallel Execution**: Launch all unblocked Phases in this wave as parallel Tasks:
+      `Task(subagent_type="team-shinchan:bo", ...)` × N (one per Phase)
+   c. **Wait**: Collect all results
+   d. **Failure Isolation**: If any Phase fails, keep successful results.
+      Re-run only failed Phases sequentially (1 retry each).
+      If retry also fails → escalate to user with failure details.
+   e. **Action Kamen Review**: Required after each wave completes (covers all Phases in wave)
+   f. **Update PROGRESS.md**: Check off completed Phase checkboxes
+
+For single-Phase waves or Phases without wave metadata: execute sequentially as before.
 
 **Step Splitting**: 4+ file changes or complex logic → split phase into Steps (N-1, N-2...). Each step independently verifiable. Include breakdown in delegation prompt.
 
@@ -219,7 +236,7 @@ Update WORKFLOW_STATE.yaml: `current.stage: completion`, `owner: shinnosuke`, ap
 
 **Step 2: Write RETROSPECTIVE.md**
 ```typescript
-Task(subagent_type="team-shinchan:bo", model="sonnet",
+Task(subagent_type="team-shinchan:masumi", model="sonnet",
   prompt="Write .shinchan-docs/{DOC_ID}/RETROSPECTIVE.md with these sections:
   ## Summary (what was built, 2-3 sentences)
   ## What Went Well (bullets)
@@ -231,7 +248,7 @@ Task(subagent_type="team-shinchan:bo", model="sonnet",
 
 **Step 3: Write IMPLEMENTATION.md**
 ```typescript
-Task(subagent_type="team-shinchan:bo", model="sonnet",
+Task(subagent_type="team-shinchan:masumi", model="sonnet",
   prompt="Write .shinchan-docs/{DOC_ID}/IMPLEMENTATION.md with these sections:
   ## Overview (what was implemented)
   ## Architecture (key design decisions, component relationships)

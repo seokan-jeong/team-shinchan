@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:implement
-description: Quick code implementation with Bo. Used for "implement", "code this", "write code", "fix" requests.
+description: Quick code implementation with domain-aware routing. Used for "implement", "code this", "write code", "fix" requests.
 user-invocable: false
 ---
 
@@ -18,13 +18,29 @@ If args length > 2000 characters:
   Warn user: "Request was truncated to 2000 characters"
 ```
 
-## Step 2: Execute Task
+## Step 2: Domain Detection & Routing
+
+Read `${CLAUDE_PLUGIN_ROOT}/agents/_shared/domain-router.json` to determine the target agent.
+
+**Detection logic** (apply in order):
+1. Extract file extensions from args (e.g., "fix Login.tsx" → `.tsx` → frontend)
+2. Check args text against domain keywords in domain-router.json
+3. Check for path patterns (e.g., ".github/workflows/" → devops)
+4. Check for known filenames (e.g., "Dockerfile" → devops)
+
+**Routing decision:**
+- Frontend match → `subagent_type="team-shinchan:aichan"`
+- Backend match → `subagent_type="team-shinchan:bunta"`
+- DevOps match → `subagent_type="team-shinchan:masao"`
+- No match → `subagent_type="team-shinchan:bo"` (fallback)
+
+## Step 3: Execute Task
 
 **Do not read further. Execute this Task NOW:**
 
 ```typescript
 Task(
-  subagent_type="team-shinchan:bo",
+  subagent_type="{detected_agent from Step 2}",
   model="sonnet",
   prompt=`/team-shinchan:implement has been invoked.
 

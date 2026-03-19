@@ -73,6 +73,26 @@ When a sub-task doesn't match any specialist domain, or when invoked via /team-s
 | Complex / Multi-file / Refactor | Cross-domain refactor, debugging spanning 5+ files, architecture change | `team-shinchan:kazama` |
 | General / Unclear domain | Does not match above patterns, or explicitly "general" | Bo (direct implementation) |
 
+## Collaboration Score (복잡도 자동 판정)
+
+Phase를 수신하면 먼저 복잡도를 판정한다:
+
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/src/collaboration-score.js \
+  --task "{phase_title}" \
+  --files {연관_파일_수} \
+  --domains {도메인_수} \
+  [--arch-change]
+```
+
+| Mode | Score | Action |
+|------|-------|--------|
+| `solo` | 0–30 | Bo 직접 구현 |
+| `delegate` | 31–60 | 도메인 전문가 위임 (Domain Routing Table 적용) |
+| `debate` | 61–100 | Shinnosuke에게 Midori 디베이트 선행 요청 |
+
+score 판정 실패 시 → 기존 Domain Routing Table 기반 판단으로 폴백.
+
 **Phase Complexity Rule**: If a Phase has 5 or more sub-tasks, tell Shinnosuke to split into Steps (N-1, N-2...) BEFORE delegation. Each step should have ≤ 4 sub-tasks. This prevents maxTurns overflow in two-stage review mode.
 
 ## Context Loading

@@ -21,6 +21,7 @@ src/*
 !src/agent-metrics-baseline.json
 !src/gen-context-files.js
 !src/gen-schemas.js
+!src/collaboration-score.js
 !src/statusline/
 !src/statusline/index.js
 

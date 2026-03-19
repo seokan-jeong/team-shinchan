@@ -103,6 +103,8 @@ process.stdin.on('end', () => {
               missing.push('REQUESTS.md missing Requirements section');
             }
           }
+          // Advisory: Plan Mode — not a hard block (R-5: may not be supported in all versions)
+          console.warn('[transition-gate] ADVISORY: Nene should call EnterPlanMode before starting PROGRESS.md (FR-P0.1). Not a hard block.');
         }
 
         // Gate: planning -> execution

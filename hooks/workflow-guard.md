@@ -24,7 +24,9 @@ event: PreToolUse
 | Edit | BLOCK | BLOCK | OK | BLOCK |
 | Write | BLOCK* | BLOCK | OK | docs only** |
 | TodoWrite | BLOCK | BLOCK | OK | BLOCK |
-| Bash | BLOCK | BLOCK | OK | BLOCK |
+| Bash | BLOCK | BLOCK | OK*** | BLOCK |
+
+**\*\*\* Bash in execution**: `git commit` and `git push` are **BLOCKED** during execution stage. Commits are deferred to Stage 4 (Completion) after Action Kamen review. `git add`/`commit`/`push` are allowed in completion stage.
 
 ## Exceptions (ALWAYS ALLOWED regardless of stage)
 

@@ -25,6 +25,25 @@ Task(subagent_type="team-shinchan:nene", model="opus",
 
 Store as `{plan_context}`. Skip if task is clear and touches 1-2 files.
 
+## Step 2.5: Wave Order Calculation (if plan_context exists)
+
+If `{plan_context}` was generated, compute Wave execution order using ontology:
+
+```bash
+node -e "
+const { getWaveOrder } = require('${CLAUDE_PLUGIN_ROOT}/src/ontology-engine.js');
+const taskList = /* parse task units from plan_context as [{id, files:[...]}] */;
+const { waves, warnings } = getWaveOrder(process.cwd(), taskList);
+console.log(JSON.stringify({ waves, warnings }, null, 2));
+"
+```
+
+- `waves` = `[[task1, task2], [task3], ...]` — 같은 Wave 내 태스크는 병렬 실행 가능
+- Wave 1 완료 후 Wave 2 실행, 순차적으로 진행
+- **Fallback**: `getWaveOrder`가 단일 Wave를 반환하거나 온톨로지가 없으면, 모든 태스크를 동시 병렬 실행 (기존 동작 유지)
+
+Store result as `{wave_plan}`. Pass to Step 3 execution.
+
 ## Step 3: Execute
 
 ```typescript

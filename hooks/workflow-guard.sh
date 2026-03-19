@@ -106,10 +106,28 @@ process.stdin.on('end', () => {
     }
   }
 
-  if (stage === 'completion') {
-    // Bash in completion: block destructive, allow read-only
+  // execution: block git commit/push (deferred to completion stage after review)
+  if (stage === 'execution') {
     if (toolName === 'Bash') {
       const cmd = toolInput.command || '';
+      if (/\\bgit\\s+(commit|push)\\b/.test(cmd)) {
+        console.log(JSON.stringify({
+          decision: 'block',
+          reason: 'WORKFLOW GUARD: Git commits are deferred to Stage 4 (Completion) after Action Kamen review. Current stage: execution. Continue with implementation and review first.'
+        }));
+        return;
+      }
+    }
+  }
+
+  if (stage === 'completion') {
+    // Bash in completion: block destructive, but allow git commit/push
+    if (toolName === 'Bash') {
+      const cmd = toolInput.command || '';
+      // Allow git add/commit/push in completion stage (post-review)
+      if (/\\bgit\\s+(add|commit|push)\\b/.test(cmd)) {
+        process.exit(0);
+      }
       const destructive = /\\b(rm|mv|cp|mkdir|chmod|chown|git\\s+(commit|push|add|reset|merge|rebase|checkout)|echo\\s.*>|sed\\s+-i|npm\\s+(install|publish|run\\s+build)|npx|yarn\\s+add)\\b/;
       if (destructive.test(cmd)) {
         console.log(JSON.stringify({

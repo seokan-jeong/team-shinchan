@@ -126,6 +126,8 @@ if command -v node &>/dev/null; then
         case 'Stop':
           type = 'stop';
           data.content = (input.last_assistant_message || '').slice(0, 500);
+          // FR-P1-1.2: Session cumulative tokens — graceful null if not in payload (HR-2)
+          data.total_tokens = (typeof input.total_tokens === 'number') ? input.total_tokens : null;
           break;
 
         case 'SessionStart': {
@@ -137,6 +139,11 @@ if command -v node &>/dev/null; then
           }
           sessionId = newId;
           data.model = input.model || 'unknown';
+          // FR-P1-1.1: Token fields — graceful null if payload lacks these fields (HR-2)
+          data.input_tokens = (typeof input.input_tokens === 'number') ? input.input_tokens : null;
+          data.output_tokens = (typeof input.output_tokens === 'number') ? input.output_tokens : null;
+          data.cache_read_tokens = (typeof input.cache_read_tokens === 'number') ? input.cache_read_tokens : null;
+          data.cache_write_tokens = (typeof input.cache_write_tokens === 'number') ? input.cache_write_tokens : null;
           break;
         }
 

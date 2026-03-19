@@ -2,6 +2,19 @@
 
 All notable changes to Team-Shinchan will be documented in this file.
 
+## [Unreleased]
+
+### BREAKING CHANGE
+- **Git commits deferred to Stage 4 (Completion)**: `git commit` and `git push` are now blocked during Stage 3 (execution) via `workflow-guard.sh`. Commits are deferred to Stage 4 after Action Kamen review passes. Quick Fix paths are unaffected.
+
+### Added
+- `hooks/workflow-guard.sh`: git commit/push detection and blocking in execution stage, explicit allow in completion stage
+- `tests/validate/workflow-guard-behavior.js`: TC-11 (execution + git commit → BLOCK), TC-12 (completion + git commit → ALLOW), TC-13 (execution + git push → BLOCK)
+
+### Changed
+- `hooks/workflow-guard.md`: Stage-Tool Matrix updated with git blocking rule for execution stage
+- `docs/workflow-guide.md`: Stage 3 section notes commit deferral to Stage 4
+
 ## [4.16.0] - 2026-03-18
 
 ### Added

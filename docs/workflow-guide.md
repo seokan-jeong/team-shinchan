@@ -109,6 +109,8 @@ for phase in phases:
     update("PROGRESS.md", phase.retrospective)
 ```
 
+> **Git Commit Timing**: Git commits (`git commit`/`git push`) are **blocked during Stage 3** and deferred to Stage 4 (Completion) after Action Kamen's final review passes. This ensures all code is reviewed before being committed. Quick Fix paths are unaffected.
+
 ### Goal-Driven Execution Pattern
 
 Every phase in Stage 3 follows the **Goal-Driven Execution** pattern.

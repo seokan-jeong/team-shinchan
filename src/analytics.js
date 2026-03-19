@@ -306,6 +306,55 @@ function computeGitRetro(cwd, days = 7) {
   };
 }
 
+// ── Cost metrics (FR-P1-1.3) ─────────────────────────────────────────────────
+const MODEL_PRICING = {
+  'claude-opus-4': { input: 15.0, output: 75.0, cache_read: 1.5, cache_write: 18.75 },
+  'claude-sonnet-4': { input: 3.0, output: 15.0, cache_read: 0.3, cache_write: 3.75 },
+  'claude-haiku-4': { input: 0.8, output: 4.0, cache_read: 0.08, cache_write: 1.0 },
+  'default': { input: 3.0, output: 15.0, cache_read: 0.3, cache_write: 3.75 }
+};
+
+function resolvePricing(model) {
+  if (!model) return MODEL_PRICING['default'];
+  const lower = model.toLowerCase();
+  for (const [key, pricing] of Object.entries(MODEL_PRICING)) {
+    if (key !== 'default' && lower.includes(key)) return pricing;
+  }
+  return MODEL_PRICING['default'];
+}
+
+function computeCostMetrics(events) {
+  const sessions = {};
+  for (const e of events) {
+    if (e.type !== 'session_start') continue;
+    const sid = e.session;
+    if (!sid) continue;
+    const model = (e.data && e.data.model) ? e.data.model : 'unknown';
+    const inputTok = (e.data && typeof e.data.input_tokens === 'number') ? e.data.input_tokens : null;
+    const outputTok = (e.data && typeof e.data.output_tokens === 'number') ? e.data.output_tokens : null;
+    const cacheRead = (e.data && typeof e.data.cache_read_tokens === 'number') ? e.data.cache_read_tokens : null;
+    const cacheWrite = (e.data && typeof e.data.cache_write_tokens === 'number') ? e.data.cache_write_tokens : null;
+    const pricing = resolvePricing(model);
+    let estimatedCostUsd = null;
+    if (inputTok !== null || outputTok !== null) {
+      const i = inputTok || 0, o = outputTok || 0, cr = cacheRead || 0, cw = cacheWrite || 0;
+      estimatedCostUsd = ((i * pricing.input) + (o * pricing.output) + (cr * pricing.cache_read) + (cw * pricing.cache_write)) / 1_000_000;
+      estimatedCostUsd = Math.round(estimatedCostUsd * 100000) / 100000;
+    }
+    sessions[sid] = { model, input_tokens: inputTok, output_tokens: outputTok, cache_read_tokens: cacheRead, cache_write_tokens: cacheWrite, estimated_cost_usd: estimatedCostUsd };
+  }
+  const byModel = {};
+  let totalCost = 0, hasAnyData = false;
+  for (const s of Object.values(sessions)) {
+    if (!byModel[s.model]) byModel[s.model] = { sessions: 0, total_input: 0, total_output: 0, total_cost_usd: 0, has_data: false };
+    byModel[s.model].sessions++;
+    if (s.input_tokens !== null) { byModel[s.model].total_input += s.input_tokens; byModel[s.model].has_data = true; hasAnyData = true; }
+    if (s.output_tokens !== null) { byModel[s.model].total_output += s.output_tokens; }
+    if (s.estimated_cost_usd !== null) { byModel[s.model].total_cost_usd += s.estimated_cost_usd; totalCost += s.estimated_cost_usd; }
+  }
+  return { by_session: sessions, by_model: byModel, total_estimated_cost_usd: hasAnyData ? Math.round(totalCost * 100000) / 100000 : null, has_token_data: hasAnyData, note: hasAnyData ? null : 'No token data in JSONL. Token tracking requires Claude Code payload to include token fields.' };
+}
+
 // ── Exports ─────────────────────────────────────────────────────────────
 module.exports = {
   parseLines,
@@ -318,12 +367,34 @@ module.exports = {
   traceTimeline,
   computeGitMetrics,
   computeGitRetro,
+  computeCostMetrics,
 };
 
 // ── Table formatter ──────────────────────────────────────────────────────────
 function pad(str, len) {
   const s = String(str);
   return s.length >= len ? s : s + ' '.repeat(len - s.length);
+}
+
+function printCostTable(costMetrics) {
+  const sep = '━'.repeat(65);
+  console.log(sep);
+  console.log('  Cost Estimate Report (USD) — ESTIMATED, not contractual');
+  console.log(sep);
+  if (!costMetrics.has_token_data) {
+    console.log('\n  ' + (costMetrics.note || 'No token data available.'));
+    console.log('\n' + sep);
+    return;
+  }
+  console.log('\n== By Model ==');
+  console.log(`${pad('Model', 22)} ${pad('Sessions', 10)} ${pad('Input Tok', 12)} ${pad('Output Tok', 12)} Est. Cost ($)`);
+  console.log('-'.repeat(65));
+  for (const [model, m] of Object.entries(costMetrics.by_model)) {
+    const cost = m.has_data ? m.total_cost_usd.toFixed(5) : 'N/A';
+    console.log(`${pad(model, 22)} ${pad(m.sessions, 10)} ${pad(m.total_input || '-', 12)} ${pad(m.total_output || '-', 12)} ${cost}`);
+  }
+  console.log(`\nTotal estimated cost: $${costMetrics.total_estimated_cost_usd !== null ? costMetrics.total_estimated_cost_usd.toFixed(5) : 'N/A'}`);
+  console.log(sep);
 }
 
 function printTable(report) {
@@ -405,7 +476,20 @@ function printGitTable(metrics, retro) {
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 async function main(options = {}) {
-  const { jsonlPath, format = 'json', filterAgent, filterTrace, periodDays } = options;
+  const { jsonlPath, format = 'json', filterAgent, filterTrace, periodDays, costMode } = options;
+
+  // Cost mode: compute and display cost metrics, then return
+  if (costMode) {
+    const allEvents = await parseLines(jsonlPath);
+    const events = applyFilters(allEvents, { periodDays, filterTrace });
+    const costMetrics = computeCostMetrics(events);
+    if (format === 'table') {
+      printCostTable(costMetrics);
+    } else {
+      console.log(JSON.stringify(costMetrics, null, 2));
+    }
+    return;
+  }
 
   const allEvents = await parseLines(jsonlPath);
   const events = applyFilters(allEvents, { periodDays, filterTrace });
@@ -487,7 +571,8 @@ Options:
   --trace <id>       Show timeline for a specific trace ID
   --period <N>d      Filter events to the last N days
   --git              Show git activity metrics (no jsonl-path needed)
-  --retro <N>d       Week-over-week comparison for N days (use with --git)`);
+  --retro <N>d       Week-over-week comparison for N days (use with --git)
+  --cost             Show estimated token cost report by model/session`);
     process.exit(0);
   }
 
@@ -497,6 +582,7 @@ Options:
   let periodDays = null;
   let gitMode = false;
   let retroDays = null;
+  let costMode = false;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--format' && args[i + 1]) {
@@ -513,6 +599,8 @@ Options:
     } else if (args[i] === '--retro' && args[i + 1]) {
       const rm = args[++i].match(/^(\d+)d$/);
       if (rm) retroDays = parseInt(rm[1], 10);
+    } else if (args[i] === '--cost') {
+      costMode = true;
     }
   }
 
@@ -537,7 +625,7 @@ Options:
   }
 
   const jsonlPath = args[0];
-  main({ jsonlPath, format, filterAgent, filterTrace, periodDays }).catch(err => {
+  main({ jsonlPath, format, filterAgent, filterTrace, periodDays, costMode }).catch(err => {
     console.error('Analytics error:', err.message);
     process.exit(1);
   });

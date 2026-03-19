@@ -238,9 +238,54 @@ function buildAgentContext(agentName) {
   };
 }
 
+// ─── Failure Hints (FR-P1-2.1) ───────────────────────────────────────
+
+const DIMENSION_HINTS = {
+  correctness: 'Output이 요구사항을 완전히 충족하는지 확인 후 응답하세요.',
+  efficiency: '중복 작업을 줄이고, 최단 경로로 목표를 달성하세요.',
+  compliance: '에이전트 규칙(IMMUTABLE RULES, stage 제한)을 준수하세요.',
+  quality: '출력물의 완성도와 일관성을 높이세요.'
+};
+
+/**
+ * Returns improvement hints for dimensions with below-average scores.
+ * @param {string} agentName
+ * @returns {string[]} max 3 hints, empty if insufficient data
+ */
+function getFailureHints(agentName) {
+  if (!fs.existsSync(EVAL_FILE)) return [];
+  const lines = readLastLines(EVAL_FILE, MAX_LINES);
+  const records = parseJsonLines(lines);
+  const agentRecords = records.filter(r => r && r.agent && r.agent.toLowerCase() === agentName.toLowerCase() && r.scores);
+  // FR-P1-2.4: require at least 3 records
+  if (agentRecords.length < 3) return [];
+  const recent3 = agentRecords.slice(-3);
+  const dims = ['correctness', 'efficiency', 'compliance', 'quality'];
+  // Compute overall average across all agents (last 50 records)
+  const all50 = records.filter(r => r && r.scores).slice(-50);
+  const globalAvg = {};
+  for (const dim of dims) {
+    const vals = all50.map(r => r.scores[dim]).filter(v => typeof v === 'number');
+    globalAvg[dim] = vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : 3.5;
+  }
+  const hints = [];
+  for (const dim of dims) {
+    const vals = recent3.map(r => r.scores[dim]).filter(v => typeof v === 'number');
+    if (vals.length === 0) continue;
+    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+    if (avg < globalAvg[dim] - 0.3) {
+      const hint = DIMENSION_HINTS[dim] || `${dim} 개선 필요`;
+      hints.push(`⚠️ [Self-Observation] ${agentName}: ${dim} 낮음 → ${hint}`);
+      if (hints.length >= 3) break;
+    }
+  }
+  return hints;
+}
+
 // ── Exports ─────────────────────────────────────────────────────────
 module.exports = {
   buildAgentContext,
+  getFailureHints,
   KNOWN_AGENTS,
 };
 

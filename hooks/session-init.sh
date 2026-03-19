@@ -232,6 +232,35 @@ if command -v node &>/dev/null && [ -f "$CONTEXT_SCRIPT" ]; then
   ) &
 fi
 
+# ── 7. Agent Failure Hints (FR-P1-2.2) ─────────────────────────────
+if command -v node &>/dev/null && [ -f "${PLUGIN_ROOT}/src/agent-context.js" ]; then
+  STAGE_AGENT_MAP='{"requirements":"misae","planning":"nene","execution":"bo","completion":"masumi"}'
+  ACTIVE_AGENT=""
+  for yaml in "$DOCS_DIR"/*/WORKFLOW_STATE.yaml; do
+    [ -f "$yaml" ] || continue
+    if grep -q "status: active" "$yaml" 2>/dev/null; then
+      CURRENT_STAGE=$(grep "stage:" "$yaml" 2>/dev/null | head -1 | sed 's/.*stage: *//' | tr -d '"' | tr -d ' ')
+      ACTIVE_AGENT=$(echo "$STAGE_AGENT_MAP" | node -e "
+const map = JSON.parse(require('fs').readFileSync('/dev/stdin','utf-8'));
+const stage = '${CURRENT_STAGE}';
+console.log(map[stage] || '');
+" 2>/dev/null || echo "")
+      break
+    fi
+  done
+
+  if [ -n "$ACTIVE_AGENT" ]; then
+    HINTS=$(timeout 5 node -e "
+const { getFailureHints } = require('${PLUGIN_ROOT}/src/agent-context.js');
+const hints = getFailureHints('${ACTIVE_AGENT}');
+if (hints.length > 0) console.log(hints.join('\n'));
+" 2>/dev/null || echo "")
+    if [ -n "$HINTS" ]; then
+      OUTPUT="${OUTPUT}${HINTS}\n"
+    fi
+  fi
+fi
+
 # ── Output ───────────────────────────────────────────────────────────
 if [ -n "$OUTPUT" ]; then
   echo -e "$OUTPUT"

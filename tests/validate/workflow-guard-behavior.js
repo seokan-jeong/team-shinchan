@@ -360,6 +360,64 @@ function runValidation() {
     }
   }
 
+  // ── Git Commit/Push Blocking in Execution Stage ────────────────────────────
+
+  section('4.1. Git Commit/Push Blocking in Execution Stage');
+
+  // TC-11: git commit in execution stage → BLOCK
+  {
+    const tmpDir = mkTmpFixture('execution');
+    try {
+      const result = runHook(
+        { tool_name: 'Bash', tool_input: { command: 'git commit -m "feat: add feature"' } },
+        tmpDir
+      );
+      if (result.decision === 'block') {
+        ok('TC-11: execution + Bash(git commit) → BLOCK (correct)');
+      } else {
+        fail(`TC-11: execution + Bash(git commit) → expected BLOCK, got decision="${result.decision}" (raw: ${result.raw.slice(0, 80)})`);
+      }
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  }
+
+  // TC-12: git commit in completion stage → ALLOW
+  {
+    const tmpDir = mkTmpFixture('completion');
+    try {
+      const result = runHook(
+        { tool_name: 'Bash', tool_input: { command: 'git commit -m "chore: release"' } },
+        tmpDir
+      );
+      if (result.decision !== 'block') {
+        ok('TC-12: completion + Bash(git commit) → ALLOW (correct)');
+      } else {
+        fail(`TC-12: completion + Bash(git commit) → expected ALLOW, got BLOCK (reason: ${(result.reason || '').slice(0, 80)})`);
+      }
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  }
+
+  // TC-13: git push in execution stage → BLOCK
+  {
+    const tmpDir = mkTmpFixture('execution');
+    try {
+      const result = runHook(
+        { tool_name: 'Bash', tool_input: { command: 'git push origin main' } },
+        tmpDir
+      );
+      if (result.decision === 'block') {
+        ok('TC-13: execution + Bash(git push) → BLOCK (correct)');
+      } else {
+        fail(`TC-13: execution + Bash(git push) → expected BLOCK, got decision="${result.decision}" (raw: ${result.raw.slice(0, 80)})`);
+      }
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  }
+
   // ── Bonus: .shinchan-docs/ Write exception in requirements ─────────────────
 
   section('5. Exception Cases');

@@ -879,6 +879,101 @@ function autoScan(projectRoot, opts) {
   return llmScanner.autoScan(projectRoot, opts);
 }
 
+// ─── Wave Order (FR-P1-3) ────────────────────────────────────────────────────
+/**
+ * Compute wave-based execution order for a task list using ontology DEPENDS_ON relations.
+ * @param {string} projectRoot
+ * @param {{id: string, files: string[]}[]} taskList
+ * @returns {{waves: string[][], warnings: string[]}}
+ */
+function getWaveOrder(projectRoot, taskList) {
+  const warnings = [];
+  if (!taskList || taskList.length === 0) return { waves: [], warnings };
+
+  const onto = load(projectRoot);
+  if (!onto || !onto.relations || onto.relations.length === 0) {
+    return { waves: [taskList.map(t => t.id)], warnings: ['No ontology available — all tasks placed in Wave 1'] };
+  }
+
+  // Build file → entity index
+  const fileToEntityIds = {};
+  for (const entity of onto.entities) {
+    const fp = entity.file_path || entity.path;
+    if (fp) {
+      if (!fileToEntityIds[fp]) fileToEntityIds[fp] = [];
+      fileToEntityIds[fp].push(entity.id);
+    }
+  }
+
+  // Map task → set of entity IDs
+  const taskEntityMap = {};
+  for (const task of taskList) {
+    taskEntityMap[task.id] = new Set();
+    for (const file of (task.files || [])) {
+      const normalizedFile = file.replace(/^\.\//, '');
+      for (const [fp, ids] of Object.entries(fileToEntityIds)) {
+        if (fp === normalizedFile || fp.endsWith('/' + normalizedFile) || normalizedFile.endsWith('/' + fp)) {
+          for (const id of ids) taskEntityMap[task.id].add(id);
+        }
+      }
+    }
+  }
+
+  // Build task-level dependency graph from DEPENDS_ON relations
+  const depsOn = {};
+  for (const task of taskList) depsOn[task.id] = new Set();
+
+  const dependsOnRels = onto.relations.filter(r => r.relation === 'DEPENDS_ON');
+  for (const rel of dependsOnRels) {
+    for (const taskA of taskList) {
+      if (!taskEntityMap[taskA.id].has(rel.from)) continue;
+      for (const taskB of taskList) {
+        if (taskA.id === taskB.id) continue;
+        if (taskEntityMap[taskB.id].has(rel.to)) {
+          depsOn[taskA.id].add(taskB.id);
+        }
+      }
+    }
+  }
+
+  // Check if any task-level deps found
+  const hasDeps = Object.values(depsOn).some(d => d.size > 0);
+  if (!hasDeps) {
+    return { waves: [taskList.map(t => t.id)], warnings: ['No DEPENDS_ON relations match task files — all tasks in Wave 1'] };
+  }
+
+  // Topological sort (Kahn's algorithm)
+  const taskIds = taskList.map(t => t.id);
+  const waves = [];
+  const placed = new Set();
+  const remaining = new Set(taskIds);
+
+  // Safety limit: max waves = taskCount + 1 to prevent infinite loops on edge cases
+  while (remaining.size > 0 && waves.length < taskIds.length + 1) {
+    const waveReady = [];
+    for (const id of remaining) {
+      const unmetDeps = [...depsOn[id]].filter(d => !placed.has(d));
+      if (unmetDeps.length === 0) waveReady.push(id);
+    }
+
+    if (waveReady.length === 0) {
+      // FR-P1-3.4: circular dependency
+      const cycleIds = [...remaining];
+      warnings.push('Circular dependency detected among tasks: [' + cycleIds.join(', ') + '] — placed in same wave');
+      waves.push(cycleIds);
+      break;
+    }
+
+    waves.push(waveReady);
+    for (const id of waveReady) {
+      placed.add(id);
+      remaining.delete(id);
+    }
+  }
+
+  return { waves, warnings };
+}
+
 module.exports = {
   ENTITY_TYPES, RELATION_TYPES, VALID_LAYERS,
   init, load, save,
@@ -886,5 +981,6 @@ module.exports = {
   query, getRelated, summary,
   merge, generateKbSummary, logHistory,
   impactAnalysis, healthScore, gc, generateMermaid, evolution,
-  autoScan  // BM-1: LLM-driven ontology scan
+  autoScan,  // BM-1: LLM-driven ontology scan
+  getWaveOrder  // FR-P1-3: wave-based parallel execution order
 };

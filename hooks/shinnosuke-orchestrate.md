@@ -37,6 +37,27 @@ Then read the relevant doc:
 
 Proceed to Step 1 (classify request).
 
+## Step 0.5: Intent Gate Check
+
+Read `.shinchan-docs/.intent-complexity` if it exists:
+
+```bash
+COMPLEXITY=$(cat .shinchan-docs/.intent-complexity 2>/dev/null || echo "medium")
+```
+
+Use this to override model when delegating to agents:
+
+| Complexity | Recommended Model Override | When to Apply |
+|-----------|--------------------------|---------------|
+| `high` | `model="opus"` | Architecture, design, refactor, migration tasks |
+| `medium` | Keep agent's default model | Most tasks |
+| `low` | `model="sonnet"` | Simple single-file edits, short prompts (**NOT haiku** — HR-1) |
+
+**Rules:**
+- Override applies to the FIRST delegated agent call only. Sub-agents use their own defaults.
+- If file doesn't exist or is unreadable, use `medium` (keep defaults).
+- User can override by specifying model explicitly in their request.
+
 ## Step 1: Classify Request (only when NO active workflow)
 
 | Type | Action |

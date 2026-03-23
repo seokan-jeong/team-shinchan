@@ -6,13 +6,34 @@ description: Start a new task with the integrated workflow
 
 **When this command is invoked, immediately execute the following:**
 
-## 0. Execute Immediately: Pause Active Workflows
+## 0. Execute Immediately: Expire, Archive, or Pause Active Workflows
 
+Read `workflow_expiry_days`:
+- Check `.shinchan-config.yaml` in project root first (key: `workflow_expiry_days`)
+- Fall back to plugin default **7** days
+- If `workflow_expiry_days: 0` or cannot be read → skip expiry, use pause-only behavior
+
+For each `.shinchan-docs/*/WORKFLOW_STATE.yaml` with `status: active`:
+
+**If expiry_days > 0 AND elapsed days since `updated` >= expiry_days:**
+```yaml
+# In WORKFLOW_STATE.yaml:
+# status: expired
+# history append:
+#   - timestamp: "{now}"
+#     event: auto_expired
+#     agent: shinnosuke
+#     archived_at: "{now}"
+#     archived_reason: auto_expiry
+```
+Then attempt to move: `mkdir -p .shinchan-docs/archived/{YYYY-MM}/ && mv .shinchan-docs/{DOC_ID}/ .shinchan-docs/archived/{YYYY-MM}/{DOC_ID}/`
+- If mv fails: silent fallback (no notification, no abort)
+- **No paused notification** for expired workflows
+
+**If NOT expired (or expiry disabled):**
 ```bash
-# Scan for active workflows
-# For each .shinchan-docs/*/WORKFLOW_STATE.yaml with status: active:
-#   - Set status to "paused", add paused event
-#   - Notify: "⏸️ Paused {doc_id} (was at Stage {stage}, Phase {phase})"
+# Set status to "paused", add paused event
+# Notify: "⏸️ Paused {doc_id} (was at Stage {stage}, Phase {phase})"
 ```
 
 ## 1. Execute Immediately: Determine DOC_ID

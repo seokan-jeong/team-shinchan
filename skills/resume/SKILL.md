@@ -10,7 +10,44 @@ Resume a paused/interrupted workflow by loading saved state and delegating to th
 
 ## Step 0: Input Validation
 
-If DOC_ID not provided: scan `.shinchan-docs/*/WORKFLOW_STATE.yaml`, filter `status: active|paused`, display list to user. If none found: suggest `/team-shinchan:start`.
+If DOC_ID not provided:
+
+**Active/Paused workflows:**
+Scan `.shinchan-docs/*/WORKFLOW_STATE.yaml` (exclude `archived/` subfolder), filter
+`status: active|paused`, display list.
+
+**Archived workflows:**
+Scan `.shinchan-docs/archived/*/*/WORKFLOW_STATE.yaml`, collect all entries.
+
+Display combined output:
+```
+Active/Paused:
+  1. {DOC_ID} ({status}, {stage})
+  ...
+
+Archived:
+  A1. {DOC_ID} (expired, {stage}, archived {YYYY-MM})
+  ...
+```
+
+If both lists empty: suggest `/team-shinchan:start`.
+
+**If user selects an archived entry:**
+1. Move `.shinchan-docs/archived/{YYYY-MM}/{DOC_ID}/` → `.shinchan-docs/{DOC_ID}/`
+2. In WORKFLOW_STATE.yaml: set `status: paused`
+3. Add history event:
+   ```yaml
+   - timestamp: "{ISO now}"
+     event: unarchived
+     agent: shinnosuke
+     unarchived_at: "{ISO now}"
+   ```
+4. Proceed to Step 1 with the unarchived DOC_ID
+
+**If DOC_ID provided directly:**
+- Check `.shinchan-docs/{DOC_ID}/` first, then `.shinchan-docs/archived/*/{DOC_ID}/`
+- If found in archived: unarchive (steps 1-3 above) before proceeding
+- Error if not found anywhere: list available workflows
 
 ## Step 1: Load Context
 

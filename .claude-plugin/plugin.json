@@ -32,5 +32,8 @@
     "productivity",
     "ai-agents",
     "team"
-  ]
+  ],
+  "settings": {
+    "workflow_expiry_days": 7
+  }
 }

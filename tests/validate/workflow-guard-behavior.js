@@ -77,6 +77,30 @@ function mkTmpNoWorkflow() {
 }
 
 /**
+ * Create a temporary fixture with a WORKFLOW_STATE.yaml inside an archived subfolder.
+ * Simulates the archived path: .shinchan-docs/archived/YYYY-MM/doc-id/
+ */
+function mkTmpArchivedFixture(stage, status = 'active') {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'shinchan-wg-archived-'));
+  const docsDir = path.join(tmpDir, '.shinchan-docs', 'archived', '2026-03', 'test-archived-doc');
+  fs.mkdirSync(docsDir, { recursive: true });
+
+  const yaml = [
+    '---',
+    'document_type: workflow_state',
+    `status: ${status}`,
+    `stage: ${stage}`,
+    'created: "2026-03-07"',
+    'doc_id: test-archived-doc',
+    '---',
+    ''
+  ].join('\n');
+
+  fs.writeFileSync(path.join(docsDir, 'WORKFLOW_STATE.yaml'), yaml, 'utf-8');
+  return tmpDir;
+}
+
+/**
  * Run the workflow-guard hook with given JSON input from a given cwd.
  *
  * @param {object} input - the JSON object to pipe as stdin
@@ -488,6 +512,31 @@ function runValidation() {
         ok('Exception: completion + Write(IMPLEMENTATION.md) → ALLOW (.md exception applies)');
       } else {
         fail(`Exception: completion + Write(IMPLEMENTATION.md) → expected ALLOW, got BLOCK (reason: ${(result.reason || '').slice(0, 80)})`);
+      }
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  }
+
+  // ── Archived Path Exclusion ────────────────────────────────────────────────
+
+  section('6. Archived Path Exclusion — HR-4');
+
+  // TC-14: Edit tool with only an archived workflow (active) → ALLOW
+  // The guard must NOT block tools when the only "active" YAML is under archived/
+  {
+    const tmpDir = mkTmpArchivedFixture('execution', 'active');
+    try {
+      const result = runHook(
+        { tool_name: 'Edit', tool_input: { file_path: 'src/foo.ts', old_string: 'a', new_string: 'b' } },
+        tmpDir
+      );
+      if (result.decision !== 'block') {
+        ok('TC-14 (HR-4): archived path + active status + Edit → ALLOW (archived excluded from scan)');
+      } else {
+        fail(`TC-14 (HR-4): archived path + active status + Edit → expected ALLOW, got BLOCK\n` +
+             `  This means workflow-guard.sh is scanning archived/ paths (HR-4 bug)\n` +
+             `  Reason: ${(result.reason || '').slice(0, 120)}`);
       }
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });

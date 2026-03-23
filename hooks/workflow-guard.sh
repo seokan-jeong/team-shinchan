@@ -24,6 +24,12 @@ ACTIVE_YAML=""
 LATEST_TS=""
 for yaml in "$DOCS_DIR"/*/WORKFLOW_STATE.yaml; do
   [ -f "$yaml" ] || continue
+  # Skip archived workflows — archived path pattern: .shinchan-docs/archived/YYYY-MM/doc-id/
+  # The one-level glob above won't reach archived/ subfolders, but guard explicitly here
+  # in case of path changes. Also handles any direct reference.
+  case "$yaml" in
+    */archived/*) continue ;;
+  esac
   if grep -q "status: active" "$yaml" 2>/dev/null; then
     # Use file modification time for recency
     if [ -z "$ACTIVE_YAML" ]; then

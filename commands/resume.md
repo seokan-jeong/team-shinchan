@@ -21,14 +21,24 @@ When this command is invoked, **DO NOT** explain the process. **EXECUTE** the re
 ### 1. Input Validation
 
 **If no DOC_ID provided:**
-- Scan `.shinchan-docs/*/WORKFLOW_STATE.yaml`
-- Filter: `status: active` OR `status: paused`
-- Display list and await user selection
-- If empty: "No interrupted workflows found."
+- Scan `.shinchan-docs/*/WORKFLOW_STATE.yaml` (skip `archived/` subfolder) — filter `status: active|paused`
+- Scan `.shinchan-docs/archived/*/*/WORKFLOW_STATE.yaml` — collect all entries
+- Display:
+  ```
+  Active/Paused:
+    1. {DOC_ID} ({status}, {stage})
+
+  Archived:
+    A1. {DOC_ID} (expired, {stage}, archived {YYYY-MM})
+  ```
+- If user selects archived entry: unarchive first (move to `.shinchan-docs/{DOC_ID}/`,
+  set status: paused, add unarchived event), then proceed
+- If both empty: "No interrupted workflows found."
 
 **If DOC_ID provided:**
-- Validate existence of `.shinchan-docs/{DOC_ID}/`
-- Error if not found: List available workflows
+- Check `.shinchan-docs/{DOC_ID}/` first, then `.shinchan-docs/archived/*/{DOC_ID}/`
+- If found in archived: unarchive before proceeding
+- Error if not found anywhere: List available workflows
 
 ### 2. Load State
 

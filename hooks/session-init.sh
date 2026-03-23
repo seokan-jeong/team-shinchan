@@ -94,6 +94,7 @@ try {
   const dirs = fs.readdirSync(docsDir, { withFileTypes: true });
   for (const d of dirs) {
     if (!d.isDirectory()) continue;
+    if (d.name === 'archived') continue; // skip archived folder
     const yp = path.join(docsDir, d.name, 'WORKFLOW_STATE.yaml');
     try {
       const yc = fs.readFileSync(yp, 'utf-8');
@@ -165,6 +166,9 @@ fi
 # ── 3. Interrupted Workflows ─────────────────────────────────────────
 for yaml in "$DOCS_DIR"/*/WORKFLOW_STATE.yaml; do
   [ -f "$yaml" ] || continue
+  # Skip archived paths (defense in depth — the one-level glob won't reach them
+  # but this is explicit protection if path patterns change)
+  case "$yaml" in */archived/*) continue ;; esac
   if grep -q "status: active" "$yaml" 2>/dev/null; then
     DOC_ID=$(basename "$(dirname "$yaml")")
     STAGE=$(grep "stage:" "$yaml" 2>/dev/null | head -1 | sed 's/.*stage: *//' | tr -d '"')
@@ -238,6 +242,7 @@ if command -v node &>/dev/null && [ -f "${PLUGIN_ROOT}/src/agent-context.js" ]; 
   ACTIVE_AGENT=""
   for yaml in "$DOCS_DIR"/*/WORKFLOW_STATE.yaml; do
     [ -f "$yaml" ] || continue
+    case "$yaml" in */archived/*) continue ;; esac
     if grep -q "status: active" "$yaml" 2>/dev/null; then
       CURRENT_STAGE=$(grep "stage:" "$yaml" 2>/dev/null | head -1 | sed 's/.*stage: *//' | tr -d '"' | tr -d ' ')
       ACTIVE_AGENT=$(echo "$STAGE_AGENT_MAP" | node -e "

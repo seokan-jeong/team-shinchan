@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:learn
-description: Manually add new learnings (patterns, preferences, rules) to memory. Use when you want to remember specific information.
+description: Use when you want to manually add new learnings or rules to memory.
 user-invocable: false
 ---
 

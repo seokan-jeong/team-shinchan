@@ -74,8 +74,26 @@ process.stdin.on('end', () => {
   // requirements/planning: BLOCK Edit, Write, TodoWrite; Bash only for read-only commands
   // execution: ALLOW all
   // completion: BLOCK Edit, TodoWrite; Bash only for read-only; Write only for docs
+  //
+  // EXCEPTION: .shinchan-docs/ files are workflow metadata, not source code.
+  // Edit/Write to .shinchan-docs/ is always allowed in ALL stages to prevent deadlocks.
   const blockedInReqPlan = ['Edit', 'Write', 'TodoWrite'];
   const blockedInCompletion = ['Edit', 'TodoWrite'];
+
+  // Global exception: .shinchan-docs/ paths are workflow management files (WORKFLOW_STATE.yaml,
+  // PROGRESS.md, REQUESTS.md, RETROSPECTIVE.md, IMPLEMENTATION.md, etc.)
+  // These must be writable in ALL stages to avoid planning/execution deadlocks.
+  if ((toolName === 'Edit' || toolName === 'Write') && filePath.includes('.shinchan-docs/')) {
+    process.exit(0);
+  }
+
+  // Global exception: .claude-plugin/ paths are release metadata files (plugin.json, marketplace.json).
+  // These must be writable in completion stage for version bumps during the release process.
+  if ((toolName === 'Edit' || toolName === 'Write') && filePath.includes('.claude-plugin/')) {
+    if (stage === 'completion') {
+      process.exit(0);
+    }
+  }
 
   if (stage === 'requirements' || stage === 'planning') {
     // Bash: block destructive commands, allow read-only
@@ -96,14 +114,6 @@ process.stdin.on('end', () => {
       process.exit(0); // Read-only Bash is allowed
     }
     if (blockedInReqPlan.includes(toolName)) {
-      // Exception: Write to WORKFLOW_STATE.yaml is allowed in requirements
-      if (toolName === 'Write' && stage === 'requirements' && filePath.includes('WORKFLOW_STATE.yaml')) {
-        process.exit(0);
-      }
-      // Exception: Write to .shinchan-docs/ is allowed (interview docs)
-      if (toolName === 'Write' && filePath.includes('.shinchan-docs/')) {
-        process.exit(0);
-      }
       console.log(JSON.stringify({
         decision: 'block',
         reason: 'WORKFLOW GUARD: Stage \"' + stage + '\" does not allow ' + toolName + '. Complete ' + stage + ' phase first before writing code. Use Read/Glob/Grep/Task only.'
@@ -145,18 +155,22 @@ process.stdin.on('end', () => {
       process.exit(0);
     }
     if (blockedInCompletion.includes(toolName)) {
+      // Edit exception: allow .claude-plugin/ files (release metadata) in completion
+      if (toolName === 'Edit' && filePath.includes('.claude-plugin/')) {
+        process.exit(0);
+      }
       console.log(JSON.stringify({
         decision: 'block',
-        reason: 'WORKFLOW GUARD: Stage \"completion\" does not allow ' + toolName + '. Only documentation writes (.shinchan-docs/ or *.md) are permitted.'
+        reason: 'WORKFLOW GUARD: Stage \"completion\" does not allow ' + toolName + '. Only documentation writes (.shinchan-docs/, *.md, or .claude-plugin/) are permitted.'
       }));
       return;
     }
-    // Write in completion: only .shinchan-docs/ or .md files
+    // Write in completion: only .shinchan-docs/, .md files, or .claude-plugin/ (release metadata)
     if (toolName === 'Write') {
-      if (!filePath.includes('.shinchan-docs/') && !filePath.endsWith('.md')) {
+      if (!filePath.includes('.shinchan-docs/') && !filePath.endsWith('.md') && !filePath.includes('.claude-plugin/')) {
         console.log(JSON.stringify({
           decision: 'block',
-          reason: 'WORKFLOW GUARD: Stage \"completion\" only allows Write to documentation files (.shinchan-docs/ or *.md). Cannot write to: ' + filePath
+          reason: 'WORKFLOW GUARD: Stage \"completion\" only allows Write to documentation or release metadata files (.shinchan-docs/, *.md, or .claude-plugin/). Cannot write to: ' + filePath
         }));
         return;
       }

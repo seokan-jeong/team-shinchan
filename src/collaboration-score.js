@@ -20,6 +20,7 @@
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const COMPLEX_KEYWORDS = ['redesign', 'refactor', 'migrate', 'auth', 'security', 'encrypt'];
+const MODEL_TIERS = ['haiku', 'sonnet', 'opus'];
 
 // ── Argument parsing ──────────────────────────────────────────────────────────
 
@@ -75,9 +76,9 @@ function computeScore({ task, files, domains, archChange }) {
 }
 
 function classify(score) {
-  if (score <= 30) return { mode: 'solo',     description: 'Bo handles directly — low complexity task' };
-  if (score <= 60) return { mode: 'delegate', description: 'Route to domain specialist — moderate complexity' };
-  return              { mode: 'debate',    description: 'Debate pass required — high complexity task' };
+  if (score <= 30) return { mode: 'solo',     model_tier: MODEL_TIERS[0], description: 'Bo handles directly — low complexity task' };
+  if (score <= 60) return { mode: 'delegate', model_tier: MODEL_TIERS[1], description: 'Route to domain specialist — moderate complexity' };
+  return              { mode: 'debate',    model_tier: MODEL_TIERS[2], description: 'Debate pass required — high complexity task' };
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -99,9 +100,9 @@ function main() {
   }
 
   const { score, breakdown } = computeScore(params);
-  const { mode, description } = classify(score);
+  const { mode, model_tier, description } = classify(score);
 
-  const output = { score, mode, description, breakdown };
+  const output = { score, mode, model_tier, description, breakdown };
   process.stdout.write(JSON.stringify(output, null, 2) + '\n');
 }
 

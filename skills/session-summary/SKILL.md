@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:session-summary
-description: Generate or view session summary from Work Tracker logs on demand.
+description: Use when you need to generate or view a session summary from work tracker logs.
 user-invocable: false
 ---
 

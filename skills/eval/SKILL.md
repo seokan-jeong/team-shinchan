@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:eval
-description: View agent evaluation history and detect performance regressions.
+description: Use when you need to view agent evaluation history or detect performance regressions.
 user-invocable: false
 ---
 

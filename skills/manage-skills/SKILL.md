@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:manage-skills
-description: Analyze changes and ensure verify-* skill coverage. Maintains verification pipeline integrity.
+description: Use when you need to analyze changes and ensure verify-* skill coverage.
 user-invocable: false
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:orchestrate
-description: Explicitly invoke Shinnosuke to orchestrate through the integrated workflow. Creates documentation folder and guides through requirements → planning → execution → completion stages.
+description: Use when you want to orchestrate through the full integrated workflow stages.
 user-invocable: false
 ---
 

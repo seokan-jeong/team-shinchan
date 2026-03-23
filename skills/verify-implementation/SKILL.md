@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:verify-implementation
-description: Execute all verify-* skills sequentially to generate integrated validation report.
+description: Use when you need to execute all verify-* skills for an integrated validation report.
 user-invocable: false
 ---
 

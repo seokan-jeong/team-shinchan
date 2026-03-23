@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:research
-description: Research and documentation with Masumi (Librarian). Use for web research, documentation lookup, and knowledge gathering.
+description: Use when you need web research, documentation lookup, or knowledge gathering.
 user-invocable: false
 ---
 

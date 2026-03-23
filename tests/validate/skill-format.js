@@ -13,6 +13,7 @@ const SKILLS_DIR = path.join(ROOT_DIR, 'skills');
 function validateSkillFile(filePath, fileName) {
   const content = fs.readFileSync(filePath, 'utf-8');
   const errors = [];
+  const warnings = [];
 
   // Check 1: Has YAML frontmatter
   const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
@@ -27,6 +28,12 @@ function validateSkillFile(filePath, fileName) {
     }
     if (!frontmatter.includes('description:')) {
       errors.push('Frontmatter missing: description');
+    } else {
+      // Check description starts with "Use when"
+      const descMatch = frontmatter.match(/^description:\s*(.+)$/m);
+      if (descMatch && !descMatch[1].trim().startsWith('Use when')) {
+        warnings.push('description should start with "Use when" (found: "' + descMatch[1].trim().substring(0, 40) + '...")');
+      }
     }
   }
 
@@ -45,7 +52,7 @@ function validateSkillFile(filePath, fileName) {
     errors.push('Missing content sections');
   }
 
-  return errors;
+  return { errors, warnings };
 }
 
 function runValidation() {
@@ -60,6 +67,7 @@ function runValidation() {
 
   let hasErrors = false;
   let totalErrors = 0;
+  let totalWarnings = 0;
 
   // Find all SKILL.md files
   const skillDirs = fs.readdirSync(SKILLS_DIR);
@@ -68,21 +76,28 @@ function runValidation() {
     const skillPath = path.join(SKILLS_DIR, dir, 'SKILL.md');
 
     if (fs.existsSync(skillPath)) {
-      const errors = validateSkillFile(skillPath, `${dir}/SKILL.md`);
+      const { errors, warnings } = validateSkillFile(skillPath, `${dir}/SKILL.md`);
 
-      if (errors.length === 0) {
+      if (errors.length === 0 && warnings.length === 0) {
         console.log(`\x1b[32m✓\x1b[0m ${dir}/SKILL.md`);
-      } else {
+      } else if (errors.length > 0) {
         hasErrors = true;
         totalErrors += errors.length;
+        totalWarnings += warnings.length;
         console.log(`\x1b[31m✗\x1b[0m ${dir}/SKILL.md`);
         errors.forEach(e => console.log(`    \x1b[31mERROR: ${e}\x1b[0m`));
+        warnings.forEach(w => console.log(`    \x1b[33mWARN: ${w}\x1b[0m`));
+      } else {
+        // Warnings only, no errors
+        totalWarnings += warnings.length;
+        console.log(`\x1b[33m~\x1b[0m ${dir}/SKILL.md`);
+        warnings.forEach(w => console.log(`    \x1b[33mWARN: ${w}\x1b[0m`));
       }
     }
   });
 
   console.log('\n----------------------------------------');
-  console.log(`Errors: ${totalErrors}`);
+  console.log(`Errors: ${totalErrors} | Warnings: ${totalWarnings}`);
   console.log('----------------------------------------\n');
 
   return hasErrors ? 1 : 0;

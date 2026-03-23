@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:verify-consistency
-description: Validate cross-references, stage matrix, and debate configuration consistency
+description: Use when you need to validate cross-references, stage matrix, or debate consistency.
 user-invocable: false
 ---
 

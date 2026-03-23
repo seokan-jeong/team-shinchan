@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:verify-workflow
-description: Validate workflow state schema, error handling, part numbering, and quick-fix paths
+description: Use when you need to validate workflow state schema or error handling.
 user-invocable: false
 ---
 

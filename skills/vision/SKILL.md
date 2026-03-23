@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:vision
-description: Image and PDF analysis with Ume. Used for "analyze this image", "read this PDF", "screenshot", "mockup" requests.
+description: Use when you need to analyze images, PDFs, screenshots, or mockups.
 user-invocable: false
 ---
 

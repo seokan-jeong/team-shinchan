@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:backend
-description: Backend development with Bunta. Used for "API", "database", "server", "endpoint" requests.
+description: Use when you need backend development for APIs, databases, servers, or endpoints.
 user-invocable: false
 ---
 

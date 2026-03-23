@@ -126,8 +126,9 @@ process.stdin.on('end', () => {
             const phases = content.split(/^## Phase \\d+/m).slice(1);
 
             // Check 1: Every Phase must have at least 1 AC reference (FR-2.1)
+            // Accepts: AC-1, FR-01, NFR, or **AC**: pattern (flexible AC format)
             for (let i = 0; i < phases.length; i++) {
-              if (!phases[i].match(/AC-\\d+/)) {
+              if (!phases[i].match(/AC-\\d+|FR-\\d+|NFR|\\*\\*AC\\*\\*:/)) {
                 missing.push('Plan Validation: Phase ' + (i+1) + ' missing Acceptance Criteria (AC) reference');
               }
             }

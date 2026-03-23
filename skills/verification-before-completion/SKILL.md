@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:verification-before-completion
-description: Use before claiming any task is complete, before commits, and before PR creation. Blocks completion without evidence.
+description: Use when claiming a task is complete, before commits, or before PR creation.
 user-invocable: false
 ---
 

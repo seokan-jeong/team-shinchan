@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:deepsearch
-description: Deep codebase exploration with Shiro(Explorer) and Masumi(Librarian). Used for "find", "where is", "search" requests.
+description: Use when you need deep codebase exploration to find code, patterns, or references.
 user-invocable: false
 ---
 

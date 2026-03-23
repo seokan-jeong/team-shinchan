@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:frontend
-description: Frontend development with Aichan. Used for "UI", "component", "React", "CSS", "styling" requests.
+description: Use when you need frontend development for UI components, React, CSS, or styling.
 user-invocable: false
 ---
 

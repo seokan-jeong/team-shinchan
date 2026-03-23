@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:design-review
-description: Compare design mockups against implementation to detect UI mismatches. Used for "design review", "compare design", "check UI fidelity" requests.
+description: Use when you need to compare design mockups against implementation for UI fidelity.
 user-invocable: true
 ---
 

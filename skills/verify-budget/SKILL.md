@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:verify-budget
-description: Validate token budget compliance for all configuration files
+description: Use when you need to validate token budget compliance for configuration files.
 user-invocable: false
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:setup-hud
-description: Install or remove the Team-Shinchan HUD statusline configuration.
+description: Use when you need to install or remove the Team-Shinchan HUD statusline.
 user-invocable: true
 ---
 

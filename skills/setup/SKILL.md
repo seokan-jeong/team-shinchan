@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:setup
-description: First-time installation onboarding and health check for Team-Shinchan plugin.
+description: Use when you need first-time installation onboarding or a plugin health check.
 user-invocable: true
 ---
 

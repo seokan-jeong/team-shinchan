@@ -4,6 +4,22 @@ All notable changes to Team-Shinchan will be documented in this file.
 
 ## [Unreleased]
 
+## [4.20.0] - 2026-03-23
+
+### Added
+- **Subagent model tier selection** (BM): `collaboration-score.js` now outputs `model_tier` field (haiku/sonnet/opus) based on complexity score. `micro-execute/SKILL.md` Step 2.5 uses it for dynamic implementer model selection. Reviewers remain opus.
+- **Skill description "Use when" pattern** (BM): `skill-format.js` warns when description doesn't start with "Use when". All 50 skills unified to trigger-focused descriptions.
+- **Skill word count validator** (BM): `skill-schema.js` checks description (≤20 words) and body (200-500 words) with WARNING/NOTICE levels. Also fixed subdirectory traversal bug (was scanning 0 skills).
+- **Writing-skills TDD meta-skill** (BM): `skills/writing-skills/SKILL.md` — 4-step process (trigger scenarios → expected behavior → implement → pressure validation) for creating quality skills.
+- **Cursor plugin support** (BM): `.cursor-plugin/cursor-rules.md` adapts 4-stage workflow as Cursor rules. `.cursor-plugin/README.md` with installation guide.
+- **Branch completion 4-option** (BM): Stage 4 Step 4.5 — merge locally / create PR / keep for later / discard options after Action Kamen approval.
+- **Worktree first-class support** (BM): Stage 3 Step 3.0 offers optional worktree isolation with `.shinchan-worktrees/{DOC_ID}/` path, dependency install, and baseline test verification.
+
+### Fixed
+- **workflow-guard deadlock** (BM): `.shinchan-docs/` paths now allowed for Edit/Write in all stages (workflow metadata ≠ source code). Previously caused planning→execution transition deadlock.
+- **transition-gate AC regex** (BM): Now accepts `FR-XX`, `NFR`, `**AC**:` formats in addition to `AC-XX`.
+- **skill-schema.js traversal**: Was scanning `skills/*.md` (0 files found) instead of `skills/*/SKILL.md` (50 files).
+
 ## [4.19.0] - 2026-03-23
 
 ### Added

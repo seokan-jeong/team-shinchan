@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:resume
-description: Resume an interrupted workflow from where it left off
+description: Use when you need to resume an interrupted workflow from where it left off.
 user-invocable: true
 ---
 

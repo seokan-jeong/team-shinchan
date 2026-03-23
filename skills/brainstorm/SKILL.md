@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:brainstorm
-description: Structured problem exploration before requirements. Reframes the problem, surfaces 2-4 alternative approaches with pros/cons, and recommends a path. Run BEFORE /team-shinchan:requirements for better coverage.
+description: Use when you need structured problem exploration before writing requirements.
 user-invocable: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:verify-agents
-description: Validate agent schema compliance and shared reference integrity
+description: Use when you need to validate agent schema compliance and reference integrity.
 user-invocable: false
 ---
 

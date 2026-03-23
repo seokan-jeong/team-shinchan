@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:micro-execute
-description: Micro-task execution with per-task two-stage review. Breaks phases into 2-3 minute tasks, each reviewed for spec compliance and code quality.
+description: Use when you need micro-task execution with per-task two-stage review.
 user-invocable: true
 ---
 
@@ -90,6 +90,37 @@ User request: ${args}`)
 
 Store result as `{micro_plan}`.
 
+## Step 2.5: Determine Model Tier per Task
+
+Before execution, score each micro-task with collaboration-score.js and assign a model tier.
+
+**For EACH micro-task in the plan:**
+
+```
+score_result = node ${CLAUDE_PLUGIN_ROOT}/src/collaboration-score.js \
+  --task "{task.title}" \
+  --files {len(task.files)} \
+  --domains {task.domain_count || 1}
+
+Parse JSON output → output.model_tier
+Validate: model_tier must be one of ['haiku', 'sonnet', 'opus']
+If unknown value: fallback to 'sonnet'
+Store as task.model
+```
+
+Example output from collaboration-score.js:
+```json
+{ "score": 45, "mode": "delegate", "model_tier": "sonnet", ... }
+```
+
+After scoring all tasks, announce the plan:
+```
+Model tier assignment:
+  Task 1: {title} → {task.model} (score: {score})
+  Task 2: {title} → {task.model} (score: {score})
+  ...
+```
+
 ## Step 3: Execute Micro-Tasks
 
 **For EACH micro-task, sequentially (never parallel for implementation):**
@@ -99,7 +130,7 @@ Store result as `{micro_plan}`.
 ```typescript
 Task(
   subagent_type="team-shinchan:{domain_agent}",  // Bo | Aichan | Bunta | Masao
-  model="sonnet",
+  model="{task.model}",  // haiku | sonnet | opus — set in Step 2.5 via collaboration-score.js
   prompt=`You are implementing a SINGLE micro-task.
 
 ## Prompt Template
@@ -293,12 +324,12 @@ Output final summary:
 
 | Domain | Agent | Model |
 |--------|-------|-------|
-| General code | Bo | sonnet |
-| Frontend/UI/CSS | Aichan | sonnet |
-| Backend/API/DB | Bunta | sonnet |
-| DevOps/CI/Docker | Masao | sonnet |
-| All reviews | Action Kamen | opus |
-| Plan generation | Nene | opus |
+| General code | Bo | collaboration-score model_tier |
+| Frontend/UI/CSS | Aichan | collaboration-score model_tier |
+| Backend/API/DB | Bunta | collaboration-score model_tier |
+| DevOps/CI/Docker | Masao | collaboration-score model_tier |
+| All reviews | Action Kamen | opus (fixed) |
+| Plan generation | Nene | opus (fixed) |
 
 ## Execution Rules
 

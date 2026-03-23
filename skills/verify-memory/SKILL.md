@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:verify-memory
-description: Validate memory system configuration and file structure
+description: Use when you need to validate memory system configuration and file structure.
 user-invocable: false
 ---
 

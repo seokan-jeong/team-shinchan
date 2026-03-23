@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:ralph
-description: Persistently loops until task is fully complete. Used for "until done", "complete it", "dont stop" requests.
+description: Use when you need persistent looping until a task is fully complete.
 user-invocable: false
 ---
 

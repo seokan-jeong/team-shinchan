@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:forget
-description: Delete specific memories. Use to remove outdated or incorrect learnings.
+description: Use when you need to delete specific outdated or incorrect memories.
 user-invocable: false
 ---
 

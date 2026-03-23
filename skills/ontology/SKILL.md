@@ -1,6 +1,6 @@
 ---
 name: ontology
-description: Query, manage, and visualize the project-level ontology
+description: Use when you need to query, manage, or visualize the project-level ontology.
 user-invocable: false
 ---
 

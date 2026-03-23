@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:autopilot
-description: Autonomously completes from requirements analysis to verification without user intervention. Used for "auto", "automatically", "autopilot" requests.
+description: Use when you want autonomous completion from requirements to verification without intervention.
 user-invocable: true
 ---
 

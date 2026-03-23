@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:review
-description: Code review and verification with Action Kamen. Used for "review", "check my code", "verify" requests.
+description: Use when you need code review, verification, or quality checks on your work.
 user-invocable: true
 ---
 

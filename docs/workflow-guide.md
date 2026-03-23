@@ -209,6 +209,10 @@ extract_and_save_learnings(".shinchan-docs/learnings.md")
 # 5. Final review
 final_review = delegate_to("actionkamen", "Final verification")
 if final_review.approved:
+    # 5.5 Branch completion options (skipped if work is on main)
+    if current_branch != "main":
+        option = ask_user("A=merge locally / B=create PR / C=keep / D=discard")
+        handle_branch_completion(option)  # See agents/shinnosuke.md Step 4.5 for full details
     report_completion()
 else:
     fix_and_retry()  # Error handling defined in agent prompts and hook configurations

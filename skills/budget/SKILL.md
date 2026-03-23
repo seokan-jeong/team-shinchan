@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:budget
-description: View and manage workflow turn budgets. Show status, set limits, or reset counters.
+description: Use when you need to view or manage workflow turn budgets and limits.
 user-invocable: false
 ---
 

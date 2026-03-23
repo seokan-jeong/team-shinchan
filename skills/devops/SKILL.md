@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:devops
-description: DevOps and infrastructure with Masao. Used for "CI/CD", "Docker", "deploy", "pipeline" requests.
+description: Use when you need DevOps work like CI/CD, Docker, deployment, or pipelines.
 user-invocable: false
 ---
 

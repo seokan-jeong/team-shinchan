@@ -67,6 +67,7 @@ npm-debug.log*
 # Team-Shinchan data (local only - workflow docs, learnings, feedback)
 .shinchan-docs/
 .team-shinchan/
+.shinchan-worktrees/
 ~/
 
 # Testing cache/output (local only)

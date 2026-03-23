@@ -204,6 +204,23 @@ Task(subagent_type="team-shinchan:shinnosuke", model="opus",
 | 3. Execution | Shiro→Bo(PO)→{Aichan|Bunta|Masao|Kazama}→Action Kamen | Code + PROGRESS.md |
 | 4. Completion | Masumi→Action Kamen | RETROSPECTIVE.md, IMPLEMENTATION.md |
 
+**Step 3.0: Worktree Setup (Optional)**
+
+Before starting the Phase Loop, offer worktree isolation to the user:
+
+> **Would you like to work in an isolated worktree?**
+> - **Yes (recommended for multi-phase work)**: Create `.shinchan-worktrees/{DOC_ID}/` with new branch `{DOC_ID}`
+> - **No**: Continue working on the current branch
+
+If the user chooses worktree:
+1. Verify `.shinchan-worktrees/` is in `.gitignore` (add if missing)
+2. Run: `git worktree add .shinchan-worktrees/{DOC_ID} -b {DOC_ID}`
+3. Install dependencies if needed (detect `package.json` → `npm install`, `pyproject.toml` → `pip install`, etc.)
+4. Run baseline tests to verify a clean state
+5. If tests fail, report and ask the user whether to proceed
+
+If worktree is chosen, all Phase execution happens inside the worktree directory. At Stage 4 completion, use `git worktree remove` and merge/cleanup as appropriate.
+
 **Phase Loop (Stage 3)**:
 1. Read PROGRESS.md — extract all Phase specs with wave metadata
 2. Group Phases by wave number (same wave = parallel-safe)
@@ -266,6 +283,61 @@ Task(subagent_type="team-shinchan:actionkamen", model="opus",
   RETROSPECTIVE.md and IMPLEMENTATION.md exist and are substantive,
   tests pass, no regressions. This is the last gate before workflow completion.")
 ```
+
+**Step 4.5: Branch Completion Options**
+
+After Action Kamen approval (Step 4), check whether the work was done on a dedicated branch (not directly on `main`). Read WORKFLOW_STATE.yaml `current.branch` or run `git branch --show-current` to determine.
+
+**If work was done directly on `main`, skip this step entirely and proceed to Step 5.**
+
+Otherwise, present the following options to the user:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👦 [Shinnosuke] Work is ready! How would you like to complete this branch?
+
+Choose how to complete this work:
+
+| Option | Action                                      | Cleanup      |
+|--------|---------------------------------------------|--------------|
+| A      | Merge locally — merge to main, run tests, delete branch | Full cleanup |
+| B      | Create PR — push branch, open PR via gh     | Keep branch  |
+| C      | Keep for later — leave branch as-is         | No cleanup   |
+| D      | Discard — delete branch and all changes     | Full cleanup |
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Wait for user selection, then execute:
+
+- **A (Merge locally)**:
+  ```bash
+  git checkout main
+  git merge {branch}
+  # run project tests
+  git branch -d {branch}
+  ```
+  Then proceed to Step 5.
+
+- **B (Create PR)**:
+  ```bash
+  git push -u origin {branch}
+  gh pr create
+  ```
+  Then proceed to Step 5 (mark workflow completed; branch kept open for PR review).
+
+- **C (Keep for later)**:
+  No git action. Record choice in WORKFLOW_STATE.yaml `branch_disposition: kept`.
+  Then proceed to Step 5.
+
+- **D (Discard)**:
+  **Require explicit confirmation**: ask user to type the word `discard` before proceeding.
+  If confirmed:
+  ```bash
+  git checkout main
+  git branch -D {branch}
+  ```
+  Then proceed to Step 5.
+  If not confirmed: re-present the 4 options.
 
 **Step 5: Mark Complete**
 Update WORKFLOW_STATE.yaml: `status: completed`, append history event `workflow_completed`.

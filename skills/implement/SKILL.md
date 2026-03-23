@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:implement
-description: Quick code implementation with domain-aware routing. Used for "implement", "code this", "write code", "fix" requests.
+description: Use when you need quick code implementation for features, bug fixes, or utilities.
 user-invocable: false
 ---
 

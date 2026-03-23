@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:status
-description: Show current workflow status. Displays active stage, phase, completed items, and pending requirements.
+description: Use when you need to check current workflow status, stage, or pending items.
 user-invocable: false
 ---
 

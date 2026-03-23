@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:ultrawork
-description: Complete tasks quickly with parallel agent execution. Used for "fast", "parallel", "ulw" requests.
+description: Use when you need to complete tasks quickly with parallel agent execution.
 user-invocable: false
 ---
 

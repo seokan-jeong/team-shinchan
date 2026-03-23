@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:analyze
-description: Deep analysis of code, bugs, performance, architecture with Hiroshi(Oracle). Used for "analyze", "debug", "why isn't it working" requests.
+description: Use when you need deep analysis of code, bugs, performance, or architecture issues.
 user-invocable: false
 ---
 

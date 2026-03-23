@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:analytics
-description: Analyze work tracker JSONL data. Compute agent metrics, session stats, event distribution, and delegation graphs.
+description: Use when you need to analyze work tracker data for agent metrics or session stats.
 user-invocable: false
 ---
 

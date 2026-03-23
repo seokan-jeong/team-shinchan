@@ -35,7 +35,8 @@ const KNOWN_SKILLS = [
   'analytics',
   'budget',
   'lint-harness',
-  'setup'
+  'setup',
+  'writing-skills'
 ];
 
 function getActualAgents() {

@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:bigproject
-description: Large-scale project orchestration with Himawari. Used for "big project", "multi-phase", "complex implementation" requests.
+description: Use when you have a large-scale, multi-phase project requiring orchestrated execution.
 user-invocable: false
 ---
 

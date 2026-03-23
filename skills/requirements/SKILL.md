@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:requirements
-description: Hidden requirements analysis with Misae. Used for "what am I missing", "risks", "edge cases", "before I start" requests.
+description: Use when you need to discover hidden requirements, risks, or edge cases.
 user-invocable: false
 ---
 

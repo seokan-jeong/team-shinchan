@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:verify-skills
-description: Validate skill schema, format compliance, and input validation rules
+description: Use when you need to validate skill schema, format, or input validation rules.
 user-invocable: false
 ---
 

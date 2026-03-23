@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:start
-description: Start a new task with the integrated workflow. Creates documentation folder and begins requirements gathering.
+description: Use when you want to start a new task with the integrated workflow.
 user-invocable: true
 ---
 

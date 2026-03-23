@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:release
-description: Automate version bump across all 4 required files (plugin.json, marketplace.json, README.md, CHANGELOG.md) and optionally create a git tag.
+description: Use when you need to automate version bumps across all required files.
 user-invocable: true
 ---
 

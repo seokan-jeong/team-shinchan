@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:debate
-description: Specialized agents debate to find optimal solutions. Used for "debate", "pros and cons", "gather opinions" requests.
+description: Use when you want multiple agents to debate and find optimal solutions.
 user-invocable: false
 ---
 

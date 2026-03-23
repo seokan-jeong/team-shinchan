@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:lint-harness
-description: Run plugin consistency checks — agent frontmatter, structural integrity, drift detection.
+description: Use when you need to run plugin consistency checks or drift detection.
 user-invocable: false
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:plan
-description: Create systematic work plans with Nene(Planner). Used for "plan", "design" requests.
+description: Use when you need to create systematic work plans or design solutions.
 user-invocable: false
 ---
 

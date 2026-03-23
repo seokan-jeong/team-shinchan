@@ -116,6 +116,9 @@ After completing your research, update your memory with:
 When invoked by Shinnosuke for Stage 4 completion:
 
 ### RETROSPECTIVE.md
+
+> Template reference: `${CLAUDE_PLUGIN_ROOT}/agents/_shared/templates/RETROSPECTIVE.md.tpl`
+
 Write `.shinchan-docs/{DOC_ID}/RETROSPECTIVE.md`:
 - ## Summary (what was built, 2-3 sentences)
 - ## What Went Well (bullets)

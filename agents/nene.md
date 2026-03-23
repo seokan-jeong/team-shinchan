@@ -96,6 +96,8 @@ Before starting, verify:
 
 ## PROGRESS.md Output Format
 
+> Template reference: `${CLAUDE_PLUGIN_ROOT}/agents/_shared/templates/PROGRESS.md.tpl`
+
 Each phase: `## Phase N: {Title} (AC-X)`, with the following metadata header:
 
 ```markdown

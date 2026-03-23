@@ -4,6 +4,20 @@ All notable changes to Team-Shinchan will be documented in this file.
 
 ## [Unreleased]
 
+## [4.21.0] - 2026-03-23
+
+### Added
+- **PreCompact hook** (BM): `hooks/pre-compact.sh` persists workflow state (doc_id, stage, phase, ts) to `.shinchan-docs/pre-compact-state.json` before context compaction. Registered in `hooks/hooks.json` as PreCompact event.
+- **SubagentStart audit log** (BM): `hooks/write-tracker.sh` now records `spawned_by` field on `agent_start` events — reads `.current-agent` before overwriting to capture parent agent chain.
+- **Path-scoped rules** (BM): `rules/path-rules.json` defines glob-pattern-based coding standards. `hooks/workflow-guard.sh` emits advisory output when Edit/Write targets a matched path. Custom `globToRegex()` handles `*`, `**`, `?` without external deps.
+- **Project gap detection** (BM): `hooks/session-init.sh` Section 8 scans for README, test dirs, .gitignore, lock files, CI config at SessionStart. Advisory-only output, language-aware lock file check gated on `package.json`.
+- **Team presets** (BM): `agents/_shared/team-presets.json` with 5 named agent combinations (fullstack, backend-api, quality, data-pipeline, security-audit). `skills/ultrawork/SKILL.md` Step 1.5 references preset lookup.
+- **Workflow output templates** (BM): `agents/_shared/templates/` with `REQUESTS.md.tpl`, `PROGRESS.md.tpl`, `RETROSPECTIVE.md.tpl` using `{{PLACEHOLDER}}` syntax. Referenced by misae, nene, masumi agents.
+- **HUD git branch + test status** (BM): `src/statusline/index.js` adds `readGitBranch()` (file-read only, no subprocess) and `readTestStatus()`. Displays `branch:NAME` and `T:ok`/`T:--` on Line 1.
+
+### Fixed
+- **comment-checker.sh permissions**: Added missing executable permission (`chmod +x`)
+
 ## [4.20.0] - 2026-03-23
 
 ### Added

@@ -1,0 +1,44 @@
+{
+  "rules": [
+    {
+      "pattern": "hooks/*.sh",
+      "rules": [
+        "Use set -eo pipefail (not -u) to avoid silent unbound variable failures",
+        "Exit 0 on non-critical errors (NFR-7: advisory hooks must never block unexpectedly)",
+        "Use ${BASH_SOURCE[0]:-$0} for script path resolution (run.cjs executes via bash)"
+      ]
+    },
+    {
+      "pattern": "tests/**",
+      "rules": [
+        "Follow existing test naming conventions (describe/it blocks matching src file structure)",
+        "Include both positive and negative test cases for each function",
+        "Do not introduce external test dependencies beyond the existing test framework"
+      ]
+    },
+    {
+      "pattern": "src/**/*.js",
+      "rules": [
+        "No external npm dependencies — use Node.js built-in modules only (NFR-4)",
+        "Export functions individually; avoid default exports for testability",
+        "Handle all file I/O errors gracefully with try/catch and silent fallback"
+      ]
+    },
+    {
+      "pattern": "agents/**/*.md",
+      "rules": [
+        "Include memory field in frontmatter (memory: project or memory: user)",
+        "Specify maxTurns and permissionMode in frontmatter",
+        "Prefix agent identity line with agent emoji and [AgentName] format"
+      ]
+    },
+    {
+      "pattern": "skills/**/*.md",
+      "rules": [
+        "SKILL.md frontmatter must be raw YAML at file top (no code block wrapper)",
+        "Register new skill name in src/cross-refs.js KNOWN_SKILLS array",
+        "Skill description must be ≤120 characters for marketplace display"
+      ]
+    }
+  ]
+}

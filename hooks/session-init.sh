@@ -266,6 +266,37 @@ if (hints.length > 0) console.log(hints.join('\n'));
   fi
 fi
 
+# ── 8. Gap Detection ──────────────────────────────────────────────────
+# README.md
+if [ ! -f "${PROJECT_ROOT}/README.md" ]; then
+  OUTPUT="${OUTPUT}⚠️ No README.md found — consider adding one to document your project.\n"
+fi
+
+# Test directories
+if [ ! -d "${PROJECT_ROOT}/tests" ] && [ ! -d "${PROJECT_ROOT}/test" ] && \
+   [ ! -d "${PROJECT_ROOT}/__tests__" ] && [ ! -d "${PROJECT_ROOT}/spec" ]; then
+  OUTPUT="${OUTPUT}⚠️ No test directory found (tests/, test/, __tests__/, spec/) — consider adding tests.\n"
+fi
+
+# .gitignore
+if [ ! -f "${PROJECT_ROOT}/.gitignore" ]; then
+  OUTPUT="${OUTPUT}⚠️ No .gitignore found — consider adding one to avoid committing unwanted files.\n"
+fi
+
+# Lock file (only when package.json exists)
+if [ -f "${PROJECT_ROOT}/package.json" ]; then
+  if [ ! -f "${PROJECT_ROOT}/package-lock.json" ] && \
+     [ ! -f "${PROJECT_ROOT}/yarn.lock" ] && \
+     [ ! -f "${PROJECT_ROOT}/pnpm-lock.yaml" ]; then
+    OUTPUT="${OUTPUT}⚠️ No lock file detected — consider adding package-lock.json, yarn.lock, or pnpm-lock.yaml for reproducible installs.\n"
+  fi
+fi
+
+# CI config
+if [ ! -d "${PROJECT_ROOT}/.github/workflows" ]; then
+  OUTPUT="${OUTPUT}⚠️ No CI configuration found (.github/workflows/) — consider adding a CI pipeline.\n"
+fi
+
 # ── Output ───────────────────────────────────────────────────────────
 if [ -n "$OUTPUT" ]; then
   echo -e "$OUTPUT"

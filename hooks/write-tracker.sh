@@ -78,16 +78,24 @@ if command -v node &>/dev/null; then
       let agent = null;
       let data = {};
       let stepType = null;
+      let spawnedBy = null;
 
       switch (event) {
-        case 'SubagentStart':
+        case 'SubagentStart': {
           type = 'agent_start';
           agent = extractAgent(input.agent_type);
+          // Read spawned_by BEFORE overwriting .current-agent (HR-2: ordering constraint)
+          spawnedBy = 'session';
+          try {
+            const cur = fs.readFileSync(process.cwd() + '/.shinchan-docs/.current-agent', 'utf-8').trim();
+            if (cur) spawnedBy = cur;
+          } catch(e) {}
           // Write current agent for layer-guard.sh
           if (agent) {
             try { fs.writeFileSync(process.cwd() + '/.shinchan-docs/.current-agent', agent); } catch(e) {}
           }
           break;
+        }
 
         case 'SubagentStop':
           type = 'agent_done';
@@ -171,6 +179,7 @@ if command -v node &>/dev/null; then
       };
       if (traceId) obj.trace = traceId;
       if (stepType) obj.step_type = stepType;  // BM-3: optional ReACT step field
+      if (spawnedBy !== null) obj.spawned_by = spawnedBy;  // FR-2/AC-2: agent_start only
       const line = JSON.stringify(obj);
       console.log(line);
     });

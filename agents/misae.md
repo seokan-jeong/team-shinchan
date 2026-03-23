@@ -149,6 +149,8 @@ Apply these frameworks BEFORE finalizing REQUESTS.md:
 
 ## 📝 REQUESTS.md Output Format
 
+> Template reference: `${CLAUDE_PLUGIN_ROOT}/agents/_shared/templates/REQUESTS.md.tpl`
+
 Create REQUESTS.md with YAML frontmatter (`document_type: requirements`, `status: draft`, `stage: 1`, `created`, `doc_id`) and these required sections:
 
 1. **Problem Statement** — what problem are we solving and why

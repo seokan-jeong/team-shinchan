@@ -235,6 +235,74 @@ function readTranscriptTodos(transcriptPath) {
   }
 }
 
+/**
+ * Read the current git branch name from .git/HEAD in process.cwd().
+ * File-read only — no subprocess, no execSync (NFR-6, HR-3).
+ *
+ * Cases handled:
+ *   Normal branch : "ref: refs/heads/main\n"  → "main"
+ *   Detached HEAD : raw 40-char SHA            → null
+ *   Worktree      : .git is a file "gitdir: …" → null (graceful)
+ *   Missing .git  : ENOENT                     → null
+ *
+ * Returns string | null. Never throws (R-7).
+ */
+function readGitBranch() {
+  try {
+    const gitPath = path.join(process.cwd(), '.git');
+
+    // Detect whether .git is a file (worktree) or a directory (normal repo)
+    let stat;
+    try {
+      stat = fs.statSync(gitPath);
+    } catch {
+      // .git does not exist
+      return null;
+    }
+
+    let headPath;
+    if (stat.isDirectory()) {
+      headPath = path.join(gitPath, 'HEAD');
+    } else {
+      // .git is a file → worktree; HEAD is at the gitdir target, skip for safety
+      return null;
+    }
+
+    const content = fs.readFileSync(headPath, 'utf-8').trim();
+
+    // Normal branch reference: "ref: refs/heads/<branch>"
+    const refMatch = content.match(/^ref:\s*refs\/heads\/(.+)$/);
+    if (refMatch) {
+      return refMatch[1].trim() || null;
+    }
+
+    // Detached HEAD: raw SHA (40 hex chars) → return null per spec
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Check whether the project has a test directory.
+ * Looks for any of: tests/, test/, __tests__/, spec/ relative to process.cwd().
+ * Returns true if at least one exists, false otherwise. Never throws (R-7).
+ */
+function readTestStatus() {
+  try {
+    const root = process.cwd();
+    const candidates = ['tests', 'test', '__tests__', 'spec'];
+    for (const dir of candidates) {
+      if (fs.existsSync(path.join(root, dir))) {
+        return true;
+      }
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 // ─── Section C: Rendering Helpers ───────────────────────────────────
 
 /**
@@ -288,21 +356,30 @@ function formatModel(displayName) {
 // ─── Section D: Line Builders ───────────────────────────────────────
 
 /**
- * Build Line 1: [Model] DOC_ID stage | agent | Todo X/Y
+ * Build Line 1: [Model] DOC_ID stage | agent | Todo X/Y | branch:NAME | T:ok
+ *
+ * New segments (FR-7, AC-7):
+ *   branch:NAME  — current git branch, or "branch:--" when unresolvable
+ *   T:ok         — test directory detected; "T:--" otherwise
  */
-function buildLine1(stdin, agentName, workflowState, todos) {
+function buildLine1(stdin, agentName, workflowState, todos, gitBranch, hasTests) {
   const model = formatModel(stdin?.model?.display_name || 'Unknown');
   const modelStr = '[' + model + ']';
+
+  const branchStr = 'branch:' + (gitBranch || '--');
+  const testStr   = hasTests ? 'T:ok' : 'T:--';
 
   if (workflowState) {
     const parts = [modelStr, workflowState.docId, workflowState.stage];
     if (agentName) parts.push('| ' + agentName);
     if (todos.total > 0) parts.push('| Todo ' + todos.completed + '/' + todos.total);
+    parts.push('| ' + branchStr);
+    parts.push(testStr);
     return parts.join(' ');
   }
 
   // Idle state — no active workflow
-  return modelStr + ' team-shinchan | idle';
+  return modelStr + ' team-shinchan | idle | ' + branchStr + ' ' + testStr;
 }
 
 /**
@@ -339,12 +416,14 @@ async function main() {
     const agentName = readCurrentAgent();
     const workflowState = readWorkflowState();
     const todos = readTranscriptTodos(stdin?.transcript_path);
+    const gitBranch = readGitBranch();
+    const hasTests  = readTestStatus();
 
     // Fallback: use workflowState.owner when .current-agent file is missing
     const displayAgent = agentName || (workflowState && workflowState.owner) || null;
 
     // Render output
-    console.log(buildLine1(stdin, displayAgent, workflowState, todos));
+    console.log(buildLine1(stdin, displayAgent, workflowState, todos, gitBranch, hasTests));
     console.log(buildLine2(stdin));
   } catch {
     renderFallback();
@@ -358,7 +437,9 @@ if (process.stdin.isTTY) {
     const workflowState = readWorkflowState();
     const displayAgent = agentName || (workflowState && workflowState.owner) || null;
     const todos = { completed: 0, total: 0 };
-    console.log(buildLine1(null, displayAgent, workflowState, todos));
+    const gitBranch = readGitBranch();
+    const hasTests  = readTestStatus();
+    console.log(buildLine1(null, displayAgent, workflowState, todos, gitBranch, hasTests));
     console.log(buildLine2(null));
   } catch {
     renderFallback();

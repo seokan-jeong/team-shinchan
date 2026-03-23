@@ -186,4 +186,87 @@ if [ -n "$RESULT" ]; then
   echo "$RESULT"
 fi
 
+# Path-Scoped Rules Advisory Check
+# Runs after stage/tool matrix. Edit or Write only. Non-blocking (exit 0 always).
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-}"
+PATH_RULES_FILE=""
+if [ -n "$PLUGIN_ROOT" ] && [ -f "$PLUGIN_ROOT/rules/path-rules.json" ]; then
+  PATH_RULES_FILE="$PLUGIN_ROOT/rules/path-rules.json"
+fi
+
+if [ -n "$PATH_RULES_FILE" ] && [ -f "$PATH_RULES_FILE" ]; then
+  echo "$INPUT" | PATH_RULES_FILE="$PATH_RULES_FILE" node -e "
+const fs = require('fs');
+const path = require('path');
+const chunks = [];
+process.stdin.on('data', c => chunks.push(c));
+process.stdin.on('end', () => {
+  let input;
+  try { input = JSON.parse(chunks.join('')); } catch(e) { process.exit(0); }
+
+  const toolName = input.tool_name || '';
+  if (toolName !== 'Edit' && toolName !== 'Write') { process.exit(0); }
+
+  const filePath = (input.tool_input || {}).file_path || '';
+  if (!filePath) { process.exit(0); }
+
+  let rulesData;
+  try { rulesData = JSON.parse(fs.readFileSync(process.env.PATH_RULES_FILE, 'utf-8')); } catch(e) { process.exit(0); }
+
+  const entries = (rulesData && Array.isArray(rulesData.rules)) ? rulesData.rules : [];
+
+  // Minimal globToRegex: supports **, *, ?, leading ./ normalisation (≤15 lines core logic)
+  function globToRegex(glob) {
+    // Normalise leading ./ from both glob and path
+    const g = glob.replace(/^\\.\\//,'');
+    let re = '';
+    let i = 0;
+    while (i < g.length) {
+      if (g[i] === '*' && g[i+1] === '*') {
+        re += '.*';
+        i += 2;
+        if (g[i] === '/') i++; // skip trailing slash after **
+      } else if (g[i] === '*') {
+        re += '[^/]*';
+        i++;
+      } else if (g[i] === '?') {
+        re += '[^/]';
+        i++;
+      } else {
+        re += g[i].replace(/[.+^${}()|[\\]\\\\]/g, '\\\\$&');
+        i++;
+      }
+    }
+    return new RegExp('^' + re + '$');
+  }
+
+  // Normalise filePath: strip leading ./ and any absolute prefix up to project root
+  const normPath = filePath.replace(/^\\.\\//,'').replace(/^\\/.*?\\/(?=[a-z])/,'');
+
+  const matched = [];
+  for (const entry of entries) {
+    if (!entry.pattern || !Array.isArray(entry.rules)) continue;
+    try {
+      const rx = globToRegex(entry.pattern);
+      if (rx.test(normPath) || rx.test(path.basename(normPath))) {
+        matched.push({ pattern: entry.pattern, rules: entry.rules });
+      }
+    } catch(e) { /* skip malformed pattern */ }
+  }
+
+  if (matched.length === 0) { process.exit(0); }
+
+  const lines = ['[path-rules] Advisory rules for: ' + filePath];
+  for (const m of matched) {
+    lines.push('  Pattern: ' + m.pattern);
+    for (const r of m.rules) {
+      lines.push('    - ' + r);
+    }
+  }
+  process.stdout.write(lines.join('\\n') + '\\n');
+  process.exit(0);
+});
+" 2>/dev/null || true
+fi
+
 exit 0

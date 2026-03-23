@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "presets": {
+    "fullstack": {
+      "name": "fullstack",
+      "agents": ["aichan", "bunta"],
+      "description": "Full-stack feature development — frontend UI + backend API"
+    },
+    "backend-api": {
+      "name": "backend-api",
+      "agents": ["bunta", "masao"],
+      "description": "API + infrastructure — backend logic and DevOps deployment"
+    },
+    "quality": {
+      "name": "quality",
+      "agents": ["actionkamen", "shiro"],
+      "description": "Code quality audit — spec compliance review + exploratory analysis"
+    },
+    "data-pipeline": {
+      "name": "data-pipeline",
+      "agents": ["bunta", "masumi"],
+      "description": "Data processing tasks — backend implementation + research/data analysis"
+    },
+    "security-audit": {
+      "name": "security-audit",
+      "agents": ["actionkamen", "masao"],
+      "description": "Security review — spec/compliance checks + infrastructure hardening"
+    }
+  }
+}

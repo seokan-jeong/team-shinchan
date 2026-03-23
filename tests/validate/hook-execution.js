@@ -260,6 +260,7 @@ const TEST_INPUTS = {
   'session-init.sh': '{}',
   'write-tracker.sh': '{"agent_type":"team-shinchan:test"}',
   'trace-init.sh': '{}',
+  'pre-compact.sh': '{}',
 };
 
 Object.entries(TEST_INPUTS).forEach(([script, testInput]) => {

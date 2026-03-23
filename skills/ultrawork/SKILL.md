@@ -16,6 +16,25 @@ user-invocable: false
 
 If args > 2000 chars: truncate + warn.
 
+## Step 1.5: Preset Lookup (if args includes a preset name)
+
+If args contains a recognized preset name, resolve agent list from `agents/_shared/team-presets.json`:
+
+```bash
+node -e "
+const fs = require('fs');
+const presets = JSON.parse(fs.readFileSync('${CLAUDE_PLUGIN_ROOT}/agents/_shared/team-presets.json', 'utf8')).presets;
+const input = process.argv[1] || '';
+const matched = Object.values(presets).find(p => input.toLowerCase().includes(p.name));
+if (matched) console.log(JSON.stringify(matched));
+" "{args}"
+```
+
+- If a preset matches: use its `agents` array to constrain which domain agents are assigned in Step 3
+- If no preset matches: proceed with full routing table (no constraint)
+
+Recognized preset names: `fullstack`, `backend-api`, `quality`, `data-pipeline`, `security-audit`
+
 ## Step 2: Rapid Planning (if 3+ files or unclear scope)
 
 ```typescript

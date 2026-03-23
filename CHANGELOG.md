@@ -4,6 +4,15 @@ All notable changes to Team-Shinchan will be documented in this file.
 
 ## [Unreleased]
 
+## [4.19.0] - 2026-03-23
+
+### Added
+- **Workflow auto-expiry**: Active workflows inactive for N days (default 7) are automatically expired on `/start`, eliminating stale paused notifications
+- **Archive system**: Expired workflows moved to `.shinchan-docs/archived/YYYY-MM/` for clean folder structure
+- **Configurable expiry**: `workflow_expiry_days` setting in plugin.json (project override via `.shinchan-config.yaml`, `0` to disable)
+- **Archive-safe guards**: `workflow-guard.sh` and `session-init.sh` exclude archived paths (defense in depth)
+- **Resume from archive**: `/resume` scans archived folders and supports unarchive flow
+
 ## [4.18.0] - 2026-03-19
 
 ### Added

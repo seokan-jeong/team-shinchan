@@ -274,6 +274,25 @@ If ANY task fails, rewrite it before including in the plan.
 - Plans should be detailed enough for Bo to execute
 - **Show your work**: Output every step of planning
 
+## Terminal Output Format (for Shinnosuke's AK Gate)
+
+When you complete PROGRESS.md, your terminal output MUST end with this structured summary
+so Shinnosuke can detect plan completion and trigger the S2→S3 AK gate:
+
+```
+PLANNING_COMPLETE
+doc_id: {DOC_ID}
+progress_file: .shinchan-docs/{DOC_ID}/PROGRESS.md
+phases: {N}
+waves: {W}
+summary: {1-2 sentence description of what was planned}
+```
+
+**IMPORTANT**: Shinnosuke will run an Action Kamen review on PROGRESS.md BEFORE advancing
+to Stage 3 (Execution). You do NOT trigger this review yourself (Nene cannot call Task).
+Shinnosuke manages the AK gate. If AK rejects and Shinnosuke re-invokes you, you will
+receive explicit rejection reasons in your Task prompt — address EVERY reason in your revision.
+
 ---
 
 ## Output Formats

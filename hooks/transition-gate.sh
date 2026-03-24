@@ -105,6 +105,18 @@ process.stdin.on('end', () => {
           }
           // Advisory: Plan Mode — not a hard block (R-5: may not be supported in all versions)
           console.warn('[transition-gate] ADVISORY: Nene should call EnterPlanMode before starting PROGRESS.md (FR-P0.1). Not a hard block.');
+
+          // Defense-in-depth: AK APPROVED must exist in history for requirements stage
+          const yamlOnDisk = (() => { try { return fs.readFileSync(filePath, 'utf-8'); } catch(e) { return ''; } })();
+          const newContentStr = newContent || '';
+          const combinedYaml = yamlOnDisk + '\n' + newContentStr;
+          const hasAkApprovedReq = combinedYaml.includes('event: ak_review') &&
+                                   combinedYaml.includes('stage: requirements') &&
+                                   combinedYaml.includes('verdict: APPROVED') &&
+                                   combinedYaml.includes('agent: action_kamen');
+          if (!hasAkApprovedReq) {
+            missing.push('No Action Kamen APPROVED review recorded for requirements stage in workflow history');
+          }
         }
 
         // Gate: planning -> execution
@@ -124,6 +136,18 @@ process.stdin.on('end', () => {
 
             // Plan Validation Gate — 3 quality checks (FR-2)
             const phases = content.split(/^## Phase \\d+/m).slice(1);
+
+            // Defense-in-depth: AK APPROVED must exist in history for planning stage
+            const yamlOnDiskPlan = (() => { try { return fs.readFileSync(filePath, 'utf-8'); } catch(e) { return ''; } })();
+            const newContentStrPlan = newContent || '';
+            const combinedYamlPlan = yamlOnDiskPlan + '\\n' + newContentStrPlan;
+            const hasAkApprovedPlan = combinedYamlPlan.includes('event: ak_review') &&
+                                      combinedYamlPlan.includes('stage: planning') &&
+                                      combinedYamlPlan.includes('verdict: APPROVED') &&
+                                      combinedYamlPlan.includes('agent: action_kamen');
+            if (!hasAkApprovedPlan) {
+              missing.push('No Action Kamen APPROVED review recorded for planning stage in workflow history');
+            }
 
             // Check 1: Every Phase must have at least 1 AC reference (FR-2.1)
             // Accepts: AC-1, FR-01, NFR, or **AC**: pattern (flexible AC format)

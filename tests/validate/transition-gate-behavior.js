@@ -359,7 +359,7 @@ function runValidation() {
 
   section('2. Allow Cases — Valid transitions');
 
-  // TC-3: requirements→planning WITH valid REQUESTS.md → ALLOW
+  // TC-3: requirements→planning WITH valid REQUESTS.md + AK APPROVED → ALLOW
   {
     const { tmpDir, docsDir, workflowFile } = mkTmpFixture('requirements');
     try {
@@ -380,27 +380,29 @@ function runValidation() {
         'utf-8'
       );
 
+      // Include AK APPROVED entry in the new content being written (simulates Misae
+      // writing the full updated WORKFLOW_STATE.yaml after AK approved)
       const result = runHook(
         {
           tool_name: 'Write',
           tool_input: {
             file_path: workflowFile,
-            content: '---\nstage: planning\nstatus: active\n---\n'
+            content: '---\nstage: planning\nstatus: active\n---\nhistory:\n  - event: ak_review\n    agent: action_kamen\n    stage: requirements\n    verdict: APPROVED\n'
           }
         },
         tmpDir
       );
       if (result.decision !== 'block') {
-        ok('TC-3: requirements→planning (valid REQUESTS.md) → ALLOW');
+        ok('TC-3: requirements→planning (valid REQUESTS.md + AK APPROVED) → ALLOW');
       } else {
-        fail(`TC-3: requirements→planning (valid REQUESTS.md) → expected ALLOW, got BLOCK (reason: ${(result.reason || '').slice(0, 120)})`);
+        fail(`TC-3: requirements→planning (valid REQUESTS.md + AK APPROVED) → expected ALLOW, got BLOCK (reason: ${(result.reason || '').slice(0, 120)})`);
       }
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
   }
 
-  // TC-4b: planning→execution WITH both REQUESTS.md and PROGRESS.md → ALLOW
+  // TC-4b: planning→execution WITH REQUESTS.md, PROGRESS.md + AK APPROVED → ALLOW
   {
     const { tmpDir, docsDir, workflowFile } = mkTmpFixture('planning');
     try {
@@ -415,20 +417,22 @@ function runValidation() {
         'utf-8'
       );
 
+      // Include AK APPROVED entry in the new content being written (simulates Shinnosuke
+      // writing the full updated WORKFLOW_STATE.yaml after AK approved PROGRESS.md)
       const result = runHook(
         {
           tool_name: 'Write',
           tool_input: {
             file_path: workflowFile,
-            content: '---\nstage: execution\nstatus: active\n---\n'
+            content: '---\nstage: execution\nstatus: active\n---\nhistory:\n  - event: ak_review\n    agent: action_kamen\n    stage: planning\n    verdict: APPROVED\n'
           }
         },
         tmpDir
       );
       if (result.decision !== 'block') {
-        ok('TC-4b: planning→execution (REQUESTS.md + PROGRESS.md present) → ALLOW');
+        ok('TC-4b: planning→execution (REQUESTS.md + PROGRESS.md + AK APPROVED) → ALLOW');
       } else {
-        fail(`TC-4b: planning→execution (valid artifacts) → expected ALLOW, got BLOCK (reason: ${(result.reason || '').slice(0, 120)})`);
+        fail(`TC-4b: planning→execution (valid artifacts + AK APPROVED) → expected ALLOW, got BLOCK (reason: ${(result.reason || '').slice(0, 120)})`);
       }
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -667,6 +671,129 @@ function runValidation() {
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
+  }
+
+  // ── TC-11/12: AK Review Gate Tests ──────────────────────────────────────────
+
+  section('5. AK Review Gate — requirements and planning transitions');
+
+  // TC-11: requirements→planning WITHOUT AK APPROVED in history → BLOCK
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('requirements');
+    try {
+      // Valid REQUESTS.md (passes existing artifact checks)
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- FR-1: The system shall do Y\n',
+        'utf-8'
+      );
+      // No AK review in WORKFLOW_STATE.yaml — mkTmpFixture does not add it
+
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile,
+          content: '---\nstage: planning\nstatus: active\n---\nhistory:\n  - event: requirements_approved\n    agent: misae\n' } },
+        tmpDir
+      );
+      if (result.decision === 'block') {
+        const mentionsAK = (result.reason || '').toLowerCase().includes('action kamen') ||
+                           (result.reason || '').toLowerCase().includes('ak') ||
+                           (result.reason || '').toLowerCase().includes('approved');
+        if (mentionsAK) {
+          ok('TC-11: requirements→planning (valid REQUESTS.md, no AK APPROVED) → BLOCK with AK in reason');
+        } else {
+          ok(`TC-11: requirements→planning (no AK APPROVED) → BLOCK (reason: ${(result.reason || '').slice(0, 100)})`);
+        }
+      } else {
+        fail('TC-11: requirements→planning (no AK APPROVED) → expected BLOCK, got ALLOW');
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // TC-11b: requirements→planning WITH AK APPROVED in history → ALLOW
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('requirements');
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- FR-1: The system shall do Y\n',
+        'utf-8'
+      );
+      // Include AK approved entry in the new content being written
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile,
+          content: '---\nstage: planning\nstatus: active\n---\nhistory:\n  - event: ak_review\n    agent: action_kamen\n    stage: requirements\n    verdict: APPROVED\n' } },
+        tmpDir
+      );
+      if (result.decision !== 'block') {
+        ok('TC-11b: requirements→planning (valid REQUESTS.md + AK APPROVED) → ALLOW');
+      } else {
+        fail(`TC-11b: requirements→planning (with AK APPROVED) → expected ALLOW, got BLOCK: ${(result.reason || '').slice(0, 120)}`);
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // TC-12: planning→execution WITHOUT AK APPROVED in history → BLOCK
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('planning');
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- Requirement A\n',
+        'utf-8'
+      );
+      fs.writeFileSync(
+        path.join(docsDir, 'PROGRESS.md'),
+        '# PROGRESS\n\n## Phase 1: Implement the core feature with full AC coverage\nImplement the feature.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n',
+        'utf-8'
+      );
+      // No AK review in WORKFLOW_STATE.yaml
+
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile,
+          content: '---\nstage: execution\nstatus: active\n---\nhistory:\n  - event: planning_approved\n    agent: nene\n' } },
+        tmpDir
+      );
+      if (result.decision === 'block') {
+        const mentionsAK = (result.reason || '').toLowerCase().includes('action kamen') ||
+                           (result.reason || '').toLowerCase().includes('ak') ||
+                           (result.reason || '').toLowerCase().includes('approved');
+        if (mentionsAK) {
+          ok('TC-12: planning→execution (valid PROGRESS.md, no AK APPROVED) → BLOCK with AK in reason');
+        } else {
+          ok(`TC-12: planning→execution (no AK APPROVED) → BLOCK (reason: ${(result.reason || '').slice(0, 100)})`);
+        }
+      } else {
+        fail('TC-12: planning→execution (no AK APPROVED) → expected BLOCK, got ALLOW');
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // TC-12b: planning→execution WITH AK APPROVED in history → ALLOW
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('planning');
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- Requirement A\n',
+        'utf-8'
+      );
+      fs.writeFileSync(
+        path.join(docsDir, 'PROGRESS.md'),
+        '# PROGRESS\n\n## Phase 1: Implement the core feature with full AC coverage\nImplement the feature.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n',
+        'utf-8'
+      );
+      // Include AK approved entry in the new content being written
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile,
+          content: '---\nstage: execution\nstatus: active\n---\nhistory:\n  - event: ak_review\n    agent: action_kamen\n    stage: planning\n    verdict: APPROVED\n' } },
+        tmpDir
+      );
+      if (result.decision !== 'block') {
+        ok('TC-12b: planning→execution (valid PROGRESS.md + AK APPROVED) → ALLOW');
+      } else {
+        fail(`TC-12b: planning→execution (with AK APPROVED) → expected ALLOW, got BLOCK: ${(result.reason || '').slice(0, 120)}`);
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
   }
 
   // ── Summary ─────────────────────────────────────────────────────────────────

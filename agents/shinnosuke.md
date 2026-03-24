@@ -95,10 +95,98 @@ You coordinate all work as Team-Shinchan's main orchestrator.
   - PROGRESS.md 전체가 아닌 해당 Phase 섹션만 읽어서 업데이트 (context window 효율)
 
 **Stage Transition Gates** (ALL must pass):
-- S1→S2: REQUESTS.md with Problem Statement + Requirements + AC + user approval
-- S2→S3: PROGRESS.md with phases, each has AC
+- S1→S2: REQUESTS.md with Problem Statement + Requirements + AC + user approval + **AK APPROVED** (managed by Misae — see agents/misae.md Phase E)
+- S2→S3: PROGRESS.md with phases, each has AC + **AK APPROVED** (managed by Shinnosuke — see S2→S3 AK Gate below)
 - S3→S4: All phases complete with Action Kamen review
 - Done: RETROSPECTIVE.md + IMPLEMENTATION.md + learnings + Action Kamen final pass
+
+#### S2→S3 AK Gate: PROGRESS.md Review
+
+After Nene completes PROGRESS.md and Shinnosuke receives plan approval summary,
+BEFORE writing stage=execution to WORKFLOW_STATE.yaml:
+
+```
+MAX_RETRIES = 2
+retry_count = read from WORKFLOW_STATE.yaml current.ak_gate.planning.retry_count (default 0)
+all_rejection_reasons = []
+
+LOOP:
+  1. Invoke AK review:
+     Task(
+       subagent_type="team-shinchan:actionkamen",
+       model="opus",
+       prompt="DOCUMENT REVIEW — PROGRESS.md for {DOC_ID}.
+       Review file: .shinchan-docs/{DOC_ID}/PROGRESS.md
+
+       rubric:
+         Phase Completeness (max 5): Every phase has goals, file changes, AC checkboxes,
+           agent assignment, wave/dependency metadata. 4+ file phases split into steps.
+         AC Reference Validity (max 5): Each phase references at least one AC from REQUESTS.md.
+           AC checkboxes are testable (running X produces Y — not 'implement X').
+         Feasibility & File References (max 5): File references resolve to existing files
+           (or new files marked Create). Phase dependencies correctly ordered. Risks present.
+       pass_threshold: 9/15 (60%)
+
+       Prior rejection feedback to check against (if retry): {last_rejection_reasons}"
+     )
+
+  2. Parse AK verdict. Append history to WORKFLOW_STATE.yaml:
+       event: ak_review
+       agent: action_kamen
+       stage: planning
+       verdict: {APPROVED or REJECTED}
+       retry_count: {retry_count}
+       rejection_reasons: {reasons or []}
+
+  3. If APPROVED:
+     - Update current.ak_gate.planning.status = approved
+     - Write stage=execution, owner=bo to WORKFLOW_STATE.yaml
+     - Narrate: "AK review: APPROVED — advancing to Stage 3 (Execution)"
+     - EXIT LOOP
+
+  4. If REJECTED:
+     - Append to all_rejection_reasons
+     - Write current.ak_gate.planning.retry_count = retry_count + 1
+     - Write current.ak_gate.planning.status = rejected
+     - Write current.ak_gate.planning.last_rejection_reasons = {reasons}
+     - If retry_count >= MAX_RETRIES:
+       - Write current.ak_gate.planning.status = escalated
+       - Escalate to user (see below)
+       - EXIT LOOP
+     - Else:
+       - Narrate: "AK review: REJECTED (retry {retry_count+1}/{MAX_RETRIES}). Re-invoking Nene to revise PROGRESS.md..."
+       - Invoke Nene:
+           Task(subagent_type="team-shinchan:nene", model="opus",
+             prompt="PROGRESS.md revision required. AK review rejected with these reasons:
+             {rejection_reasons}
+             You MUST address EACH rejection reason explicitly in your revision.
+             Read current PROGRESS.md, revise it, and output updated plan.")
+       - retry_count += 1
+       - CONTINUE LOOP
+
+ESCALATION (after 2 rejections):
+  Present to user:
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  👦 [Shinnosuke] AK review for PROGRESS.md: Max retries reached (2/2). Escalating.
+
+  ## Rejection Summary
+
+  ### Attempt 1 (Initial)
+  {all_rejection_reasons[0]}
+
+  ### Attempt 2 (Retry 1)
+  {all_rejection_reasons[1]}
+
+  ### Attempt 3 (Retry 2)
+  {all_rejection_reasons[2]}
+
+  ## Suggested Actions
+  A. Nene revises PROGRESS.md based on your guidance — tell me which areas to fix
+  B. Accept PROGRESS.md as-is and manually override (type: override ak-planning)
+  C. Re-plan from scratch
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Do NOT advance to Stage 3. Record status: escalated.
+```
 
 Update WORKFLOW_STATE.yaml on transition: set `current.stage`, `owner`, `status: active`, append to `history` (timestamp, event, from, to, agent).
 

@@ -61,11 +61,39 @@ current:
   owner: misae
   status: active
   interview: { step: 0, collected_count: 0, last_question: null }
+  ak_gate:
+    requirements:
+      status: pending          # pending | in_review | approved | rejected | escalated
+      retry_count: 0           # 0, 1, or 2 (max)
+      last_rejection_reasons: []  # list of strings — most recent rejection points
+    planning:
+      status: pending
+      retry_count: 0
+      last_rejection_reasons: []
 history:
   - timestamp: "{timestamp}"
     event: workflow_started
     agent: shinnosuke
 ```
+
+History entry format for AK review (appended after each AK review):
+
+```yaml
+- timestamp: "{ISO timestamp}"
+  event: ak_review
+  agent: action_kamen
+  stage: requirements          # or planning
+  verdict: REJECTED            # or APPROVED
+  retry_count: 0               # which attempt this was (0 = first, 1 = first retry, 2 = second retry)
+  rejection_reasons:
+    - "Problem Statement lacks quantified success metrics"
+    - "FR coverage missing error-handling scenarios"
+```
+
+> **ak_gate schema notes**:
+> - `status` values: `pending` (not yet reviewed) | `in_review` (AK review in progress) | `approved` (AK approved) | `rejected` (AK rejected, retries remaining) | `escalated` (max retries reached, waiting for user)
+> - `retry_count` persists across session restarts (NFR-2: session-restart safe)
+> - Existing workflows without `ak_gate` field continue to function (backwards-compatible)
 
 > Stage rules and transition gates are defined in CLAUDE.md and hooks/workflow-guard.md.
 

@@ -163,10 +163,113 @@ Create REQUESTS.md with YAML frontmatter (`document_type: requirements`, `status
 
 Missing any section = Stage 1 verification failure.
 
-### Phase E: User Approval
-- Present REQUESTS.md summary to user
+### Phase E: User Approval + AK Review Gate
+
+#### Step E-1: Request User Approval
+- Present REQUESTS.md summary to user (key FRs, scope, risks, ACs)
 - Ask for approval via AskUserQuestion
-- If approved: update status to `approved`, transition stage
+- If NOT approved: revise REQUESTS.md per user feedback, return to Step E-1
+- If approved: proceed to Step E-2
+
+#### Step E-2: AK Review Loop
+
+```
+MAX_RETRIES = 2
+retry_count = read from WORKFLOW_STATE.yaml current.ak_gate.requirements.retry_count (default 0)
+all_rejection_reasons = []  # accumulate across retries
+
+LOOP:
+  1. Read current REQUESTS.md content
+  2. Invoke AK review:
+     Task(
+       subagent_type="team-shinchan:actionkamen",
+       model="opus",
+       prompt="DOCUMENT REVIEW — REQUESTS.md for {DOC_ID}.
+       Review file: .shinchan-docs/{DOC_ID}/REQUESTS.md
+
+       rubric:
+         Problem Statement (max 5): Is problem clearly stated with context, impact, measurable
+           success criteria, and WHY it matters?
+         FR/NFR Coverage (max 5): Are all functional requirements complete, non-overlapping,
+           and testable? Are NFRs present and quantified?
+         Scope & AC Testability (max 5): Is scope delineated? STRIDE analysis present?
+           Are ACs phrased as testable checkboxes?
+       pass_threshold: 9/15 (60%)
+
+       Prior rejection feedback to check against (if retry): {last_rejection_reasons}
+
+       Output: APPROVED or REJECTED verdict with rubric scores and specific rejection reasons."
+     )
+
+  3. Parse AK verdict from Task result:
+     - Append history entry to WORKFLOW_STATE.yaml:
+         event: ak_review
+         agent: action_kamen
+         stage: requirements
+         verdict: {APPROVED or REJECTED}
+         retry_count: {retry_count}
+         rejection_reasons: {reasons list or []}
+
+  4. If APPROVED:
+     - Update WORKFLOW_STATE.yaml current.ak_gate.requirements.status = approved
+     - Proceed to Step E-3 (stage transition)
+     - EXIT LOOP
+
+  5. If REJECTED:
+     - Append rejection reasons to all_rejection_reasons
+     - Write WORKFLOW_STATE.yaml:
+         current.ak_gate.requirements.retry_count = retry_count + 1
+         current.ak_gate.requirements.status = rejected
+         current.ak_gate.requirements.last_rejection_reasons = {reasons}
+     - If retry_count >= MAX_RETRIES:
+       - Update status = escalated
+       - Proceed to Step E-4 (escalation)
+       - EXIT LOOP
+     - Else:
+       - Tell user: "AK review rejected (retry {retry_count+1}/{MAX_RETRIES}). Revising REQUESTS.md..."
+       - Revise REQUESTS.md: address EACH rejection reason explicitly
+         (CRITICAL: do not resubmit unchanged document — address every AK complaint)
+       - retry_count += 1
+       - CONTINUE LOOP
+```
+
+#### Step E-3: Stage Transition (only reached after AK APPROVED)
+- Update WORKFLOW_STATE.yaml:
+    current.stage: planning
+    current.owner: nene
+    current.ak_gate.requirements.status: approved
+  Append to history:
+    event: stage_transition
+    from: requirements
+    to: planning
+    agent: misae
+
+#### Step E-4: Escalation (only reached after 2 failed retries)
+Present to user:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👩 [Misae] AK review: Max retries reached (2/2). Escalating to you.
+
+REQUESTS.md was reviewed 3 times (initial + 2 retries) and received REJECTED each time.
+
+## Rejection Summary
+
+### Attempt 1 (Initial)
+{all_rejection_reasons[0]}
+
+### Attempt 2 (Retry 1)
+{all_rejection_reasons[1]}
+
+### Attempt 3 (Retry 2)
+{all_rejection_reasons[2]}
+
+## Suggested Actions
+A. I'll revise REQUESTS.md myself based on your guidance — tell me which areas to fix
+B. Accept REQUESTS.md as-is and manually override (type: override ak-requirements)
+C. Restart requirements interview from scratch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+Wait for user response. Do NOT advance stage. Record status: escalated in WORKFLOW_STATE.yaml.
 
 ---
 

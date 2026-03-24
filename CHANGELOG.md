@@ -4,6 +4,15 @@ All notable changes to Team-Shinchan will be documented in this file.
 
 ## [Unreleased]
 
+## [4.22.0] - 2026-03-24
+
+### Added
+- **AK review gate for Requirements stage**: Misae triggers Action Kamen auto-review after user approval of REQUESTS.md. Hard block with max 2 auto-revise retries before user escalation.
+- **AK review gate for Planning stage**: Shinnosuke triggers Action Kamen auto-review after user approval of PROGRESS.md. Same hard block + 2-retry loop with escalation.
+- **WORKFLOW_STATE.yaml ak_gate schema**: New `ak_gate` section tracks review status, retry count, and rejection reasons per stage. Session-restart safe.
+- **transition-gate.sh defense-in-depth**: Hard block checks for AK APPROVED history entries on requirements→planning and planning→execution transitions.
+- **4 new test cases**: TC-11/11b (requirements gate), TC-12/12b (planning gate). TC-3, TC-4b updated for AK APPROVED compatibility.
+
 ## [4.21.0] - 2026-03-23
 
 ### Added

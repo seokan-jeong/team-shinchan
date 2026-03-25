@@ -57,6 +57,27 @@ If both lists empty: suggest `/team-shinchan:start`.
    - `status: blocked`: show blocker reason
 2. Extract: `current_stage`, `current_phase`, `current_owner`
 
+## Step 1.5: Load Handoff State (Conditional)
+
+Check if `.shinchan-docs/pre-compact-state.json` exists (using Read tool).
+
+**If file exists and readable**:
+Parse the JSON and prepend the following block to the context header output in Step 4:
+
+```
+[Handoff] Completed: {completed_phases} | Pending: {pending_phases}
+Last Decision: {last_decision|none}
+Blocking Issues: {blocking_issues|none}
+```
+
+- `completed_phases`: array → join with `,`; string → display as-is
+- `last_decision`: null → display `none`
+- `blocking_issues`: null → display `none`
+
+**If file does not exist or Read fails**: skip silently. Proceed to Step 2 without error.
+
+**If JSON parse fails** (malformed content): skip silently. Proceed to Step 2 without error.
+
 ## Step 2: Load Documents
 
 - **Always**: Read `.shinchan-docs/{DOC_ID}/REQUESTS.md` (warn if missing)
@@ -68,6 +89,20 @@ If both lists empty: suggest `/team-shinchan:start`.
 Add `resumed` event to history, set `status: active`.
 
 ## Step 4: Output Status
+
+If handoff state was loaded in Step 1.5, prepend the `[Handoff]` block before the separator:
+
+```
+[Handoff] Completed: 1,2 | Pending: 3
+Last Decision: Use regex-only parser for PROGRESS.md
+Blocking Issues: none
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶️ Workflow Resumed: {DOC_ID}
+Stage: {current_stage} ({n}/4) | Phase: {current_phase|N/A} | Owner: {current_owner}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+If no handoff state (file absent or parse failed):
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

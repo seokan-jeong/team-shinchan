@@ -70,12 +70,103 @@ try {
   }
 } catch(e) {}
 
+// -- HANDOFF ARTIFACT (FR-1) --
+// Parse PROGRESS.md for phase completion status
+let completedPhases = [];
+let pendingPhases = [];
+let lastDecision = null;
+let blockingIssues = null;
+
+try {
+  // Locate PROGRESS.md
+  const progressPath = path.join(process.env.PROJECT_ROOT, '.shinchan-docs', docId, 'PROGRESS.md');
+
+  // HR-2: size guard — skip parsing if > 100KB
+  let progressContent = null;
+  try {
+    const stat = fs.statSync(progressPath);
+    if (stat.size > 100 * 1024) {
+      completedPhases = 'parse_skipped_large_file';
+      pendingPhases = 'parse_skipped_large_file';
+    } else {
+      progressContent = fs.readFileSync(progressPath, 'utf-8');
+    }
+  } catch(e) { /* PROGRESS.md absent — use defaults */ }
+
+  if (progressContent !== null && typeof completedPhases !== 'string') {
+    // Extract phase numbers from ### Phase N headings
+    const phasePattern = /^### Phase (\d+)/gm;
+    let match;
+    const allPhaseNums = [];
+    while ((match = phasePattern.exec(progressContent)) !== null) {
+      allPhaseNums.push(parseInt(match[1], 10));
+    }
+
+    // Determine completed vs pending by checkbox state
+    // A phase is complete if ALL its checkboxes are checked (no unchecked remain)
+    for (const num of allPhaseNums) {
+      // Extract block between this phase heading and the next
+      const blockRe = new RegExp(
+        '### Phase ' + num + '[\\s\\S]*?(?=### Phase \\d+|$)'
+      );
+      const blockMatch = progressContent.match(blockRe);
+      if (!blockMatch) continue;
+      const block = blockMatch[0];
+      const hasUnchecked = /- \[ \]/.test(block);
+      const hasChecked   = /- \[x\]/i.test(block);
+      if (hasChecked && !hasUnchecked) {
+        completedPhases.push(num);
+      } else if (hasUnchecked) {
+        pendingPhases.push(num);
+      }
+    }
+
+    // Extract last_decision: last ## Decision block first line (256 char limit)
+    const decisionBlocks = [...progressContent.matchAll(/^## Decision\s*\n([^\n]+)/gm)];
+    if (decisionBlocks.length > 0) {
+      lastDecision = decisionBlocks[decisionBlocks.length - 1][1].slice(0, 256);
+      // HR-1: sensitive pattern masking
+      lastDecision = lastDecision.replace(
+        /\b(key|password|secret|token)\s*=\s*\S+/gi,
+        '$1=[REDACTED]'
+      );
+    }
+  }
+} catch(e) { /* FR-1 is best-effort — never block pre-compact */ }
+
+// Read blocking_issues from WORKFLOW_STATE.yaml
+try {
+  const yamlContent2 = fs.readFileSync(activeYaml, 'utf-8');
+  const noComments2 = yamlContent2.replace(/#.*/g, '');
+  const biMatch = noComments2.match(/^\s*blocked_reason:\s*(.+)$/m);
+  if (biMatch) blockingIssues = biMatch[1].trim().replace(/[\x22\x27]/g, '');
+} catch(e) {}
+
+// Build handoff_summary
+const completedStr = Array.isArray(completedPhases)
+  ? (completedPhases.length > 0 ? completedPhases.join(',') : 'none')
+  : completedPhases;
+const pendingStr = Array.isArray(pendingPhases)
+  ? (pendingPhases.length > 0 ? pendingPhases.join(',') : 'none')
+  : pendingPhases;
+const handoffSummary =
+  'Stage: ' + stage + '. Completed phases: ' + completedStr +
+  '. Pending: ' + pendingStr +
+  (lastDecision ? '. Last decision: ' + lastDecision.slice(0, 80) : '') +
+  (blockingIssues ? '. BLOCKED: ' + blockingIssues.slice(0, 80) : '');
+// -- END HANDOFF ARTIFACT --
+
 // Write pre-compact-state.json
 const state = {
   doc_id: docId,
   stage: stage,
   phase: phase,
-  ts: new Date().toISOString()
+  ts: new Date().toISOString(),
+  completed_phases: completedPhases,
+  pending_phases: pendingPhases,
+  last_decision: lastDecision,
+  blocking_issues: blockingIssues,
+  handoff_summary: handoffSummary
 };
 
 const outPath = path.join(docsDir, 'pre-compact-state.json');

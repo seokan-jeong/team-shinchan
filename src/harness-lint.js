@@ -58,6 +58,37 @@ function checkDrift(){
       cks.push(ck('arch: fresh',fresh,fresh?'ok':'stale — run: node src/gen-architecture-map.js --write'));
     }catch(e){cks.push(ck('arch: fresh',false,'stat error: '+e.message));}
   }
+  // -- Assumption Audit (FR-6) --
+  // Verify that key structural assumptions introduced in main-060 are still valid.
+  const akContent = rf(path.join(D('agents'), 'actionkamen.md'));
+  cks.push(ck(
+    'assumption: actionkamen has Skepticism Rules',
+    !!(akContent && akContent.includes('## Skepticism Rules')),
+    akContent && akContent.includes('## Skepticism Rules') ? 'ok' : 'FAIL — add Skepticism Rules section to agents/actionkamen.md'
+  ));
+
+  const neneContent = rf(path.join(D('agents'), 'nene.md'));
+  cks.push(ck(
+    'assumption: nene has sprint-contract',
+    !!(neneContent && neneContent.includes('sprint-contract')),
+    neneContent && neneContent.includes('sprint-contract') ? 'ok' : 'FAIL — add Sprint-Contract section to agents/nene.md'
+  ));
+
+  const evalRubricsPath = path.join(D('agents'), '_shared', 'eval-rubrics.json');
+  const evalRubricsExists = fs.existsSync(evalRubricsPath);
+  cks.push(ck(
+    'assumption: eval-rubrics.json exists',
+    evalRubricsExists,
+    evalRubricsExists ? 'ok' : 'FAIL — create agents/_shared/eval-rubrics.json (FR-7)'
+  ));
+
+  const resumeContent = rf(path.join(D('skills'), 'resume', 'SKILL.md'));
+  cks.push(ck(
+    'assumption: resume skill references pre-compact-state.json',
+    !!(resumeContent && resumeContent.includes('pre-compact-state.json')),
+    resumeContent && resumeContent.includes('pre-compact-state.json') ? 'ok' : 'FAIL — add pre-compact-state.json handoff loading to skills/resume/SKILL.md'
+  ));
+  // -- End Assumption Audit --
   return{category:'drift',label:'Drift Detection',checks:cks};
 }
 

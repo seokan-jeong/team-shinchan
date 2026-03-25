@@ -1,0 +1,77 @@
+{
+  "version": "1.0.0",
+  "rubrics": {
+    "default": {
+      "description": "Default code review rubric — applied to Stage 3 implementation reviews",
+      "items": [
+        {
+          "id": "correctness",
+          "label": "Correctness",
+          "max": 5,
+          "criteria": "Does the implementation do what the spec requires? Are edge cases handled? Input validation present?"
+        },
+        {
+          "id": "completeness",
+          "label": "Completeness",
+          "max": 5,
+          "criteria": "Are all specified requirements implemented? No missing features or skipped ACs?"
+        },
+        {
+          "id": "quality",
+          "label": "Quality",
+          "max": 5,
+          "criteria": "Is the code well-structured, readable, and maintainable? Follows project patterns? No magic numbers or deep chains?"
+        }
+      ],
+      "pass_threshold_pct": 60
+    },
+    "documentation": {
+      "description": "Documentation review rubric — applied when reviewing REQUESTS.md, PROGRESS.md, RETROSPECTIVE.md, IMPLEMENTATION.md",
+      "items": [
+        {
+          "id": "clarity",
+          "label": "Clarity",
+          "max": 5,
+          "criteria": "Is the document clear, unambiguous, and free of contradictions? Does it use precise language?"
+        },
+        {
+          "id": "completeness",
+          "label": "Completeness",
+          "max": 5,
+          "criteria": "Does the document cover all required sections? Are all FRs/ACs/phases addressed?"
+        },
+        {
+          "id": "actionability",
+          "label": "Actionability",
+          "max": 5,
+          "criteria": "Can an implementer act on this document without asking follow-up questions? Are file paths, commands, and expected outputs specified?"
+        }
+      ],
+      "pass_threshold_pct": 60
+    },
+    "planning": {
+      "description": "Planning review rubric — applied to PROGRESS.md at S2→S3 AK gate",
+      "items": [
+        {
+          "id": "phase_completeness",
+          "label": "Phase Completeness",
+          "max": 5,
+          "criteria": "Every phase has goals, file changes, AC checkboxes, agent assignment, and wave/dependency metadata. 4+ file phases are split into Steps."
+        },
+        {
+          "id": "ac_reference_validity",
+          "label": "AC Reference Validity",
+          "max": 5,
+          "criteria": "Each phase references at least one AC from REQUESTS.md. AC checkboxes are testable per Spec Granularity Rules (running X produces Y)."
+        },
+        {
+          "id": "feasibility",
+          "label": "Feasibility & File References",
+          "max": 5,
+          "criteria": "File references resolve to existing files (or new files marked Create). Phase dependencies are correctly ordered. Risks are present."
+        }
+      ],
+      "pass_threshold_pct": 60
+    }
+  }
+}

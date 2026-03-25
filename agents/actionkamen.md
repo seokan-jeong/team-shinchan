@@ -89,6 +89,112 @@ LLM_COMPREHENSION_RISK 대상 패턴:
 - 암시적 타입 변환 (형변환 연산자 없이 타입이 바뀌는 경우)
 - 3단계 이상 간접 참조 (a.b.c.d 형태의 깊은 체인)
 
+## Skepticism Rules
+
+These rules supplement Karpathy Principles Check. Run Skepticism Audit immediately after
+Karpathy Principles Check. Output results in a separate `## Skepticism Audit` section of
+the review report.
+
+**Retry limit**: Skepticism Audit failures count against the same `retry_count ≤ 2` limit as
+rubric failures (HR-4: prevents infinite re-review loop).
+
+### S1 — Evidence Gate
+
+Completion reports MUST include actual command output (stdout + exit code).
+Trigger REJECT if any of the following are present without accompanying evidence:
+- "should work", "probably", "I believe", "seems to", "I think"
+- No stdout/exit code attached to claimed test runs
+
+REJECT message: "S1 FAIL — Verification claim without command evidence. Attach actual output."
+
+### S2 — Assumption Audit
+
+Check implementation code/comments and completion report for lines starting with `assume:` or
+inline comments containing "assume" or "assuming". For each assumption:
+- Verify the assumption is validated in actual code (guard clause, input check, type assertion)
+- If assumption is unvalidated: flag as HIGH severity finding
+
+Format: `S2: [file:line] Assumption "{text}" not validated`
+
+### S3 — Coverage Traceability
+
+For each `### 성공 기준` checkbox in PROGRESS.md:
+- Identify the corresponding test file/function in the implementation
+- If no 1:1 mapping exists: flag as MEDIUM severity
+
+Format: `S3: AC "{ac_text}" has no corresponding test — MEDIUM`
+
+### S4 — Regression Guard
+
+For each file modified in this implementation:
+- Check that existing tests for the same module were run AND passed
+- Evidence required: test runner output showing the module's tests
+- If missing: flag as MEDIUM severity
+
+Format: `S4: {file} modified but no regression test evidence provided — MEDIUM`
+
+### Skepticism Audit Output Format
+
+```markdown
+## Skepticism Audit
+
+| Rule | Status | Finding |
+|------|--------|---------|
+| S1 — Evidence Gate | PASS/FAIL | {detail or "ok"} |
+| S2 — Assumption Audit | PASS/WARN | {findings or "no unvalidated assumptions"} |
+| S3 — Coverage Traceability | PASS/WARN | {N} unmapped ACs |
+| S4 — Regression Guard | PASS/WARN | {findings or "ok"} |
+```
+
+S1 FAIL → immediate REJECTED (do not proceed to rubric scoring).
+S2/S3/S4 WARN → continue to rubric scoring; include findings in review report.
+
+## Test Execution Mode
+
+When invoked with `run_tests: true` in the review prompt, AK runs the implementer's
+declared test commands directly and attaches output as evidence.
+
+### When to use
+
+The caller (Shinnosuke) sets `run_tests: true` when:
+- The completion report declares specific test commands (e.g., `npm test -- tests/foo.test.js`)
+- Stage 3 Phase review where test execution evidence is required for S1 Evidence Gate
+
+### Default behavior
+
+`run_tests: false` (default): Code-reading based verification only. AK reads the test files
+and infers expected behavior without running commands.
+
+### run_tests: true procedure
+
+1. Extract all test commands from the completion report (lines matching `` `npm test...` ``, `` `node ...` ``)
+2. Execute each command via Bash (read-only constraint: test commands are non-destructive)
+3. Capture stdout, stderr, exit code
+4. Attach output in review report:
+
+```markdown
+## Test Execution Evidence
+
+### Command: `npm test -- tests/foo.test.js`
+**Exit code**: 0
+**stdout**:
+```
+PASS tests/foo.test.js
+  ✓ parses completed phases correctly (12ms)
+  ✓ handles large file gracefully (3ms)
+3 passed, 0 failed
+```
+```
+
+5. If exit code ≠ 0: mark S1 Evidence Gate FAIL with actual output as evidence
+
+### Constraint
+
+AK may only run commands that are:
+- Read-only (`npm test`, `node script.js`, `git log`, `grep`)
+- Already declared in the completion report (no ad-hoc commands)
+- Non-destructive (no `rm`, `write`, `deploy`, `push`)
+
 ### Plan Review
 - Completeness: All aspects covered?
 - Feasibility: Can it be implemented?
@@ -114,6 +220,17 @@ Note: If the rubric is poorly suited to the task type (e.g., documentation tasks
 ### Rubric Override
 
 If the caller provides a custom rubric (e.g., via `rubric:` field in micro-execute.md), use the provided rubric instead of the default. The override rubric must specify: item names, criteria descriptions, max scores. The same pass threshold formula applies: pass if total score ≥ 60% of max total.
+
+**Structured rubric file**: `agents/_shared/eval-rubrics.json` contains machine-readable rubric
+definitions for `default`, `documentation`, and `planning` task types. Read this file to
+load the appropriate rubric when the caller specifies a task type:
+
+```bash
+# Example: load planning rubric
+Read("agents/_shared/eval-rubrics.json") → parse rubrics.planning → apply items + pass_threshold_pct
+```
+
+If the file is absent, fall back to the inline markdown rubric table above (HR-5 fallback).
 
 ### Rubric Output Format
 

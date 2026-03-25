@@ -100,6 +100,77 @@ You coordinate all work as Team-Shinchan's main orchestrator.
 - S3→S4: All phases complete with Action Kamen review
 - Done: RETROSPECTIVE.md + IMPLEMENTATION.md + learnings + Action Kamen final pass
 
+#### Sprint-Contract: AC Testability Review (FR-3 — Shinnosuke Steps 2 & 4)
+
+Triggered when Nene outputs `PLANNING_COMPLETE` marker.
+
+**Step 2: Extract and delegate AC review to AK**
+
+After receiving PLANNING_COMPLETE from Nene:
+1. Read `.shinchan-docs/{DOC_ID}/PROGRESS.md`
+2. For each phase, extract all lines under `### 성공 기준` heading (up to next `###` or `##`)
+3. Invoke AK for testability review:
+
+```typescript
+Task(
+  subagent_type="team-shinchan:actionkamen",
+  model="opus",
+  prompt=`SPRINT-CONTRACT REVIEW for {DOC_ID}.
+
+Review the following AC checkboxes for testability. For each AC, output:
+- TESTABLE: the AC is binary-verifiable with a specific deliverable and command evidence
+- VAGUE: the AC references a deliverable but lacks a command or expected output
+- UNVERIFIABLE: the AC cannot be verified without human interpretation
+
+Judgment criteria: Spec Granularity Rules in agents/nene.md (Rule 1: Deliverable Anchor,
+Rule 2: Binary Verifiability, Rule 3: Command Evidence).
+
+AC list by phase:
+{extracted_ac_list}
+
+Output format per AC:
+| Phase | AC Text | Verdict | Suggestion |
+|-------|---------|---------|------------|
+...`
+)
+```
+
+**Step 4: Record audit log and return to Nene**
+
+After AK returns Sprint-Contract verdict:
+1. Parse verdict table from AK output
+2. For each Phase N that has any AC verdict:
+   Write `.shinchan-docs/{DOC_ID}/sprint-contract-{N}.json` using Write tool:
+   ```json
+   {
+     "doc_id": "{DOC_ID}",
+     "phase": N,
+     "reviewed_at": "{ISO timestamp}",
+     "reviewer": "action_kamen",
+     "verdicts": [
+       { "ac_text": "...", "verdict": "TESTABLE|VAGUE|UNVERIFIABLE", "suggestion": "..." }
+     ]
+   }
+   ```
+3. If ALL ACs are TESTABLE:
+   - Narrate: "Sprint-Contract: all ACs TESTABLE. Proceeding to S2→S3 AK Gate."
+   - Continue to S2→S3 AK Gate (PROGRESS.md review).
+4. If ANY AC is VAGUE or UNVERIFIABLE:
+   - Collect all non-TESTABLE verdicts
+   - Re-invoke Nene with Sprint-Contract feedback:
+     ```typescript
+     Task(
+       subagent_type="team-shinchan:nene",
+       model="opus",
+       prompt=`SPRINT-CONTRACT REVISION REQUIRED for {DOC_ID}.
+       AK marked the following ACs as VAGUE or UNVERIFIABLE:
+       {non_testable_verdicts_table}
+       Revise PROGRESS.md: for each listed AC, improve per Spec Granularity Rules.
+       Do NOT change AC scope. After revision, output PLANNING_COMPLETE.`
+     )
+     ```
+   - This re-invocation counts against the overall retry_count (max 2).
+
 #### S2→S3 AK Gate: PROGRESS.md Review
 
 After Nene completes PROGRESS.md and Shinnosuke receives plan approval summary,

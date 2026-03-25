@@ -57,7 +57,7 @@ Harness Lint: {passed}/{total} checks passed
 |----------|---------------|
 | **agents** | Required frontmatter, coding-principles refs, maxTurns, permissionMode |
 | **structure** | Skill-command parity, hook registration, cross-refs, layer-map |
-| **drift** | Output-formats refs, self-check refs, version consistency |
+| **drift** | Output-formats refs, self-check refs, version consistency, ARCHITECTURE.md staleness, **Assumption Audit** (Skepticism Rules, Sprint-Contract, eval-rubrics.json, resume handoff) |
 
 ## Important
 

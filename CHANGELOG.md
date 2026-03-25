@@ -4,6 +4,18 @@ All notable changes to Team-Shinchan will be documented in this file.
 
 ## [Unreleased]
 
+## [4.23.0] - 2026-03-25
+
+### Added
+- **Pre-compact handoff artifact** (BM): `hooks/pre-compact.sh` saves 5 handoff fields to `pre-compact-state.json`. HR-1 sensitive masking, HR-2 100KB size guard.
+- **Resume handoff loading** (BM): `skills/resume/SKILL.md` Step 1.5 loads `pre-compact-state.json` with `[Handoff]` context header.
+- **Sprint-Contract pattern** (BM): Nene `PLANNING_COMPLETE` → Shinnosuke mediates AK testability review → audit log. Nene Steps 1,5,6 + Shinnosuke Steps 2,4.
+- **Spec Granularity Rules** (BM): `agents/nene.md` — Deliverable Anchor, Binary Verifiability, Command Evidence.
+- **Skepticism Rules S1-S4** (BM): `agents/actionkamen.md` — Evidence Gate, Assumption Audit, Coverage Traceability, Regression Guard.
+- **Test Execution Mode** (BM): `agents/actionkamen.md` — `run_tests: true/false` for test command execution as evidence.
+- **eval-rubrics.json** (BM): `agents/_shared/eval-rubrics.json` — default/documentation/planning rubrics.
+- **Assumption Audit** (BM): `src/harness-lint.js` `checkDrift()` — 4 structural checks in drift category.
+
 ## [4.22.0] - 2026-03-24
 
 ### Added

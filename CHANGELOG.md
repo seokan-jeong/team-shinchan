@@ -4,6 +4,14 @@ All notable changes to Team-Shinchan will be documented in this file.
 
 ## [Unreleased]
 
+## [4.23.1] - 2026-03-26
+
+### Fixed
+- Sync README inventory counts with actual codebase (commands 50→49, validators 28→24, promptfoo 25→29)
+- Add 8 undocumented commands to README table (design-review, micro-execute, systematic-debugging, etc.)
+- Add ARCHITECTURE.md auto-generation mention to Harness Engineering section
+- Sync TEST_SUMMARY.md and COVERAGE.md with current validator list
+
 ## [4.23.0] - 2026-03-25
 
 ### Added

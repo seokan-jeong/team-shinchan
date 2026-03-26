@@ -3,11 +3,11 @@
 ## Overview
 
 Three tiers of testing ensure plugin quality:
-1. **Static Validators** (17) - Structure/schema checks, no API calls
-2. **Promptfoo Agent Tests** (25) - Individual agent behavior verification
+1. **Static Validators** (24) - Structure/schema checks, no API calls
+2. **Promptfoo Agent Tests** (29) - Individual agent behavior verification
 3. **E2E Workflow Tests** (11) - Full workflow scenario validation
 
-## Static Validators (17 total)
+## Static Validators (24 total)
 
 | # | Validator | What It Validates |
 |---|-----------|-------------------|
@@ -28,10 +28,17 @@ Three tiers of testing ensure plugin quality:
 | 15 | skill-command-parity | Each skill has a corresponding command file |
 | 16 | version-consistency | Version matches across plugin.json, marketplace.json, README, CHANGELOG |
 | 17 | token-budget | File sizes stay within token budget limits |
+| 18 | agents-map | AGENTS.md map completeness and agent listing |
+| 19 | ontology-integrity | Ontology schema and cross-reference integrity |
+| 20 | agent-routing | Agent routing rules and delegation patterns |
+| 21 | workflow-guard-behavior | Workflow guard stage-tool blocking behavior |
+| 22 | transition-gate-behavior | Stage transition gate blocking and unlock conditions |
+| 23 | agent-tool-guard-behavior | Agent tool restriction enforcement |
+| 24 | layer-guard-behavior | Architectural layer enforcement |
 
-## Promptfoo Agent Tests (25 total)
+## Promptfoo Agent Tests (29 total)
 
-Individual agent behavior tests covering: Shiro (read-only, Glob, Grep), Bo (implementation), Hiroshi (analysis), Shinnosuke (delegation, stage transitions, quick fix), Nene (planning), Action Kamen (review verdicts), Midori (debate), Misae (hidden requirements), Masumi (documentation), Kazama (persistence), Ume (multimodal), Aichan (frontend), Bunta (backend), stage awareness, error handling, Himawari escalation, input validation, CI awareness, and status checking.
+Individual agent behavior tests covering: Shiro (read-only, Glob, Grep), Bo (implementation), Hiroshi (analysis), Shinnosuke (delegation, stage transitions, quick fix), Nene (planning), Action Kamen (review verdicts), Midori (debate), Misae (hidden requirements), Masumi (documentation), Kazama (persistence), Ume (multimodal), Aichan (frontend), Bunta (backend), stage awareness, error handling, Himawari escalation, input validation, CI awareness, and status checking. (29 test cases total)
 
 ## E2E Workflow Tests (11 total)
 

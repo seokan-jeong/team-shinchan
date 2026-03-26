@@ -79,6 +79,7 @@ Observability and continuous improvement.
 
 - **Analytics** -- trace IDs, event tracking, agent performance metrics (`src/analytics.js`)
 - **Harness Lint** -- static analysis of the harness itself (`src/harness-lint.js`)
+- **ARCHITECTURE.md auto-generation** -- `src/gen-architecture-map.js` generates agent hierarchy, workflow, invariant rules, and entry points; `--check` flag integrates into CI
 - **Eval** -- schema validation and regression detection (`src/eval-schema.js`, `src/regression-detect.js`)
 - **Auto-Retrospective** -- extracts learnings after every completed task
 - **Garbage Collection** -- lint detects orphaned skills, broken refs, stale configs
@@ -217,7 +218,7 @@ If you see the help menu, you are ready to go.
 
 ## Commands
 
-50 commands across workflow, specialist, and utility categories:
+49 commands across workflow, specialist, and utility categories:
 
 ### Workflow Commands
 | Command | Description |
@@ -241,6 +242,7 @@ If you see the help menu, you are ready to go.
 | `/team-shinchan:deepsearch` | Codebase search |
 | `/team-shinchan:requirements` | Gather and clarify requirements |
 | `/team-shinchan:research` | Research a topic |
+| `/team-shinchan:design-review` | Compare design mockups against implementation to detect UI mismatches |
 
 ### Implementation
 | Command | Description |
@@ -251,6 +253,9 @@ If you see the help menu, you are ready to go.
 | `/team-shinchan:devops` | Infrastructure and DevOps |
 | `/team-shinchan:review` | Code review |
 | `/team-shinchan:vision` | Image/PDF analysis |
+| `/team-shinchan:micro-execute` | Micro-task execution with per-task two-stage review |
+| `/team-shinchan:systematic-debugging` | 4-phase root-cause debugging (investigate, analyze, hypothesize, implement) |
+| `/team-shinchan:test-driven-development` | Enforce RED-GREEN-REFACTOR TDD cycle during implementation |
 
 ### Verification
 | Command | Description |
@@ -283,6 +288,14 @@ If you see the help menu, you are ready to go.
 | `/team-shinchan:session-summary` | View session summary |
 | `/team-shinchan:manage-skills` | Manage plugin skills |
 | `/team-shinchan:help` | Show help |
+| `/team-shinchan:setup` | First-time setup and health check |
+| `/team-shinchan:setup-hud` | Configure Claude Code statusLine HUD display |
+
+### Internal / Admin Commands
+| Command | Description |
+|---------|-------------|
+| `/team-shinchan:release` | Bump version across plugin.json, marketplace.json, README, and CHANGELOG (maintainers only) |
+| `/team-shinchan:verification-before-completion` | Block completion claims without fresh verification evidence (auto-invoked by agents) |
 
 ---
 
@@ -360,7 +373,7 @@ No commands needed -- just say:
 | Skills | 50 | `skills/` |
 | Commands | 49 | `commands/` |
 | Hooks | 30 entries | `hooks/` |
-| Validators | 28 | `tests/validate/` |
+| Validators | 24 | `tests/validate/` |
 | Rules | 4 categories (54 rules) | `rules/` |
 | Src Scripts | 16 | `src/` |
 
@@ -372,8 +385,8 @@ Team-Shinchan is validated by 3 tiers of automated testing:
 
 | Tier | Tests | What It Checks |
 |------|-------|----------------|
-| Static Validators | 28 | Schema, cross-refs, consistency, API contracts, token budget, layer enforcement, agents-map, ontology integrity, hook execution |
-| Agent Behavior (promptfoo) | 25 | Individual agent role adherence |
+| Static Validators | 24 | Schema, cross-refs, consistency, API contracts, token budget, layer enforcement, agents-map, ontology integrity, hook execution |
+| Agent Behavior (promptfoo) | 29 | Individual agent role adherence |
 | E2E Workflow | 11 | Full workflow scenarios (5 types) |
 
 ```bash

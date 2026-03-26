@@ -2,7 +2,7 @@
 
 ## Overview
 
-17 static validators ensure consistency across the Team-Shinchan codebase.
+24 static validators ensure consistency across the Team-Shinchan codebase.
 
 ## Coverage Matrix
 
@@ -25,6 +25,13 @@
 | hook-registration | hooks/*.md, hooks/hooks.json | All hooks referenced in hooks.json exist; no broken references |
 | skill-command-parity | skills/*/,  commands/*.md | Every skill directory has a matching command file and vice versa |
 | version-consistency | .claude-plugin/plugin.json, .claude-plugin/marketplace.json, README.md, CHANGELOG.md | Version numbers match across all release files |
+| agents-map | agents/*.md, AGENTS.md | AGENTS.md completeness; all agents listed with roles |
+| ontology-integrity | .shinchan-docs/ontology/*.json | Ontology schema validity and cross-reference integrity |
+| agent-routing | agents/*.md, skills/*/SKILL.md | Agent routing rules match delegation patterns |
+| workflow-guard-behavior | hooks/workflow-guard.sh, hooks/hooks.json | Workflow guard stage-tool blocking behavior (runtime) |
+| transition-gate-behavior | hooks/transition-gate.sh, hooks/hooks.json | Stage transition gate behavior (runtime) |
+| agent-tool-guard-behavior | hooks/agent-tool-guard.sh, hooks/hooks.json | Agent tool restriction enforcement (runtime) |
+| layer-guard-behavior | hooks/layer-guard.sh, hooks/hooks.json | Architectural layer enforcement behavior (runtime) |
 
 ## Overlap Analysis
 

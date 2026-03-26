@@ -70,7 +70,8 @@ Automated checks that prevent bad outcomes.
 - **Budget Guard** -- token budget enforcement with alerts at 80% and hard stop at 100%
 - **Deny List** -- 15 pattern rules blocking dangerous operations
 - **Self-Check** -- completion checklist all execution agents must pass
-- **Action Kamen** -- mandatory code review at every phase boundary
+- **Action Kamen** -- mandatory code review with Skepticism Rules (S1-S4) at every phase boundary
+- **Sprint-Contract** -- AC testability review before execution begins
 
 ### 4. Feedback Loops
 
@@ -89,31 +90,38 @@ Durable state across sessions and workflows.
 - **WORKFLOW_STATE.yaml** -- structured state file with stage, phase, and progress
 - **Trace IDs** -- every agent action tagged for end-to-end traceability
 - **Session Wrap** -- auto-summary on session end, persisted to work tracker
-- **Resume** -- interrupted workflows resume from last checkpoint
+- **Resume** -- interrupted workflows resume from last checkpoint with handoff artifacts
 - **Work Tracker** -- JSONL event log with auto-rotation at 10K lines
 
 ---
 
 ## What's New
 
-### v4.9.0 — Socratic Interview, Two-Stage Review, Brainstorm Skill
+### v4.23.0 — Generator-Evaluator Harness Strengthening
 
-- **Brainstorm skill** — New `/team-shinchan:brainstorm` for structured problem exploration before requirements. Hiroshi reframes the problem, surfaces 2-4 alternatives with pros/cons, and recommends a path.
-- **Misae Socratic mode** — Exactly ONE question per turn, each with 2-3 concrete alternatives. No more batch questions. IMMUTABLE RULES enforced.
-- **Bo two-stage review** — Spec compliance + code quality review (via Action Kamen) generalized from micro-execute to all Phase Loop executions. maxTurns 50→80.
-- **Skill chain** — Documented workflow: `brainstorm → requirements → start`. Requirements skill auto-checks for prior brainstorm output.
+Benchmarked from Anthropic's ["Harness Design for Long-Running Apps"](https://www.anthropic.com/engineering/harness-design-long-running-apps):
 
-### v4.8.0 — Bo Execution PO Redesign
+- **Sprint-Contract pattern** — Nene and Action Kamen negotiate testable AC criteria before execution. Shinnosuke mediates the review with audit logs.
+- **Skepticism Rules S1-S4** — Action Kamen now runs Evidence Gate, Assumption Audit, Coverage Traceability, and Regression Guard on every review.
+- **Pre-compact handoff** — Context resets preserve progress, decisions, and blocking issues. `/resume` auto-loads handoff state.
+- **Test Execution Mode** — Action Kamen can run declared test commands and attach output as evidence (`run_tests: true`).
+- **Spec Granularity Rules** — 3 rules (Deliverable Anchor, Binary Verifiability, Command Evidence) enforce testable AC writing.
+- **Structured rubrics** — `eval-rubrics.json` with default/documentation/planning rubrics for machine-readable quality scoring.
+- **Assumption Audit** — Harness Lint verifies structural assumptions (Skepticism Rules, Sprint-Contract, rubrics, handoff) haven't drifted.
 
-- **Bo redesigned** from Task Executor to Execution PO — manages sub-task delegation, progress tracking, and Phase completion summaries
-- **Completion docs enforcement** — hook blocks `status: completed` without RETROSPECTIVE.md and IMPLEMENTATION.md
+### v4.22.0 — AK Review Gate for Requirements and Planning
+
+- Action Kamen auto-review gates after user approval of REQUESTS.md and PROGRESS.md
+- Hard block with max 2 auto-revise retries before user escalation
 
 ### Earlier Highlights
 
-- **v4.3.x**: Hook execution reliability — Node.js runner, commit lint, 109-assertion test suite
-- **v4.2.0**: 18 enforcement gaps closed — budget hard stop, stage transition gates, read-only agent enforcement
-- **v4.1.0**: Project Ontology — auto-build knowledge graph, impact analysis
-- **v4.0.0**: Harness foundation — analytics, trace IDs, budget guard, harness lint, 5-layer architecture
+- **v4.18.0**: Domain-aware routing, collaboration scoring, wave parallel execution
+- **v4.17.0**: Plan Mode integration, token usage tracking, git commit deferred to Stage 4
+- **v4.10.0**: ARCHITECTURE.md auto-generation, 3-layer ontology, agent self-observation
+- **v4.9.0**: Brainstorm skill, Socratic interview, two-stage review
+- **v4.2.0**: 18 enforcement gaps closed — budget hard stop, stage transition gates
+- **v4.0.0**: Harness foundation — analytics, trace IDs, budget guard, 5-layer architecture
 
 ---
 
@@ -209,7 +217,7 @@ If you see the help menu, you are ready to go.
 
 ## Commands
 
-42 commands across workflow, specialist, and utility categories:
+50 commands across workflow, specialist, and utility categories:
 
 ### Workflow Commands
 | Command | Description |
@@ -349,12 +357,12 @@ No commands needed -- just say:
 | Component | Count | Location |
 |-----------|-------|----------|
 | Agents | 15 | `agents/` |
-| Skills | 42 | `skills/` |
-| Commands | 42 | `commands/` |
-| Hooks | 22 command hooks | `hooks/` |
-| Validators | 23 | `tests/validate/` |
+| Skills | 50 | `skills/` |
+| Commands | 49 | `commands/` |
+| Hooks | 30 entries | `hooks/` |
+| Validators | 28 | `tests/validate/` |
 | Rules | 4 categories (54 rules) | `rules/` |
-| Src Scripts | 9 | `src/` |
+| Src Scripts | 16 | `src/` |
 
 ---
 
@@ -364,7 +372,7 @@ Team-Shinchan is validated by 3 tiers of automated testing:
 
 | Tier | Tests | What It Checks |
 |------|-------|----------------|
-| Static Validators | 23 | Schema, cross-refs, consistency, API contracts, token budget, layer enforcement, agents-map, ontology integrity, hook execution |
+| Static Validators | 28 | Schema, cross-refs, consistency, API contracts, token budget, layer enforcement, agents-map, ontology integrity, hook execution |
 | Agent Behavior (promptfoo) | 25 | Individual agent role adherence |
 | E2E Workflow | 11 | Full workflow scenarios (5 types) |
 

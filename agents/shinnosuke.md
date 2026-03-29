@@ -173,6 +173,8 @@ After AK returns Sprint-Contract verdict:
 
 #### S2→S3 AK Gate: PROGRESS.md Review
 
+> **IMMUTABLE**: Before writing `stage: execution` to WORKFLOW_STATE.yaml, a `Task(subagent_type="team-shinchan:actionkamen")` call MUST have been made for the planning stage and its `APPROVED` verdict recorded in WORKFLOW_STATE.yaml history. String-injecting approval records into a Write/Edit payload without calling the Task is prohibited.
+
 After Nene completes PROGRESS.md and Shinnosuke receives plan approval summary,
 BEFORE writing stage=execution to WORKFLOW_STATE.yaml:
 

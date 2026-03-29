@@ -108,12 +108,10 @@ process.stdin.on('end', () => {
 
           // Defense-in-depth: AK APPROVED must exist in history for requirements stage
           const yamlOnDisk = (() => { try { return fs.readFileSync(filePath, 'utf-8'); } catch(e) { return ''; } })();
-          const newContentStr = newContent || '';
-          const combinedYaml = yamlOnDisk + '\n' + newContentStr;
-          const hasAkApprovedReq = combinedYaml.includes('event: ak_review') &&
-                                   combinedYaml.includes('stage: requirements') &&
-                                   combinedYaml.includes('verdict: APPROVED') &&
-                                   combinedYaml.includes('agent: action_kamen');
+          const hasAkApprovedReq = yamlOnDisk.includes('event: ak_review') &&
+                                   yamlOnDisk.includes('stage: requirements') &&
+                                   yamlOnDisk.includes('verdict: APPROVED') &&
+                                   yamlOnDisk.includes('agent: action_kamen');
           if (!hasAkApprovedReq) {
             missing.push('No Action Kamen APPROVED review recorded for requirements stage in workflow history');
           }
@@ -139,12 +137,10 @@ process.stdin.on('end', () => {
 
             // Defense-in-depth: AK APPROVED must exist in history for planning stage
             const yamlOnDiskPlan = (() => { try { return fs.readFileSync(filePath, 'utf-8'); } catch(e) { return ''; } })();
-            const newContentStrPlan = newContent || '';
-            const combinedYamlPlan = yamlOnDiskPlan + '\\n' + newContentStrPlan;
-            const hasAkApprovedPlan = combinedYamlPlan.includes('event: ak_review') &&
-                                      combinedYamlPlan.includes('stage: planning') &&
-                                      combinedYamlPlan.includes('verdict: APPROVED') &&
-                                      combinedYamlPlan.includes('agent: action_kamen');
+            const hasAkApprovedPlan = yamlOnDiskPlan.includes('event: ak_review') &&
+                                      yamlOnDiskPlan.includes('stage: planning') &&
+                                      yamlOnDiskPlan.includes('verdict: APPROVED') &&
+                                      yamlOnDiskPlan.includes('agent: action_kamen');
             if (!hasAkApprovedPlan) {
               missing.push('No Action Kamen APPROVED review recorded for planning stage in workflow history');
             }

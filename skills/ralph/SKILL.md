@@ -46,7 +46,11 @@ Don't stop until complete. Idle detection enabled.
      c. Phase completion: checked items \`- [x]\` in PROGRESS.md increased
    - If ANY of (a, b, c) is true → progress detected → reset idle counter to 0
    - If ALL of (a, b, c) are false → no progress → increment idle counter
-5. **Idle detection**:
+5. **Stagnation detection** (after each idle-detection check):
+   Run: \`node src/stagnation-detector.js --jsonl .shinchan-docs/work-tracker.jsonl --doc-id {DOC_ID} --window 20\`
+   If output \`stagnation: true\`, include pattern names in the continuation prompt:
+   "Stagnation detected: {pattern names}. Adjusting approach to address: {evidence}."
+6. **Idle detection**:
    - If idle counter >= 3: "Idle detected — 3 consecutive iterations with no measurable progress"
    - Auto-generate continuation prompt with new approach:
      "Previous approach stalled on [last task]. Trying alternative: [different strategy or next task]."
@@ -57,10 +61,10 @@ Don't stop until complete. Idle detection enabled.
      - Iteration 7+: min(8 * 2^(iter-7), 60) seconds (max 60s)
    - Record to boulder-log.jsonl (if .shinchan-docs/{DOC_ID}/ exists):
      \`{"ts":"ISO8601","iteration":N,"event":"idle_detected","reason":"...","backoff_ms":N}\`
-6. On failure → Analyze cause → Retry (max 3 retries per task)
-7. On success → Next task
-8. All tasks complete → Action Kamen final verification
-9. Verification fails → Fix and re-verify
+7. On failure → Analyze cause → Retry (max 3 retries per task)
+8. On success → Next task
+9. All tasks complete → Action Kamen final verification
+10. Verification fails → Fix and re-verify
 
 ### Safety Limits
 - **Max iterations**: 15 (hard limit — "Boulder limit reached — manual intervention required")

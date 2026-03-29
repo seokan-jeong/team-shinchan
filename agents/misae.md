@@ -164,6 +164,32 @@ Create REQUESTS.md with YAML frontmatter (`document_type: requirements`, `status
 
 Missing any section = Stage 1 verification failure.
 
+### Clarity Scoring Rubric (FR-1.1–FR-1.3)
+
+After each interview turn (Turns 1–4), compute and persist three sub-scores to WORKFLOW_STATE.yaml
+under `clarity_score:`. All scores are 0.0–1.0. **Scores during mid-interview are informational
+only — do NOT refuse to continue or warn the user about low scores early (HR-2). Only the
+transition-gate blocks at transition time.**
+
+| Sub-score | 0.0 | 0.5 | 1.0 |
+|-----------|-----|-----|-----|
+| `goal_clarity` | Vague wish with no context | Defined problem with context but affected users unclear | Context, root cause, affected users, and business impact all present |
+| `constraint_clarity` | No technical or business constraints mentioned | Some constraints mentioned but incomplete (e.g., "fast" with no target) | Specific, measurable constraints defined (e.g., "< 200ms p95", "no new npm deps") |
+| `success_criteria` | No acceptance criteria or testable outcomes | Some criteria present but not binary-verifiable | All criteria phrased as testable checkboxes with specific commands or expected outputs |
+
+Compute `overall` = (`goal_clarity` + `constraint_clarity` + `success_criteria`) / 3. Round to 2 decimal places.
+
+After each turn, write to `.shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml` — replace the
+`clarity_score:` block if it exists, or append it if not present:
+
+```yaml
+clarity_score:
+  goal_clarity: {value}
+  constraint_clarity: {value}
+  success_criteria: {value}
+  overall: {computed mean}
+```
+
 ### Phase E: User Approval + AK Review Gate
 
 #### Step E-1: Request User Approval
@@ -173,6 +199,19 @@ Missing any section = Stage 1 verification failure.
 - If approved: proceed to Step E-2
 
 #### Step E-2: AK Review Loop
+
+##### Mechanical Pre-Check (FR-2.4)
+
+Before invoking AK review, run the mechanical pre-check to catch structural defects at $0 cost:
+
+```bash
+node src/mechanical-check.js --file .shinchan-docs/{DOC_ID}/REQUESTS.md
+```
+
+Parse stdout as JSON `{pass: bool, errors: string[]}`:
+- If `pass: true`: proceed to AK review loop.
+- If `pass: false`: fix ALL listed errors in REQUESTS.md and re-run the check until `pass: true`.
+  Do NOT call AK with a document that fails the mechanical pre-check.
 
 ```
 MAX_RETRIES = 2

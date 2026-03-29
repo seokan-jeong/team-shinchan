@@ -911,6 +911,125 @@ function runValidation() {
     } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
   }
 
+  // ── TC-15/16/17/18: Ambiguity Gate Tests ────────────────────────────────────
+
+  section('7. Ambiguity Gate — clarity_score validation (FR-1.4, HR-1, HR-5)');
+
+  // TC-15: clarity_score.overall < 0.8 with valid arithmetic + AK approved → BLOCK
+  {
+    // goal=0.6, constraint=0.6, success=0.75 → mean=0.65, overall=0.65 (arithmetic matches)
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('requirements', { akStage: 'requirements' });
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- FR-1: The system shall do Y\n',
+        'utf-8'
+      );
+      // Append clarity_score section to the on-disk WORKFLOW_STATE.yaml
+      fs.appendFileSync(workflowFile,
+        '\nclarity_score:\n  goal_clarity: 0.6\n  constraint_clarity: 0.6\n  success_criteria: 0.75\n  overall: 0.65\n',
+        'utf-8'
+      );
+
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile,
+          content: '---\nstage: planning\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      if (result.decision === 'block' && /AMBIGUITY GATE/.test(result.reason || '')) {
+        ok('TC-15: ambiguity gate blocks when overall < 0.8');
+      } else if (result.decision === 'block') {
+        fail(`TC-15: ambiguity gate blocks when overall < 0.8 — BLOCK but missing AMBIGUITY GATE in reason: ${(result.reason || '').slice(0, 120)}`);
+      } else {
+        fail('TC-15: ambiguity gate blocks when overall < 0.8 — expected BLOCK, got ALLOW');
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // TC-16: clarity_score.overall >= 0.8 with valid arithmetic + AK approved → ALLOW
+  {
+    // goal=0.85, constraint=0.85, success=0.85 → mean=0.85, overall=0.85 (arithmetic matches)
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('requirements', { akStage: 'requirements' });
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- FR-1: The system shall do Y\n',
+        'utf-8'
+      );
+      fs.appendFileSync(workflowFile,
+        '\nclarity_score:\n  goal_clarity: 0.85\n  constraint_clarity: 0.85\n  success_criteria: 0.85\n  overall: 0.85\n',
+        'utf-8'
+      );
+
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile,
+          content: '---\nstage: planning\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      if (result.decision !== 'block') {
+        ok('TC-16: ambiguity gate passes when overall >= 0.8');
+      } else {
+        fail(`TC-16: ambiguity gate passes when overall >= 0.8 — expected ALLOW, got BLOCK: ${(result.reason || '').slice(0, 120)}`);
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // TC-17: clarity_score absent (legacy workflow) + AK approved → ALLOW, stderr warning
+  {
+    // No clarity_score section — mkTmpFixture with akStage only writes AK history, no clarity_score
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('requirements', { akStage: 'requirements' });
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- FR-1: The system shall do Y\n',
+        'utf-8'
+      );
+
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile,
+          content: '---\nstage: planning\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      // NFR-4 / HR-5: legacy workflow (no clarity_score) must be allowed, not blocked
+      if (result.decision !== 'block') {
+        ok('TC-17: ambiguity gate allows legacy workflow (no clarity_score)');
+      } else {
+        fail(`TC-17: ambiguity gate allows legacy workflow — expected ALLOW, got BLOCK: ${(result.reason || '').slice(0, 120)}`);
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // TC-18: HR-1 — overall=0.90 but sub-scores average to 0.70 (tampered arithmetic) → BLOCK
+  {
+    // goal=0.7, constraint=0.7, success=0.7 → mean=0.70, BUT overall=0.90 (tampered)
+    // Arithmetic mismatch (0.90 - 0.70 = 0.20) > 0.05 tolerance
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('requirements', { akStage: 'requirements' });
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- FR-1: The system shall do Y\n',
+        'utf-8'
+      );
+      fs.appendFileSync(workflowFile,
+        '\nclarity_score:\n  goal_clarity: 0.7\n  constraint_clarity: 0.7\n  success_criteria: 0.7\n  overall: 0.90\n',
+        'utf-8'
+      );
+
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile,
+          content: '---\nstage: planning\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      if (result.decision === 'block' && /tampering/i.test(result.reason || '')) {
+        ok('TC-18: ambiguity gate blocks tampered arithmetic (HR-1)');
+      } else if (result.decision === 'block') {
+        fail(`TC-18: ambiguity gate blocks tampered arithmetic — BLOCK but missing "tampering" in reason: ${(result.reason || '').slice(0, 120)}`);
+      } else {
+        fail('TC-18: ambiguity gate blocks tampered arithmetic (HR-1) — expected BLOCK, got ALLOW');
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
   // ── Summary ─────────────────────────────────────────────────────────────────
 
   section('Summary — transition-gate-behavior');

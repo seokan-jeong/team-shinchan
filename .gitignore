@@ -22,6 +22,8 @@ src/*
 !src/gen-context-files.js
 !src/gen-schemas.js
 !src/collaboration-score.js
+!src/stagnation-detector.js
+!src/mechanical-check.js
 !src/statusline/
 !src/statusline/index.js
 

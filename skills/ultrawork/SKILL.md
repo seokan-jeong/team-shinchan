@@ -81,6 +81,13 @@ Task(subagent_type="team-shinchan:shinnosuke", model="opus",
 
 **STOP HERE. The above Task handles everything.**
 
+## Step 3.5: Post-Integration Stagnation Check
+
+After all parallel agents complete:
+Run: `node src/stagnation-detector.js --jsonl .shinchan-docs/work-tracker.jsonl --window 20`
+If `stagnation: true`, surface findings in the summary before handing off to Action Kamen:
+"Stagnation patterns detected: {pattern names} — {evidence}. Reviewing before AK handoff."
+
 ## Concurrency Guidelines
 
 - **File-level ownership**: each agent owns specific files, no overlaps

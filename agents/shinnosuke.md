@@ -178,6 +178,18 @@ After AK returns Sprint-Contract verdict:
 After Nene completes PROGRESS.md and Shinnosuke receives plan approval summary,
 BEFORE writing stage=execution to WORKFLOW_STATE.yaml:
 
+##### Mechanical Pre-Check for PROGRESS.md (FR-2.5)
+
+Before invoking AK review, run:
+
+```bash
+node src/mechanical-check.js --file .shinchan-docs/{DOC_ID}/PROGRESS.md
+```
+
+Parse stdout as JSON `{pass: bool, errors: string[]}`:
+- If `pass: false`: re-invoke Nene to fix the listed errors before calling AK.
+- If `pass: true`: proceed to AK review loop below.
+
 ```
 MAX_RETRIES = 2
 retry_count = read from WORKFLOW_STATE.yaml current.ak_gate.planning.retry_count (default 0)

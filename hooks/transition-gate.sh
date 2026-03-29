@@ -115,6 +115,46 @@ process.stdin.on('end', () => {
           if (!hasAkApprovedReq) {
             missing.push('No Action Kamen APPROVED review recorded for requirements stage in workflow history');
           }
+
+          // Ambiguity Gate (FR-1.4, FR-1.5, NFR-4, HR-1, HR-5)
+          // Uses yamlOnDisk already read above — no extra fs.readFileSync
+          const clarityRaw = (() => {
+            try {
+              const goalM = yamlOnDisk.match(/goal_clarity:\\s*([\\d.]+)/);
+              const constrM = yamlOnDisk.match(/constraint_clarity:\\s*([\\d.]+)/);
+              const successM = yamlOnDisk.match(/success_criteria:\\s*([\\d.]+)/);
+              const overallM = yamlOnDisk.match(/overall:\\s*([\\d.]+)/);
+              if (!goalM && !constrM && !successM && !overallM) return null; // absent = legacy
+              return {
+                goal: parseFloat(goalM ? goalM[1] : 'NaN'),
+                constraint: parseFloat(constrM ? constrM[1] : 'NaN'),
+                success: parseFloat(successM ? successM[1] : 'NaN'),
+                overall: parseFloat(overallM ? overallM[1] : 'NaN'),
+              };
+            } catch(e) { return null; }
+          })();
+
+          if (clarityRaw === null) {
+            // NFR-4 / HR-5: absent = legacy workflow, warn but allow
+            console.warn('[transition-gate] AMBIGUITY GATE: clarity_score absent — legacy workflow, allowing transition.');
+          } else {
+            // HR-1: validate arithmetic mean (±0.05 tolerance)
+            const computedMean = (clarityRaw.goal + clarityRaw.constraint + clarityRaw.success) / 3;
+            const arithmeticValid = Math.abs(computedMean - clarityRaw.overall) <= 0.05;
+            if (!arithmeticValid) {
+              missing.push(
+                'AMBIGUITY GATE: clarity_score.overall (' + clarityRaw.overall.toFixed(2) +
+                ') does not equal arithmetic mean of sub-scores (' + computedMean.toFixed(2) +
+                ') — possible tampering (HR-1)'
+              );
+            } else if (clarityRaw.overall < 0.8) {
+              missing.push(
+                'AMBIGUITY GATE: clarity_score.overall = ' + clarityRaw.overall.toFixed(2) +
+                ' < 0.8 — return to Misae for clarification'
+              );
+            }
+            // overall >= 0.8 and arithmetic valid: pass silently (FR-1.5)
+          }
         }
 
         // Gate: planning -> execution

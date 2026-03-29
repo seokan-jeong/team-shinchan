@@ -24,6 +24,7 @@ src/*
 !src/collaboration-score.js
 !src/stagnation-detector.js
 !src/mechanical-check.js
+!src/drift-check.js
 !src/statusline/
 !src/statusline/index.js
 

@@ -81,6 +81,23 @@ function classify(score) {
   return              { mode: 'debate',    model_tier: MODEL_TIERS[2], description: 'Debate pass required — high complexity task' };
 }
 
+// ── Model Escalation ──────────────────────────────────────────────────────────
+
+/**
+ * Escalate to the next model tier when a task requires more capacity.
+ *
+ * @param {string} currentTier - Current model tier ('haiku', 'sonnet', 'opus', or unknown)
+ * @returns {string} Next model tier
+ */
+function escalateModel(currentTier) {
+  switch (currentTier) {
+    case 'haiku':  return 'sonnet';
+    case 'sonnet': return 'opus';
+    case 'opus':   return 'opus';   // already at ceiling
+    default:       return 'sonnet'; // safe default for unknown values
+  }
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 function main() {
@@ -106,4 +123,6 @@ function main() {
   process.stdout.write(JSON.stringify(output, null, 2) + '\n');
 }
 
-main();
+if (require.main === module) { main(); }
+
+module.exports = { escalateModel };

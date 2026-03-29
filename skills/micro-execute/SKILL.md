@@ -209,7 +209,16 @@ You MUST independently verify by READING THE ACTUAL CODE.
 - Issues (if FAIL): what's wrong, spec says X, code does Y, file:line`)
 ```
 
-**If FAIL**: Re-dispatch implementer with spec reviewer's issues → re-run spec review. Max 2 retry loops.
+**If FAIL**: Escalate model tier for retry using `escalateModel`:
+
+```javascript
+const { escalateModel } = require('./src/collaboration-score.js');
+// escalateModel: haiku → sonnet, sonnet → opus, opus → opus (cap)
+task.model = escalateModel(task.model);
+// Announce: "Task {N} FAIL — escalating model tier to {task.model}"
+```
+
+Re-dispatch implementer at the escalateModel-returned tier with spec reviewer's issues → re-run spec review. Max 1 escalation per task (R-1 cost cap).
 
 ### 3c. Dispatch Code Quality Reviewer
 

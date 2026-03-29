@@ -410,6 +410,16 @@ If worktree is chosen, all Phase execution happens inside the worktree directory
       If retry also fails → escalate to user with failure details.
    e. **Action Kamen Review**: Required after each wave completes (covers all Phases in wave)
    f. **Update PROGRESS.md**: Check off completed Phase checkboxes
+   g. **Drift Gate (Optional, Non-Blocking)**: After updating PROGRESS.md, run:
+      ```bash
+      node src/drift-check.js \
+        --requests .shinchan-docs/{DOC_ID}/REQUESTS.md \
+        --progress .shinchan-docs/{DOC_ID}/PROGRESS.md
+      ```
+      - Exit 0 (ok/skip): continue normally
+      - Exit 1 (warn): narrate warning to user — "Coverage < 50%, some REQUESTS.md ACs may be unmet"
+      - Exit 2 (block): escalate to user — "0% AC coverage detected. Confirm PROGRESS.md phase ACs map to REQUESTS.md ACs."
+      Do NOT auto-block execution on exit 2 — present to user and await decision.
 
 For single-Phase waves or Phases without wave metadata: execute sequentially as before.
 

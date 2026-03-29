@@ -78,6 +78,29 @@ Blocking Issues: {blocking_issues|none}
 
 **If JSON parse fails** (malformed content): skip silently. Proceed to Step 2 without error.
 
+## Step 1.6: Load JSONL Checkpoint (Conditional)
+
+Check if `.shinchan-docs/{DOC_ID}/work-tracker.jsonl` exists (using Read tool). If not found, also check `.shinchan-docs/work-tracker.jsonl` as fallback.
+
+**If file exists**:
+
+Read the last 32KB of the file (tail approach — do NOT read the full file to avoid memory issues on large JSONL logs). Scan lines in reverse order (last line first) for the first entry matching:
+- `"event": "phase_complete"` or `"event": "task_complete"`
+
+If a matching entry is found, parse it and store as `{jsonl_checkpoint}`.
+
+Prepend the following block to the Step 4 output header (before the separator line):
+
+```
+[Checkpoint] Last: {jsonl_checkpoint.event} | Phase: {jsonl_checkpoint.phase|N/A} | Task: {jsonl_checkpoint.task|N/A} | At: {jsonl_checkpoint.timestamp|unknown}
+```
+
+**If file does not exist**: skip silently. Proceed to Step 2 without error.
+
+**If Read fails or no matching event found**: skip silently. Proceed to Step 2 without error.
+
+**If JSON parse fails on a line**: skip that line, continue scanning backward.
+
 ## Step 2: Load Documents
 
 - **Always**: Read `.shinchan-docs/{DOC_ID}/REQUESTS.md` (warn if missing)

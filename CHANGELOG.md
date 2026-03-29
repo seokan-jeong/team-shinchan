@@ -4,6 +4,22 @@ All notable changes to Team-Shinchan will be documented in this file.
 
 ## [Unreleased]
 
+## [4.24.0] - 2026-03-29
+
+### Added
+- **Ambiguity Gate**: `hooks/transition-gate.sh` blocks requirements→planning when `clarity_score.overall < 0.8`. Legacy pass-through with warning. Sub-score tampering detection.
+- **Mechanical Pre-Check**: `src/mechanical-check.js` validates document structure (AC, file refs, FR→AC mapping) at $0 cost before AK review. Integrated into misae and shinnosuke agents.
+- **Stagnation Detection**: `src/stagnation-detector.js` tail-reads work-tracker JSONL for REPEAT_ERROR, OSCILLATION, AC_STALL patterns. Integrated into ralph and ultrawork skills.
+- **Auto-Escalation**: `escalateModel()` in `src/collaboration-score.js` — haiku→sonnet→opus chain on failure. Integrated in micro-execute Step 3b retry loop.
+- **Drift Check**: `src/drift-check.js` measures AC coverage ratio (0-100%) with exit codes 0/1/2. Integrated in shinnosuke Phase Loop step 3g.
+- **Event Replay Resume**: `skills/resume/SKILL.md` Step 1.6 JSONL checkpoint scan with 32KB tail-read and per-workflow path isolation.
+- **Clarity Scoring Rubric**: `agents/misae.md` Phase D — goal_clarity, constraint_clarity, success_criteria scoring per interview turn.
+
+### Fixed
+- **AK Gate Bypass**: `hooks/transition-gate.sh` checks only `yamlOnDisk` (not `combinedYaml`) for AK approval — closes injection bypass.
+- **AK IMMUTABLE RULES**: Explicit prohibition against string-injecting approval records in misae and shinnosuke agents.
+- **Tests**: TC-13/14 injection bypass, TC-15~18 ambiguity gate. 27/27 pass.
+
 ## [4.23.1] - 2026-03-26
 
 ### Fixed

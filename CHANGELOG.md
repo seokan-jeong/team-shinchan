@@ -1,6 +1,14 @@
 # Changelog
 
-All notable changes to Team-Shinchan will be documented in this file.
+## [4.25.1] - 2026-03-30
+
+### Fixed
+- **AK Review Gate Hardening**: AK review was being skipped at workflow stage transitions due to context compression and prompt drift. Defense-in-depth fix:
+  - Promoted `AK-GATE` rule to first position in `agents/misae.md` IMMUTABLE RULES with hard-stop wording
+  - Added top-level `## IMMUTABLE RULES` section + Rule 7 in `agents/shinnosuke.md`
+  - Added actionable recovery instructions to `transition-gate.sh` error messages
+  - Added `ak_gate` backfill step (Step 1.7) in `skills/resume/SKILL.md` for legacy workflows
+  - Added AK-GATE regression tests in `tests/validate/agent-schema.js`
 
 ## [Unreleased]
 

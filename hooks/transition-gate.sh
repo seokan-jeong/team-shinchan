@@ -113,7 +113,7 @@ process.stdin.on('end', () => {
                                    yamlOnDisk.includes('verdict: APPROVED') &&
                                    yamlOnDisk.includes('agent: action_kamen');
           if (!hasAkApprovedReq) {
-            missing.push('No Action Kamen APPROVED review recorded for requirements stage in workflow history');
+            missing.push('No Action Kamen APPROVED review recorded for requirements stage in workflow history → Run: Task(subagent_type=\'team-shinchan:actionkamen\') for stage: requirements, then record verdict in WORKFLOW_STATE.yaml history');
           }
 
           // Ambiguity Gate (FR-1.4, FR-1.5, NFR-4, HR-1, HR-5)
@@ -182,7 +182,7 @@ process.stdin.on('end', () => {
                                       yamlOnDiskPlan.includes('verdict: APPROVED') &&
                                       yamlOnDiskPlan.includes('agent: action_kamen');
             if (!hasAkApprovedPlan) {
-              missing.push('No Action Kamen APPROVED review recorded for planning stage in workflow history');
+              missing.push('No Action Kamen APPROVED review recorded for planning stage in workflow history → Run: Task(subagent_type=\'team-shinchan:actionkamen\') for stage: planning, then record verdict in WORKFLOW_STATE.yaml history');
             }
 
             // Check 1: Every Phase must have at least 1 AC reference (FR-2.1)

@@ -124,6 +124,47 @@ function runValidation() {
     }
   });
 
+  // IMMUTABLE RULE assertions: AK-GATE presence checks
+  const immutableChecks = [
+    {
+      label: 'AK-GATE misae',
+      file: 'misae.md',
+      check: (content) => content.includes('AK-GATE'),
+      description: 'IMMUTABLE RULES contains AK-GATE'
+    },
+    {
+      label: 'AK-GATE shinnosuke',
+      file: 'shinnosuke.md',
+      check: (content) => content.includes('AK-GATE'),
+      description: 'IMMUTABLE RULES contains AK-GATE'
+    },
+    {
+      label: 'AK-GATE STOP misae',
+      file: 'misae.md',
+      check: (content) => content.includes('AK-GATE') && content.includes('STOP'),
+      description: 'IMMUTABLE RULES AK-gate rule contains STOP'
+    }
+  ];
+
+  console.log('\n--- IMMUTABLE RULE Assertions ---');
+  immutableChecks.forEach(({ label, file, check, description }) => {
+    const filePath = path.join(AGENTS_DIR, file);
+    let passed = false;
+    try {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      passed = check(content);
+    } catch (e) {
+      passed = false;
+    }
+    const status = passed ? '\x1b[32m✓\x1b[0m' : '\x1b[31m✗\x1b[0m';
+    console.log(`${status} ${label}: ${description}`);
+    if (!passed) {
+      hasErrors = true;
+      totalErrors += 1;
+      console.log(`    \x1b[31mERROR: ${label} assertion failed in ${file}\x1b[0m`);
+    }
+  });
+
   console.log('\n----------------------------------------');
   console.log(`Agents: ${files.length} | Errors: ${totalErrors} | Warnings: ${totalWarnings}`);
   if (contentWarnings > 0) {

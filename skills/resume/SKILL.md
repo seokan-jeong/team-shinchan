@@ -101,6 +101,32 @@ Prepend the following block to the Step 4 output header (before the separator li
 
 **If JSON parse fails on a line**: skip that line, continue scanning backward.
 
+## Step 1.7: Backfill Missing ak_gate Block (Conditional)
+
+Check if `current.ak_gate` is present in the loaded WORKFLOW_STATE.yaml.
+
+**Do NOT overwrite existing ak_gate values.** This step only fills in absent fields.
+
+**If `ak_gate` is entirely absent**: write the following default block under `current`:
+
+```yaml
+ak_gate:
+  requirements:
+    status: pending
+    retry_count: 0
+    last_rejection_reasons: []
+  planning:
+    status: pending
+    retry_count: 0
+    last_rejection_reasons: []
+```
+
+**If `ak_gate` is present but missing sub-fields** (e.g., `requirements` exists but `planning` is absent, or vice versa): add only the missing sub-fields using the same defaults above. Do NOT modify any sub-fields that already exist.
+
+**If `ak_gate` is fully present with both `requirements` and `planning`**: skip silently. No changes needed.
+
+After any write, proceed to Step 2 without error.
+
 ## Step 2: Load Documents
 
 - **Always**: Read `.shinchan-docs/{DOC_ID}/REQUESTS.md` (warn if missing)

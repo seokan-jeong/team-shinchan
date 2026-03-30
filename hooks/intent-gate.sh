@@ -73,4 +73,37 @@ if [ "$COMPLEXITY" != "medium" ] && [ -d "$DOCS_DIR" ]; then
   echo "$LINE" >> "$TRACKER_FILE" 2>/dev/null || true
 fi
 
+# Keyword match logging (non-blocking, isolated)
+# Matches user prompt against intent keyword table and logs to work-tracker.jsonl
+(
+  PROMPT_TEXT=$(echo "$INPUT" | node -e "
+const chunks = [];
+process.stdin.on('data', c => chunks.push(c));
+process.stdin.on('end', () => {
+  try { const j = JSON.parse(chunks.join('')); console.log((j.prompt || '').toLowerCase()); }
+  catch(e) { console.log(''); }
+});
+" 2>/dev/null || echo "")
+
+  if [ -n "$PROMPT_TEXT" ]; then
+    KEYWORD_SKILL=""
+    case "$PROMPT_TEXT" in
+      *fix*|*debug*|*error*|*버그*|*디버그*) KEYWORD_SKILL="systematic-debugging" ;;
+      *plan*|*design*|*계획*|*설계*)         KEYWORD_SKILL="plan" ;;
+      *implement*|*add*|*feature*|*구현*|*추가*) KEYWORD_SKILL="implement" ;;
+      *review*|*check*|*리뷰*|*검토*)        KEYWORD_SKILL="review" ;;
+      *test*|*테스트*)                        KEYWORD_SKILL="test-driven-development" ;;
+      *release*|*릴리스*)                    KEYWORD_SKILL="release" ;;
+      *analyze*|*understand*|*분석*|*이해*)  KEYWORD_SKILL="analyze" ;;
+    esac
+
+    if [ -n "$KEYWORD_SKILL" ] && [ -d "$DOCS_DIR" ]; then
+      TRACKER_FILE="${DOCS_DIR}/work-tracker.jsonl"
+      TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+      LINE="{\"ts\":\"${TS}\",\"type\":\"keyword_match\",\"agent\":null,\"session\":null,\"data\":{\"skill\":\"${KEYWORD_SKILL}\"}}"
+      echo "$LINE" >> "$TRACKER_FILE" 2>/dev/null || true
+    fi
+  fi
+) 2>/dev/null || true
+
 exit 0

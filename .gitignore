@@ -25,6 +25,8 @@ src/*
 !src/stagnation-detector.js
 !src/mechanical-check.js
 !src/drift-check.js
+!src/doctor.js
+!src/slop-cleaner.js
 !src/statusline/
 !src/statusline/index.js
 

@@ -175,10 +175,10 @@ After AK returns Sprint-Contract verdict:
 
 > **IMMUTABLE**: Before writing `stage: execution` to WORKFLOW_STATE.yaml, a `Task(subagent_type="team-shinchan:actionkamen")` call MUST have been made for the planning stage and its `APPROVED` verdict recorded in WORKFLOW_STATE.yaml history. String-injecting approval records into a Write/Edit payload without calling the Task is prohibited.
 
-After Nene completes PROGRESS.md and Shinnosuke receives plan approval summary,
+After Nene completes PROGRESS.md,
 BEFORE writing stage=execution to WORKFLOW_STATE.yaml:
 
-##### Mechanical Pre-Check for PROGRESS.md (FR-2.5)
+##### Step 1: Mechanical Pre-Check for PROGRESS.md (FR-2.5)
 
 Before invoking AK review, run:
 
@@ -189,6 +189,8 @@ node src/mechanical-check.js --file .shinchan-docs/{DOC_ID}/PROGRESS.md
 Parse stdout as JSON `{pass: bool, errors: string[]}`:
 - If `pass: false`: re-invoke Nene to fix the listed errors before calling AK.
 - If `pass: true`: proceed to AK review loop below.
+
+##### Step 2: AK Review Loop
 
 ```
 MAX_RETRIES = 2
@@ -225,8 +227,8 @@ LOOP:
 
   3. If APPROVED:
      - Update current.ak_gate.planning.status = approved
-     - Write stage=execution, owner=bo to WORKFLOW_STATE.yaml
-     - Narrate: "AK review: APPROVED — advancing to Stage 3 (Execution)"
+     - Narrate: "AK review: APPROVED — presenting plan to user for final approval"
+     - Proceed to Step 3 (user approval)
      - EXIT LOOP
 
   4. If REJECTED:
@@ -272,6 +274,18 @@ ESCALATION (after 2 rejections):
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Do NOT advance to Stage 3. Record status: escalated.
 ```
+
+##### Step 3: Present AK-Approved PROGRESS.md to User (only reached after AK APPROVED)
+
+Present the AK-approved PROGRESS.md plan summary to the user for final confirmation:
+- Summarize phases, wave structure, key AC items, and any risks flagged by AK
+- Ask user: "PROGRESS.md has passed AK review. Ready to start execution?"
+- If user approves:
+  - Write stage=execution, owner=bo to WORKFLOW_STATE.yaml
+  - Narrate: "Plan approved — advancing to Stage 3 (Execution)"
+- If user requests changes:
+  - Re-invoke Nene with the requested changes
+  - After Nene revises, return to Step 1 (mechanical pre-check) to re-validate
 
 Update WORKFLOW_STATE.yaml on transition: set `current.stage`, `owner`, `status: active`, append to `history` (timestamp, event, from, to, agent).
 

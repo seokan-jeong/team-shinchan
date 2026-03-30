@@ -4,6 +4,15 @@ All notable changes to Team-Shinchan will be documented in this file.
 
 ## [Unreleased]
 
+## [4.25.0] - 2026-03-30
+
+### Added
+- **Doctor Diagnostic Skill**: `skills/doctor/SKILL.md` — full plugin health diagnostics covering agents, skills, hooks, validators, and workflow state.
+- **AI Slop Cleaner**: `skills/simplify/SKILL.md` — reviews changed code for reuse, quality, and efficiency, then fixes issues found.
+- **Keyword Router Help Section**: `skills/help/SKILL.md` — added keyword-based routing guidance to help users find the right skill faster.
+- **Workflow Order Change**: AK spec review now runs before user approval step in the Phase Loop, ensuring quality gates are enforced earlier.
+- **Interview UX with Numbered Options**: Misae interview turns now present options as numbered lists for clearer user interaction.
+
 ## [4.24.0] - 2026-03-29
 
 ### Added

@@ -115,6 +115,22 @@ AskUserQuestion(questions=[{
 - Collect non-functional requirements (NFR) across Turns 1-4
 - Define scope (In/Out) by Turn 2
 
+**Interview UX — Numbered Options (apply to all Phases A-D)**
+
+When presenting discrete choices, use AskUserQuestion with numbered options so the user can respond with just a number:
+
+```
+Use AskUserQuestion to present choices as numbered options:
+"다음 중 선택해 주세요:
+1. Option A
+2. Option B
+3. Option C"
+
+The user can respond with just the number (e.g., "1") for quick selection.
+```
+
+Map responses: "1" → first option, "2" → second option, etc. If the response is not a number or is out of range, ask for clarification.
+
 ### Phase C: Hidden Requirements Analysis
 
 Apply these frameworks BEFORE finalizing REQUESTS.md:
@@ -190,15 +206,11 @@ clarity_score:
   overall: {computed mean}
 ```
 
-### Phase E: User Approval + AK Review Gate
+### Phase E: AK Review Gate + User Approval
 
-#### Step E-1: Request User Approval
-- Present REQUESTS.md summary to user (key FRs, scope, risks, ACs)
-- Ask for approval via AskUserQuestion
-- If NOT approved: revise REQUESTS.md per user feedback, return to Step E-1
-- If approved: proceed to Step E-2
+#### Step E-1: AK Review Loop
 
-#### Step E-2: AK Review Loop
+Run AK review first so only a verified document is presented to the user for final approval.
 
 ##### Mechanical Pre-Check (FR-2.4)
 
@@ -252,7 +264,7 @@ LOOP:
 
   4. If APPROVED:
      - Update WORKFLOW_STATE.yaml current.ak_gate.requirements.status = approved
-     - Proceed to Step E-3 (stage transition)
+     - Proceed to Step E-2 (user approval)
      - EXIT LOOP
 
   5. If REJECTED:
@@ -273,7 +285,13 @@ LOOP:
        - CONTINUE LOOP
 ```
 
-#### Step E-3: Stage Transition (only reached after AK APPROVED)
+#### Step E-2: Request User Approval (only reached after AK APPROVED)
+- Present AK-approved REQUESTS.md summary to user (key FRs, scope, risks, ACs)
+- Ask for approval via AskUserQuestion
+- If NOT approved: revise REQUESTS.md per user feedback, return to Step E-1 (re-run AK review on revised document)
+- If approved: proceed to Step E-3
+
+#### Step E-3: Stage Transition (only reached after AK APPROVED and user approved)
 - Update WORKFLOW_STATE.yaml:
     current.stage: planning
     current.owner: nene

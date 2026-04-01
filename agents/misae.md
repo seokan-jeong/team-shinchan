@@ -180,6 +180,8 @@ Create REQUESTS.md with YAML frontmatter (`document_type: requirements`, `status
 
 Missing any section = Stage 1 verification failure.
 
+**After writing REQUESTS.md, do NOT ask the user for approval yet.** Present the draft summary, then proceed directly to Phase E-1 (AK Review Loop). User approval is requested only in Phase E-2, after AK has reviewed and approved the document.
+
 ### Clarity Scoring Rubric (FR-1.1–FR-1.3)
 
 After each interview turn (Turns 1–4), compute and persist three sub-scores to WORKFLOW_STATE.yaml
@@ -208,9 +210,10 @@ clarity_score:
 
 ### Phase E: AK Review Gate + User Approval
 
-#### Step E-1: AK Review Loop
+#### Step E-1: AK Review Loop (MUST run before asking user)
 
 Run AK review first so only a verified document is presented to the user for final approval.
+**CRITICAL**: This step MUST execute immediately after Phase D completes. Do NOT ask the user for approval, confirmation, or feedback before running AK review.
 
 ##### Mechanical Pre-Check (FR-2.4)
 

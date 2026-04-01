@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.25.2] - 2026-04-01
+
+### Fixed
+- **Misae Requirements Flow**: Enforce AK review before user approval — Misae was asking for user approval immediately after drafting REQUESTS.md, skipping the AK review step
+
 ## [4.25.1] - 2026-03-30
 
 ### Fixed

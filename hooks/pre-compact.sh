@@ -156,6 +156,89 @@ const handoffSummary =
   (blockingIssues ? '. BLOCKED: ' + blockingIssues.slice(0, 80) : '');
 // -- END HANDOFF ARTIFACT --
 
+// -- SEMANTIC CONTEXT PRESERVATION (FR-2) --
+// Extract file references, recent user requests, and pending task keywords
+// from work-tracker.jsonl to preserve semantic information across compaction.
+// Inspired by claw-code compact.rs pattern.
+let referencedFiles = [];
+let recentUserRequests = [];
+let pendingTaskKeywords = [];
+
+try {
+  const trackerPath = path.join(process.env.PROJECT_ROOT, '.shinchan-docs', 'work-tracker.jsonl');
+  const trackerStat = (() => { try { return fs.statSync(trackerPath); } catch(e) { return null; } })();
+
+  if (trackerStat && trackerStat.size > 0) {
+    // HR-2: tail-read last 64KB to stay within NFR-6 timing budget
+    const TAIL_BYTES = 64 * 1024;
+    const readSize = Math.min(trackerStat.size, TAIL_BYTES);
+    const offset = trackerStat.size - readSize;
+    const buf = Buffer.alloc(readSize);
+    const fd = fs.openSync(trackerPath, 'r');
+    try {
+      fs.readSync(fd, buf, 0, readSize, offset);
+    } finally {
+      fs.closeSync(fd);
+    }
+    const trackerContent = buf.toString('utf-8');
+    const trackerLines = trackerContent.split('\\n');
+
+    // Collect from last 30 events (window)
+    const trackerEvents = [];
+    for (const tl of trackerLines) {
+      const trimmed = tl.trim();
+      if (!trimmed) continue;
+      try { trackerEvents.push(JSON.parse(trimmed)); } catch(_) {}
+    }
+    const recentEvents = trackerEvents.slice(-30);
+
+    // Extract referenced files from file_change events and tool_input
+    const fileSet = new Set();
+    for (const evt of recentEvents) {
+      if (evt.type === 'file_change') {
+        const fp = (evt.data && (evt.data.file || evt.data.path)) || '';
+        if (fp) fileSet.add(fp);
+      }
+      if (evt.data && evt.data.tool_input) {
+        const fp = evt.data.tool_input.file_path || evt.data.tool_input.path || '';
+        if (fp) fileSet.add(fp);
+      }
+    }
+    // HR-1: convert absolute paths to relative, limit to 20 files
+    referencedFiles = [...fileSet]
+      .map(function(f) { return f.replace(process.env.PROJECT_ROOT + '/', '').replace(process.env.PROJECT_ROOT, ''); })
+      .slice(-20);
+
+    // Extract recent user requests from UserPromptSubmit events
+    const requestSet = [];
+    for (const evt of recentEvents) {
+      if (evt.type === 'UserPromptSubmit' || (evt.data && evt.data.hook_event === 'UserPromptSubmit')) {
+        const content = (evt.data && evt.data.content) || '';
+        if (content && content.length > 5) {
+          // HR-1: mask sensitive patterns, truncate to 120 chars
+          const cleaned = content
+            .replace(/\\b(key|password|secret|token)\\s*=\\s*\\S+/gi, '$1=[REDACTED]')
+            .slice(0, 120);
+          requestSet.push(cleaned);
+        }
+      }
+    }
+    recentUserRequests = requestSet.slice(-5);
+
+    // Extract pending task keywords from unchecked checkboxes in PROGRESS.md
+    if (progressContent !== null && typeof completedPhases !== 'string') {
+      const uncheckedRe = /- \\[ \\]\\s*(.+)/g;
+      let kwMatch;
+      const kwList = [];
+      while ((kwMatch = uncheckedRe.exec(progressContent)) !== null) {
+        kwList.push(kwMatch[1].trim().slice(0, 60));
+      }
+      pendingTaskKeywords = kwList.slice(0, 10);
+    }
+  }
+} catch(e) { /* FR-2 is best-effort — never block pre-compact */ }
+// -- END SEMANTIC CONTEXT PRESERVATION --
+
 // Write pre-compact-state.json
 const state = {
   doc_id: docId,
@@ -166,6 +249,9 @@ const state = {
   pending_phases: pendingPhases,
   last_decision: lastDecision,
   blocking_issues: blockingIssues,
+  referenced_files: referencedFiles,
+  recent_user_requests: recentUserRequests,
+  pending_task_keywords: pendingTaskKeywords,
   handoff_summary: handoffSummary
 };
 

@@ -27,6 +27,7 @@ src/*
 !src/drift-check.js
 !src/doctor.js
 !src/slop-cleaner.js
+!src/token-estimator.js
 !src/statusline/
 !src/statusline/index.js
 

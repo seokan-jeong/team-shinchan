@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.25.3] - 2026-04-03
+
+### Fixed
+- **CI**: Regenerate AGENTS.md to fix static-validation freshness check (masumi allowedTools sync)
+
 ## [4.25.2] - 2026-04-01
 
 ### Fixed

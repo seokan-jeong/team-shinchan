@@ -29,7 +29,7 @@
 | hiroshi | advisory | Senior Advisor (Oracle) providing strategic adv... | opus | Read, Glob, Grep... | 15 | plan |
 | kazama | execution | Autonomous Deep Worker for complex long-running... | opus | Read, Write, Edit... | 50 | acceptEdits |
 | masao | specialist | DevOps Specialist for infrastructure and deploy... | sonnet | Read, Write, Edit... | 25 | acceptEdits |
-| masumi | utility | Librarian for documentation and information search | sonnet | Read, Glob, Grep... | 20 | plan |
+| masumi | utility | Librarian for documentation and information search | sonnet | Read, Glob, Grep... | 20 | default |
 | midori | orchestration | Debate Moderator - Facilitates expert debates t... | sonnet | Read, Write, Glob... | 25 | plan |
 | misae | advisory | Requirements Analyst that interviews users, col... | sonnet | Read, Write, Glob... | 20 | plan |
 | nene | advisory | Strategic Planner that creates comprehensive im... | opus | Read, Write, Glob... | 20 | plan |

@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.27.0] - 2026-04-06
+
+### Changed
+- **autopilot**: Align pipeline with `/start` for full parity — added workflow expiry/archive/pause, DOC_ID generation, detailed WORKFLOW_STATE schema (ak_gate, interview), Ume visual analysis, and direct Misae invocation in auto-analyze mode
+
 ## [4.26.1] - 2026-04-06
 
 ### Fixed

@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.26.1] - 2026-04-06
+
+### Fixed
+- **deny-list regex bug**: `curl.*| bash` pattern was incorrectly blocking ALL commands containing "curl" due to unescaped `|` being treated as regex OR operator. Fixed to `curl.*\|\s*bash` to only block actual pipe-to-bash patterns.
+
 ## [4.26.0] - 2026-04-03
 
 ## [4.25.3] - 2026-04-03

@@ -26,7 +26,7 @@
   },
   {
     "tool": "Bash",
-    "pattern": "curl.*| bash",
+    "pattern": "curl.*\\|\\s*bash",
     "reason": "Prevents piping remote scripts to bash"
   },
   {

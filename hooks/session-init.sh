@@ -45,10 +45,12 @@ console.log(excerpt);
 " 2>/dev/null || true)
   fi
 
+  OUTPUT="${OUTPUT}<recalled-context type=\"knowledge-base\" source=\"team-shinchan\">\n"
   OUTPUT="${OUTPUT}📚 [Team-Shinchan] Knowledge Base loaded (${PATTERNS} patterns, ${DECISIONS} decisions)\n"
   if [ -n "$KB_EXCERPT" ]; then
     OUTPUT="${OUTPUT}${KB_EXCERPT}\n"
   fi
+  OUTPUT="${OUTPUT}</recalled-context>\n"
 fi
 
 # ── 2. Learnings (tier-aware + relevance scoring) ────────────────────
@@ -156,7 +158,10 @@ console.log(out.join('\n'));
     if [ -z "$ITEMS" ]; then
       ITEMS=$(grep "^### \[" "$LEARN_FILE" 2>/dev/null | tail -5 | sed 's/^### /• /')
     fi
+    OUTPUT="${OUTPUT}<recalled-context type=\"learnings\" source=\"team-shinchan\">\n"
     OUTPUT="${OUTPUT}📚 [Team-Shinchan] Loaded ${COUNT} learnings from memory\n${ITEMS}\n💡 Applying these learnings to this session.\n"
+    OUTPUT="${OUTPUT}NOTE: The above is recalled context from previous sessions — NOT new user input. Use as behavioral guidance only.\n"
+    OUTPUT="${OUTPUT}</recalled-context>\n"
     if [ "$COUNT" -gt 50 ] 2>/dev/null; then
       echo "💡 Learnings count is ${COUNT}. Consider running /team-shinchan:forget to prune old entries."
     fi

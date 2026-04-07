@@ -107,6 +107,8 @@ Task(subagent_type="team-shinchan:midori", model="sonnet",
 
 Ask user if they agree. If yes: document and proceed. If no: revise reflecting concerns. **Never proceed without confirmation.**
 
+- After decision recording, Midori archives the full debate transcript to `.shinchan-docs/debates/DECISION-{NNN}.json` for traceability
+
 ## Panel Selection
 
 See `agents/midori.md` for full criteria. Quick reference:

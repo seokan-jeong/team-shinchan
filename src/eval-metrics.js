@@ -171,17 +171,117 @@ function findAgentForEvent(events, targetEvent) {
   return null;
 }
 
+/**
+ * Compute cross-session agent performance trends from JSONL event stream.
+ * Groups metrics by session, calculates rolling averages, and detects regressions.
+ * @param {string} jsonlPath - Path to work-tracker.jsonl
+ * @param {number} windowSize - Number of recent sessions for rolling average (default 10)
+ * @returns {Object} Trend data with per-session metrics, rolling averages, and regressions
+ */
+function computeTrends(jsonlPath, windowSize = 10) {
+  const lines = fs.readFileSync(jsonlPath, 'utf8').trim().split('\n');
+  const events = lines.map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+
+  // Group events by session
+  const sessions = {};
+  for (const e of events) {
+    const sid = e.session || 'unknown';
+    if (!sessions[sid]) sessions[sid] = [];
+    sessions[sid].push(e);
+  }
+
+  // Compute per-session metrics
+  const sessionMetrics = [];
+  for (const [sid, sevents] of Object.entries(sessions)) {
+    const agents = {};
+    let testPasses = 0, testTotal = 0;
+
+    for (const e of sevents) {
+      if (e.type === 'agent_start' && e.agent) {
+        agents[e.agent] = (agents[e.agent] || 0) + 1;
+      }
+      if (e.type === 'tool_use' && e.data?.tool === 'Bash') {
+        const cmd = e.data?.command || '';
+        if (/npm test|jest|pytest|vitest|mocha/.test(cmd)) {
+          testTotal++;
+          if (e.data?.exit_code === 0) testPasses++;
+        }
+      }
+    }
+
+    sessionMetrics.push({
+      session: sid,
+      timestamp: sevents[0]?.ts || null,
+      totalAgentInvocations: Object.values(agents).reduce((a, b) => a + b, 0),
+      agentBreakdown: agents,
+      testPassRate: testTotal > 0 ? testPasses / testTotal : null,
+    });
+  }
+
+  // Sort by timestamp
+  sessionMetrics.sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
+
+  // Compute rolling average and detect regressions
+  const recent = sessionMetrics.slice(-windowSize);
+  const current = sessionMetrics[sessionMetrics.length - 1];
+
+  if (recent.length < 2) {
+    return { sessions: sessionMetrics, trends: null, regressions: [] };
+  }
+
+  const baseline = recent.slice(0, -1);
+  const avgInvocations = baseline.reduce((s, m) => s + m.totalAgentInvocations, 0) / baseline.length;
+
+  const regressions = [];
+  if (current && current.totalAgentInvocations > avgInvocations * 1.2) {
+    regressions.push({
+      metric: 'totalAgentInvocations',
+      current: current.totalAgentInvocations,
+      average: Math.round(avgInvocations * 100) / 100,
+      deviation: '+' + Math.round(((current.totalAgentInvocations / avgInvocations) - 1) * 100) + '%',
+    });
+  }
+
+  return {
+    totalSessions: sessionMetrics.length,
+    windowSize: Math.min(windowSize, recent.length),
+    trends: {
+      avgInvocationsPerSession: Math.round(avgInvocations * 100) / 100,
+    },
+    regressions,
+    latestSession: current,
+  };
+}
+
 // ─── CLI ─────────────────────────────────────────────────────────────
 function cli() {
   const args = process.argv.slice(2);
-  const jsonlPath = args[0];
-  const docId = args[1];
 
-  if (!jsonlPath || jsonlPath === '--help') {
+  if (!args[0] || args[0] === '--help') {
     console.log('Usage: eval-metrics <work-tracker.jsonl> [doc_id] [--expected-files N]');
+    console.log('       eval-metrics --trends <work-tracker.jsonl> [--window N]');
     console.log('Computes ground-truth evaluation metrics from event stream.');
     return;
   }
+
+  // --trends mode
+  if (args[0] === '--trends') {
+    const trendsPath = args[1];
+    if (!trendsPath) {
+      console.error('Error: --trends requires a JSONL file path');
+      process.exit(1);
+    }
+    let window = 10;
+    for (let i = 0; i < args.length; i++) {
+      if (args[i] === '--window') window = parseInt(args[i + 1]) || 10;
+    }
+    const trends = computeTrends(trendsPath, window);
+    console.log(JSON.stringify(trends, null, 2));
+    return;
+  }
+
+  const jsonlPath = args[0];
+  const docId = args[1];
 
   let expectedFiles = 0;
   for (let i = 0; i < args.length; i++) {
@@ -196,4 +296,4 @@ function cli() {
 
 if (require.main === module) cli();
 
-module.exports = { computeMetrics, addSurgicalPrecision };
+module.exports = { computeMetrics, addSurgicalPrecision, computeTrends };

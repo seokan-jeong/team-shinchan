@@ -155,6 +155,38 @@ If this supersedes a prior decision, update old entry's Status to "Superseded by
 
 ---
 
+## Debate Transcript Archiving
+
+After recording the decision in debate-decisions.md, create a structured debate archive:
+
+1. Write `.shinchan-docs/debates/DECISION-{NNN}.json` with:
+   ```json
+   {
+     "decision_id": "DECISION-NNN",
+     "timestamp": "ISO-8601",
+     "topic": "debate topic",
+     "pattern": "round-table|dialectic|expert-panel|lightweight|sparse",
+     "panelists": ["agent1", "agent2"],
+     "rounds": [
+       {
+         "round": 1,
+         "positions": [
+           {"agent": "hiroshi", "stance": "summary", "key_arguments": ["arg1", "arg2"]}
+         ]
+       }
+     ],
+     "consensus": true,
+     "final_decision": "chosen approach",
+     "rationale": "why this was chosen",
+     "dissenting_views": [],
+     "affected_components": ["component1"]
+   }
+   ```
+2. If ontology exists, create a Decision entity with DECIDED_BY relations to affected components.
+3. This archive enables future debates to reference past decisions and ADR generation.
+
+---
+
 ## Invocation
 
 | Type | How |

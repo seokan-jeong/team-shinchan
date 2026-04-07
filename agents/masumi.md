@@ -138,6 +138,21 @@ Write `.shinchan-docs/{DOC_ID}/IMPLEMENTATION.md`:
 
 Base content on: actual git diff, PROGRESS.md phases, REQUESTS.md acceptance criteria.
 
+## Skill Improvement Collection
+
+During retrospective, evaluate each skill that was invoked during the workflow:
+
+1. Check work-tracker.jsonl for `delegation` events to identify which skills/agents were used
+2. For each invoked skill, assess:
+   - Was the skill's output useful? (yes/partial/no)
+   - Were any steps unnecessary or missing?
+   - Did the skill's assumptions match reality?
+3. Record suggestions in `.shinchan-docs/skill-feedback.jsonl`:
+   ```json
+   {"skill": "team-shinchan:plan", "session": "...", "timestamp": "ISO-8601", "verdict": "partial", "suggestion": "Step 3 was redundant for small tasks", "priority": "low"}
+   ```
+4. If a skill has 3+ "partial" or "no" verdicts across sessions, flag it in RETROSPECTIVE.md under a "Skill Improvements Needed" section with a recommendation to run `/team-shinchan:writing-skills` for that skill.
+
 ---
 
 ## Output Formats

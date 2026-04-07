@@ -10,6 +10,14 @@ set -eo pipefail
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/.." && pwd)"
 PROJECT_ROOT="${PWD}"
 DOCS_DIR="${PROJECT_ROOT}/.shinchan-docs"
+STATE_FILE="${DOCS_DIR}/pre-compact-state.json"
+
+# Compression iteration counter
+PREV_ITERATION=0
+if [[ -f "$STATE_FILE" ]]; then
+  PREV_ITERATION=$(jq -r '.compression_iteration // 0' "$STATE_FILE" 2>/dev/null || echo 0)
+fi
+ITERATION=$((PREV_ITERATION + 1))
 
 # HR-4 / NFR-7: no .shinchan-docs/ → exit silently
 if [ ! -d "$DOCS_DIR" ]; then
@@ -20,7 +28,7 @@ fi
 INPUT=$(cat)
 
 # Find active WORKFLOW_STATE.yaml and write pre-compact-state.json
-DOCS_DIR="$DOCS_DIR" PROJECT_ROOT="$PROJECT_ROOT" node -e "
+DOCS_DIR="$DOCS_DIR" PROJECT_ROOT="$PROJECT_ROOT" ITERATION="$ITERATION" node -e "
 const fs = require('fs');
 const path = require('path');
 
@@ -252,7 +260,8 @@ const state = {
   referenced_files: referencedFiles,
   recent_user_requests: recentUserRequests,
   pending_task_keywords: pendingTaskKeywords,
-  handoff_summary: handoffSummary
+  handoff_summary: handoffSummary,
+  compression_iteration: parseInt(process.env.ITERATION, 10) || 1
 };
 
 const outPath = path.join(docsDir, 'pre-compact-state.json');
@@ -264,5 +273,31 @@ try {
   process.exit(0);
 }
 " 2>/dev/null || true
+
+cat <<COMPRESSION_GUIDE
+<compression-guide iteration="$ITERATION">
+When compacting this conversation, preserve this structure:
+
+### 1. Goal
+[What the user is trying to accomplish]
+
+### 2. Progress
+[Completed work, changed files]
+
+### 3. Decisions
+[Architecture choices, rejected approaches, rationale]
+
+### 4. Active State
+[Workflow stage, phase, blocking issues]
+
+### 5. Modified Files
+[File list with change descriptions]
+
+### 6. Next Steps
+[Immediate actions after compaction]
+
+NOTE: If a previous compression summary exists, UPDATE it — do not replace. Preserve specific details (paths, function names, errors) over vague summaries.
+</compression-guide>
+COMPRESSION_GUIDE
 
 exit 0

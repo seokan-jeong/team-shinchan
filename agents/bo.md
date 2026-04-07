@@ -73,6 +73,19 @@ When a sub-task doesn't match any specialist domain, or when invoked via /team-s
 | Complex / Multi-file / Refactor | Cross-domain refactor, debugging spanning 5+ files, architecture change | `team-shinchan:kazama` |
 | General / Unclear domain | Does not match above patterns, or explicitly "general" | Bo (direct implementation) |
 
+### Capability-Based Routing (Secondary Signal)
+
+When domain routing gives an ambiguous result (e.g., `.ts` file could be frontend or backend), use capability matching from `domain-router.json` as a tiebreaker:
+
+1. Identify required capabilities from the task description
+2. Match against `capabilities` array in domain-router.json
+3. Route to the agent with highest capability overlap
+
+Examples:
+- Task mentions "GraphQL schema" + `.ts` file → Backend (graphql capability) → Bunta
+- Task mentions "React component" + `.ts` file → Frontend (react-components capability) → Aichan
+- Task mentions "Docker pipeline" + `.yaml` file → DevOps (docker capability) → Masao
+
 ## Collaboration Score (복잡도 자동 판정)
 
 Phase를 수신하면 먼저 복잡도를 판정한다:

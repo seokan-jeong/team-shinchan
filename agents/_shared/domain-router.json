@@ -4,11 +4,13 @@
     "frontend": {
       "extensions": [".tsx", ".ts", ".jsx", ".js", ".css", ".scss", ".sass", ".less", ".vue", ".html", ".svelte"],
       "keywords": ["component", "layout", "styling", "animation", "ui", "frontend", "react", "vue", "css", "html", "button", "form", "modal", "page", "render", "style", "theme", "responsive"],
+      "capabilities": ["react-components", "css-styling", "accessibility", "frontend-performance"],
       "agent": "team-shinchan:aichan"
     },
     "backend": {
       "extensions": [".py", ".go", ".java", ".rb", ".php", ".rs", ".c", ".cpp", ".cs"],
       "keywords": ["api", "endpoint", "database", "migration", "query", "orm", "model", "schema", "rest", "graphql", "backend", "server", "auth", "middleware", "refund", "payment"],
+      "capabilities": ["rest-api", "graphql", "database-design", "sql-migrations", "backend-security"],
       "server_ts_keywords": ["api", "endpoint", "route", "controller", "service", "repository"],
       "agent": "team-shinchan:bunta"
     },
@@ -17,10 +19,12 @@
       "filenames": ["Dockerfile", "docker-compose.yml", "docker-compose.yaml", ".dockerignore", "Makefile", "nginx.conf"],
       "path_patterns": [".github/workflows/", "k8s/", "helm/", "terraform/", "ansible/"],
       "keywords": ["docker", "pipeline", "deployment", "nginx", "cloud", "kubernetes", "terraform", "ansible", "devops", "infra", "environment"],
+      "capabilities": ["ci-cd", "docker", "infrastructure-as-code", "observability"],
       "agent": "team-shinchan:masao"
     },
     "general": {
       "description": "Fallback — no domain match or explicitly general",
+      "capabilities": ["complex-refactoring", "deep-debugging", "architecture-design"],
       "agent": "team-shinchan:bo"
     }
   }

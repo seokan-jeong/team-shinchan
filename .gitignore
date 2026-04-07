@@ -28,6 +28,8 @@ src/*
 !src/doctor.js
 !src/slop-cleaner.js
 !src/token-estimator.js
+!src/cost-estimator.js
+!src/hook-matcher.js
 !src/statusline/
 !src/statusline/index.js
 

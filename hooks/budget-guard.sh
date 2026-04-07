@@ -135,6 +135,13 @@ process.stdin.on('end', () => {
 });
 " 2>/dev/null || true)
 
+# Cost estimation
+CURRENT_AGENT=$(cat "$DOCS_DIR/.current-agent" 2>/dev/null || echo "unknown")
+COST_INFO=$(node "${CLAUDE_PLUGIN_ROOT}/src/cost-estimator.js" --per-turn "$CURRENT_AGENT" 2>/dev/null || echo '{}')
+COST_PER_TURN=$(echo "$COST_INFO" | jq -r '.estimatedCostPerTurn // "?"')
+MODEL=$(echo "$COST_INFO" | jq -r '.model // "?"')
+echo "💰 [Budget] Est. cost/turn: \$${COST_PER_TURN} (${CURRENT_AGENT}/${MODEL})" >&2
+
 if [ -n "$RESULT" ]; then
   echo "$RESULT"
 fi

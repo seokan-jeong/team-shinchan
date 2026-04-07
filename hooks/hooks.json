@@ -1,4 +1,9 @@
 {
+  "_meta": {
+    "description": "Hook registry for Team-Shinchan plugin",
+    "wildcard_support": "Event patterns support * wildcard via src/hook-matcher.js (e.g., 'Pre*' matches PreToolUse + PreCompact)",
+    "version": "2.0"
+  },
   "hooks": {
     "SubagentStart": [
       {
@@ -27,6 +32,16 @@
       }
     ],
     "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/prompt-injection-guard.sh",
+            "timeout": 5
+          }
+        ]
+      },
       {
         "matcher": "*",
         "hooks": [

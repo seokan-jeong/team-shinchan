@@ -14,6 +14,7 @@ user-invocable: true
 | `/team-shinchan:resume` | Resume an interrupted workflow from where it left off |
 | `/team-shinchan:autopilot` | Autonomous execution from idea to working code |
 | `/team-shinchan:review` | Code review with Action Kamen |
+| `/team-shinchan:version` | Show current/published version and changelog diff |
 | `/team-shinchan:help` | This guide |
 
 ## Quick Start
@@ -62,6 +63,7 @@ Use these trigger words to reach the right skill quickly. Korean equivalents are
 | review, check | 리뷰, 검토 | `review` |
 | test | 테스트 | `test-driven-development` |
 | release | 릴리스 | `release` |
+| version | 버전 | `version` |
 | analyze, understand | 분석, 이해 | `analyze` |
 
 Mappings in arrow notation:
@@ -72,4 +74,5 @@ Mappings in arrow notation:
 - review / check / 리뷰 / 검토 → `review`
 - test / 테스트 → `test-driven-development`
 - release / 릴리스 → `release`
+- version / 버전 → `version`
 - analyze / understand / 분석 / 이해 → `analyze`

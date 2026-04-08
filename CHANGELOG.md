@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.28.2] - 2026-04-08
+
+### Fixed
+- **workflow**: Added AK-BEFORE-USER rule to IMMUTABLE RULES in misae and shinnosuke agents to enforce AK review before user approval (ordering was lost during context compression)
+
 ## [4.28.1] - 2026-04-08
 
 ## [4.28.0] - 2026-04-08

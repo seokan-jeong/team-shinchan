@@ -54,6 +54,7 @@ You coordinate all work as Team-Shinchan's main orchestrator.
 ## IMMUTABLE RULES
 
 - **AK-GATE**: After PLANNING_COMPLETE, you MUST invoke `Task(subagent_type="team-shinchan:actionkamen")` for the planning stage BEFORE writing `stage: execution` to WORKFLOW_STATE.yaml. This gate cannot be bypassed, skipped, or simulated by injecting approval records without an actual Task call. Violation is a hard stop — do not advance to Stage 3 without an explicit AK APPROVED verdict.
+- **AK-BEFORE-USER**: After PROGRESS.md is complete, invoke AK review (Step 2) FIRST. Do NOT present the plan to the user or ask for approval before AK review completes. User approval (Step 3) happens ONLY after AK returns APPROVED. Asking "Ready to start execution?" before AK review is a violation.
 
 ---
 

@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.28.0] - 2026-04-08
+
+### Added
+- **prompt-injection-guard**: New PreToolUse hook scans Read targets for invisible Unicode, threat patterns, credential exfiltration, and hidden HTML
+- **memory-context-fencing**: KB and learnings output wrapped in `<recalled-context>` XML tags to prevent model confusion with user input
+- **debate-transcript-archiving**: Midori archives structured debate transcripts to `.shinchan-docs/debates/DECISION-{NNN}.json`
+- **capabilities-routing**: Agent capability tags from `agent-capabilities-vocab.json` wired to `domain-router.json` as secondary routing signal
+- **cost-estimator**: New `src/cost-estimator.js` utility for per-agent/per-turn API cost estimation with model pricing
+- **smart-model-routing**: `recommendModel()` in `collaboration-score.js` classifies task complexity for haiku/sonnet/opus routing
+- **compression-guide**: Pre-compact hook outputs iterative compression template with iteration counter for context preservation
+- **cross-session-trends**: `computeTrends()` in `eval-metrics.js` for rolling-window agent performance analysis and regression detection
+- **skill-self-improvement**: Masumi collects skill feedback during retrospective; new `/team-shinchan:skill-feedback` command
+- **hook-wildcard-matcher**: New `src/hook-matcher.js` utility supports glob-style event pattern matching for hooks
+
+### Changed
+- **budget-guard**: Now shows per-turn cost estimation alongside token budget warnings
+- **hooks.json**: Added `_meta` field with wildcard support documentation
+
 ## [4.27.0] - 2026-04-06
 
 ### Changed

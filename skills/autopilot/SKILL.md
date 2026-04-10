@@ -21,19 +21,19 @@ If args length > 2000 characters:
   Warn user: "Request was truncated to 2000 characters"
 ```
 
-## Step 2: Expire, Archive, or Pause Active Workflows
+## Step 2: Expire and Archive Stale Workflows
 
 Read `workflow_expiry_days` from:
 1. `.shinchan-config.yaml` in the current project root (key: `workflow_expiry_days`) — takes priority
 2. Otherwise use the plugin default: **7** (from `plugin.json` settings)
-3. If `workflow_expiry_days` is `0` or cannot be read → skip expiry, use existing pause logic
+3. If `workflow_expiry_days` is `0` or cannot be read → skip expiry entirely
 
 For each `.shinchan-docs/*/WORKFLOW_STATE.yaml` where `status: active`:
 
 **Expiry check** (skip if `workflow_expiry_days == 0`):
 
 1. Read the `updated` timestamp from WORKFLOW_STATE.yaml
-2. Parse the timestamp (ISO 8601). If parsing fails → skip expiry for this entry, fall through to pause
+2. Parse the timestamp (ISO 8601). If parsing fails → skip this entry
 3. Calculate elapsed days: `(now - updated) / 86400000`
 4. If `elapsed >= workflow_expiry_days`:
    a. Set `status: expired` in WORKFLOW_STATE.yaml
@@ -49,11 +49,11 @@ For each `.shinchan-docs/*/WORKFLOW_STATE.yaml` where `status: active`:
    d. Attempt: `mkdir -p .shinchan-docs/archived/{YYYY-MM}/ && mv .shinchan-docs/{DOC_ID}/ .shinchan-docs/archived/{YYYY-MM}/{DOC_ID}/`
    e. If `mv` fails: silently continue (status stays `expired`, folder stays in place)
    f. Do NOT output any paused/expired notification to the user
-   g. Continue to next workflow (do not pause this one)
+   g. Continue to next workflow
 
-**Pause logic** (only reached if workflow is NOT expired):
-
-If not expired (or expiry disabled): set `status: paused`, add paused event to history. If none found, proceed silently.
+**Non-expired active workflows are left as-is.** Multiple workflows can be `active` simultaneously.
+The workflow guard protects the most recently updated active workflow.
+Use `/team-shinchan:resume` to switch the guard target to a different workflow.
 
 ## Step 3: Setup (Folder + State)
 

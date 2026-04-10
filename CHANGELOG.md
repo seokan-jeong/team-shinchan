@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.32.0] - 2026-04-10
+
+### Changed
+- **release-skill**: Moved from plugin skill (`skills/release/`) to project-local command (`.claude/commands/release.md`) — no longer exposed to plugin users
+
 ## [4.31.0] - 2026-04-10
 
 ### Added

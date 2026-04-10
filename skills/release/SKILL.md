@@ -63,5 +63,17 @@ If NOT dry-run:
 
 If dry-run:
   Output: "Dry run complete. No files were modified."
+  STOP
+
+## Step 5: Clear Local Caches (skip if --dry-run)
+
+Reset stale local caches so agents start fresh after the release:
+
+```bash
+echo '{}' > .shinchan-docs/agent-context-cache.json
+echo '{}' > .shinchan-docs/ontology/.llm-scan-cache.json
+```
+
+Output: "Local caches cleared (agent-context-cache, llm-scan-cache)"
 
 **STOP HERE.**

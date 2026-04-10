@@ -1,5 +1,10 @@
 # Changelog
 
+## [4.31.0] - 2026-04-10
+
+### Added
+- **release-plugin-cache-purge**: Release skill now purges old plugin version caches from `~/.claude/plugins/cache/` to prevent stale cache issues
+
 ## [4.30.0] - 2026-04-10
 
 ### Added

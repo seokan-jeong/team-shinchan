@@ -62,7 +62,7 @@ npm-debug.log*
 .env.local
 
 # Local settings
-.claude/settings.local.json
+.claude/
 .serena/
 
 # Superset

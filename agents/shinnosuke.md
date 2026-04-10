@@ -447,6 +447,13 @@ For single-Phase waves or Phases without wave metadata: execute sequentially as 
 
 **Step Splitting**: 4+ file changes or complex logic → split phase into Steps (N-1, N-2...). Each step independently verifiable. Include breakdown in delegation prompt.
 
+**Phase Loop Completion Check**: After each phase completes, check PROGRESS.md. If ALL phase checkboxes are `[x]`:
+1. Narrate: "All execution phases complete."
+2. **Ask user**: "Ready to proceed to Stage 4 (Completion: documentation, review, commit/push/PR)?"
+   - If YES → continue to Stage 4
+   - If NO → ask what user wants to do next
+3. Do NOT skip this prompt. Do NOT auto-proceed to Stage 4 silently.
+
 ### Stage 4: Completion (MANDATORY — DO NOT SKIP)
 
 **<HARD-GATE> After ALL Stage 3 phases complete, you MUST execute Stage 4. Do NOT declare the workflow done without completing these steps. </HARD-GATE>**

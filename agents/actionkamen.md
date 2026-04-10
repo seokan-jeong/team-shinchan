@@ -322,8 +322,22 @@ When rubric total is ≤8 (FAIL):
 ### Pre-Review Check
 
 1. Look for `.shinchan-docs/{doc_id}/DESIGN_SPEC.md` (where doc_id comes from WORKFLOW_STATE.yaml)
-2. If found, add Design Fidelity to your review categories
-3. If not found, skip this section entirely (standard review only)
+2. If a **Figma URL** is available in the task context or DESIGN_SPEC.md, and any Figma MCP tool is available (tool name containing `figma`), call it to fetch live design data for precision verification
+3. If Design Spec or Figma data found, add Design Fidelity to your review categories
+4. If neither found, skip this section entirely (standard review only)
+
+### Figma API-Powered Precision Verification
+
+When Figma API data is available, perform **exact value comparison** (not visual estimation):
+
+| Check | Method | Tolerance |
+|-------|--------|-----------|
+| Colors | Compare implementation HEX values against Figma API HEX values | Exact match required |
+| Font size | Compare px values from CSS/Tailwind against Figma API values | ±1px |
+| Font weight | Compare weight values | Exact match required |
+| Spacing (gap/padding/margin) | Compare px values against Figma API layout data | ±2px |
+| Border radius | Compare px values | ±1px |
+| Component hierarchy | Compare DOM nesting against Figma layer structure | Structural match |
 
 ### Design Fidelity Checklist
 
@@ -332,7 +346,7 @@ When a Design Spec exists, verify each category:
 | Category | Check | Severity |
 |----------|-------|----------|
 | Components | All spec components implemented? | MEDIUM |
-| Colors | Color values match spec (within tolerance for low-confidence values)? | MEDIUM |
+| Colors | Color values match spec? (exact match for API-sourced, tolerance for image-sourced) | MEDIUM |
 | Typography | Font family, size, weight match spec? | LOW |
 | Layout | Flex/grid structure, spacing, direction match spec? | MEDIUM |
 | Interactions | Hover, focus, transition states implemented? | LOW |
@@ -343,15 +357,16 @@ Include in your review summary:
 
 ```markdown
 ## Design Fidelity
+- Data source: {Figma API / Image analysis / Design Spec file}
 - Components: {N}/{total} match | {deviations}
-- Colors: PASS/FAIL | {mismatches}
+- Colors: PASS/FAIL | {mismatches with exact expected vs actual values}
 - Typography: PASS/FAIL | {mismatches}
 - Layout: PASS/FAIL | {mismatches}
 - Interactions: PASS/FAIL/N/A | {notes}
 - Overall: {FAITHFUL / MINOR_DEVIATIONS / NEEDS_REVISION}
 ```
 
-**Severity rule**: Design fidelity issues alone do NOT cause REJECTED verdict unless explicitly flagged as CRITICAL by the Design Spec. They are reported as MEDIUM/LOW findings alongside standard code review.
+**Severity rule**: Design fidelity issues alone do NOT cause REJECTED verdict unless explicitly flagged as CRITICAL by the Design Spec. They are reported as MEDIUM/LOW findings alongside standard code review. However, when Figma API data is the source, **color and spacing mismatches are bumped to MEDIUM** severity (since exact values are known).
 
 ## Important
 

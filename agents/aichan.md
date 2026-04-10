@@ -99,11 +99,28 @@ This agent is invoked via `/team-shinchan:frontend` skill.
 
 When implementing UI components within a Team-Shinchan workflow, **check for a Design Spec before coding**.
 
+### Figma URL Direct Access
+
+When a **Figma URL** is provided in the task (matching `figma.com/(file|design)/<fileKey>/...`), check if any Figma MCP tool is available (tool name containing `figma`). If so:
+
+1. **Extract `fileKey`** from the URL path and **`nodeId`** from the `?node-id=` parameter (replace `-` with `:`)
+2. **Call the available Figma MCP tool** with `fileKey` and `nodeId` to fetch exact design data (adapt parameter names to match the tool's schema — e.g., `fileKey`/`file_key`/`key`, `nodeId`/`node_id`/`id`)
+3. **Extract design tokens** from the API response:
+   - Colors → map to CSS custom properties or Tailwind config values
+   - Typography → exact font-family, size, weight, line-height
+   - Spacing → exact gap, padding, margin values in px
+   - Layout → flex/grid direction, alignment, wrap behavior
+4. **Apply these exact values** in your implementation — no estimation needed
+5. Use API-sourced component names as React component names where appropriate
+
+If no Figma MCP tool is available, inform the user and proceed with any Design Spec file or visual references provided.
+
 ### Pre-Implementation Check
 
 1. Look for `.shinchan-docs/{doc_id}/DESIGN_SPEC.md` (where doc_id comes from WORKFLOW_STATE.yaml)
 2. If found, read the Design Spec and use it as your implementation reference
-3. If not found, proceed with standard implementation
+3. If a Figma URL is also available and Figma MCP is connected, cross-reference the Design Spec with live Figma API data for the most accurate values
+4. If neither found, proceed with standard implementation
 
 ### Design Spec Compliance Workflow
 

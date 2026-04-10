@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.29.0] - 2026-04-10
+
+### Added
+- **figma-mcp-integration**: Ume, Aichan, Action Kamen agents now detect and use any available Figma MCP tool for precise design data extraction
+- **figma-url-support**: design-review skill accepts Figma URLs directly, producing precision Design Specs with exact colors, typography, and spacing from the Figma API
+- **precision-design-fidelity**: Action Kamen performs exact-value comparison (HEX, px) when Figma API data is available, with defined tolerance thresholds
+
+### Changed
+- **design-review**: Updated input validation and workflow to branch between Figma URL (API) and image file (visual analysis) paths
+- **ume**: Added Figma URL detection, MCP tool invocation, and precision vs visual Design Spec comparison
+- **aichan**: Added Figma URL Direct Access workflow for extracting exact design tokens before implementation
+
 ## [4.28.2] - 2026-04-08
 
 ### Fixed

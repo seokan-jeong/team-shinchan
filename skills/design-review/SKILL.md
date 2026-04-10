@@ -10,8 +10,10 @@ user-invocable: true
 
 ```
 If args is empty or only whitespace:
-  Ask user: "Please provide the design mockup image path and the implementation file/directory path.
-  Example: /team-shinchan:design-review './mockup.png' './src/components/Login.tsx'"
+  Ask user: "Please provide the design source and implementation path.
+  Supports:
+    - Figma URL:  /team-shinchan:design-review 'https://www.figma.com/design/abc123/...' './src/components/Login.tsx'
+    - Image file: /team-shinchan:design-review './mockup.png' './src/components/Login.tsx'"
   STOP and wait for user response
 
 If args length > 2000 characters:
@@ -31,11 +33,14 @@ Task(
 
 ## Design-Implementation Comparison Request
 
-You are performing a **Design Fidelity Review** — comparing a design mockup against its implementation to find mismatches.
+You are performing a **Design Fidelity Review** — comparing a design against its implementation to find mismatches.
 
 ### Workflow
 
-1. **Analyze the design mockup image**: Read the image file provided. Extract a full Design Spec using your Design Spec Extraction workflow (Components, Colors, Typography, Layout, Interactions with confidence levels).
+1. **Detect input type and extract Design Spec**:
+   - **If Figma URL provided** (contains figma.com/): Use your Figma URL Data Extraction workflow — if any Figma MCP tool is available (tool name containing \`figma\`), call it to get exact design data from the Figma API. This yields a **precision Design Spec** with exact HEX colors, px values, font specs, and component hierarchy (all confidence: high). If no Figma MCP is available, inform the user.
+   - **If image file provided**: Read the image file. Extract a full Design Spec using your visual Design Spec Extraction workflow (Components, Colors, Typography, Layout, Interactions with confidence levels).
+   - **If both provided**: Use Figma API data as primary source, cross-reference with the image for visual verification.
 
 2. **Analyze the implementation**: Read the implementation source code (or screenshot if provided). Identify the implemented components, styles, layout structure, and interaction handlers.
 
@@ -78,10 +83,12 @@ You are performing a **Design Fidelity Review** — comparing a design mockup ag
 \`\`\`
 
 ### Important Notes
-- For low-confidence Design Spec values, note them as "approximate — verify with designer"
+- **Figma API data** yields exact values — mismatches against API-sourced specs are definitive (no "approximate" qualifier needed)
+- For low-confidence Design Spec values (image-sourced only), note them as "approximate — verify with designer"
 - Search the codebase with Grep to find related component files
-- If only a design image is provided (no implementation path), just produce the Design Spec
-- If only implementation code is provided (no design image), report what you can analyze
+- If only a design source is provided (no implementation path), just produce the Design Spec
+- If only implementation code is provided (no design source), report what you can analyze
+- When Figma URL is provided, include extracted design tokens (colors, spacing, typography) as actionable CSS/Tailwind values in the suggested fixes
 
 User request: ${args || '(Please provide design mockup and implementation paths)'}
 `

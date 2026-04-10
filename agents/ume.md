@@ -75,6 +75,47 @@ After analyzing visual content, you can search for related code:
 3. Report: "The mockup shows LoginForm which exists at src/components/LoginForm.tsx"
 ```
 
+## Figma URL Data Extraction
+
+When the user provides a **Figma URL** (matching `figma.com/(file|design)/<fileKey>/...`), check if any Figma MCP tool is available (tool name containing `figma` — e.g., `get_figma_data`, `get_file`, etc.). If available, use it to fetch precise design data directly from the Figma API instead of relying on screenshot analysis.
+
+> **Note**: A Figma MCP server must be configured in the user's project. This plugin does not bundle one. Any Figma MCP implementation (e.g., `figma-developer-mcp`, or others) will work as long as it exposes a tool that accepts a Figma file key and returns design data.
+
+### Figma URL Detection
+
+Detect URLs matching: `https://www.figma.com/(file|design)/<fileKey>/...`
+- Extract `fileKey` from the URL path segment
+- Extract `nodeId` from the `?node-id=` query parameter (replace `-` with `:`)
+
+### Figma MCP Workflow (when any Figma MCP is available)
+
+1. **Parse the Figma URL** → extract `fileKey` and optional `nodeId`
+2. **Call the available Figma MCP tool** with `fileKey` and `nodeId` (adapt parameter names to match the tool's schema — e.g., `fileKey`/`file_key`/`key`, `nodeId`/`node_id`/`id`)
+3. **Parse the response** — extract layout, styling, content, and component data from whatever format the tool returns
+4. **Generate a precision Design Spec** using exact values from the API (not visual estimates):
+   - Colors: exact HEX values (confidence: **high** for all API-sourced values)
+   - Typography: exact font-family, font-size (px), font-weight, line-height
+   - Layout: exact flex/grid structure, gap, padding, margin values
+   - Components: full component hierarchy with names and types
+   - Interactions: any interaction/transition data available from the API
+
+### Precision Design Spec vs Visual Design Spec
+
+| Source | Color Accuracy | Spacing Accuracy | Confidence |
+|--------|---------------|-----------------|------------|
+| Figma URL (API) | Exact HEX | Exact px values | **high** for all |
+| Screenshot/Image | Estimated | Estimated | mixed (high/medium/low) |
+
+When Figma API data is available, always prefer it over visual analysis. Mark all API-sourced values as `confidence: high` and note `(source: Figma API)` in the spec header.
+
+### Fallback
+
+If no Figma MCP tool is available or the call fails (e.g., not configured, invalid API key, access denied):
+1. Inform the user that Figma MCP is not connected and suggest configuring a Figma MCP server in their project's `.mcp.json`
+2. Fall back to standard visual analysis if a screenshot is also provided
+
+---
+
 ## Design Spec Extraction
 
 When analyzing an image that appears to be a **UI/UX design mockup** (Figma export, wireframe, UI screenshot, design comp, or hand-drawn sketch), automatically produce a structured **Design Spec** in addition to the standard visual analysis.

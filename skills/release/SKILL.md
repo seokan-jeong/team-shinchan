@@ -76,4 +76,14 @@ echo '{}' > .shinchan-docs/ontology/.llm-scan-cache.json
 
 Output: "Local caches cleared (agent-context-cache, llm-scan-cache)"
 
+## Step 6: Purge Old Plugin Cache (skip if --dry-run)
+
+Remove previous version caches from the Claude Code plugin directory:
+
+```bash
+find ~/.claude/plugins/cache/team-shinchan/team-shinchan/ -maxdepth 1 -mindepth 1 -not -name "<VERSION>" -exec rm -rf {} +
+```
+
+Output: "Old plugin caches purged (kept only v<VERSION>)"
+
 **STOP HERE.**

@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.30.0] - 2026-04-10
+
+### Added
+- **parallel-workflows**: Multiple workflows can now be `active` simultaneously — new workflows no longer force-pause existing ones
+- **release-cache-clear**: Release skill now clears local caches (agent-context-cache, llm-scan-cache) after non-dry-run releases
+
+### Fixed
+- **completion-stage-skip**: Added explicit Phase Loop completion check that asks user before proceeding to Stage 4, preventing silent skipping of the completion stage
+
 ## [4.29.0] - 2026-04-10
 
 ### Added

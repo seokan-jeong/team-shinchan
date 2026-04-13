@@ -117,25 +117,80 @@ Task(subagent_type="team-shinchan:ume", model="sonnet",
 
 Store result as `{vision_context}`. Skip if no visual input.
 
-### Step 2A: Requirements - Invoke Misae DIRECTLY
+### Step 2A: Requirements — Parent-Orchestrated Interview Loop
 
-**CRITICAL: Do NOT invoke Shinnosuke for Stage 1. Invoke Misae directly (1-level instead of 2-level).**
+**CRITICAL: Sub-agents cannot call `AskUserQuestion` for the user.** The main thread (this skill) drives the interview; Misae designs each question. See `agents/misae.md` § "Parent-Orchestrated Interview Protocol".
+
+**2A.1 — Interview loop (turns 1–5, early-exit on `status: done`):**
+
+```
+answers = []
+for turn in 1..5:
+  result = Task(subagent_type="team-shinchan:misae", model="sonnet", prompt=
+    "mode: DESIGN_NEXT_QUESTION
+    DOC_ID: {DOC_ID} | WORKFLOW_STATE: .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml
+    turn: {turn}
+    prior_answers: {answers}
+    user_request: {args}
+    vision_context: {vision_context or 'None'}
+    Return the interview-question JSON block per agents/misae.md contract.")
+
+  Parse the last ```interview-question ... ``` fenced block in result.
+  If status == "done": break
+  If status == "ask":
+    user_answer = AskUserQuestion(questions=[{
+      question: question,
+      header: header,
+      options: options,       // array of {label, description}
+      multiSelect: multiSelect
+    }])
+    answers.push({turn, question, answer: user_answer})
+```
+
+**2A.2 — Finalize draft (Misae writes REQUESTS.md + runs AK review):**
 
 ```typescript
 Task(subagent_type="team-shinchan:misae", model="sonnet",
-  prompt="Starting Stage 1: Requirements via /team-shinchan:start.
-  DOC_ID: {DOC_ID} | WORKFLOW_STATE: .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml
-  Visual Analysis: {vision_context or 'None'}
-  Mission: Interview user, collect requirements, analyze hidden risks, create REQUESTS.md (Problem, FR/NFR, Scope, Hidden Requirements, Risks, AC), get approval.
-  If visual analysis provided, use as starting point and validate with user.
-  On approval: set current.stage to 'planning', return summary.
-  User request: {args}")
+  prompt=`mode: FINALIZE_DRAFT
+  DOC_ID: ${DOC_ID} | WORKFLOW_STATE: .shinchan-docs/${DOC_ID}/WORKFLOW_STATE.yaml
+  answers: ${JSON.stringify(answers)}
+  user_request: ${args}
+  vision_context: ${vision_context or 'None'}
+  Per agents/misae.md: write REQUESTS.md, run mechanical check, run AK review loop (max 2 retries). Return finalize-result JSON block.`)
+```
+
+Parse the `finalize-result` JSON block.
+- If `ak_verdict == "APPROVED"` → continue to 2A.3.
+- If `ak_verdict == "ESCALATED"` → show rejection_reasons to user and stop (user decides next step per Misae Phase E-4).
+
+**2A.3 — Phase E-2 user approval (parent drives AskUserQuestion):**
+
+```
+user_decision = AskUserQuestion(questions=[{
+  question: "REQUESTS.md을 승인하시겠어요?",
+  header: "최종 승인",
+  options: [
+    {label: "A. 승인 — Stage 2 (Planning)로 진행", description: "현재 REQUESTS.md 내용 그대로 확정"},
+    {label: "B. 수정 필요 — 피드백 제공", description: "어떤 부분을 바꿔야 하는지 알려주세요"}
+  ],
+  multiSelect: false
+}])
+
+If user picked B:
+  feedback = AskUserQuestion free-form or prompt user to describe changes
+  Task(misae, mode: REVISE, user_feedback: feedback)  // loops back through AK
+  Repeat 2A.3.
+
+If user picked A (or equivalent):
+  Task(subagent_type="team-shinchan:misae", model="sonnet",
+    prompt=`mode: TRANSITION
+    DOC_ID: ${DOC_ID}
+    User approved REQUESTS.md. Transition WORKFLOW_STATE to planning.`)
 ```
 
 ### Step 2A-post: Requirements Complete
 
-Misae has already performed hidden requirements analysis as part of Stage 1. No separate analysis needed.
-If Misae's REQUESTS.md is approved, proceed directly to Step 2B.
+Misae has performed hidden requirements analysis as part of FINALIZE_DRAFT. Once TRANSITION returns, proceed to Step 2B.
 
 ### Step 2B: Stage Transition Narration
 

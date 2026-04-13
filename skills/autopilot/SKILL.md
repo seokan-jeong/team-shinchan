@@ -106,12 +106,14 @@ In autopilot mode, Misae performs **autonomous analysis** — no user interview.
 
 ```typescript
 Task(subagent_type="team-shinchan:misae", model="sonnet",
-  prompt="Starting Stage 1: Requirements via /team-shinchan:autopilot (autonomous mode).
+  prompt="mode: AUTONOMOUS (autopilot — no user interview)
   DOC_ID: {DOC_ID} | WORKFLOW_STATE: .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml
   Visual Analysis: {vision_context or 'None'}
 
   ## AUTOPILOT MODE — No User Interview
-  Skip the interactive interview. Instead:
+  CRITICAL: Do NOT emit any `interview-question` JSON block. Do NOT ask the user anything. Do NOT wait for user input. You are a sub-agent and cannot reach the user anyway — the parent will NOT call AskUserQuestion. Any question you write will be silently dropped.
+
+  Instead:
   1. Analyze the user request and infer all requirements autonomously
   2. Identify hidden requirements, risks, and edge cases from the request context
   3. Produce REQUESTS.md (Problem, FR/NFR, Scope, Hidden Requirements, Risks, AC)

@@ -99,21 +99,20 @@ history:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-## 5. Execute Immediately: Invoke Misae
+## 5. Execute Immediately: Parent-Orchestrated Interview
 
-```typescript
-Task(
-  subagent_type="team-shinchan:misae",
-  model="sonnet",
-  prompt="Starting Stage 1: Requirements via /team-shinchan:start.
+**CRITICAL: Sub-agents cannot reach the user via `AskUserQuestion`.** The main thread drives the interview; Misae designs each question. Delegate to `skills/start/SKILL.md § 2A` for the exact protocol, or follow the summary below.
 
-DOC_ID: {DOC_ID}
-WORKFLOW_STATE: .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml
-Mission: Interview user, collect requirements, analyze hidden risks, create REQUESTS.md (Problem, FR/NFR, Scope, Hidden Requirements, Risks, AC), get approval.
-On approval: set current.stage to 'planning', return summary.
-User request: {args}"
-)
-```
+**5.1 Interview loop (turns 1-5, early-exit on `status: done`):**
+- `Task(misae, mode: DESIGN_NEXT_QUESTION, turn, prior_answers, user_request)` → parse `interview-question` JSON block
+- Main thread calls `AskUserQuestion(question, header, options, multiSelect)` with the returned spec
+- Push `{turn, question, answer}` into `answers`; repeat
+
+**5.2 Finalize:** `Task(misae, mode: FINALIZE_DRAFT, answers)` → writes REQUESTS.md, runs mechanical check + AK review; returns `finalize-result` JSON.
+
+**5.3 User approval (Phase E-2):** Main thread calls `AskUserQuestion` asking for approval. If user requests changes, call `Task(misae, mode: REVISE, user_feedback)` and loop. On approval, call `Task(misae, mode: TRANSITION)`.
+
+See `agents/misae.md § "Parent-Orchestrated Interview Protocol"` for the complete JSON contract.
 
 ---
 
@@ -121,7 +120,8 @@ User request: {args}"
 
 - ❌ Only describing the above steps
 - ❌ Proceeding without creating WORKFLOW_STATE.yaml
-- ❌ Proceeding directly without invoking Misae
+- ❌ Calling `Task(misae)` and expecting the sub-agent to interview the user directly (sub-agent `AskUserQuestion` calls never reach the user — the options disappear)
+- ❌ Batching multiple turns into a single Misae call
 
 ## Usage
 

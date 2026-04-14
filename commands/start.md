@@ -105,6 +105,7 @@ history:
 
 **5.1 Interview loop (turns 1-5, early-exit on `status: done`):**
 - `Task(misae, mode: DESIGN_NEXT_QUESTION, turn, prior_answers, user_request)` → parse `interview-question` JSON block
+- **GUARD**: if the block is missing, unparseable, or `options` is empty/has <2 entries, re-invoke Misae with a corrective note (re-read protocol; emit valid block with 2-4 options). Retry up to 2 times; on 3rd failure abort and surface Misae's raw output. NEVER call `AskUserQuestion` with empty options (user sees a question with no choices)
 - Main thread calls `AskUserQuestion(question, header, options, multiSelect)` with the returned spec
 - Push `{turn, question, answer}` into `answers`; repeat
 

@@ -136,12 +136,26 @@ for turn in 1..5:
     Return the interview-question JSON block per agents/misae.md contract.")
 
   Parse the last ```interview-question ... ``` fenced block in result.
+
+  GUARD (parsing / options integrity):
+    - If no `interview-question` block is found, OR the JSON fails to parse,
+      OR status == "ask" but `options` is missing/empty/has <2 entries:
+        Re-invoke Misae with the same mode, appending to the prompt:
+        "CRITICAL: Your previous response had no valid `interview-question`
+         JSON block (or options was empty/insufficient). Re-read
+         agents/misae.md § Parent-Orchestrated Interview Protocol and emit
+         exactly one fenced block tagged `interview-question` with 2-4
+         options. Do NOT return prose only."
+        Retry up to 2 times.
+        On 3rd failure: abort the interview, surface Misae's raw output to
+        the user, and stop — do NOT call AskUserQuestion with empty options.
+
   If status == "done": break
-  If status == "ask":
+  If status == "ask" (and guard passed):
     user_answer = AskUserQuestion(questions=[{
       question: question,
       header: header,
-      options: options,       // array of {label, description}
+      options: options,       // array of {label, description}, length >= 2
       multiSelect: multiSelect
     }])
     answers.push({turn, question, answer: user_answer})

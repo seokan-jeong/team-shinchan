@@ -71,6 +71,16 @@ current:
   phase: null
   owner: misae
   status: active
+  interview: { step: 0, collected_count: 0, last_question: null }
+  ak_gate:
+    requirements:
+      status: pending          # pending | in_review | approved | rejected | escalated
+      retry_count: 0
+      last_rejection_reasons: []
+    planning:
+      status: pending
+      retry_count: 0
+      last_rejection_reasons: []
 
 stage_rules:
   requirements:
@@ -101,13 +111,45 @@ history:
 
 ## 5. Execute Immediately: Parent-Orchestrated Interview
 
-**CRITICAL: Sub-agents cannot reach the user via `AskUserQuestion`.** The main thread drives the interview; Misae designs each question. Delegate to `skills/start/SKILL.md § 2A` for the exact protocol, or follow the summary below.
+**CRITICAL: Sub-agents cannot reach the user via `AskUserQuestion`.** The main thread drives the interview; Misae designs each question. You MUST follow the full protocol in `skills/start/SKILL.md § 2A` — treat that section as the canonical spec and execute it step-by-step. The summary below is a reminder, NOT a replacement.
 
 **5.1 Interview loop (turns 1-5, early-exit on `status: done`):**
-- `Task(misae, mode: DESIGN_NEXT_QUESTION, turn, prior_answers, user_request)` → parse `interview-question` JSON block
-- **GUARD**: if the block is missing, unparseable, or `options` is empty/has <2 entries, re-invoke Misae with a corrective note (re-read protocol; emit valid block with 2-4 options). Retry up to 2 times; on 3rd failure abort and surface Misae's raw output. NEVER call `AskUserQuestion` with empty options (user sees a question with no choices)
-- Main thread calls `AskUserQuestion(question, header, options, multiSelect)` with the returned spec
-- Push `{turn, question, answer}` into `answers`; repeat
+
+```
+answers = []
+for turn in 1..5:
+  result = Task(subagent_type="team-shinchan:misae", model="sonnet", prompt=
+    "mode: DESIGN_NEXT_QUESTION
+    DOC_ID: {DOC_ID} | WORKFLOW_STATE: .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml
+    turn: {turn}
+    prior_answers: {answers}
+    user_request: {args}
+    Return the interview-question JSON block per agents/misae.md contract.")
+
+  Parse the LAST ```interview-question ... ``` fenced block in result.
+
+  GUARD — validate ALL before calling AskUserQuestion:
+    (a) Fenced block exists and JSON parses.
+    (b) status ∈ {"ask", "done"}.
+    (c) If status == "ask":
+        - question is a non-empty string (>= 5 chars)
+        - options is an array with >= 2 entries
+        - every option.label is non-empty (>= 2 chars, not whitespace, not just "A."/"B." alone)
+        - header is a non-empty string
+
+    On ANY failure: re-invoke Misae (same mode) with a corrective prompt
+    citing the SPECIFIC reason (e.g., "options[1].label was empty"), up to
+    2 retries. On 3rd failure, abort and print Misae's raw output verbatim
+    — NEVER call AskUserQuestion with empty/blank options (the user sees a
+    question with no choices and must guess).
+
+  If status == "done": break
+  If status == "ask" (guard passed):
+    user_answer = AskUserQuestion(questions=[{
+      question, header, options, multiSelect
+    }])
+    answers.push({turn, question, answer: user_answer})
+```
 
 **5.2 Finalize:** `Task(misae, mode: FINALIZE_DRAFT, answers)` → writes REQUESTS.md, runs mechanical check + AK review; returns `finalize-result` JSON.
 

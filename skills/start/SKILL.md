@@ -138,17 +138,30 @@ for turn in 1..5:
   Parse the last ```interview-question ... ``` fenced block in result.
 
   GUARD (parsing / options integrity):
-    - If no `interview-question` block is found, OR the JSON fails to parse,
-      OR status == "ask" but `options` is missing/empty/has <2 entries:
-        Re-invoke Misae with the same mode, appending to the prompt:
-        "CRITICAL: Your previous response had no valid `interview-question`
-         JSON block (or options was empty/insufficient). Re-read
-         agents/misae.md § Parent-Orchestrated Interview Protocol and emit
-         exactly one fenced block tagged `interview-question` with 2-4
-         options. Do NOT return prose only."
-        Retry up to 2 times.
-        On 3rd failure: abort the interview, surface Misae's raw output to
-        the user, and stop — do NOT call AskUserQuestion with empty options.
+    Validate ALL of the following before calling AskUserQuestion:
+    (a) An `interview-question` fenced JSON block exists and parses.
+    (b) `status` is "ask" or "done".
+    (c) If status == "ask":
+        - `question` is a non-empty string (>= 5 chars).
+        - `options` is an array with >= 2 entries.
+        - Every option has a `label` that is a non-empty string
+          (>= 2 chars, NOT whitespace-only, NOT just "A." / "B." prefix).
+        - `header` is a non-empty string.
+
+    On ANY validation failure:
+      Re-invoke Misae with mode=DESIGN_NEXT_QUESTION, appending to the prompt:
+      "CRITICAL: Your previous response failed validation: {specific reason,
+       e.g. 'options[1].label was empty', 'no interview-question block
+       found', 'question string too short'}. Re-read agents/misae.md
+       § Parent-Orchestrated Interview Protocol. Emit EXACTLY ONE fenced
+       block tagged `interview-question` containing: non-empty question
+       (>=5 chars), non-empty header, 2-4 options each with a
+       substantive label (e.g. 'A. 성능 병목 해결' — NOT empty string,
+       NOT just 'A.'). Do NOT return prose only."
+      Retry up to 2 times.
+      On 3rd failure: abort the interview, print the raw Misae output
+      verbatim to the user, and STOP. Never call AskUserQuestion with
+      empty/blank options — user would see a question with no choices.
 
   If status == "done": break
   If status == "ask" (and guard passed):

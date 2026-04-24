@@ -62,7 +62,7 @@ Your parent passes a `mode` field in its prompt. You MUST detect the mode and re
 
 #### Mode: `DESIGN_NEXT_QUESTION`
 
-Input from parent: `turn` (1–5), `prior_answers` (list of `{turn, question, answer}`), `user_request`, optional `vision_context`.
+Input from parent: `turn` (1부터 시작, 상한 없음), `prior_answers` (list of `{turn, question, answer}`), `user_request`, optional `vision_context`.
 
 Your job:
 1. Read context (codebase, WORKFLOW_STATE.yaml) — 1-2 Read/Glob/Grep calls minimum.
@@ -93,20 +93,21 @@ Or, if enough information has been collected (typically after Turn 3–5):
 
 **Rules for DESIGN_NEXT_QUESTION**:
 - Return EXACTLY ONE question (never batch).
-- Options: 2–4 entries; last option is usually "직접 입력" / "Other" when free-form is acceptable.
-- Header must include turn counter: `(Turn X/5)`.
+- Options: 2개 이상, 질문에 필요한 만큼 유연하게 제공. "직접 입력" / "Other"는 포함하지 마라 — 부모가 AskUserQuestion 호출 시 자동으로 추가됨.
+- Header must include turn counter: `(Turn X/N)` — N은 예상 총 턴 수이며, 인터뷰 진행에 따라 유동적으로 조정 가능.
 - The JSON block is the contract — the parent parses it. Prose before the block is fine (for streaming transparency) but the block must be valid JSON.
 - DO NOT call `AskUserQuestion` yourself — you don't have the tool.
 
-#### Interview Plan (guidance, not rigid)
+#### Interview Plan (guidance, not rigid — 턴 수는 유동적)
 
 | Turn | Purpose |
 |------|---------|
-| 1 | 문제 정의 (무엇을, 왜) — 2–3 options |
+| 1 | 문제 정의 (무엇을, 왜) |
 | 2 | 범위 선택 — may use `multiSelect: true` |
-| 3 | 대안 접근법 — 2–3 concrete alternatives |
-| 4 | 숨은 요구사항 / 리스크 확인 |
-| 5 | (optional) 추가 제약 확인, 없으면 `status: done` at turn 4 |
+| 3 | 대안 접근법 |
+| 4+ | 숨은 요구사항 / 리스크 / 추가 제약 확인 — 충분히 수집되면 `status: done` |
+
+질문이 2~3턴으로 충분하면 조기 종료하고, 복잡한 요구사항이면 필요한 만큼 계속 진행.
 
 **Self-check before emitting each JSON block**: "Stage=requirements. 요구사항만 수집. 코드 수정/구현 금지."
 
@@ -186,9 +187,9 @@ If a parent invokes you WITHOUT a `mode` field (legacy), treat it as `FINALIZE_D
 
 ### Phase B: User Interview (Parent-Orchestrated)
 - Invoked via mode=`DESIGN_NEXT_QUESTION` — return one question per invocation as `interview-question` JSON block (see Parent-Orchestrated Interview Protocol above).
-- Surface 2-3 concrete alternatives per question; the parent calls AskUserQuestion and passes the user's answer back in the next invocation.
-- Collect functional requirements (FR) across Turns 1-4.
-- Collect non-functional requirements (NFR) across Turns 1-4.
+- 질문에 필요한 만큼 구체적인 대안을 제시 (개수 제한 없음); 부모가 AskUserQuestion을 호출하고 사용자 답변을 다음 호출에 전달.
+- Collect functional requirements (FR) across all interview turns.
+- Collect non-functional requirements (NFR) across all interview turns.
 - Define scope (In/Out) by Turn 2.
 - Options are rendered as numbered choices by the parent; your `label` field already starts with "A. / B. / C." — that label flows through to the user. Keep labels short; put detail in `description`.
 

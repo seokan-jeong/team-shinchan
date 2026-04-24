@@ -113,11 +113,12 @@ history:
 
 **CRITICAL: Sub-agents cannot reach the user via `AskUserQuestion`.** The main thread drives the interview; Misae designs each question. You MUST follow the full protocol in `skills/start/SKILL.md § 2A` — treat that section as the canonical spec and execute it step-by-step. The summary below is a reminder, NOT a replacement.
 
-**5.1 Interview loop (turns 1-5, early-exit on `status: done`):**
+**5.1 Interview loop (유동적 턴 수, `status: done`으로 종료):**
 
 ```
 answers = []
-for turn in 1..5:
+maxTurns = 10  // safety cap — Misae가 status: done을 반환하면 조기 종료
+for turn in 1..maxTurns:
   result = Task(subagent_type="team-shinchan:misae", model="sonnet", prompt=
     "mode: DESIGN_NEXT_QUESTION
     DOC_ID: {DOC_ID} | WORKFLOW_STATE: .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml
@@ -133,7 +134,7 @@ for turn in 1..5:
     (b) status ∈ {"ask", "done"}.
     (c) If status == "ask":
         - question is a non-empty string (>= 5 chars)
-        - options is an array with >= 2 entries
+        - options is an array with >= 2 entries (개수 상한 없음 — 질문에 필요한 만큼 허용)
         - every option.label is non-empty (>= 2 chars, not whitespace, not just "A."/"B." alone)
         - header is a non-empty string
 
@@ -145,9 +146,32 @@ for turn in 1..5:
 
   If status == "done": break
   If status == "ask" (guard passed):
-    user_answer = AskUserQuestion(questions=[{
-      question, header, options, multiSelect
-    }])
+    // OPTIONS OVERFLOW HANDLING:
+    // AskUserQuestion tool allows max 4 options per call.
+    // When Misae returns > 4 options, paginate:
+    if options.length <= 4:
+      user_answer = AskUserQuestion(questions=[{
+        question, header, options, multiSelect
+      }])
+    else:
+      // Split: first 3 options + "더 많은 선택지 보기"
+      page1 = options.slice(0, 3)
+      page1.push({label: "더 많은 선택지 보기", description: "추가 옵션을 확인합니다"})
+      user_answer = AskUserQuestion(questions=[{
+        question, header, options: page1, multiSelect: false
+      }])
+      if user_answer == "더 많은 선택지 보기":
+        remaining = options.slice(3)
+        while remaining.length > 0:
+          page = remaining.slice(0, 4)
+          remaining = remaining.slice(4)
+          if remaining.length > 0:
+            page = page.slice(0, 3)
+            page.push({label: "더 많은 선택지 보기", description: "추가 옵션을 확인합니다"})
+          user_answer = AskUserQuestion(questions=[{
+            question, header, options: page, multiSelect: false
+          }])
+          if user_answer != "더 많은 선택지 보기": break
     answers.push({turn, question, answer: user_answer})
 ```
 

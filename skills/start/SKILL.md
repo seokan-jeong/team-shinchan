@@ -121,11 +121,12 @@ Store result as `{vision_context}`. Skip if no visual input.
 
 **CRITICAL: Sub-agents cannot call `AskUserQuestion` for the user.** The main thread (this skill) drives the interview; Misae designs each question. See `agents/misae.md` § "Parent-Orchestrated Interview Protocol".
 
-**2A.1 — Interview loop (turns 1–5, early-exit on `status: done`):**
+**2A.1 — Interview loop (유동적 턴 수, `status: done`으로 종료):**
 
 ```
 answers = []
-for turn in 1..5:
+maxTurns = 10  // safety cap — Misae가 status: done을 반환하면 조기 종료
+for turn in 1..maxTurns:
   result = Task(subagent_type="team-shinchan:misae", model="sonnet", prompt=
     "mode: DESIGN_NEXT_QUESTION
     DOC_ID: {DOC_ID} | WORKFLOW_STATE: .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml
@@ -143,7 +144,7 @@ for turn in 1..5:
     (b) `status` is "ask" or "done".
     (c) If status == "ask":
         - `question` is a non-empty string (>= 5 chars).
-        - `options` is an array with >= 2 entries.
+        - `options` is an array with >= 2 entries (개수 상한 없음 — 질문에 필요한 만큼 허용).
         - Every option has a `label` that is a non-empty string
           (>= 2 chars, NOT whitespace-only, NOT just "A." / "B." prefix).
         - `header` is a non-empty string.
@@ -155,7 +156,7 @@ for turn in 1..5:
        found', 'question string too short'}. Re-read agents/misae.md
        § Parent-Orchestrated Interview Protocol. Emit EXACTLY ONE fenced
        block tagged `interview-question` containing: non-empty question
-       (>=5 chars), non-empty header, 2-4 options each with a
+       (>=5 chars), non-empty header, 2개 이상 options each with a
        substantive label (e.g. 'A. 성능 병목 해결' — NOT empty string,
        NOT just 'A.'). Do NOT return prose only."
       Retry up to 2 times.
@@ -165,12 +166,34 @@ for turn in 1..5:
 
   If status == "done": break
   If status == "ask" (and guard passed):
-    user_answer = AskUserQuestion(questions=[{
-      question: question,
-      header: header,
-      options: options,       // array of {label, description}, length >= 2
-      multiSelect: multiSelect
-    }])
+    // OPTIONS OVERFLOW HANDLING:
+    // AskUserQuestion tool allows max 4 options per call.
+    // When Misae returns > 4 options, paginate:
+    if options.length <= 4:
+      user_answer = AskUserQuestion(questions=[{
+        question, header, options, multiSelect
+      }])
+    else:
+      // Split: first 3 options + "더 많은 선택지 보기"
+      page1 = options.slice(0, 3)
+      page1.push({label: "더 많은 선택지 보기", description: "추가 옵션을 확인합니다"})
+      user_answer = AskUserQuestion(questions=[{
+        question, header, options: page1, multiSelect: false
+      }])
+      if user_answer == "더 많은 선택지 보기":
+        // Show remaining options (up to 4 per page, repeat if needed)
+        remaining = options.slice(3)
+        while remaining.length > 0:
+          page = remaining.slice(0, 4)
+          remaining = remaining.slice(4)
+          if remaining.length > 0:
+            page = page.slice(0, 3)
+            page.push({label: "더 많은 선택지 보기", description: "추가 옵션을 확인합니다"})
+            remaining = options.slice(3 + (pageNum * 3))  // adjust offset
+          user_answer = AskUserQuestion(questions=[{
+            question, header, options: page, multiSelect: false
+          }])
+          if user_answer != "더 많은 선택지 보기": break
     answers.push({turn, question, answer: user_answer})
 ```
 

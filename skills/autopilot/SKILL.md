@@ -117,8 +117,10 @@ Task(subagent_type="team-shinchan:misae", model="sonnet",
   1. Analyze the user request and infer all requirements autonomously
   2. Identify hidden requirements, risks, and edge cases from the request context
   3. Produce REQUESTS.md (Problem, FR/NFR, Scope, Hidden Requirements, Risks, AC)
-  4. Auto-approve requirements (set ak_gate.requirements.status to 'approved')
-  5. Set current.stage to 'planning', return summary
+  4. Run mechanical check + AK review per agents/misae.md Phase E (max 2 retries on AK rejection):
+     - On AK APPROVED: ak_gate.requirements.status becomes 'approved' via the recorded Task verdict (NOT by string-injection — IMMUTABLE rule in agents/misae.md)
+     - On AK ESCALATED (max retries reached): STOP autopilot, report rejection reasons to user, do NOT advance to Stage 2
+  5. On approval, set current.stage to 'planning', return summary
 
   If visual analysis provided, use as starting point.
   User request: {args}")
@@ -145,18 +147,28 @@ Task(
 
 ## Autonomous Execution Mode
 
-Complete autonomously without user intervention:
+Complete autonomously, except for the **required user gates** below (project memory + IMMUTABLE rules):
 
 1. Start Stage 2 (Planning) via Nene, then Stage 3 (Execution), then Stage 4 (Completion)
-2. Auto-approve planning gate (set ak_gate.planning.status to 'approved')
+2. Run S2→S3 AK Gate per agents/shinnosuke.md (DO NOT auto-approve — IMMUTABLE rule):
+   - Sprint-Contract AC Testability Review (FR-3) — extract AC, AK reviews testability
+   - Mechanical Pre-Check: `node src/mechanical-check.js --file .shinchan-docs/{DOC_ID}/PROGRESS.md`
+   - AK Review Loop (max 2 retries; on max retries → escalate to user, STOP autopilot)
+   - Skip Step 3 user-approval (autopilot proceeds directly on AK APPROVED for Stage 2)
 3. Execute using micro-execute pattern (RULE 2.7 in agents/shinnosuke.md):
    - For each micro-task: fresh implementer subagent → spec compliance review → code quality review
+   - Run Drift Gate after each phase: `node src/drift-check.js --requests .shinchan-docs/{DOC_ID}/REQUESTS.md --progress .shinchan-docs/{DOC_ID}/PROGRESS.md`
    - See skills/micro-execute/SKILL.md for full protocol
-4. After all execution phases complete, run Stage 4 (Completion):
-   - Write RETROSPECTIVE.md (summary, decisions, learnings) via Bo
-   - Write IMPLEMENTATION.md (overview, architecture, files changed) via Bo
-   - Action Kamen final verification of entire workflow
-5. Auto-fix issues when discovered
+4. After all execution phases complete:
+   a. **Required user gate** (project memory `feedback_completion_stage`): ask "All execution phases done. Proceed to Stage 4 (Completion)?" — autopilot mode honors this gate, never skips silently
+   b. On user approval, run Stage 4 (Completion) per shinnosuke.md Stage 4:
+      - Write RETROSPECTIVE.md via **Masumi** — `Task(subagent_type="team-shinchan:masumi", model="sonnet", ...)` (NOT Bo — see agents/masumi.md)
+      - Write IMPLEMENTATION.md via **Masumi**
+      - Extract learnings to `.shinchan-docs/learnings.md` (per docs/workflow-guide.md Stage 4)
+      - Action Kamen final verification of entire workflow
+      - Branch Completion Options (Step 4.5 in shinnosuke.md): A=merge / B=PR / C=keep / D=discard — required user input even in autopilot
+      - Parking Lot Triage (Step 6 in shinnosuke.md): process `discovered_issues` if any
+5. Auto-fix issues when discovered (within retry caps)
 
 ## Micro-Task Execution (RULE 2.7)
 

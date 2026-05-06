@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.35.0] - 2026-05-06
+
+### Fixed
+- **autopilot/AK-GATE-bypass**: Removed `Auto-approve requirements` (Stage 1) and `Auto-approve planning gate` (Stage 2) instructions from `skills/autopilot/SKILL.md`. These were string-injecting approval records without an actual `Task(subagent_type="team-shinchan:actionkamen")` call, violating the IMMUTABLE AK-GATE rule defined in `agents/misae.md` and `agents/shinnosuke.md`. Autopilot now runs the real AK review loop (max 2 retries) and escalates to user on rejection.
+- **autopilot/stage4-author**: Stage 4 documentation (`RETROSPECTIVE.md`, `IMPLEMENTATION.md`) now correctly delegated to **Masumi** instead of Bo, restoring agent role consistency with `agents/masumi.md` and `docs/workflow-guide.md`.
+
+### Added
+- **autopilot/quality-gates**: Autopilot Stage 2-3 prompt now explicitly includes the standard quality gates that were previously missing — Sprint-Contract AC Testability Review (FR-3), Mechanical Pre-Check (`src/mechanical-check.js`), and Drift Gate (`src/drift-check.js`).
+- **autopilot/stage4-completeness**: Stage 4 prompt now covers the full Stage 4 checklist — learnings extraction to `.shinchan-docs/learnings.md`, Branch Completion Options (Step 4.5: A=merge / B=PR / C=keep / D=discard), and Parking Lot Triage (Step 6).
+- **autopilot/stage3-to-4-confirm**: Required user gate before Stage 4 ("All execution phases done. Proceed to Stage 4?") added per project memory (`feedback_completion_stage`), preventing silent skipping of completion stage even in autopilot mode.
+
 ## [4.34.2] - 2026-04-24
 
 ### Changed

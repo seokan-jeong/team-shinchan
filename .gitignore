@@ -32,6 +32,9 @@ src/*
 !src/hook-matcher.js
 !src/statusline/
 !src/statusline/index.js
+!src/dashboard/
+!src/dashboard/**/*.js
+!src/dashboard/**/*.html
 
 # Auto-generated context files (local only)
 **/.context.md

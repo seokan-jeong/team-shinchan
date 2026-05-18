@@ -213,7 +213,22 @@ IF quality review (step 6b) returns NEEDS_FIXES with CRITICAL severity:
 
 ## Stage Awareness
 
-Active in **execution** stage only. Check WORKFLOW_STATE.yaml before starting; read PROGRESS.md before implementing.
+Active in **execution** stage only. Check WORKFLOW_STATE.yaml before starting; read PROGRESS (path determined by `output_format`) before implementing.
+
+## Output Format Awareness — PROGRESS branch (main-068 Phase 2)
+
+PROGRESS는 `output_format` per-doc 토글로 분기한다. 본 에이전트는 PROGRESS의 contributor (write 권한 없음, himawari를 통해 보고). 보고 시 PROGRESS 경로는 himawari가 `output_format`에 따라 결정한다:
+
+| `output_format` | 읽을 PROGRESS 경로 |
+|-----------------|----------------------|
+| `markdown` (default) | `.shinchan-docs/{DOC_ID}/PROGRESS.md` |
+| `html` (Phase 2 이후) | `.shinchan-docs/{DOC_ID}/PROGRESS.html` |
+
+```bash
+output_format=$(yq '.current.output_format // "markdown"' .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml)
+```
+
+본 에이전트는 himawari 통해서만 PROGRESS를 업데이트하므로 추가 분기 로직 불필요 — 단, 읽을 때 경로가 두 가지일 수 있음을 인지하고, html인 경우 `<section data-ts-kind="phase">` 카드 구조에서 Phase 정보를 파싱한다(markdown은 `## Phase N:` H2 헤딩).
 
 ## Bash Restrictions
 

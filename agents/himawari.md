@@ -99,10 +99,29 @@ Report status per domain as table: Domain | Phase (N/M) | Status | Agent. Escala
 
 ---
 
-## PROGRESS.md Management Strategy
+## PROGRESS Management Strategy — branched by output_format
+
+**main-068 Phase 2 fan-out (kazama 구현)**: PROGRESS 산출/업데이트는 `output_format` per-doc 토글로 분기한다. 기존 markdown 경로는 default + 회귀 안전(HR-2). HTML 경로는 nene의 PROGRESS 분기 패턴(Phase 2)을 그대로 따른다.
+
+### Step PM-1: Read `output_format` (single source of truth)
+
+`.shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml`의 `current.output_format` 키를 읽어 PROGRESS 파일 경로를 결정:
+
+```bash
+output_format=$(yq '.current.output_format // "markdown"' .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml)
+# markdown → .shinchan-docs/{DOC_ID}/PROGRESS.md
+# html     → .shinchan-docs/{DOC_ID}/PROGRESS.html
+```
+
+| `output_format` | PROGRESS 경로 | 업데이트 메커니즘 |
+|-----------------|----------------|---------------------|
+| `markdown` (default) | `PROGRESS.md` | YAML frontmatter + Change Log table 행 추가 |
+| `html` (Phase 2 이후) | `PROGRESS.html` | `<table class="ts-change-log">`에 `<tr class="ts-change-log">` 행 추가 |
+
+분기 안전성: 미명시 시 markdown fall-through (HR-2 회귀 안전). 토큰 비용: Phase 2 골든 PROGRESS HTML 비율 1.4297(safety 0.57) 검증됨.
 
 ### Ownership Rules
-- **Himawari owns PROGRESS.md**: Only Himawari creates, updates, and marks phases complete.
+- **Himawari owns PROGRESS**: Only Himawari creates, updates, and marks phases complete (markdown 또는 html, `output_format`에 따름).
 - Executing agents (Bo, Aichan, Bunta, Masao) report results; Himawari writes the update.
 - **No parallel writes**: One agent writes at a time.
 
@@ -115,15 +134,15 @@ Before marking ANY phase complete, verify:
 - Tests pass (agent-reported)
 - Action Kamen review APPROVED
 - No regressions in prior phases (re-run if cross-cutting)
-- PROGRESS.md updated with completion time and summary
+- PROGRESS file (markdown 또는 html) updated with completion time and summary
 
 ### Checkpoint Protocol (Between Phases)
 
-After each phase: update PROGRESS.md, run full test suite, report status to user, verify next phase dependencies, resolve or escalate any blockers.
+After each phase: update PROGRESS (path per `output_format`), run full test suite, report status to user, verify next phase dependencies, resolve or escalate any blockers.
 
 ### Multi-Session Continuity
 
-PROGRESS.md is the single source of truth. Each phase's Change Log records what, by whom, when. On resume: read PROGRESS.md, verify last completed phase, continue from next pending. Never redo completed phases unless Action Kamen flagged regressions.
+PROGRESS (markdown 또는 html per `output_format`) is the single source of truth. Each phase's Change Log records what, by whom, when. On resume: read PROGRESS file at the path determined by `output_format`, verify last completed phase, continue from next pending. Never redo completed phases unless Action Kamen flagged regressions.
 
 ---
 

@@ -94,9 +94,35 @@ Before starting, verify:
 
 ---
 
-## PROGRESS.md Output Format
+## PROGRESS Output Format — branched by output_format
 
-> Template reference: `${CLAUDE_PLUGIN_ROOT}/agents/_shared/templates/PROGRESS.md.tpl`
+**main-068 Phase 2 fan-out (kazama 구현)**: PROGRESS는 `output_format` per-doc 토글로 분기한다. 기존 markdown 경로는 default + 회귀 안전(HR-2). HTML 경로는 misae REQUESTS vslice (Phase 1) 패턴을 그대로 따른다.
+
+### Step P-1: Read `output_format` (single source of truth)
+
+`.shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml`의 `current.output_format` 키 → 권위 있는 단일 소스. 부재 시 global default(`config/output-format.json` Phase 6.3 flip 전까지 `markdown`)를 상속. 키가 명시되어 있으면 명시값 우선.
+
+```bash
+# 의사코드
+output_format=$(yq '.current.output_format // "markdown"' .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml)
+```
+
+### Step P-2: Branch on output_format
+
+| `output_format` 값 | 산출 경로 | 템플릿 | 검증 모드 |
+|--------------------|-----------|--------|-----------|
+| `markdown` (default, 회귀 안전) | `.shinchan-docs/{DOC_ID}/PROGRESS.md` | `${CLAUDE_PLUGIN_ROOT}/agents/_shared/templates/PROGRESS.md.tpl` | mechanical-check markdown 모드 |
+| `html` (main-068 Phase 2 이후) | `.shinchan-docs/{DOC_ID}/PROGRESS.html` | `${CLAUDE_PLUGIN_ROOT}/agents/_shared/templates/PROGRESS.html.tpl` | mechanical-check HTML 모드 (Check HA/HB/HC) |
+
+분기 규칙:
+- markdown 경로는 그대로 기존 흐름(YAML frontmatter + H2 헤딩 섹션).
+- html 경로는 `PROGRESS.html.tpl` fragment 구조를 따른다 — 자세한 클래스/ARIA 규약은 `${CLAUDE_PLUGIN_ROOT}/docs/HTML_STYLE_GUIDE.md` 참조 (특히 § phase 카드 규약, § change-log 항목 규약, § risk-register 항목 규약).
+- 토큰 비용: html 경로 작성 후 반드시 `src/html-token-estimator.js`로 ≤2× 측정. 위반 시 시맨틱 태그/클래스 절제하여 재작성(NFR-3 게이트). Phase 2 골든 PROGRESS 비율 1.4297(safety 0.57) 참고.
+
+### Required sections (양 모드 공통 의미 구조)
+
+> Template reference (markdown): `${CLAUDE_PLUGIN_ROOT}/agents/_shared/templates/PROGRESS.md.tpl`
+> Template reference (html): `${CLAUDE_PLUGIN_ROOT}/agents/_shared/templates/PROGRESS.html.tpl`
 
 Each phase: `## Phase N: {Title} (AC-X)`, with the following metadata header:
 

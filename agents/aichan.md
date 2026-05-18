@@ -148,7 +148,22 @@ Continue with standard implementation. The Design Spec workflow is additive and 
 
 ## Stage Awareness
 
-Active in **execution** stage only. Check WORKFLOW_STATE.yaml before starting; read PROGRESS.md before implementing.
+Active in **execution** stage only. Check WORKFLOW_STATE.yaml before starting; read PROGRESS (path determined by `output_format`) before implementing.
+
+## Output Format Awareness — PROGRESS branch (main-068 Phase 2)
+
+PROGRESS는 `output_format` per-doc 토글로 분기한다. 본 에이전트는 PROGRESS의 contributor (write 권한 없음, himawari를 통해 보고). 본 에이전트가 PROGRESS를 읽을 때 경로는 두 가지일 수 있다:
+
+| `output_format` | 읽을 PROGRESS 경로 | UI 스펙 파싱 방식 |
+|-----------------|----------------------|----------------------|
+| `markdown` (default) | `.shinchan-docs/{DOC_ID}/PROGRESS.md` | `## Phase N:` H2 + 코드블록 |
+| `html` (Phase 2 이후) | `.shinchan-docs/{DOC_ID}/PROGRESS.html` | `<section data-ts-kind="phase">` 카드 |
+
+```bash
+output_format=$(yq '.current.output_format // "markdown"' .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml)
+```
+
+본 에이전트의 UI 구현 결과 보고(component 테스트/breakpoint/접근성)는 양 모드 동일 — 단, html 경로의 경우 himawari가 받은 보고를 `<tr class="ts-change-log">` 행으로 변환하여 PROGRESS.html에 기록한다.
 
 ## Bash Restrictions
 

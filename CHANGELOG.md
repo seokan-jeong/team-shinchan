@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.36.0] - 2026-05-19
+
+### Added
+- **dashboard**: New real-time observability dashboard (`src/dashboard/`) — HTMX + SSE card grid that streams workflow state from `.shinchan-docs/`. Run via `npm run dashboard` (defaults to port 8765, override with `TS_DASHBOARD_PORT`). Covers grid view, per-doc panel, file viewer, status/stage/progress/recent-activity slots, and click-to-load doc rendering.
+- **dashboard/realtime (main-071)**: SSE client now stamps a "마지막 업데이트" indicator on every event + heartbeat + reconnect (`htmx:sseOpen`) and runs a 60s safety-net interval, so users no longer need to hard-refresh to see workflow state changes.
+- **dashboard/done-card-semantics (main-071)**: `computeStageInfo`/`computeActionHint`/`extractRecentActivity` now respect `status: done` — done cards show `progressPct: 100`, no stale "워크플로 마무리 진행 중" action hint, and an `EVENT_VERB_MAP` priority chain (EVENT_VERB_MAP > EVENT_LABELS > slug) turns event slugs into human verb sentences like "사용자가 컨펌했습니다". WCAG AA dim measured at 7.05:1 at `opacity: 0.65`.
+- **mechanical-check/html-mode**: `src/mechanical-check.js` extended with HTML structural validation alongside Markdown — supports the new `agents/_shared/templates/{PROGRESS,REQUESTS,RETROSPECTIVE}.html.tpl` artifacts and is covered by `tests/mechanical-check-html.test.js` + `tests/html-token-estimator.test.js`.
+- **docs**: `docs/HOOKS_DASHBOARD_INTEGRATION.md` documents how the dashboard subscribes to workflow hooks; `docs/HTML_STYLE_GUIDE.md` documents the HTML artifact contract for the templates above.
+- **scripts/nfr-suite.sh**: Aggregated NFR pre-flight suite for dashboard/template work.
+- **tests**: New `tests/dashboard/` unit suite, `tests/e2e/dashboard-card-click.e2e.js`, and `tests/fixtures/` for dashboard/HTML coverage.
+
+### Changed
+- **agents/aichan, bo, bunta, himawari, kazama, masumi, misae, nene**: Agent contracts updated for HTML-template authoring path and dashboard awareness (deliverables, slot vocabulary).
+
+### Fixed
+- **dashboard/field.js (main-071)**: Suppress duplicate `.ts-recent-agent` column when `eventLabel` already leads with the agent name (regression caught at P3 puppeteer acceptance: "shinnosuke shinnosuke가 …"). Legacy agent-less labels still render the column normally.
+
 ## [4.35.0] - 2026-05-06
 
 ### Fixed

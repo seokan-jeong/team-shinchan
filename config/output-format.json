@@ -1,0 +1,69 @@
+{
+  "$schema_version": 1,
+  "$comment": "팀신짱 워크플로 산출물의 output_format global default 설정. main-068 Phase 6.3에서 락. 이 파일을 수정하지 마세요(unless workflow rule change). per-doc override는 .shinchan-docs/<doc_id>/WORKFLOW_STATE.yaml의 current.output_format 필드 사용.",
+  "mode": "auto",
+  "default": "html",
+  "fallback": "markdown",
+  "decision": {
+    "locked_in": "main-068 Phase 6.3",
+    "locked_at": "2026-05-18",
+    "locked_by": "kazama",
+    "source_decision": "OQ-1 (REQUESTS.md / phase-0-decisions.md § OQ-1 / PLAN.md Phase 6 § default flip)",
+    "rationale": [
+      "Phase 6.1 NFR-3 진실 검증에서 4 doc (REQUESTS/PLAN/PROGRESS/RETROSPECTIVE) 모두 1:1 production 측정 PASS (avg ratio 1.27, max 1.42, min 0.93). Phase 1 inflation trick 무관하게 자연스럽게 NFR-3 ≤ 2.0 한도 안전.",
+      "Phase 5에서 markdown ↔ html 양쪽 호환 인프라 완성 (auto/iframe/pre 토글, optionalDependencies + lazy require, archived md 보존).",
+      "Phase 6.2 nfr-suite 8/8 + 전체 테스트 142/142 PASS — 회귀 0 확인.",
+      "main-068 자체 산출물은 OQ-1 결정에 따라 markdown 유지 (부트스트랩 모순 R-9 회피)."
+    ]
+  },
+  "modes": {
+    "auto": {
+      "description": "신규 워크플로(WORKFLOW_STATE.yaml의 created 필드가 본 결정 lock 이후)는 html, 기존 archived는 markdown 유지. 가장 안전 (회귀 0 보장).",
+      "behavior": {
+        "new_workflow": "default 값(html) 적용",
+        "archived_workflow": "기존 frontmatter output_format 그대로 (markdown 보존)",
+        "ambiguous": "frontmatter output_format이 있으면 그 값을 우선"
+      }
+    },
+    "force_html": {
+      "description": "모든 워크플로(신규/archived 무관)에서 html 강제. archived markdown은 자동 변환되지 않음 — 명시적 마이그레이션 필요. 권장하지 않음.",
+      "use_when": "전체 마이그레이션을 한 번에 수행할 때만"
+    },
+    "force_markdown": {
+      "description": "모든 워크플로에서 markdown 강제 (Phase 0~6.3 인프라 미사용). 안전 회귀 모드.",
+      "use_when": "html 인프라 장애 발생 시 또는 markdown 환경 강제 필요 시"
+    }
+  },
+  "override": {
+    "scope": "per-doc",
+    "precedence": [
+      "1. .shinchan-docs/<doc_id>/WORKFLOW_STATE.yaml의 current.output_format (최우선, doc 단위 강제)",
+      "2. 산출물 파일의 frontmatter output_format 키 (read-only 캐시)",
+      "3. 본 파일의 default 값 (mode=auto에서 신규 워크플로에 적용)"
+    ],
+    "example_yaml": {
+      "path": ".shinchan-docs/main-069/WORKFLOW_STATE.yaml",
+      "snippet": "current:\n  output_format: markdown  # 이 워크플로만 강제 markdown\n"
+    }
+  },
+  "fallback_behavior": {
+    "trigger": "html 인프라 (mechanical-check html mode, html-token-estimator 등) 실행 시 uncaught error 발생",
+    "action": "fallback 값(markdown)으로 자동 회귀, exit 0 (NFR-2 fail-safe 준수)",
+    "rationale": "검증 도구 장애가 워크플로 자체를 정지시키지 않도록 보장"
+  },
+  "migration_guide": {
+    "for_new_workflow": "별도 작업 불필요 — auto 모드에서 자동 html 적용. WORKFLOW_STATE.yaml에 current.output_format 키를 추가하지 않으면 default(html) 상속.",
+    "for_existing_archived": "archived/* 디렉토리의 markdown 산출물은 그대로 유지 (auto 모드는 변환하지 않음). 필요 시 수동으로 html.tpl 적용 가능하나 권장하지 않음 (audit trail 보존).",
+    "for_force_markdown_workflow": "WORKFLOW_STATE.yaml에 current.output_format: markdown 명시. 산출물 frontmatter에도 동일 키 자동 반영."
+  },
+  "bootstrap_self_application": {
+    "doc_id": "main-068",
+    "output_format": "markdown",
+    "reason": "OQ-1 결정 (phase-0-decisions.md § OQ-1): 본 워크플로는 인프라 구축 자체가 목적이므로 인프라에 의존하면 부트스트랩 데드락 발생. main-068의 모든 산출물(REQUESTS/PLAN/PROGRESS/RETROSPECTIVE/phase-0-decisions)은 markdown frontmatter 유지. main-069+부터 본 파일의 default(html) 자동 적용."
+  },
+  "verification": {
+    "ak_phase_review": "Phase 6.3 AK 최종 리뷰 시 본 파일의 schema와 결정 일관성 검증",
+    "nfr_3_safety": "Phase 6.1 측정 결과 (avg 1.27, max 1.42) 가 NFR-3 한도(2.0) 대비 0.58 이상 safety margin 확보",
+    "regression_safety": "fallback=markdown으로 인프라 장애 시 자동 회귀, 회귀 0 보장"
+  }
+}

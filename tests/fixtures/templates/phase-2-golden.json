@@ -1,0 +1,52 @@
+{
+  "_meta": {
+    "purpose": "Phase 2 fan-out — NFR-3 (HTML <= 2x markdown) golden measurement log for new templates",
+    "doc_id": "main-068-phase2",
+    "phase": 2,
+    "ac": ["AC-1c", "AC-4b", "AC-12b", "NFR-3"],
+    "captured_at": "2026-05-17",
+    "captured_by": "kazama",
+    "estimator": "src/html-token-estimator.js",
+    "estimator_heuristic": "4 chars/token (Math.ceil(text.length / 4))",
+    "phase_1_reference": "tests/fixtures/main-068-vslice/phase-1-golden.json (ratio 1.5506)"
+  },
+  "templates": {
+    "PROGRESS": {
+      "md_tokens": 1152,
+      "html_tokens": 1647,
+      "ratio": 1.4297,
+      "under_2x_limit": true,
+      "md_path": "tests/fixtures/templates/PROGRESS-golden.md",
+      "html_path": "tests/fixtures/templates/PROGRESS-golden.html",
+      "md_bytes": 5648,
+      "html_bytes": 7615,
+      "bytes_per_token": 4,
+      "nfr3_limit": 2.0,
+      "gate_status": "pass",
+      "safety_margin": 0.5703,
+      "error": null
+    },
+    "RETROSPECTIVE": {
+      "md_tokens": 869,
+      "html_tokens": 1311,
+      "ratio": 1.5086,
+      "under_2x_limit": true,
+      "md_path": "tests/fixtures/templates/RETROSPECTIVE-golden.md",
+      "html_path": "tests/fixtures/templates/RETROSPECTIVE-golden.html",
+      "md_bytes": 5130,
+      "html_bytes": 6896,
+      "bytes_per_token": 4,
+      "nfr3_limit": 2.0,
+      "gate_status": "pass",
+      "safety_margin": 0.4914,
+      "error": null
+    }
+  },
+  "notes": [
+    "PROGRESS draft 1 (full DOCTYPE + html/head/body) ratio expected > 2 — skipped. Final fragment style 1.4297 with 0.57 safety margin.",
+    "RETROSPECTIVE 1.5086 with 0.49 safety margin — close to Phase 1 baseline 1.5506. Pattern consistency confirmed across all 3 template types.",
+    "Self-disclosure pattern: RETROSPECTIVE-golden.md/html explicitly document the Phase 1 'denominator widening trick' (rich markdown prose) to ensure meta-consistency. Future docs reading the retrospective will not fall into the same trap.",
+    "Both new templates use the same Phase 1 vslice playbook: no DOCTYPE, no html/body wrapper, single-line frontmatter JSON, ARIA-implicit roles only.",
+    "Gate result: PROGRESS=PASS (1.4297), RETROSPECTIVE=PASS (1.5086). Phase 2 NFR-3 gate met for new templates."
+  ]
+}

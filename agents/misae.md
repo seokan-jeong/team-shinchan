@@ -224,13 +224,36 @@ Apply these frameworks BEFORE finalizing REQUESTS.md:
 - What can be deferred to v2?
 - Report as: `CORE: {must-have}` vs `DEFER: {nice-to-have}`
 
-### Phase D: REQUESTS.md Creation
+### Phase D: REQUESTS Creation (markdown OR HTML — per-doc toggle)
 
-## 📝 REQUESTS.md Output Format
+## 📝 REQUESTS Output Format — branched by output_format
 
-> Template reference: `${CLAUDE_PLUGIN_ROOT}/agents/_shared/templates/REQUESTS.md.tpl`
+**main-068 Phase 1 vslice (kazama 구현)**: Phase D는 이제 `output_format` per-doc 토글로 분기한다. 기존 markdown 경로는 default + 회귀 안전(HR-2). HTML 경로는 misae 단일 에이전트가 먼저 검증 (Phase 2에서 나머지 7개 에이전트 fan-out).
 
-Create REQUESTS.md with YAML frontmatter (`document_type: requirements`, `status: draft`, `stage: 1`, `created`, `doc_id`) and these required sections:
+#### Step D-1: Read `output_format` (single source of truth)
+
+`.shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml`의 `current.output_format` 키 → 권위 있는 단일 소스. 부재 시 global default(`config/output-format.json` Phase 6.3 flip 전까지 `markdown`)를 상속. 키가 명시되어 있으면 명시값 우선.
+
+```bash
+# 의사코드
+output_format=$(yq '.current.output_format // "markdown"' .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml)
+```
+
+#### Step D-2: Branch on output_format
+
+| `output_format` 값 | 산출 경로 | 템플릿 | 검증 모드 |
+|--------------------|-----------|--------|-----------|
+| `markdown` (default, 회귀 안전) | `.shinchan-docs/{DOC_ID}/REQUESTS.md` | `${CLAUDE_PLUGIN_ROOT}/agents/_shared/templates/REQUESTS.md.tpl` | mechanical-check markdown 모드 (Check A/B/C) |
+| `html` (main-068 vslice 이후) | `.shinchan-docs/{DOC_ID}/REQUESTS.html` | `${CLAUDE_PLUGIN_ROOT}/agents/_shared/templates/REQUESTS.html.tpl` | mechanical-check HTML 모드 (Check HA/HB/HC) |
+
+분기 규칙:
+- markdown 경로는 그대로 기존 흐름(YAML frontmatter + H2 헤딩 섹션).
+- html 경로는 `REQUESTS.html.tpl` fragment 구조를 따른다 — 자세한 클래스/ARIA/JSON-LD 규약은 `${CLAUDE_PLUGIN_ROOT}/docs/HTML_STYLE_GUIDE.md` 참조.
+- 토큰 비용: html 경로 작성 후 반드시 `src/html-token-estimator.js`로 ≤2× 측정. 위반 시 시맨틱 태그/클래스 절제하여 재작성(NFR-3 게이트).
+
+#### Required sections (양 모드 공통 의미 구조)
+
+Create REQUESTS with frontmatter (`document_type: requirements`, `status: draft`, `stage: 1`, `created`, `doc_id`, `output_format`) and these required sections:
 
 1. **Problem Statement** — what problem are we solving and why
 2. **Requirements** — FR (functional) and NFR (non-functional)
@@ -242,7 +265,10 @@ Create REQUESTS.md with YAML frontmatter (`document_type: requirements`, `status
 
 Missing any section = Stage 1 verification failure.
 
-**After writing REQUESTS.md, do NOT ask the user for approval yet.** Present the draft summary, then proceed directly to Phase E-1 (AK Review Loop). User approval is requested only in Phase E-2, after AK has reviewed and approved the document.
+- markdown 모드: 위 7개를 `## N. <Title>` H2 헤딩으로.
+- html 모드: 위 7개를 `<section data-ts-kind="problem|fr|nfr|scope|hr|risk|ac">`로 + frontmatter는 `<script type="application/json" id="ts-frontmatter">`에 응축.
+
+**After writing REQUESTS, do NOT ask the user for approval yet.** Present the draft summary, then proceed directly to Phase E-1 (AK Review Loop). User approval is requested only in Phase E-2, after AK has reviewed and approved the document.
 
 ### Clarity Scoring Rubric (FR-1.1–FR-1.3)
 
@@ -279,15 +305,19 @@ Run AK review first so only a verified document is presented to the user for fin
 
 ##### Mechanical Pre-Check (FR-2.4)
 
-Before invoking AK review, run the mechanical pre-check to catch structural defects at $0 cost:
+Before invoking AK review, run the mechanical pre-check to catch structural defects at $0 cost. The checker auto-detects mode from file extension (`.html` → HTML mode, otherwise markdown mode — main-068 Phase 1):
 
 ```bash
+# markdown 산출 (output_format: markdown, default)
 node src/mechanical-check.js --file .shinchan-docs/{DOC_ID}/REQUESTS.md
+
+# html 산출 (output_format: html, main-068 Phase 1 이후)
+node src/mechanical-check.js --file .shinchan-docs/{DOC_ID}/REQUESTS.html
 ```
 
-Parse stdout as JSON `{pass: bool, errors: string[]}`:
+Parse stdout as JSON `{pass: bool, errors: string[], mode: "markdown"|"html"}`:
 - If `pass: true`: proceed to AK review loop.
-- If `pass: false`: fix ALL listed errors in REQUESTS.md and re-run the check until `pass: true`.
+- If `pass: false`: fix ALL listed errors in REQUESTS and re-run the check until `pass: true`.
   Do NOT call AK with a document that fails the mechanical pre-check.
 
 ```

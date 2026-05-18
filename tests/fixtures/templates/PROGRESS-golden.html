@@ -1,0 +1,102 @@
+<article data-ts-kind="progress" data-ts-doc-id="main-068-phase2" role="document">
+<header data-ts-role="frontmatter">
+<script type="application/json" id="ts-frontmatter">
+{"document_type":"progress","status":"draft","stage":2,"created":"2026-05-17","doc_id":"main-068-phase2","source":"REQUESTS.md","output_format":"html"}
+</script>
+<h1>PROGRESS — 팀신짱 Phase 2 fan-out 골든 샘플</h1>
+</header>
+<section data-ts-kind="overview"><h2>Overview</h2>
+<p>본 PROGRESS는 Phase 2 fan-out 단계의 골든 샘플이다. 7개 에이전트 Phase D 분기 + 2개 잔여 템플릿(PROGRESS/RETROSPECTIVE) 신설 + mechanical-check HA/HB/HC 강화 + 골든 fixture 신설을 한 wave로 묶어 실행한다. Phase 1 vslice의 NFR-3 통과(token ratio 1.5506)를 골든 기준으로 삼아 본 PROGRESS HTML도 동일 휴리스틱으로 측정한다.</p>
+<pre class="mermaid" data-ts-kind="diagram">
+flowchart TD
+  P1[Phase 1 vslice] --> P2[Phase 2 fan-out]
+  P2 --> A1[7 agents Phase D]
+  P2 --> A2[2 new templates]
+  P2 --> A3[mechanical-check strengthened]
+  A1 --> M[merge]
+  A2 --> M
+  A3 --> M
+  M --> P3[Phase 3 dashboard]
+</pre></section>
+<section data-ts-kind="wave-summary"><h2>Wave Execution Summary</h2>
+<table>
+<thead><tr><th>Wave</th><th>Phases</th><th>Parallel</th><th>Artifact Dependency</th></tr></thead>
+<tbody>
+<tr><td>Wave 2</td><td>Phase 2, Phase 3</td><td>true</td><td>Phase 1 통과 후, 서로 파일 충돌 없음</td></tr>
+</tbody></table></section>
+<section class="ts-phase" data-ts-kind="phase" data-ts-id="P2"><h2>Phase 2: 7 에이전트 + 잔여 템플릿 fan-out (AC-2b)</h2>
+<dl>
+<dt>Agent</dt><dd>kazama (구현) + bunta (회귀 테스트)</dd>
+<dt>Wave</dt><dd>2 (parallel=true)</dd>
+<dt>Depends on</dt><dd>Phase 1</dd>
+<dt>artifact_dependency</dt><dd>Phase 1의 REQUESTS.html.tpl + docs/HTML_STYLE_GUIDE.md + Phase 1 vslice의 NFR-3 통과 결과(token ratio ≤2×)</dd>
+</dl>
+<h3>Rationale</h3>
+<p>Phase 1에서 misae+REQUESTS.html 파이프라인을 증명했다. 이제 동일 패턴을 7개 에이전트(nene, masumi, bo, bunta, himawari, kazama, aichan)와 2개 잔여 doc 타입(PROGRESS, RETROSPECTIVE)으로 확장한다. 출력 doc과 에이전트 간 매핑이 1:1이 아니므로 세분화가 필요하다. PROGRESS write 권한자 3명(nene/shinnosuke/himawari)의 doc-write 로직을 분기형으로 바꾸고, RETROSPECTIVE write 권한자 1명(masumi)의 doc-write 로직도 분기형으로 바꾼다. PROGRESS contributor 4명(bo/bunta/kazama/aichan)은 보고 포맷만 표준화한다.</p>
+<p>Alternative rejected: 에이전트당 별도 sub-phase로 쪼개기 — Phase 2-1, 2-2, …, 2-7 → 오버헤드 큼. 대신 한 Phase에 Step 단위로 6개 묶음으로 분할.</p>
+<h3>목표</h3>
+<ul>
+<li>2개 잔여 HTML 템플릿 신설 (PROGRESS.html.tpl, RETROSPECTIVE.html.tpl)</li>
+<li>7 에이전트 Phase D 분기형 수정 완료 → AC-2 전체 통과</li>
+<li>모든 doc-owner의 mechanical-check 호출이 HTML 모드 자동 분기</li>
+<li>스타일 가이드를 PROGRESS/RETROSPECTIVE 클래스셋까지 확장 완료</li>
+</ul>
+<h3>변경 사항</h3>
+<table>
+<thead><tr><th>Action</th><th>File</th><th>Reason</th></tr></thead>
+<tbody>
+<tr><td>Create</td><td><code>agents/_shared/templates/PROGRESS.html.tpl</code></td><td>FR-1/AC-1: PROGRESS.md.tpl와 의미상 동등 HTML</td></tr>
+<tr><td>Create</td><td><code>agents/_shared/templates/RETROSPECTIVE.html.tpl</code></td><td>FR-1/AC-1: RETROSPECTIVE.md.tpl와 의미상 동등 HTML</td></tr>
+<tr><td>Modify</td><td><code>docs/HTML_STYLE_GUIDE.md</code></td><td>FR-10/AC-12: phase/retrospective 클래스셋 추가</td></tr>
+<tr><td>Modify</td><td><code>agents/nene.md</code></td><td>FR-1/AC-2: PROGRESS output_format 분기</td></tr>
+<tr><td>Modify</td><td><code>agents/masumi.md</code></td><td>FR-1/AC-2: RETROSPECTIVE+IMPLEMENTATION 분기</td></tr>
+<tr><td>Modify</td><td><code>agents/bo.md</code></td><td>FR-2: 보고 포맷 표준화</td></tr>
+<tr><td>Modify</td><td><code>agents/bunta.md</code></td><td>FR-2: 보고 포맷 표준화</td></tr>
+<tr><td>Modify</td><td><code>agents/himawari.md</code></td><td>FR-1/AC-2: PROGRESS write 분기</td></tr>
+<tr><td>Modify</td><td><code>agents/kazama.md</code></td><td>FR-2: 보고 포맷 표준화</td></tr>
+<tr><td>Modify</td><td><code>agents/aichan.md</code></td><td>FR-2: 보고 포맷 표준화</td></tr>
+<tr><td>Modify</td><td><code>src/mechanical-check.js</code></td><td>HB-1/HB-2 보강 (article/section 시맨틱 태그)</td></tr>
+<tr><td>Modify</td><td><code>tests/mechanical-check-html.test.js</code></td><td>PROGRESS/RETROSPECTIVE 2케이스 추가</td></tr>
+</tbody></table>
+<p>Cross-reference check: agents/shinnosuke.md는 본 Phase 영역 외, Step 2-5의 drift-check는 기존 markdown 회귀를 유지.</p>
+<section data-ts-kind="ac"><h3>성공 기준</h3>
+<ul>
+<li class="ts-ac" data-ts-id="AC-2b">[ ] AC-2b: 7 에이전트 전부 output_format 토글 진입점 보유</li>
+<li class="ts-ac" data-ts-id="AC-1c">[ ] AC-1c: PROGRESS/RETROSPECTIVE.html.tpl 각각 data-ts-kind 5개 이상</li>
+<li class="ts-ac" data-ts-id="AC-4b">[ ] AC-4b: mechanical-check-html 테스트 11케이스 통과</li>
+<li class="ts-ac" data-ts-id="AC-12b">[ ] AC-12b: HTML_STYLE_GUIDE phase/retrospective/change-log/risk-register H3 ≥ 4</li>
+<li class="ts-ac" data-ts-id="NFR-3">[ ] NFR-3: PROGRESS/RETROSPECTIVE 골든 token_ratio ≤ 2.0</li>
+</ul></section>
+<h3>Change Log</h3>
+<table>
+<thead><tr><th>Date</th><th>Author</th><th>Note</th></tr></thead>
+<tbody>
+<tr class="ts-change-log"><td>2026-05-17</td><td>kazama</td><td>Phase 2 fan-out 초안 작성 — 7 에이전트 + 2 템플릿</td></tr>
+</tbody></table></section>
+<section data-ts-kind="risk"><h2>Risk Register</h2>
+<table>
+<thead><tr><th>ID</th><th>Phase</th><th>Risk</th><th>Severity</th><th>Mitigation</th></tr></thead>
+<tbody>
+<tr class="ts-risk-register ts-risk-h" data-ts-id="R-1"><td>R-1</td><td>Phase 2</td><td>7 에이전트 동시 회귀 → 워크플로 정지</td><td>H</td><td>Phase 1 vslice 통과 후 fan-out, 단위 테스트로 격리, output_format 토글 회귀 안전</td></tr>
+<tr class="ts-risk-register ts-risk-h" data-ts-id="R-2"><td>R-2</td><td>Phase 2</td><td>새 템플릿 토큰 ≤2× 초과 가능</td><td>M</td><td>html-token-estimator로 매 템플릿 측정, 위반 시 시맨틱 절제</td></tr>
+<tr class="ts-risk-register ts-risk-h" data-ts-id="R-3"><td>R-3</td><td>Phase 2</td><td>mechanical-check HB 강화로 기존 케이스 회귀</td><td>M</td><td>7 baseline cases 회귀 테스트 통과 확인 (baseline 보존)</td></tr>
+</tbody></table></section>
+<section data-ts-kind="effort"><h2>Effort Estimates</h2>
+<table>
+<thead><tr><th>Phase</th><th>FR</th><th>Files Changed</th><th>Effort</th><th>Agent</th></tr></thead>
+<tbody>
+<tr class="ts-effort"><td>Phase 2</td><td>FR-1, FR-2, FR-3, FR-10</td><td>13 (2 tpl + guide + 7 agents + mech + test + decision)</td><td>XL</td><td>kazama + bunta</td></tr>
+</tbody></table></section>
+<footer data-ts-role="validation"><h2>Validation Checklist</h2>
+<ul>
+<li>[x] All FR items assigned to phases</li>
+<li>[x] All NFR items addressed (NFR-3 token gate)</li>
+<li>[x] All HR items addressed</li>
+<li>[x] All risks have mitigations</li>
+<li>[x] All AC items covered by phase success criteria</li>
+<li>[x] File conflict analysis complete (Phase 3 disjoint from Phase 2)</li>
+<li>[x] Wave grouping validated — no file conflicts within same wave</li>
+<li>[x] artifact_dependency set where required (Phase 1 NFR-3 통과)</li>
+<li>[ ] User approval pending (Phase 2 골든, no real user)</li>
+</ul></footer>
+</article>

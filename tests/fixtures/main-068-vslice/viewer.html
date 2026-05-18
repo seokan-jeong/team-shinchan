@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Team-Shinchan vslice viewer — main-068-vslice</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root { color-scheme: light dark; --bg:#fafafa; --fg:#1a1a1a; --muted:#666; --accent:#2563eb; --border:#e5e7eb; --risk-h:#dc2626; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --accent:#60a5fa; --border:#1e293b; --risk-h:#f87171; }
+  }
+  body { margin:0; font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--fg); }
+  .viewer-shell { max-width:920px; margin:0 auto; padding:24px; }
+  .viewer-header { border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:24px; }
+  .viewer-header h1 { font-size:1.25rem; margin:0 0 4px; color:var(--accent); }
+  .viewer-header .meta { color:var(--muted); font-size:0.875rem; }
+  .viewer-status { display:inline-block; padding:2px 8px; border-radius:4px; font-size:0.75rem; margin-left:8px; }
+  .viewer-status.ok { background:#10b981; color:white; }
+  .viewer-status.err { background:#ef4444; color:white; }
+  #ts-doc article { background:transparent; }
+  #ts-doc h1 { font-size:1.5rem; }
+  #ts-doc h2 { font-size:1.15rem; border-bottom:1px solid var(--border); padding-bottom:4px; margin-top:1.5em; }
+  #ts-doc h3 { font-size:1rem; color:var(--accent); }
+  #ts-doc table { border-collapse:collapse; width:100%; font-size:0.875rem; }
+  #ts-doc th, #ts-doc td { border:1px solid var(--border); padding:6px 8px; text-align:left; vertical-align:top; }
+  #ts-doc th { background:rgba(0,0,0,0.04); }
+  #ts-doc .ts-risk-h td:nth-child(4) { color:var(--risk-h); font-weight:600; }
+  #ts-doc .ts-requirement { border-left:3px solid var(--accent); padding:8px 12px; margin:8px 0; background:rgba(0,0,0,0.02); }
+  #ts-doc .ts-hr { border-left:3px solid #f59e0b; padding:8px 12px; margin:8px 0; background:rgba(0,0,0,0.02); }
+  #ts-doc footer { border-top:1px solid var(--border); margin-top:24px; padding-top:12px; }
+  #ts-doc script { display:none; }
+  .viewer-fallback { display:none; padding:16px; border:1px dashed var(--border); border-radius:4px; }
+  .viewer-fallback iframe { width:100%; min-height:600px; border:0; }
+  .json-block { background:rgba(0,0,0,0.04); padding:8px; border-radius:4px; font-family:ui-monospace,monospace; font-size:0.75rem; overflow-x:auto; white-space:pre; }
+</style>
+</head>
+<body>
+<div class="viewer-shell">
+  <header class="viewer-header">
+    <h1>Team-Shinchan vslice viewer<span id="status" class="viewer-status">로딩...</span></h1>
+    <div class="meta">
+      doc_id: <code>main-068-vslice</code> · source: <code>REQUESTS.html</code> · mode: static (no server) · phase: 1
+    </div>
+  </header>
+
+  <details>
+    <summary>Frontmatter (parsed)</summary>
+    <pre id="ts-fm-display" class="json-block">(REQUESTS.html 로드 후 표시)</pre>
+  </details>
+
+  <main id="ts-doc">
+    <p class="viewer-fallback-msg" style="color:var(--muted);">REQUESTS.html을 로드 중입니다...</p>
+  </main>
+
+  <div id="fallback" class="viewer-fallback">
+    <p style="margin-top:0;color:var(--muted);"><strong>fetch 실패</strong> — file:// 프로토콜 또는 CORS 제한일 수 있습니다. iframe fallback으로 표시합니다:</p>
+    <iframe src="REQUESTS.html" title="REQUESTS.html (iframe fallback)"></iframe>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var docEl       = document.getElementById('ts-doc');
+  var statusEl    = document.getElementById('status');
+  var fbEl        = document.getElementById('fallback');
+  var fmDisplayEl = document.getElementById('ts-fm-display');
+
+  function setStatus(text, cls) {
+    statusEl.textContent = text;
+    statusEl.className = 'viewer-status ' + (cls || '');
+  }
+
+  function renderInto(html) {
+    docEl.innerHTML = html;
+    // Parse and display frontmatter for proof of round-trip
+    var fmScript = docEl.querySelector('script#ts-frontmatter');
+    if (fmScript) {
+      try {
+        var parsed = JSON.parse(fmScript.textContent);
+        fmDisplayEl.textContent = JSON.stringify(parsed, null, 2);
+        setStatus('렌더 OK · frontmatter parsed', 'ok');
+      } catch (e) {
+        setStatus('렌더 OK · frontmatter parse 실패', 'err');
+        fmDisplayEl.textContent = '/* JSON.parse 실패: ' + e.message + ' */';
+      }
+    } else {
+      setStatus('렌더 OK · frontmatter 없음', 'err');
+    }
+  }
+
+  function showFallback() {
+    setStatus('fetch 실패 — iframe 사용', 'err');
+    fbEl.style.display = 'block';
+  }
+
+  // Primary path: fetch the fragment HTML and inject into #ts-doc
+  if (typeof fetch === 'function') {
+    fetch('REQUESTS.html', { cache: 'no-store' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      })
+      .then(function (html) { renderInto(html); })
+      .catch(function (_err) { showFallback(); });
+  } else {
+    showFallback();
+  }
+})();
+</script>
+</body>
+</html>

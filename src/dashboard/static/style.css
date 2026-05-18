@@ -1,0 +1,1462 @@
+/* src/dashboard/static/style.css
+ *
+ * Phase 8.2 — Linear-style dashboard.
+ *
+ * Design principles (taken from Linear app, not "linear-ish"):
+ *   1. Very dark canvas (#08090a) with a card surface barely lighter (#16171a).
+ *      Depth = surface color + 1px subtle border. Zero shadows.
+ *   2. One accent (#5e6ad2 — Linear brand). Used only for the progress fill,
+ *      focus rings, and the "active" status dot. Status colors (paused/done/
+ *      error) are semantic and stay muted.
+ *   3. Typography: -apple-system / Inter Display. Base 13px, letter-spacing
+ *      -0.012em. Title 14px medium. Caption 11px ALL CAPS faint.
+ *   4. Spacing: 4px grid (8 / 12 / 16 / 20 / 24). Card padding 20px.
+ *   5. Hover: rgba(255,255,255,0.025) shift — almost invisible, but present.
+ *
+ * NFR-6: hand-written, ~370 lines, no build step.
+ */
+
+/* ─── Tokens ──────────────────────────────────────────────────────────── */
+
+:root {
+  /* P6.4 — warm-shifted dark palette. The previous #08090a/#16171a was a
+   * cold near-black that read as "engineering MVP". Shifting half a hue
+   * toward warm (a touch of red+green added to balance the blue chill)
+   * lands on #0b0d12 / #16181f — still deep dark, but the eye reads it as
+   * a *considered* surface, not a console background. */
+  --ts-bg:              #0b0d12;
+  --ts-surface:         #16181f;
+  --ts-surface-hover:   #1d2029;
+  --ts-surface-strong:  #21242e;
+
+  /* Borders */
+  --ts-border:          rgba(255, 255, 255, 0.06);
+  --ts-border-strong:   rgba(255, 255, 255, 0.11);
+  --ts-divider:         rgba(255, 255, 255, 0.045);
+
+  /* Text — slight warm tint so text reads as paper-ink on the warm dark. */
+  --ts-text:            #ebecf0;
+  --ts-text-muted:      #969aa4;
+  --ts-text-faint:      #6a6e78;
+  --ts-text-quiet:      #4d5159;
+
+  /* Legacy alias (some existing selectors still reference --ts-muted). */
+  --ts-muted:           var(--ts-text-muted);
+
+  /* Accent (Linear brand) */
+  --ts-accent:          #5e6ad2;
+  --ts-accent-strong:   #7b87f0;
+  --ts-accent-soft:     rgba(94, 106, 210, 0.18);
+
+  /* Status semantic colors — desaturated to fit Linear palette */
+  --ts-status-active:   #4ea7e9;
+  --ts-status-paused:   #c69b34;
+  --ts-status-done:     #4caf81;
+  --ts-status-archived: #6b6e76;
+  --ts-status-error:    #d36368;
+
+  /* Hint kinds */
+  --ts-hint-info:       var(--ts-accent);
+  --ts-hint-paused:     var(--ts-status-paused);
+  --ts-hint-warning:    #e6a23c;
+  --ts-hint-success:    var(--ts-status-done);
+  --ts-hint-error:      var(--ts-status-error);
+
+  /* Typography
+   * main-069 FR-1.1: lead with Apple HIG system stack (SF Pro Text/Display on
+   * Apple platforms via -apple-system / BlinkMacSystemFont). Inter Display kept
+   * as fallback for non-Apple platforms. system-ui closes the chain. */
+  --ts-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+                  "Inter Display", "Inter", "Helvetica Neue", system-ui,
+                  "Segoe UI", Roboto, Arial, sans-serif;
+  --ts-font-mono: "SF Mono", ui-monospace, Menlo, Consolas, "Liberation Mono", monospace;
+
+  --ts-text-caption: 11px;
+  --ts-text-meta:    12px;
+  --ts-text-body:    13px;
+  --ts-text-title:   14px;
+  --ts-text-h1:      18px;
+
+  --ts-leading-tight: 1.35;
+  --ts-leading-body:  1.5;
+
+  /* Radii */
+  --ts-radius-sm: 4px;
+  --ts-radius:    6px;
+  --ts-radius-lg: 8px;
+
+  /* Motion */
+  --ts-transition: 120ms cubic-bezier(0.2, 0.6, 0.2, 1);
+
+  /* ─── Glassmorphism foundation tokens (main-069 P1) ──────────────────────
+   * Apple HIG / glassmorphism polish layer. These tokens are defined here
+   * but NOT applied to any surface in P1 — P2 wires them into .ts-topbar,
+   * .ts-doc-panel, .ts-card, .ts-conn. Every token is mirrored under
+   * @media (prefers-color-scheme: light) for symmetric light-mode rendering
+   * (FR-1.2). Values pre-validated for WCAG AA against intended surfaces
+   * (final verification in P2/P6). NFR-6: solid translucent rgba fallback
+   * comes via @supports not (backdrop-filter) in P2.
+   * --------------------------------------------------------------------- */
+
+  /* Glass surface backgrounds — dark mode default. P6.1: alpha lowered to
+   * 0.52 / 0.66 (was 0.62 / 0.78) for the Apple Liquid Glass look — more
+   * canvas bleeds through, the surface reads as a real refractive pane.
+   * P6.4: warm-shifted to match the new --ts-surface base. */
+  --ts-glass-bg:        rgba(22, 24, 31, 0.55);
+  --ts-glass-bg-strong: rgba(28, 30, 38, 0.72);
+
+  /* Glass borders — slightly more translucent than --ts-border to read as a
+   * highlight edge on the blurred surface rather than a hard rule. */
+  --ts-glass-border:    rgba(255, 255, 255, 0.10);
+
+  /* Blur radius scale. Used on backdrop-filter in P2. Lighter values on
+   * cards/grids; stronger on doc-panel chrome (HR-5 — chrome only). P6.1:
+   * saturation bumped to Apple "Liquid Glass" levels (180/200%) to punch
+   * background hues through the glass without saturating the glass itself. */
+  --ts-blur:            blur(16px) saturate(180%);
+  --ts-blur-strong:     blur(22px) saturate(200%);
+
+  /* P6.1 Liquid Glass: specular top-edge highlight + inset hairline. Inset
+   * shadow simulates the light catch on the top edge of a glass pane. The
+   * inner hairline keeps the surface boundary readable even when the alpha
+   * is pushed for transparency. Light-mode mirror is under @media block. */
+  --ts-glass-highlight: inset 0 1px 0 0 rgba(255,255,255,0.18),
+                        inset 0 0 0 1px var(--ts-glass-border);
+
+  /* Glass shadow — very subtle, low alpha; rests *under* the glass surface to
+   * lift it off the canvas. Avoid heavy drop shadows (anti-Linear). */
+  --ts-shadow-glass:    0 1px 2px rgba(0, 0, 0, 0.20), 0 8px 24px rgba(0, 0, 0, 0.24);
+
+  /* SSE update flash color (P4 — drives @keyframes ts-just-updated-flash).
+   * Accent-tinted soft pulse so the eye picks it up without alarm. */
+  --ts-flash-color:     rgba(94, 106, 210, 0.32);
+
+  /* Motion easing + durations (P3 / P4 micro-interactions). --ts-easing is a
+   * pure timing function (vs. --ts-transition above which bundles 120ms).
+   * Kept separate so duration and easing can be composed independently. */
+  --ts-easing:          cubic-bezier(0.2, 0.6, 0.2, 1);
+  --ts-duration-micro:  180ms;
+  --ts-duration-flash:  900ms;
+
+  /* main-069 P3: progress sweep accent color for .htmx-request top-border
+   * lifecycle indicator (FR-1.3). Themable via the light-mode block below so
+   * the sweep reads against both dark and light glass surfaces. Alpha kept
+   * mid-range so the gradient mid-stop sweeps as a soft highlight rather than
+   * a hard bar (visible signal, not alarm). */
+  --ts-progress-color:  rgba(94, 106, 210, 0.55);
+
+  /* Typographic tier scale (main-069 P5-A / FR-1.5 / AC-4) — three tiers
+   * applied to existing card classes (no class renames per NFR-4). Primary
+   * (title, 17px/600) > secondary (status/stage/ID/hint, 13px/500) > tertiary
+   * (time, recent rows, 12px/400). Weight + size step together so the eye
+   * ranks lines without depending on color contrast alone. */
+  --ts-font-size-primary:    17px;
+  --ts-font-size-secondary:  13px;
+  --ts-font-size-tertiary:   12px;
+  --ts-font-weight-primary:  600;
+  --ts-font-weight-secondary: 500;
+  --ts-font-weight-tertiary: 400;
+}
+
+/* Light fallback for forced-light environments. */
+@media (prefers-color-scheme: light) {
+  :root {
+    --ts-bg:             #fafafa;
+    --ts-surface:        #ffffff;
+    --ts-surface-hover:  #f5f6f8;
+    --ts-surface-strong: #eceef2;
+    --ts-border:         rgba(0, 0, 0, 0.08);
+    --ts-border-strong:  rgba(0, 0, 0, 0.13);
+    --ts-divider:        rgba(0, 0, 0, 0.05);
+    --ts-text:           #1a1a1f;
+    --ts-text-muted:     #56595f;
+    --ts-text-faint:     #80838a;
+    --ts-text-quiet:     #aaadb3;
+
+    /* main-069 P1: light-mode counterparts for glassmorphism foundation tokens.
+     * Higher alpha on background (0.70-0.82) reads as a soft white frosted
+     * pane over the off-white canvas. Border tints flip to subtle dark for
+     * contrast on a light pane. Shadow alpha kept very low to avoid the
+     * "heavy drop shadow" anti-pattern on light backgrounds. FR-1.2 + HR-4. */
+    --ts-glass-bg:        rgba(255, 255, 255, 0.65);
+    --ts-glass-bg-strong: rgba(255, 255, 255, 0.78);
+    --ts-glass-border:    rgba(0, 0, 0, 0.08);
+    --ts-shadow-glass:    0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.08);
+    /* P6.1: light-mode specular top-edge highlight — softer white tint over
+     * a near-white pane reads as ambient catch rather than a hard line. */
+    --ts-glass-highlight: inset 0 1px 0 0 rgba(255,255,255,0.55),
+                          inset 0 0 0 1px var(--ts-glass-border);
+    /* Flash tint warmer in light mode so it reads as a gentle highlight
+     * against a white-ish surface rather than disappearing into accent. */
+    --ts-flash-color:     rgba(94, 106, 210, 0.22);
+    /* P3 progress sweep accent — bumped saturation/alpha so the gradient
+     * reads against the near-white light glass surface (the dark-mode 0.55
+     * alpha goes flat on white). */
+    --ts-progress-color:  rgba(74, 86, 190, 0.75);
+    /* Blur radius + easing + durations are mode-agnostic — inherited from
+     * :root defaults; no override needed here. */
+
+    /* main-069 P2 (HR-4 / NFR-5 / AC-5): status + hint signal colors on glass.
+     * Dark-mode dots (#4ea7e9 blue, #c69b34 amber, #4caf81 green, #d36368 red)
+     * fail WCAG 1.4.11 3:1 against the near-white glass surface in light mode
+     * (measured contrasts: 2.0-2.7:1). These darker, more saturated variants
+     * push each color above 3:1 against rgba(255,255,255,0.70) glass over the
+     * #fafafa canvas. Used by .ts-status[data-ts-status="*"] .ts-status-dot,
+     * .ts-conn[data-ts-conn="*"]::before, and .ts-hint[data-ts-hint="*"]
+     * .ts-hint-icon (existing dark-mode rules already reference these tokens). */
+    --ts-status-active:   #1a72d1;
+    --ts-status-paused:   #92702a;
+    --ts-status-done:     #1e8458;
+    --ts-status-archived: #595c64;
+    --ts-status-error:    #b03a3f;
+    --ts-hint-warning:    #a36b1f;
+  }
+}
+
+/* ─── Reset + base ────────────────────────────────────────────────────── */
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--ts-bg);
+  color: var(--ts-text);
+  font-family: var(--ts-font-sans);
+  font-size: var(--ts-text-body);
+  line-height: var(--ts-leading-body);
+  letter-spacing: -0.012em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* main-069 P6.4 — ambient canvas. Three layered radial gradients give the
+ * Liquid Glass surfaces something to refract: accent purple top-left, a
+ * cool cyan wash bottom-right, and a warm magenta haze top-right. Fixed
+ * background-attachment so the mesh doesn't scroll under the sticky
+ * topbar (which would dim the refraction effect on scroll). Alpha is
+ * low (0.10–0.16) so the mesh reads as ambient light, not decoration. */
+body {
+  /* P6.4: punchier mesh — three blooms saturate enough to give the glass
+   * panes something to refract on dark. Light-mode block below mirrors at
+   * dramatically lower alpha so the same warmth doesn't bleach. */
+  background-image:
+    radial-gradient(60% 50% at 8% 6%, rgba(94, 106, 210, 0.22), transparent 70%),
+    radial-gradient(55% 50% at 92% 96%, rgba(78, 167, 233, 0.14), transparent 70%),
+    radial-gradient(45% 40% at 96% 6%, rgba(208, 134, 220, 0.10), transparent 70%),
+    radial-gradient(60% 45% at 50% 100%, rgba(76, 175, 129, 0.06), transparent 70%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  position: relative;
+}
+/* Subtle film-grain texture overlay — inline SVG turbulence at very low
+ * opacity. Gives the surface real "tactile" feel; without it the glass
+ * reads as flat color. The filter is rasterised once by the browser then
+ * the resulting noise pattern tiles, so cost is one-shot. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.6'/></svg>");
+  opacity: 0.045;
+  mix-blend-mode: overlay;
+}
+.ts-shell { position: relative; z-index: 1; }
+@media (prefers-color-scheme: light) {
+  body {
+    background-image:
+      radial-gradient(60% 50% at 8% 6%, rgba(94, 106, 210, 0.10), transparent 70%),
+      radial-gradient(55% 50% at 92% 96%, rgba(78, 167, 233, 0.07), transparent 70%),
+      radial-gradient(45% 40% at 96% 6%, rgba(208, 134, 220, 0.05), transparent 70%);
+  }
+  body::before { opacity: 0.03; mix-blend-mode: multiply; }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+a:hover { color: var(--ts-text); }
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+}
+
+code, pre {
+  font-family: var(--ts-font-mono);
+  font-size: 0.92em;
+}
+
+/* ─── Layout chrome ───────────────────────────────────────────────────── */
+
+.ts-shell {
+  /* main-069 P6.2: lifted the chrome cap from 1400 → 1600 so the doc panel
+   * has room to breathe on ultrawide monitors; combined with the 1fr:3fr
+   * split below, the document gets ~75% of the available width.
+   * P6.4: bumped vertical padding 28→36 to let the topbar breathe against
+   * the ambient gradient mesh above it. */
+  max-width: 1640px;
+  margin: 0 auto;
+  padding: 36px 36px 72px;
+}
+
+.ts-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* P6.4: bumped margin-bottom 24→32 and padding 14/18→18/24 so the topbar
+   * reads as a settled chrome pane rather than a tight band. Radius 14→16
+   * for the deeper Apple "pillow" curve at the larger size. */
+  margin-bottom: 32px;
+  padding: 18px 24px;
+  border: 1px solid var(--ts-glass-border);
+  border-radius: 16px;
+  /* main-069 P2 (HR-5) + P6.1: static header chrome — heavy blur + saturate
+   * 200% for Liquid Glass refraction. Specular top-edge highlight stacked
+   * with the lift shadow makes the pane catch light at the top edge. */
+  background: var(--ts-glass-bg);
+  backdrop-filter: var(--ts-blur-strong);
+  -webkit-backdrop-filter: var(--ts-blur-strong);
+  box-shadow: var(--ts-glass-highlight), var(--ts-shadow-glass);
+  /* main-069 P5-B (FR-1.6 a / R-6): sticky topbar. Scroll-ancestor chain
+   * audit — html, body, .ts-shell carry no overflow:hidden constraint, so
+   * position:sticky pins to the viewport as expected. top:8px keeps a small
+   * gap below the viewport edge so the glass border doesn't fuse to the
+   * window chrome. z-index sits above the doc-panel sticky (which uses no
+   * explicit z-index) so the topbar always wins occlusion. */
+  position: sticky;
+  top: 8px;
+  z-index: 20;
+}
+.ts-topbar h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.2;
+}
+.ts-topbar .ts-brand-meta {
+  font-size: var(--ts-text-meta);
+  color: var(--ts-text-muted);
+  margin-top: 2px;
+}
+
+/* Connection indicator — glowing pulse dot (main-069 P6.1 redesign).
+ * The label text is screen-reader-only (.ts-sr-only on data-ts-conn-label);
+ * the visible signal is purely the colored, glowing, breathing dot. The dot
+ * is the [aria-hidden="true"] child <span>. Larger + glow box-shadow makes
+ * it perceivably "alive" rather than a faint inline marker. */
+.ts-conn-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+}
+.ts-conn-indicator > [aria-hidden="true"] {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--ts-text-quiet);
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.04);
+}
+.ts-conn-indicator[data-ts-conn="connected"]   > [aria-hidden="true"] { background: var(--ts-status-done); }
+.ts-conn-indicator[data-ts-conn="connecting"]  > [aria-hidden="true"] { background: var(--ts-status-paused); }
+.ts-conn-indicator[data-ts-conn="lost"]        > [aria-hidden="true"] { background: var(--ts-status-error); }
+
+/* ─── Master-detail split ─────────────────────────────────────────────── */
+/* Phase 8.3 — left grid + right doc panel. Single column under 900px (the
+ * panel collapses below the grid). The right column gets a bit more space
+ * because the iframe needs room to read REQUESTS / PLAN comfortably. */
+
+.ts-split {
+  display: grid;
+  /* main-069 P6.2: document is the primary surface, the card grid is the
+   * navigator. Shift the ratio from 1:1.5 → 1:3 so the doc panel takes ~75%
+   * of the row (still > 280px minimum for the card grid on 1280-class
+   * laptops). The narrower grid forces cards into a single column, which
+   * matches the "scroll list of workflows on the left" mental model.
+   * P6.4: gap 20→28 separates the two surfaces visually. */
+  grid-template-columns: minmax(300px, 1fr) minmax(0, 3fr);
+  gap: 28px;
+  align-items: start;
+}
+.ts-split-left  { min-width: 0; }
+.ts-split-right {
+  min-width: 0;
+  position: sticky;
+  top: 20px;
+  /* Cap at viewport - chrome (approx topbar + padding) so the iframe stays
+   * usable on long pages without scroll-jacking the rest of the page. */
+  max-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 900px) {
+  .ts-split {
+    grid-template-columns: 1fr;
+  }
+  .ts-split-right {
+    position: static;
+    max-height: none;
+  }
+}
+
+/* main-069 P5-C (FR-1.6 c / R-7 / AC-7): narrow-viewport collapse at
+ * ≤ 720px. The 900px breakpoint above already collapses the split to a
+ * single column for tablet-class widths; this tighter rule covers phone
+ * widths where the right pane should stack BELOW the left grid in source
+ * order, sticky behavior must be disabled (a sticky right-pane on a phone
+ * traps content under the topbar), card padding gets a small reduction,
+ * and the grid drops to a single full-width column (vs the 280px minmax
+ * which on a ~360px phone still tries to fit columns). Cards span 100%.
+ * If layout regressions emerge (e.g. master-detail click-through breaks),
+ * the R-7 downgrade path is a width-warning banner — none observed at
+ * P5 implementation, so the collapse is in place. */
+@media (max-width: 720px) {
+  .ts-shell { padding: 16px 14px 40px; }
+  .ts-split { grid-template-columns: 1fr; gap: 14px; }
+  .ts-split-right { position: static; max-height: none; }
+  .ts-grid { grid-template-columns: 1fr; gap: 8px; }
+  .ts-card { padding: 14px 14px; width: 100%; }
+  .ts-topbar { position: static; top: auto; }
+  .ts-doc-panel { min-height: 240px; }
+}
+
+/* ─── Grid ────────────────────────────────────────────────────────────── */
+
+.ts-grid {
+  display: grid;
+  /* Narrower minimum than Phase 8.2 — the right panel now owns half the
+   * viewport, so cards live in a single column on most laptop widths.
+   * P6.4: gap 10→14 lets the glass cards read as discrete tiles. */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+.ts-grid-empty {
+  grid-column: 1 / -1;
+  padding: 40px 0;
+  text-align: center;
+  color: var(--ts-text-muted);
+  font-size: var(--ts-text-meta);
+}
+
+/* ─── Card ────────────────────────────────────────────────────────────── */
+
+.ts-card {
+  /* main-069 P2 + P6.1: glass surface. Lighter --ts-blur on cards keeps
+   * recomputation cheap when SSE-driven swaps re-paint in bursts (HR-5).
+   * P6.1 stacks the specular top-edge highlight under the lift shadow so
+   * each card reads as a discrete Liquid Glass pane.
+   * P6.4: padding 16/18 → 20/22, radius 12 → 14 for the deeper pillow,
+   * subtle translateY on hover so cards lift toward the cursor. */
+  position: relative;
+  background: var(--ts-glass-bg);
+  backdrop-filter: var(--ts-blur);
+  -webkit-backdrop-filter: var(--ts-blur);
+  border: 1px solid var(--ts-glass-border);
+  border-radius: 14px;
+  box-shadow: var(--ts-glass-highlight), var(--ts-shadow-glass);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  /* Phase 8.3: whole card is the click target (loads docs in right panel). */
+  cursor: pointer;
+  transition:
+    background 180ms cubic-bezier(.2,.6,.2,1),
+    border-color 180ms cubic-bezier(.2,.6,.2,1),
+    transform 180ms cubic-bezier(.2,.6,.2,1),
+    box-shadow 180ms cubic-bezier(.2,.6,.2,1);
+}
+.ts-card:hover {
+  background: var(--ts-glass-bg-strong);
+  border-color: var(--ts-border-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--ts-glass-highlight),
+              0 1px 2px rgba(0, 0, 0, 0.20),
+              0 12px 32px rgba(0, 0, 0, 0.30);
+}
+.ts-card:focus-visible {
+  outline: none;
+  border-color: var(--ts-accent);
+  box-shadow: var(--ts-glass-highlight), 0 0 0 3px var(--ts-accent-soft);
+}
+/* P6.4: explicit selected state — accent left bar + brighter glass so users
+ * can always see which workflow is loaded into the doc panel. Set by
+ * dashboard-events.js on card click. */
+.ts-card[data-ts-card-selected="true"] {
+  background: var(--ts-glass-bg-strong);
+  border-color: var(--ts-accent-soft);
+}
+.ts-card[data-ts-card-selected="true"]::before {
+  content: "";
+  position: absolute;
+  top: 14px; bottom: 14px; left: -1px;
+  width: 3px;
+  background: var(--ts-accent);
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 0 12px var(--ts-accent-soft);
+}
+/* Inert variant (snapshot / mail): no pointer affordance. */
+.ts-card:not([hx-get]) { cursor: default; }
+.ts-card[data-ts-status="paused"]   { border-left: 2px solid var(--ts-status-paused); }
+.ts-card[data-ts-status="archived"] { opacity: 0.72; }
+.ts-card[data-ts-status="done"]     { opacity: 0.65; }
+.ts-card[data-ts-status="error"]    { border-left: 2px solid var(--ts-status-error); }
+
+/* Header block */
+.ts-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ts-card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+.ts-card-title {
+  margin: 0;
+  /* main-069 P5-A: primary tier — dominant signal per card. 17px/600
+   * outranks the 13px/500 status row and 12px/400 time row visually. */
+  font-size: var(--ts-font-size-primary);
+  font-weight: var(--ts-font-weight-primary);
+  line-height: 1.35;
+  letter-spacing: -0.018em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: keep-all;
+}
+.ts-card-title a { color: var(--ts-text); }
+.ts-card-title a:hover { color: var(--ts-accent-strong); }
+.ts-card-docid {
+  margin: 0;
+  /* main-069 P5-A: secondary tier — workflow ID + status row share the same
+   * 13px / 500 signal weight so they read together as supporting info. */
+  font-size: var(--ts-font-size-secondary);
+  font-weight: var(--ts-font-weight-secondary);
+  color: var(--ts-text-faint);
+}
+.ts-card-docid code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+/* Status dot + label (top-left of header) */
+.ts-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--ts-text-meta);
+  color: var(--ts-text);
+  white-space: nowrap;
+}
+.ts-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ts-text-quiet);
+  flex-shrink: 0;
+}
+.ts-status[data-ts-status="active"]   .ts-status-dot { background: var(--ts-status-active); }
+.ts-status[data-ts-status="paused"]   .ts-status-dot { background: var(--ts-status-paused); }
+.ts-status[data-ts-status="done"]     .ts-status-dot,
+.ts-status[data-ts-status="completed"] .ts-status-dot { background: var(--ts-status-done); }
+.ts-status[data-ts-status="archived"] .ts-status-dot { background: var(--ts-status-archived); }
+.ts-status[data-ts-status="error"]    .ts-status-dot { background: var(--ts-status-error); }
+.ts-status-label { color: var(--ts-text); }
+.ts-status[data-ts-status="paused"]   .ts-status-label,
+.ts-status[data-ts-status="archived"] .ts-status-label { color: var(--ts-text-muted); }
+
+/* Stage text (top-right) — label + faint count, no chip box */
+.ts-card-stage {
+  /* main-069 P5-A: secondary tier — stage label sits opposite the status pill
+   * and shares its 13px / 500 weight so the top row reads as one ranked band. */
+  font-size: var(--ts-font-size-secondary);
+  font-weight: var(--ts-font-weight-secondary);
+  color: var(--ts-text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  min-width: 0;
+}
+.ts-stage-text { display: inline-flex; align-items: baseline; gap: 6px; }
+.ts-stage-label { color: var(--ts-text); font-weight: 500; }
+.ts-stage-count { color: var(--ts-text-faint); font-variant-numeric: tabular-nums; }
+
+/* Action hint */
+.ts-card-hint:empty { display: none; }
+.ts-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--ts-radius);
+  background: var(--ts-surface-strong);
+  border: 1px solid var(--ts-border);
+  font-size: var(--ts-text-meta);
+  color: var(--ts-text);
+  line-height: 1.4;
+}
+.ts-hint-icon {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--ts-hint-info);
+  flex-shrink: 0;
+}
+.ts-hint[data-ts-hint="paused"]      .ts-hint-icon { background: var(--ts-hint-paused); }
+.ts-hint[data-ts-hint="warning"]     .ts-hint-icon { background: var(--ts-hint-warning); }
+.ts-hint[data-ts-hint="success"]     .ts-hint-icon,
+.ts-hint[data-ts-hint="stage_ready"] .ts-hint-icon { background: var(--ts-hint-success); }
+.ts-hint[data-ts-hint="error"]       .ts-hint-icon { background: var(--ts-hint-error); }
+/* main-069 P5-A: secondary tier — hint text reads at the same band as status
+ * + stage so the hint card aligns with the supporting-info row hierarchy. */
+.ts-hint-text {
+  color: var(--ts-text);
+  font-size: var(--ts-font-size-secondary);
+  font-weight: var(--ts-font-weight-secondary);
+}
+
+/* Progress — hairline bar, no dots */
+.ts-progress { display: flex; flex-direction: column; gap: 6px; }
+.ts-progress-track {
+  position: relative;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--ts-surface-strong);
+  overflow: hidden;
+}
+.ts-progress-fill {
+  height: 100%;
+  background: var(--ts-accent);
+  border-radius: 999px;
+  transition: width 240ms cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+.ts-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--ts-text-caption);
+  color: var(--ts-text-muted);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.ts-progress-phase { color: var(--ts-text-muted); }
+.ts-progress-pct  { color: var(--ts-text); font-weight: 500; }
+
+/* Time row */
+.ts-time-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  /* main-069 P5-A: tertiary tier — time meta is the quietest band. 12px /
+   * 400 weight sits visibly below the 13px / 500 secondary row so the eye
+   * deprioritizes the timestamps after the title and status are absorbed. */
+  font-size: var(--ts-font-size-tertiary);
+  font-weight: var(--ts-font-weight-tertiary);
+  color: var(--ts-text-faint);
+}
+.ts-time-elapsed { color: var(--ts-text-muted); }
+.ts-time-updated { color: var(--ts-text-faint); }
+.ts-time-empty   { color: var(--ts-text-quiet); }
+
+/* Recent activity */
+.ts-card-recent {
+  border-top: 1px solid var(--ts-divider);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ts-card-recent-heading {
+  margin: 0 0 2px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ts-text-faint);
+}
+.ts-recent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ts-recent-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  /* main-069 P5-A: tertiary tier — recent activity rows are the lowest
+   * priority info in the card. 12px / 400 weight matches the time row. */
+  font-size: var(--ts-font-size-tertiary);
+  font-weight: var(--ts-font-weight-tertiary);
+  color: var(--ts-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.ts-recent-time {
+  color: var(--ts-text-faint);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  width: 70px;
+}
+.ts-recent-agent {
+  color: var(--ts-text-muted);
+  flex-shrink: 0;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ts-recent-event {
+  color: var(--ts-text);
+  flex-shrink: 0;
+}
+.ts-recent-sep {
+  color: var(--ts-text-quiet);
+  flex-shrink: 0;
+}
+.ts-recent-note {
+  color: var(--ts-text-muted);
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.ts-recent-empty {
+  margin: 0;
+  font-size: var(--ts-text-meta);
+  color: var(--ts-text-faint);
+  font-style: italic;
+}
+
+/* ─── Doc panel (Phase 8.3 master-detail right pane) ──────────────────── */
+/* The panel sits in .ts-split-right, sticky to the top of the viewport. It
+ * is a column flexbox: header (id + close) → tabs strip → iframe (flex:1
+ * fills remaining height). Empty state replaces all three when no doc is
+ * selected. Tabs scroll horizontally on overflow rather than wrapping —
+ * REQUESTS / PLAN / PROGRESS / IMPLEMENTATION / RETROSPECTIVE in one row. */
+
+.ts-doc-panel {
+  /* main-069 P2 (HR-5) + P6.1: panel wrapper gets moderate --ts-blur. The
+   * iframe inside owns its own opaque surface so we don't stack heavy blur
+   * under iframe re-renders. Heavy blur scoped to the chrome (.ts-doc-header
+   * + .ts-doc-tabs) below. P6.1 adds the specular highlight + bumps radius
+   * for the Apple Liquid Glass pillow form. */
+  background: var(--ts-glass-bg);
+  backdrop-filter: var(--ts-blur);
+  -webkit-backdrop-filter: var(--ts-blur);
+  border: 1px solid var(--ts-glass-border);
+  border-radius: 14px;
+  box-shadow: var(--ts-glass-highlight), var(--ts-shadow-glass);
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+/* Unified chrome strip (P6.4) — merged header + tabs into a single row.
+ * Left: horizontal-scrolling tab list. Right: archived badge (when relevant)
+ * and the close button. Sticky to the top of the panel so the chrome stays
+ * pinned while inner iframe content scrolls. Heavy blur + strong glass alpha
+ * keeps the strip readable as Liquid Glass chrome (main-069 P2 HR-5). */
+.ts-doc-header {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--ts-glass-bg-strong);
+  backdrop-filter: var(--ts-blur-strong);
+  -webkit-backdrop-filter: var(--ts-blur-strong);
+  border-bottom: 1px solid var(--ts-glass-border);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.ts-doc-header-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 10px;
+  flex-shrink: 0;
+}
+.ts-doc-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--ts-border);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ts-text-faint);
+  background: rgba(255,255,255,0.04);
+}
+.ts-doc-close {
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ts-text-muted);
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--ts-transition), color var(--ts-transition);
+}
+.ts-doc-close:hover {
+  background: var(--ts-surface-strong);
+  color: var(--ts-text);
+}
+.ts-doc-close:focus-visible {
+  outline: none;
+  border-color: var(--ts-accent);
+  box-shadow: 0 0 0 3px var(--ts-accent-soft);
+}
+
+/* Tabs — now a flex-row child of .ts-doc-header (P6.4). Scrolls horizontally
+ * if the file list overflows the available width on the left side of the row. */
+.ts-doc-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px 0 12px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.ts-doc-tabs::-webkit-scrollbar { height: 4px; }
+.ts-doc-tabs::-webkit-scrollbar-thumb { background: var(--ts-border-strong); border-radius: 2px; }
+
+.ts-doc-tab {
+  appearance: none;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 13px 14px 11px;
+  margin-bottom: -1px;
+  color: var(--ts-text-muted);
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--ts-transition), border-color var(--ts-transition), background var(--ts-transition);
+}
+.ts-doc-tab:hover {
+  color: var(--ts-text);
+  background: rgba(255,255,255,0.03);
+}
+.ts-doc-tab[aria-selected="true"] {
+  color: var(--ts-text);
+  border-bottom-color: var(--ts-accent);
+  font-weight: 600;
+}
+.ts-doc-tab:focus-visible {
+  outline: none;
+  color: var(--ts-text);
+  box-shadow: inset 0 0 0 2px var(--ts-accent-soft);
+  border-radius: var(--ts-radius-sm) var(--ts-radius-sm) 0 0;
+}
+@media (prefers-color-scheme: light) {
+  .ts-doc-tab:hover { background: rgba(0,0,0,0.03); }
+}
+
+/* Iframe — fills remaining height, no border (panel border owns the chrome). */
+.ts-doc-iframe {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 960px;
+  border: 0;
+  background: var(--ts-bg);
+  display: block;
+}
+
+/* Empty state — centered placeholder when no card is selected.
+ * main-069 P5-D (FR-1.7): the default empty surfaces with a subtle icon area
+ * (rendered via ::before — no inline SVG file, no extra HTTP request, no
+ * static-asset footprint). The error variant (data-ts-doc-empty="error") is
+ * triggered by dashboard-events.js on htmx:swapError per Q3 default. */
+.ts-doc-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+  gap: 10px;
+  min-height: 320px;
+  flex: 1 1 auto;
+}
+/* Subtle icon area painted as a 32px ringed dot. No inline SVG → zero
+ * payload footprint vs an <svg> data URL; reads as a neutral chrome glyph
+ * that the eye registers without competing with the title text. */
+.ts-doc-empty::before {
+  content: "";
+  display: block;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ts-text-quiet);
+  opacity: 0.45;
+  margin-bottom: 4px;
+}
+.ts-doc-empty-title {
+  margin: 0;
+  /* main-069 P5-A/P5-D: tier-align the empty state with the card title so
+   * the panel keeps a consistent typographic rank when readers glance over. */
+  font-size: var(--ts-font-size-primary);
+  font-weight: var(--ts-font-weight-primary);
+  letter-spacing: -0.012em;
+  color: var(--ts-text);
+}
+.ts-doc-empty-hint {
+  margin: 0;
+  font-size: var(--ts-font-size-secondary);
+  font-weight: var(--ts-font-weight-tertiary);
+  color: var(--ts-text-muted);
+  max-width: 360px;
+  line-height: 1.5;
+}
+/* Error variant — JS sets data-ts-doc-empty="error" via htmx:swapError. The
+ * border tint flips to the error color and the title picks up the same hue
+ * so the user reads "this failed to load" before parsing the hint copy. */
+.ts-doc-empty[data-ts-doc-empty="error"]::before {
+  border-color: var(--ts-status-error);
+  opacity: 0.9;
+}
+.ts-doc-empty[data-ts-doc-empty="error"] .ts-doc-empty-title {
+  color: var(--ts-status-error);
+}
+.ts-doc-empty[data-ts-doc-empty="error"] .ts-doc-empty-hint {
+  color: var(--ts-text);
+}
+
+/* ─── Footer (actions + files) ────────────────────────────────────────── */
+
+.ts-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ts-divider);
+}
+.ts-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: var(--ts-radius);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ts-text-muted);
+  font-size: var(--ts-text-meta);
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--ts-transition), color var(--ts-transition), border-color var(--ts-transition);
+}
+.ts-btn:hover {
+  background: var(--ts-surface-strong);
+  color: var(--ts-text);
+  border-color: var(--ts-border);
+}
+.ts-btn:focus-visible {
+  outline: none;
+  border-color: var(--ts-accent);
+  box-shadow: 0 0 0 1px var(--ts-accent-soft);
+}
+
+/* Files dropdown */
+.ts-files {
+  margin-top: 6px;
+  padding-top: 0;
+  font-size: var(--ts-text-meta);
+}
+.ts-files > summary {
+  list-style: none;
+  cursor: pointer;
+  color: var(--ts-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+.ts-files > summary::-webkit-details-marker { display: none; }
+.ts-files > summary::before {
+  content: "▸";
+  font-size: 9px;
+  color: var(--ts-text-faint);
+  transition: transform var(--ts-transition);
+}
+.ts-files[open] > summary::before { transform: rotate(90deg); }
+.ts-files > summary:hover { color: var(--ts-text); }
+.ts-files ul {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ts-files li { display: flex; align-items: baseline; gap: 8px; }
+.ts-files a {
+  color: var(--ts-text);
+  font-size: var(--ts-text-meta);
+}
+.ts-files a:hover { color: var(--ts-accent-strong); }
+.ts-files-empty {
+  color: var(--ts-muted);
+  font-style: italic;
+}
+.ts-files .ts-file-size {
+  margin-left: auto;
+  color: var(--ts-text-faint);
+  font-size: var(--ts-text-caption);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Utility ─────────────────────────────────────────────────────────── */
+
+.ts-sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
+}
+
+/* ─── HTMX lifecycle micro-interactions (main-069 P3 / FR-1.3) ───────────
+ * htmx applies these classes automatically during request/swap:
+ *   .htmx-request  → on trigger (NOT target) while request is in flight
+ *   .htmx-swapping → on swap target during the transition
+ *   .htmx-added    → on newly inserted nodes after swap
+ *   .htmx-settling → bridge phase; covered implicitly by swapping + added
+ * The .htmx-request state uses a 2px top-border gradient sweep (cheaper
+ * than a skeleton-tree; no DOM mutation; no layout shift). Reduced-motion
+ * coverage lives in the @media block at end of file (HR-3 / NFR-5).
+ * ----------------------------------------------------------------------- */
+
+/* Top-border gradient sweep painted via ::before background-image so it
+ * adds no real 2px edge (no layout shift). background-size 200% gives the
+ * gradient enough travel for the keyframe to sweep across. */
+.htmx-request {
+  position: relative;
+}
+.htmx-request::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 30%,
+    var(--ts-progress-color) 50%,
+    transparent 70%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  background-position: -50% 0;
+  animation: ts-progress-sweep 1200ms linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Swap target dip — subtle scale + opacity so the user perceives a
+ * "make way" beat before new content lands. */
+.htmx-swapping {
+  opacity: 0.6;
+  transform: scale(0.99);
+  transition:
+    opacity 120ms var(--ts-easing),
+    transform 120ms var(--ts-easing);
+}
+
+/* Newly inserted nodes — fade + slight translate so additions ease in. */
+.htmx-added {
+  animation: ts-fade-in 200ms var(--ts-easing) 1;
+}
+
+@keyframes ts-progress-sweep {
+  0%   { background-position: -50% 0; }
+  100% { background-position: 150% 0; }
+}
+
+@keyframes ts-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── SSE update flash (main-069 P4 / FR-1.4) ─────────────────────────────
+ * `data-ts-just-updated="true"` is toggled by dashboard-events.js for ~1.5s
+ * after each card-level SSE swap (handleSwap "card" / "field" / "add" cases,
+ * plus card-level htmx:afterSwap). The keyframe paints a soft backdrop tint
+ * and a single-pulse border accent that fades back to the resting glass
+ * state. Confined to `.ts-card[data-ts-just-updated]` so the flash does not
+ * bleed into descendant cards or unrelated elements. Reduced-motion users
+ * see a static outline accent instead of the pulsing animation (HR-3).
+ * ----------------------------------------------------------------------- */
+@keyframes ts-flash-pulse {
+  0% {
+    background-color: var(--ts-flash-color);
+    border-color: var(--ts-flash-color);
+  }
+  60% {
+    background-color: var(--ts-flash-color);
+    border-color: var(--ts-flash-color);
+  }
+  100% {
+    background-color: transparent;
+    border-color: var(--ts-glass-border);
+  }
+}
+
+.ts-card[data-ts-just-updated="true"] {
+  /* Single-iteration soft pulse using the P1 --ts-flash-color token. The
+   * 1500ms duration matches the JS-side timer in dashboard-events.js so
+   * the animation completes the same frame the attribute is removed.
+   * Linear timing so the perceived tint is steady, with the keyframe's
+   * 60% hold + 100% fade providing the visual decay (not the easing). */
+  animation: ts-flash-pulse 1500ms linear 1;
+}
+
+/* ─── Connection pulse (main-069 P5-E + P6.1 redesign / FR-1.8 / AC-8) ───
+ * The connected dot loops a glow breath — box-shadow alpha pulses from a
+ * tight halo to a wider, brighter aura, so the operator perceives "live" as
+ * a living light rather than a fade. The dot color stays steady. Lost state
+ * keeps a static red dot (no motion = anti-alarm signal for failure). The
+ * `connecting` (amber) state also pulses so the user reads "trying" as
+ * activity. Reduced-motion neutralizes the loop while preserving the color
+ * coding (reduced-motion block at end of file restores the resting glow).
+ * ----------------------------------------------------------------------- */
+@keyframes ts-conn-pulse-connected {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(76,175,129,0.18), 0 0 8px 1px rgba(76,175,129,0.45); }
+  50%      { box-shadow: 0 0 0 4px rgba(76,175,129,0.10), 0 0 14px 3px rgba(76,175,129,0.65); }
+}
+@keyframes ts-conn-pulse-connecting {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(198,155,52,0.18), 0 0 8px 1px rgba(198,155,52,0.45); }
+  50%      { box-shadow: 0 0 0 4px rgba(198,155,52,0.10), 0 0 14px 3px rgba(198,155,52,0.65); }
+}
+.ts-conn-indicator[data-ts-conn="connected"]  > [aria-hidden="true"] {
+  animation: ts-conn-pulse-connected 2.2s var(--ts-easing) infinite;
+}
+.ts-conn-indicator[data-ts-conn="connecting"] > [aria-hidden="true"] {
+  animation: ts-conn-pulse-connecting 1.4s var(--ts-easing) infinite;
+}
+.ts-conn-indicator[data-ts-conn="lost"]       > [aria-hidden="true"] {
+  box-shadow: 0 0 0 2px rgba(211,99,104,0.18), 0 0 10px 2px rgba(211,99,104,0.55);
+}
+
+/* ─── @supports fallback — no backdrop-filter ─────────────────────────────
+ * main-069 P2 (NFR-6 / R-2): when the browser does not implement
+ * backdrop-filter, swap every glass surface to a slightly more opaque solid
+ * translucent background. Same rgba colors as --ts-glass-bg / -strong but
+ * with alpha bumped (0.62 → 0.88, 0.78 → 0.94) so the surface is legible
+ * without the blur giving it presence. No layout collapse — every property
+ * here is paint-only. Mirrored under prefers-color-scheme: light so light
+ * users hit the same fallback shape. The duplicated solid colors live here
+ * rather than as tokens because they only exist as a fallback for one
+ * browser cohort; promoting them to :root would add cognitive noise.
+ * ----------------------------------------------------------------------- */
+@supports not (backdrop-filter: blur(1px)) {
+  .ts-topbar,
+  .ts-card,
+  .ts-doc-panel {
+    background: rgba(22, 23, 26, 0.88);
+  }
+  .ts-doc-header,
+  .ts-doc-tabs {
+    background: rgba(22, 23, 26, 0.94);
+  }
+  .ts-card:hover {
+    background: rgba(22, 23, 26, 0.94);
+  }
+}
+@media (prefers-color-scheme: light) {
+  @supports not (backdrop-filter: blur(1px)) {
+    .ts-topbar,
+    .ts-card,
+    .ts-doc-panel {
+      background: rgba(255, 255, 255, 0.92);
+    }
+    .ts-doc-header,
+    .ts-doc-tabs {
+      background: rgba(255, 255, 255, 0.96);
+    }
+    .ts-card:hover {
+      background: rgba(255, 255, 255, 0.96);
+    }
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+  /* main-069 P3 (HR-3 / NFR-5): the universal selector above already
+   * neutralizes the .htmx-swapping transition and the .htmx-request /
+   * .htmx-added keyframe animations, but the dipped rest state on
+   * .htmx-swapping (opacity: 0.6; transform: scale(0.99)) would freeze
+   * visually with animation:none and never recover until the swap class
+   * is removed by htmx. Explicitly restore the resting visual so reduced-
+   * motion users see no perceptible mid-swap dip. */
+  .htmx-swapping {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  /* The .htmx-request ::before sweep is also neutralized by animation:none
+   * above. Hide it entirely under reduced-motion so the static gradient
+   * mid-stop doesn't sit on the top edge as a frozen bar. */
+  .htmx-request::before {
+    display: none !important;
+  }
+  /* main-069 P4 (HR-3): with animation:none the .ts-flash-pulse keyframe
+   * never fires, but reduced-motion users still need a perceivable "this
+   * card just updated" signal. Swap the pulse for a static outline accent
+   * that paints for the duration the attribute is set (JS clears at 1500ms).
+   * The outline is paint-only — no transform, no animation — so it respects
+   * the reduced-motion contract while preserving the information cue. */
+  .ts-card[data-ts-just-updated="true"] {
+    outline: 1px solid var(--ts-flash-color);
+    outline-offset: 0;
+    animation: none !important;
+  }
+  /* main-069 P5-E + P6.1 (FR-1.8 / HR-3): the universal animation:none above
+   * already kills the ts-conn-pulse loops. Reduced-motion users still get
+   * the color-coded dot (green=connected, amber=connecting, red=lost) plus
+   * a static glow halo — the absence of motion is the contract, but the
+   * resting halo keeps the dot from looking like a flat marker. */
+  .ts-conn-indicator > [aria-hidden="true"] {
+    animation: none !important;
+  }
+  .ts-conn-indicator[data-ts-conn="connected"]  > [aria-hidden="true"] {
+    box-shadow: 0 0 0 2px rgba(76,175,129,0.18), 0 0 8px 1px rgba(76,175,129,0.45);
+  }
+  .ts-conn-indicator[data-ts-conn="connecting"] > [aria-hidden="true"] {
+    box-shadow: 0 0 0 2px rgba(198,155,52,0.18), 0 0 8px 1px rgba(198,155,52,0.45);
+  }
+}
+
+/* ─── P6.4 — brand mark + connection chip + tab icons + status pills ───── */
+/* These rules replace the old "system stack title + sr-only label" pattern
+ * with a designed brand surface: a gradient-filled SVG mark, a wordmark with
+ * proper display weight, and a live connection chip whose label is visible
+ * (not just a colored dot). Tabs gain inline SVG icons; status badges become
+ * filled pills tinted by semantic color. */
+
+.ts-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.ts-brand-mark {
+  width: 32px; height: 32px;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(94, 106, 210, 0.32));
+  transition: transform 220ms cubic-bezier(.2,.6,.2,1);
+}
+.ts-brand-mark svg { width: 100%; height: 100%; display: block; }
+.ts-topbar:hover .ts-brand-mark { transform: rotate(-4deg) scale(1.04); }
+.ts-brand-text { display: inline-flex; flex-direction: column; line-height: 1.1; min-width: 0; }
+.ts-brand-name {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.022em;
+  color: var(--ts-text);
+  font-feature-settings: "ss01", "cv11";
+}
+.ts-brand-meta {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ts-text-faint);
+  margin-top: 3px;
+}
+@media (prefers-color-scheme: light) {
+  .ts-brand-mark { filter: drop-shadow(0 2px 8px rgba(94, 106, 210, 0.22)); }
+}
+
+/* Last-update indicator — relative time string ("N초 전" / "N분 전") written
+ * by dashboard-events.js. Sits to the LEFT of the connection chip in .ts-meta.
+ * Empty by default; CSS :empty hides it. */
+.ts-last-update {
+  color: var(--ts-text-quiet);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  margin-right: 4px;
+}
+.ts-last-update:empty { display: none; }
+
+/* Live connection chip — the label is now visible (previously sr-only). The
+ * dot pulses on connecting/lost, glows when connected. Whole chip is glass. */
+.ts-conn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 10px;
+  background: var(--ts-glass-bg);
+  -webkit-backdrop-filter: var(--ts-blur);
+  backdrop-filter: var(--ts-blur);
+  border: 1px solid var(--ts-glass-border);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ts-text-muted);
+  box-shadow: var(--ts-glass-highlight);
+}
+.ts-conn-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--ts-text-quiet);
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.04);
+  flex-shrink: 0;
+}
+.ts-conn-chip[data-ts-conn="connected"]  .ts-conn-dot {
+  background: var(--ts-status-done);
+  box-shadow: 0 0 0 2px rgba(76,175,129,0.20), 0 0 10px 2px rgba(76,175,129,0.55);
+  animation: ts-conn-breathe 2.4s ease-in-out infinite;
+}
+.ts-conn-chip[data-ts-conn="connecting"] .ts-conn-dot {
+  background: var(--ts-status-paused);
+  box-shadow: 0 0 0 2px rgba(198,155,52,0.20), 0 0 10px 2px rgba(198,155,52,0.55);
+  animation: ts-conn-blink 1.1s ease-in-out infinite;
+}
+.ts-conn-chip[data-ts-conn="lost"]       .ts-conn-dot {
+  background: var(--ts-status-error);
+  box-shadow: 0 0 0 2px rgba(211,99,104,0.20), 0 0 10px 2px rgba(211,99,104,0.55);
+  animation: ts-conn-blink 0.9s ease-in-out infinite;
+}
+.ts-conn-chip[data-ts-conn="connected"]  .ts-conn-text { color: var(--ts-status-done); }
+.ts-conn-chip[data-ts-conn="connecting"] .ts-conn-text { color: var(--ts-status-paused); }
+.ts-conn-chip[data-ts-conn="lost"]       .ts-conn-text { color: var(--ts-status-error); }
+
+@keyframes ts-conn-breathe {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(76,175,129,0.20), 0 0 10px 2px rgba(76,175,129,0.55); }
+  50%      { box-shadow: 0 0 0 2px rgba(76,175,129,0.32), 0 0 14px 3px rgba(76,175,129,0.78); }
+}
+@keyframes ts-conn-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+
+/* Tab icons — inline SVG strokes inherit currentColor so they tint with the
+ * tab text. Selected tab inherits the accent text color → icon strokes too. */
+.ts-doc-tab { display: inline-flex; align-items: center; gap: 7px; }
+.ts-doc-tab-icon { flex-shrink: 0; opacity: 0.7; transition: opacity 180ms; }
+.ts-doc-tab:hover .ts-doc-tab-icon,
+.ts-doc-tab[aria-selected="true"] .ts-doc-tab-icon { opacity: 1; }
+.ts-doc-tab[aria-selected="true"] .ts-doc-tab-icon { color: var(--ts-accent-strong); }
+.ts-doc-tab-label { display: inline-block; }
+
+/* Status badge → filled pill (override of the dot+label inline default). The
+ * existing .ts-status / .ts-status-dot / .ts-status-label markup stays; we
+ * just restyle them so each status reads as a tinted chip with semantic
+ * color, not a hairline dot. */
+.ts-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px 3px 7px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.ts-status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--ts-text-quiet);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.03);
+}
+.ts-status[data-ts-status="active"] {
+  background: rgba(78, 167, 233, 0.10);
+  border-color: rgba(78, 167, 233, 0.30);
+  color: #92cdff;
+}
+.ts-status[data-ts-status="active"] .ts-status-dot {
+  background: var(--ts-status-active);
+  box-shadow: 0 0 8px rgba(78, 167, 233, 0.6);
+}
+.ts-status[data-ts-status="paused"] {
+  background: rgba(198, 155, 52, 0.10);
+  border-color: rgba(198, 155, 52, 0.30);
+  color: #f0c468;
+}
+.ts-status[data-ts-status="paused"] .ts-status-dot {
+  background: var(--ts-status-paused);
+  box-shadow: 0 0 8px rgba(198, 155, 52, 0.5);
+}
+.ts-status[data-ts-status="done"],
+.ts-status[data-ts-status="completed"] {
+  background: rgba(76, 175, 129, 0.10);
+  border-color: rgba(76, 175, 129, 0.30);
+  color: #6bd5a6;
+}
+.ts-status[data-ts-status="done"]      .ts-status-dot,
+.ts-status[data-ts-status="completed"] .ts-status-dot {
+  background: var(--ts-status-done);
+  box-shadow: 0 0 8px rgba(76, 175, 129, 0.5);
+}
+.ts-status[data-ts-status="archived"] {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.06);
+  color: var(--ts-text-faint);
+}
+.ts-status[data-ts-status="error"] {
+  background: rgba(211, 99, 104, 0.12);
+  border-color: rgba(211, 99, 104, 0.35);
+  color: #f08a8e;
+}
+.ts-status[data-ts-status="error"] .ts-status-dot {
+  background: var(--ts-status-error);
+  box-shadow: 0 0 8px rgba(211, 99, 104, 0.6);
+}
+.ts-status-label { color: inherit; }
+@media (prefers-color-scheme: light) {
+  .ts-status[data-ts-status="active"]    { color: #1665b3; }
+  .ts-status[data-ts-status="paused"]    { color: #7d5a1f; }
+  .ts-status[data-ts-status="done"],
+  .ts-status[data-ts-status="completed"] { color: #176b48; }
+  .ts-status[data-ts-status="error"]     { color: #a23036; }
+}

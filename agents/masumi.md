@@ -111,32 +111,56 @@ After completing your research, update your memory with:
 
 ---
 
-## Stage 4: Document Writing
+## Stage 4: Document Writing — branched by output_format
 
-When invoked by Shinnosuke for Stage 4 completion:
+**main-068 Phase 2 fan-out (kazama 구현)**: Stage 4 산출(RETROSPECTIVE/IMPLEMENTATION)은 `output_format` per-doc 토글로 분기한다. 기존 markdown 경로는 default + 회귀 안전(HR-2). HTML 경로는 misae REQUESTS vslice (Phase 1) 패턴을 그대로 따른다.
 
-### RETROSPECTIVE.md
+### Step S4-1: Read `output_format` (single source of truth)
 
-> Template reference: `${CLAUDE_PLUGIN_ROOT}/agents/_shared/templates/RETROSPECTIVE.md.tpl`
+`.shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml`의 `current.output_format` 키 → 권위 있는 단일 소스. 부재 시 global default(`config/output-format.json` Phase 6.3 flip 전까지 `markdown`)를 상속.
 
-Write `.shinchan-docs/{DOC_ID}/RETROSPECTIVE.md`:
-- ## Summary (what was built, 2-3 sentences)
-- ## What Went Well (bullets)
-- ## What Could Be Improved (bullets)
-- ## Decisions Made (key technical decisions and rationale)
-- ## Learnings (patterns discovered, reusable insights)
+```bash
+output_format=$(yq '.current.output_format // "markdown"' .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml)
+```
 
-Base content on: REQUESTS.md, PROGRESS.md, actual code changes (git diff).
+### Step S4-2: Branch on output_format
 
-### IMPLEMENTATION.md
-Write `.shinchan-docs/{DOC_ID}/IMPLEMENTATION.md`:
+| `output_format` 값 | RETROSPECTIVE 경로 | IMPLEMENTATION 경로 | 템플릿 / 검증 |
+|--------------------|---------------------|----------------------|---------------|
+| `markdown` (default) | `.shinchan-docs/{DOC_ID}/RETROSPECTIVE.md` | `.shinchan-docs/{DOC_ID}/IMPLEMENTATION.md` | `*.md.tpl` + markdown 모드 |
+| `html` (main-068 Phase 2 이후) | `.shinchan-docs/{DOC_ID}/RETROSPECTIVE.html` | `.shinchan-docs/{DOC_ID}/IMPLEMENTATION.html` | `*.html.tpl` + HTML 모드 (Check HA/HB/HC) |
+
+분기 규칙:
+- markdown 경로는 그대로 기존 흐름(YAML frontmatter + H2 헤딩 섹션).
+- html 경로는 `RETROSPECTIVE.html.tpl` fragment 구조를 따른다 — `${CLAUDE_PLUGIN_ROOT}/docs/HTML_STYLE_GUIDE.md` § retrospective 클래스셋, § retrospective 메트릭 규약 참조.
+- 토큰 비용: html 경로 작성 후 반드시 `src/html-token-estimator.js`로 ≤2× 측정. Phase 2 골든 RETROSPECTIVE 비율 1.5086(safety 0.49) 참고.
+
+### RETROSPECTIVE — Required sections (양 모드 공통)
+
+> Template reference (markdown): `${CLAUDE_PLUGIN_ROOT}/agents/_shared/templates/RETROSPECTIVE.md.tpl`
+> Template reference (html): `${CLAUDE_PLUGIN_ROOT}/agents/_shared/templates/RETROSPECTIVE.html.tpl`
+
+Write to the path determined by `output_format` (above):
+- ## Summary (what was built, 2-3 sentences) → html: `<section data-ts-kind="summary">`
+- ## What Went Well (bullets) → html: `<section data-ts-kind="went-well">`, items `.ts-went-well`
+- ## What Could Be Improved (bullets) → html: `<section data-ts-kind="improvement">`, items `.ts-improvement`
+- ## Decisions Made (key technical decisions and rationale) → html: `<section data-ts-kind="decision">`, rows `.ts-decision`
+- ## Learnings (patterns discovered, reusable insights) → html: `<footer data-ts-kind="learning">`, items `.ts-learning`
+
+Base content on: REQUESTS, PROGRESS, actual code changes (git diff).
+
+### IMPLEMENTATION — Required sections (양 모드 공통)
+
+Write to the path determined by `output_format` (above):
 - ## Overview (what was implemented)
 - ## Architecture (key design decisions, component relationships)
 - ## Files Changed (table: file | change | reason)
 - ## How to Test (verification steps)
 - ## Known Limitations (if any)
 
-Base content on: actual git diff, PROGRESS.md phases, REQUESTS.md acceptance criteria.
+html 모드 시 위 5개를 `<section data-ts-kind="overview|architecture|files-changed|test|limitation">`으로 분할.
+
+Base content on: actual git diff, PROGRESS phases, REQUESTS acceptance criteria.
 
 ## Skill Improvement Collection
 

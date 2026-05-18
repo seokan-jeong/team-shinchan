@@ -1,20 +1,36 @@
 #!/usr/bin/env node
 /**
- * Team-Shinchan Mechanical Pre-Check — $0 cost structural validation for Markdown documents
+ * Team-Shinchan Mechanical Pre-Check — $0 cost structural validation
  *
  * Usage:
  *   node src/mechanical-check.js --file <path> [--project-root <path>]
  *
- * Output: JSON { pass: boolean, errors: string[] } to stdout
+ * Output: JSON { pass: boolean, errors: string[], mode: "markdown"|"html" } to stdout
  * Exit:   0 (pass) or 1 (fail)
  *
- * Checks performed:
+ * Mode routing (main-068 Phase 1):
+ *   - .html extension → HTML mode (DOM-selector-style checks on data-ts-* attributes)
+ *   - everything else → Markdown mode (heading + backtick checks, default since v1)
+ *
+ * Checks performed (Markdown mode):
  *   A — AC Existence: at least one AC-N reference or - [ ] checkbox in document
  *   B — File Reference Validity: backtick-quoted paths must resolve to existing files
  *       (section-level "Create"/"신규"/"New" exception per HR-3)
  *   C — FR→AC Mapping: every FR-N.N must map to ≥1 AC-N or a dedicated AC section
  *
- * Fail-safe (NFR-2): any uncaught error → { pass: true, errors: [] } + exit 0
+ * Checks performed (HTML mode):
+ *   HA — AC Existence: a [data-ts-kind="ac"] section OR at least one AC-N reference exists
+ *   HB — Semantic structure + data-ts-kind hierarchy (main-068 Phase 2 strengthened):
+ *        (HB-1) at least one <article> tag present (semantic root)
+ *        (HB-2) at least one <section> tag present (semantic section)
+ *        (HB-3) data-ts-kind values include `requirements`/`progress`/`retrospective`
+ *               root + at least one of the canonical inner sections
+ *               (`problem|fr|nfr|scope|hr|risk|ac`)
+ *        Any of HB-1/HB-2/HB-3 missing → fail.
+ *   HC — frontmatter JSON: exactly one <script type="application/json" id="ts-frontmatter">
+ *        with parseable JSON containing `document_type` and `doc_id` keys.
+ *
+ * Fail-safe (NFR-2): any uncaught error → { pass: true, errors: [], mode: ... } + exit 0.
  *
  * Only uses Node.js built-in modules. No external dependencies.
  */
@@ -214,6 +230,130 @@ function checkC(content) {
   return errors;
 }
 
+// ── HTML mode (main-068 Phase 1) ──────────────────────────────────────────────
+
+const HTML_ROOT_KINDS  = ['requirements', 'progress', 'retrospective'];
+const HTML_INNER_KINDS = ['problem', 'fr', 'nfr', 'scope', 'hr', 'risk', 'ac'];
+
+/**
+ * Extract all data-ts-kind="..." values from raw HTML (regex-only, no DOM parser).
+ * Returns Set of distinct values.
+ */
+function extractHtmlKinds(content) {
+  const re = /data-ts-kind=["']([a-z\-]+)["']/g;
+  const out = new Set();
+  let m;
+  while ((m = re.exec(content)) !== null) out.add(m[1]);
+  return out;
+}
+
+/**
+ * Extract the frontmatter JSON from <script type="application/json" id="ts-frontmatter">.
+ * Returns { found: bool, parsed: object|null, raw: string|null, error: string|null }.
+ */
+function extractHtmlFrontmatter(content) {
+  // Match either order of attributes (type first or id first)
+  const re = /<script\b[^>]*\bid=["']ts-frontmatter["'][^>]*>([\s\S]*?)<\/script>/g;
+  const matches = [];
+  let m;
+  while ((m = re.exec(content)) !== null) matches.push(m[1]);
+
+  if (matches.length === 0) {
+    return { found: false, parsed: null, raw: null, error: 'no <script id="ts-frontmatter"> found' };
+  }
+  if (matches.length > 1) {
+    return { found: true, parsed: null, raw: matches[0], error: 'multiple <script id="ts-frontmatter"> blocks' };
+  }
+  const raw = matches[0].trim();
+  try {
+    const parsed = JSON.parse(raw);
+    return { found: true, parsed, raw, error: null };
+  } catch (e) {
+    return { found: true, parsed: null, raw, error: 'frontmatter JSON parse failed: ' + e.message };
+  }
+}
+
+// HA — AC Existence
+function checkHA(content) {
+  const errors = [];
+  const hasAcKind = /data-ts-kind=["']ac["']/.test(content);
+  const hasAcRef  = AC_RE.test(content);
+  if (!hasAcKind && !hasAcRef) {
+    errors.push('Check HA: no [data-ts-kind="ac"] section or AC-N reference found');
+  }
+  return errors;
+}
+
+// HB — Semantic structure + data-ts-kind hierarchy (main-068 Phase 2 strengthened)
+// HB-1: <article> tag present
+// HB-2: <section> tag present
+// HB-3: data-ts-kind root + inner section
+function checkHB(content) {
+  const errors = [];
+
+  // HB-1: at least one <article> tag (semantic root)
+  if (!/<article\b/i.test(content)) {
+    errors.push('Check HB: no <article> semantic tag found (HB-1)');
+  }
+
+  // HB-2: at least one <section> tag (semantic section)
+  if (!/<section\b/i.test(content)) {
+    errors.push('Check HB: no <section> semantic tag found (HB-2)');
+  }
+
+  // HB-3: data-ts-kind hierarchy (existing check)
+  const kinds  = extractHtmlKinds(content);
+
+  const hasRoot = HTML_ROOT_KINDS.some(k => kinds.has(k));
+  if (!hasRoot) {
+    errors.push('Check HB: no root data-ts-kind in {' + HTML_ROOT_KINDS.join('|') + '} (HB-3)');
+  }
+
+  const innerHits = HTML_INNER_KINDS.filter(k => kinds.has(k));
+  if (innerHits.length === 0) {
+    errors.push('Check HB: no inner section data-ts-kind found (expected at least one of ' + HTML_INNER_KINDS.join('|') + ') (HB-3)');
+  }
+
+  return errors;
+}
+
+// HC — frontmatter JSON
+function checkHC(content) {
+  const errors = [];
+  const fm = extractHtmlFrontmatter(content);
+  if (!fm.found) {
+    errors.push('Check HC: ' + fm.error);
+    return errors;
+  }
+  if (fm.error) {
+    errors.push('Check HC: ' + fm.error);
+    return errors;
+  }
+  if (!fm.parsed || typeof fm.parsed !== 'object') {
+    errors.push('Check HC: frontmatter is not a JSON object');
+    return errors;
+  }
+  if (!('document_type' in fm.parsed)) {
+    errors.push('Check HC: frontmatter missing key "document_type"');
+  }
+  if (!('doc_id' in fm.parsed)) {
+    errors.push('Check HC: frontmatter missing key "doc_id"');
+  }
+  return errors;
+}
+
+function checkHtml(content) {
+  return [
+    ...checkHA(content),
+    ...checkHB(content),
+    ...checkHC(content),
+  ];
+}
+
+function isHtmlMode(filePath) {
+  return /\.html?$/i.test(filePath);
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 function main() {
@@ -221,16 +361,17 @@ function main() {
 
   // Fail-safe (NFR-2, AC-2.6): any error → pass:true
   if (!params.filePath) {
-    process.stdout.write(JSON.stringify({ pass: true, errors: [] }, null, 2) + '\n');
+    process.stdout.write(JSON.stringify({ pass: true, errors: [], mode: 'markdown' }, null, 2) + '\n');
     process.exit(0);
   }
 
   // Resolve file path
   const resolvedFile = path.resolve(process.cwd(), params.filePath);
+  const mode = isHtmlMode(resolvedFile) ? 'html' : 'markdown';
 
   // File not found → fail-safe pass (NFR-2)
   if (!fs.existsSync(resolvedFile)) {
-    process.stdout.write(JSON.stringify({ pass: true, errors: [] }, null, 2) + '\n');
+    process.stdout.write(JSON.stringify({ pass: true, errors: [], mode }, null, 2) + '\n');
     process.exit(0);
   }
 
@@ -239,24 +380,42 @@ function main() {
     ? path.resolve(process.cwd(), params.projectRoot)
     : process.cwd();
 
-  const content  = fs.readFileSync(resolvedFile, 'utf-8');
-  const sections = parseSections(content);
+  const content = fs.readFileSync(resolvedFile, 'utf-8');
 
-  const errors = [
-    ...checkA(content),
-    ...checkB(content, projectRoot, sections),
-    ...checkC(content),
-  ];
+  let errors;
+  if (mode === 'html') {
+    errors = checkHtml(content);
+  } else {
+    const sections = parseSections(content);
+    errors = [
+      ...checkA(content),
+      ...checkB(content, projectRoot, sections),
+      ...checkC(content),
+    ];
+  }
 
-  const result = { pass: errors.length === 0, errors };
+  const result = { pass: errors.length === 0, errors, mode };
   process.stdout.write(JSON.stringify(result, null, 2) + '\n');
   process.exit(result.pass ? 0 : 1);
 }
 
-// Fail-safe wrapper (NFR-2, AC-2.6)
-try {
-  main();
-} catch (err) {
-  process.stdout.write(JSON.stringify({ pass: true, errors: [] }, null, 2) + '\n');
-  process.exit(0);
+// Exports for unit tests (main-068 Phase 1 — tests/mechanical-check-html.test.js)
+module.exports = {
+  // Markdown mode
+  checkA, checkB, checkC, parseSections,
+  // HTML mode
+  checkHA, checkHB, checkHC, checkHtml,
+  extractHtmlKinds, extractHtmlFrontmatter, isHtmlMode,
+  // Shared
+  parseArgs,
+};
+
+// Fail-safe wrapper (NFR-2, AC-2.6) — only run main when invoked as CLI
+if (require.main === module) {
+  try {
+    main();
+  } catch (err) {
+    process.stdout.write(JSON.stringify({ pass: true, errors: [], mode: 'markdown' }, null, 2) + '\n');
+    process.exit(0);
+  }
 }

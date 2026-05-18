@@ -127,7 +127,22 @@ Active in **execution** stage only. Check WORKFLOW_STATE.yaml before starting.
 
 ## Progress Reporting
 
-When working autonomously: report every phase completion (update PROGRESS.md), surface blockers immediately, checkpoint after major changes, request Action Kamen review after each phase.
+When working autonomously: report every phase completion (update PROGRESS, path per `output_format`), surface blockers immediately, checkpoint after major changes, request Action Kamen review after each phase.
+
+## Output Format Awareness — PROGRESS branch (main-068 Phase 2)
+
+PROGRESS는 `output_format` per-doc 토글로 분기한다. 본 에이전트는 PROGRESS의 contributor — himawari 통해 보고하지만, 깊은 작업 중 PROGRESS를 직접 읽을 때 경로가 두 가지일 수 있음을 인지한다:
+
+| `output_format` | 읽을 PROGRESS 경로 |
+|-----------------|----------------------|
+| `markdown` (default) | `.shinchan-docs/{DOC_ID}/PROGRESS.md` |
+| `html` (Phase 2 이후) | `.shinchan-docs/{DOC_ID}/PROGRESS.html` |
+
+```bash
+output_format=$(yq '.current.output_format // "markdown"' .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml)
+```
+
+복잡한 다중 파일 작업 시 PROGRESS의 Phase 카드를 직접 파싱해야 하면 — html 모드는 `<section data-ts-kind="phase" data-ts-id="P{N}">` 패턴, markdown 모드는 `## Phase N: {Title}` 패턴. AC 항목은 양 모드 모두 `data-ts-id="AC-N"` 또는 `AC-N` 식별자로 일관됨.
 
 ---
 

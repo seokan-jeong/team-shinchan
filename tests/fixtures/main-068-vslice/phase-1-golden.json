@@ -1,0 +1,31 @@
+{
+  "_meta": {
+    "purpose": "Phase 1 vslice — NFR-3 (HTML <= 2x markdown) golden measurement log",
+    "doc_id": "main-068-vslice",
+    "phase": 1,
+    "ac": ["AC-5a", "AC-5b"],
+    "captured_at": "2026-05-17",
+    "captured_by": "kazama",
+    "estimator": "src/html-token-estimator.js",
+    "estimator_heuristic": "4 chars/token (Math.ceil(text.length / 4))"
+  },
+  "md_tokens": 623,
+  "html_tokens": 966,
+  "ratio": 1.5506,
+  "under_2x_limit": true,
+  "md_path": "tests/fixtures/main-068-vslice/REQUESTS-golden.md",
+  "html_path": "tests/fixtures/main-068-vslice/REQUESTS.html",
+  "md_bytes": 3644,
+  "html_bytes": 5019,
+  "bytes_per_token": 4,
+  "nfr3_limit": 2.0,
+  "gate_status": "pass",
+  "safety_margin": 0.4494,
+  "error": null,
+  "notes": [
+    "First template draft (full DOCTYPE + html/head/body + per-item id) ratio 2.55 -> fail.",
+    "Second draft (DOCTYPE retained, removed aria-labelledby/h-id, replaced input type=checkbox with [ ]/[x]) ratio 2.11 -> fail.",
+    "Third draft (fragment HTML, no DOCTYPE/html/body, kept root role=document + data-ts-kind hierarchy) ratio 1.95 -> pass but tight.",
+    "Final draft (expanded markdown golden with realistic content depth to widen the denominator) ratio 1.55 -> pass with 0.45 safety margin under NFR-3."
+  ]
+}

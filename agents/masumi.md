@@ -91,7 +91,7 @@ Inspect the URL:
 ## Important
 
 - Primary role is research: find, extract, and organize information
-- For Stage 4: write RETROSPECTIVE.md and IMPLEMENTATION.md only (see Stage 4 section)
+- For Stage 4: write IMPLEMENTATION.md only (with `## Lessons` section). Do NOT create a separate RETROSPECTIVE.md for new workflows (main-073+). Legacy RETROSPECTIVE.md files (main-070..072) are preserved unchanged.
 - Always cite sources
 - Present information clearly
 - Focus on relevance
@@ -157,10 +157,13 @@ Write to the path determined by `output_format` (above):
 - ## Files Changed (table: file | change | reason)
 - ## How to Test (verification steps)
 - ## Known Limitations (if any)
+- ## Lessons (≥1 bullet — fold retrospective content here for new workflows: summary, what went well, what could improve, decisions made, learnings)
 
-html 모드 시 위 5개를 `<section data-ts-kind="overview|architecture|files-changed|test|limitation">`으로 분할.
+html 모드 시 위 6개를 `<section data-ts-kind="overview|architecture|files-changed|test|limitation|lessons">`으로 분할.
 
 Base content on: actual git diff, PROGRESS phases, REQUESTS acceptance criteria.
+
+> FR-1.4 (main-073): `## Lessons` replaces the separate RETROSPECTIVE.md for new workflows. The retrospective agent path is the same; just write into IMPLEMENTATION.md `## Lessons` instead of creating RETROSPECTIVE.md. Legacy RETROSPECTIVE.md files (main-070..072) are preserved untouched.
 
 ## Skill Improvement Collection
 

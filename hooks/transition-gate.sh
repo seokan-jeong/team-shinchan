@@ -247,11 +247,18 @@ process.stdin.on('end', () => {
     }
     const retroFile = path.join(docDir, 'RETROSPECTIVE.md');
     const implFile = path.join(docDir, 'IMPLEMENTATION.md');
-    if (!fs.existsSync(retroFile)) {
-      missing.push('RETROSPECTIVE.md does not exist — required before marking workflow as completed');
-    }
     if (!fs.existsSync(implFile)) {
       missing.push('IMPLEMENTATION.md does not exist — required before marking workflow as completed');
+    } else {
+      // FR-1.4 (main-073): RETROSPECTIVE.md is optional if IMPLEMENTATION.md contains ## Lessons.
+      // Legacy workflows (main-070..072) still satisfy the gate via RETROSPECTIVE.md.
+      const hasLessons = (() => {
+        try { return /\n##\s+Lessons\b/.test(fs.readFileSync(implFile, 'utf-8')); }
+        catch(e) { return false; }
+      })();
+      if (!hasLessons && !fs.existsSync(retroFile)) {
+        missing.push('RETROSPECTIVE.md missing AND IMPLEMENTATION.md has no `## Lessons` section — one is required before marking workflow as completed (FR-1.4)');
+      }
     }
   }
 

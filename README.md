@@ -10,7 +10,7 @@
 
 15 specialist agents with structured workflows, project ontology, budget controls, analytics, and self-learning.
 
-[![Version](https://img.shields.io/badge/version-4.36.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
+[![Version](https://img.shields.io/badge/version-4.37.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.ai)
 ![GitHub stars](https://img.shields.io/github/stars/seokan-jeong/team-shinchan?style=social)
@@ -396,6 +396,52 @@ Team-Shinchan is validated by 3 tiers of automated testing:
 # Run all tests (requires ANTHROPIC_API_KEY)
 ./run-tests.sh all
 ```
+
+---
+
+## Dashboard
+
+Team-Shinchan ships with a live workflow dashboard served on `http://127.0.0.1:8765/` from `src/dashboard/server.js`. It streams ontology updates, workflow state transitions, and analytics events over Server-Sent Events.
+
+### Dashboard auto-spawn
+
+Starting with v4.37.0 the dashboard auto-starts on Claude Code `SessionStart` and persists across sessions as a permanent daemon. Behavior:
+
+- **Singleton enforcement** -- a lockfile at `~/.shinchan/dashboard.lock` (format `<pid> <port>`) combined with a `/health` probe ensures exactly one daemon runs at a time. Stale lockfiles (dead PID) are auto-cleared and re-spawned on the next session.
+- **Fixed port 8765** -- no port negotiation; collisions are arbitrated by the dashboard server's `EADDRINUSE` throw.
+- **First-spawn browser open** -- the first session that actually spawns the daemon opens your default browser to `http://127.0.0.1:8765/` (best-effort on macOS / Linux / Windows via `open` / `xdg-open` / `start`). Subsequent sessions silently attach and never open a browser tab.
+- **Hook isolation** -- failures in the autostart hook never block other `SessionStart` hooks (`write-tracker`, `session-init`, `ontology-auto-build`).
+
+### Opt out
+
+Two opt-out channels, with **env wins** precedence:
+
+| Channel | Value | Effect |
+|---------|-------|--------|
+| `TS_DASHBOARD_AUTOSTART` env var | `0`, `false`, `off` (case-insensitive) | Skip autostart for this session |
+| `TS_DASHBOARD_AUTOSTART` env var | any other defined value | Force-enable (skips setting fallback) |
+| `.claude-plugin/plugin.json` `settings.dashboard_autostart` | `false` | Permanent opt-out across sessions |
+| default | `true` | Autostart enabled |
+
+```bash
+# Disable for a single Claude Code session
+TS_DASHBOARD_AUTOSTART=0 claude
+
+# Permanent opt-out: edit .claude-plugin/plugin.json
+#   "settings": { "dashboard_autostart": false }
+```
+
+### Stop the daemon
+
+```bash
+npm run dashboard:stop
+```
+
+Sends `SIGTERM` to the daemon PID recorded in the lockfile, unlinks the lockfile, and exits cleanly. Idempotent: a second invocation with no daemon running prints `no lockfile -- dashboard not running` and exits 0.
+
+### Logs
+
+Daemon stderr is appended to `~/.shinchan/dashboard.log`. **Log rotation is not implemented** -- if the file grows large, truncate it manually (`: > ~/.shinchan/dashboard.log`) or after stopping the daemon (`npm run dashboard:stop && rm ~/.shinchan/dashboard.log`). Automatic rotation may ship in a future workflow.
 
 ---
 

@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.37.0] - 2026-05-21
+
+### Added
+- **hooks/pre-push-gate.sh (main-073, FR-1.3)**: New PreToolUse(Bash) hook that blocks `git push` and `gh pr create` when an active workflow's `IMPLEMENTATION.md` is missing. Fast-path filters keep unrelated Bash commands under 10ms (NFR-2). No bypass env-var — the gate is mandatory. Non-shinchan no-op when `.shinchan-docs/` is absent; CI-safe when `CLAUDE_PLUGIN_ROOT` is unset.
+- **hooks/dashboard-autostart.sh + src/dashboard/autostart.js (main-072)**: Dashboard auto-spawns on Claude Code `SessionStart` as a permanent daemon. Singleton-enforced via `~/.shinchan/dashboard.lock` + `/health` probe. First-spawn opens the default browser; subsequent sessions silently attach. Opt-out via `TS_DASHBOARD_AUTOSTART=0` (env wins) or `.claude-plugin/plugin.json` `settings.dashboard_autostart: false`.
+
+### Changed
+- **agents/masumi.md (main-073, FR-1.4)**: Stage 4 retrospective deliverable folded into `IMPLEMENTATION.md ## Lessons` for new workflows. Legacy `RETROSPECTIVE.md` files (main-070..072) preserved unchanged. IMPLEMENTATION required sections grew from 5 to 6 (`## Lessons` added). HTML mode `data-ts-kind` enum extended.
+- **hooks/transition-gate.sh (main-073, FR-1.4)**: Status completion gate now accepts either legacy `RETROSPECTIVE.md` OR new `## Lessons` section in `IMPLEMENTATION.md`. Legacy workflows pass via RETRO; new workflows pass via Lessons. Regex check: `/\n##\s+Lessons\b/`.
+- **hooks/hooks.json**: `pre-push-gate.sh` registered in `PreToolUse(Bash)` chain after `commit-lint.sh`.
+- **README.md**: Dashboard documentation section added (auto-spawn, opt-out channels, stop daemon).
+- **.claude-plugin/plugin.json**: `settings.dashboard_autostart: true` (default).
+
+### Notes
+- **main-073 closes itself via this release**: the workflow that shipped FR-1.4 was unable to flip to `status: done` while the v4.36.0 cached `transition-gate.sh` was still running. Releasing v4.37.0 rebuilds the cache; on the next session, main-073 can finalize. This was the intended dogfooding path documented in main-073 IMPLEMENTATION.md.
+- **No source defect in ontology pipeline**: main-073 Phase 0 read-only baseline confirmed `src/ontology-scanner.js:126` PART_OF emission and `src/ontology-engine.js:323` aggregation are both correct. The apparent "0 components" for most modules reflects `.md`-only skill directories, not a scanner bug. FR-1.2 closed as "no defect found." No `src/` files were modified for this fix.
+- **Legacy RETRO immutability verified**: SHA-256 hashes of `main-070/RETROSPECTIVE.md`, `main-071/RETROSPECTIVE.md`, `main-072/RETROSPECTIVE.md` unchanged.
+
 ## [4.36.0] - 2026-05-19
 
 ### Added

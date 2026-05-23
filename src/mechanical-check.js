@@ -230,6 +230,53 @@ function checkC(content) {
   return errors;
 }
 
+// ── Check D — clarity_score.history presence (FR-7, AC4, AC6) ─────────────────
+
+/**
+ * Check D — warn (version 1) or hard-fail (version >= 2) when the workflow's
+ * WORKFLOW_STATE.yaml is missing `clarity_score.history`.
+ *
+ * Input: REQUESTS file path (we infer the sibling WORKFLOW_STATE.yaml).
+ * If WORKFLOW_STATE.yaml doesn't exist → no error (lots of test fixtures don't).
+ * If it exists, read its first 4KB (regex-only, no YAML parser needed) and:
+ *   - parse `version: N` (top-level)
+ *   - check for `clarity_score:` block AND a child `history:` key
+ * Returns errors[] (hard fails for v2+) or warnings[] (v1).
+ *
+ * Per AC6: existing main-069..main-073 workflows are `version: 1` and lack
+ * `clarity_score.history` → MUST NOT produce a hard-fail error.
+ */
+function checkD(requestsPath) {
+  const errors = [];
+  // Derive WORKFLOW_STATE.yaml path: sibling of REQUESTS.md
+  const dir = path.dirname(requestsPath);
+  const wsPath = path.join(dir, 'WORKFLOW_STATE.yaml');
+  if (!fs.existsSync(wsPath)) return errors; // No state → vacuously pass
+
+  const wsHead = fs.readFileSync(wsPath, 'utf-8').slice(0, 4096);
+
+  // Parse `version: N` (top-level — first line that matches)
+  const versionMatch = wsHead.match(/^version:\s*(\d+)\b/m);
+  const version = versionMatch ? parseInt(versionMatch[1], 10) : 1;
+
+  // Detect `clarity_score:` block + child `history:` key (indented under it)
+  // We look for the pattern: clarity_score: ... <indent> history:
+  const hasClarityBlock = /^clarity_score:\s*$/m.test(wsHead);
+  // history: must appear indented under clarity_score (look for "  history:" or "    history:" etc.)
+  const hasHistory = /^\s{2,}history:\s*$/m.test(wsHead);
+  const present = hasClarityBlock && hasHistory;
+
+  if (!present) {
+    if (version >= 2) {
+      errors.push('Check D: WORKFLOW_STATE.yaml missing clarity_score.history (version ' + version + ' requires it — FR-7)');
+    }
+    // version 1 → warning-only (printed to stderr but not added to errors)
+    // We intentionally do NOT add to errors[] so AC6 holds.
+  }
+
+  return errors;
+}
+
 // ── HTML mode (main-068 Phase 1) ──────────────────────────────────────────────
 
 const HTML_ROOT_KINDS  = ['requirements', 'progress', 'retrospective'];
@@ -342,11 +389,19 @@ function checkHC(content) {
   return errors;
 }
 
-function checkHtml(content) {
+// HD — clarity_score.history presence (html mode mirror of Check D, FR-7)
+// Same semantics as checkD: warn (version 1) or hard-fail (version >= 2)
+// when the sibling WORKFLOW_STATE.yaml is missing clarity_score.history.
+function checkHD(filePath) {
+  return checkD(filePath);
+}
+
+function checkHtml(content, filePath) {
   return [
     ...checkHA(content),
     ...checkHB(content),
     ...checkHC(content),
+    ...(filePath ? checkHD(filePath) : []),
   ];
 }
 
@@ -384,13 +439,14 @@ function main() {
 
   let errors;
   if (mode === 'html') {
-    errors = checkHtml(content);
+    errors = checkHtml(content, resolvedFile);
   } else {
     const sections = parseSections(content);
     errors = [
       ...checkA(content),
       ...checkB(content, projectRoot, sections),
       ...checkC(content),
+      ...checkD(resolvedFile),
     ];
   }
 
@@ -402,9 +458,9 @@ function main() {
 // Exports for unit tests (main-068 Phase 1 — tests/mechanical-check-html.test.js)
 module.exports = {
   // Markdown mode
-  checkA, checkB, checkC, parseSections,
+  checkA, checkB, checkC, checkD, parseSections,
   // HTML mode
-  checkHA, checkHB, checkHC, checkHtml,
+  checkHA, checkHB, checkHC, checkHD, checkHtml,
   extractHtmlKinds, extractHtmlFrontmatter, isHtmlMode,
   // Shared
   parseArgs,

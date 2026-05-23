@@ -121,12 +121,29 @@ Store result as `{vision_context}`. Skip if no visual input.
 
 **CRITICAL: Sub-agents cannot call `AskUserQuestion` for the user.** The main thread (this skill) drives the interview; Misae designs each question. See `agents/misae.md` § "Parent-Orchestrated Interview Protocol".
 
-**2A.1 — Interview loop (유동적 턴 수, `status: done`으로 종료):**
+**2A.0 — Read interview config (FR-6):**
 
 ```
-answers = []
-maxTurns = 10  // safety cap — Misae가 status: done을 반환하면 조기 종료
-for turn in 1..maxTurns:
+# Read .shinchan-config.yaml if present (project root), else use defaults.
+config = read_yaml(".shinchan-config.yaml") if file_exists else {}
+skip_threshold = config.get("interview.skip_threshold", 0.85)
+done_threshold = config.get("interview.done_threshold", 0.75)
+hard_cap       = config.get("interview.hard_cap", 10)
+
+# Sanity check (FR-6): if invalid, silently fall back to defaults
+if not (0 < done_threshold < skip_threshold <= 1.0) or not (1 <= hard_cap <= 50):
+  print("⚠️ [start] invalid interview thresholds in .shinchan-config.yaml — using defaults (0.85 / 0.75 / 10)")
+  skip_threshold = 0.85
+  done_threshold = 0.75
+  hard_cap       = 10
+```
+
+**2A.1 — Interview loop (clarity-gated, hard_cap is the only ceiling):**
+
+```
+answers       = []
+exit_reason   = null   # populated by Misae's status:done payload
+for turn in 1..hard_cap:
   result = Task(subagent_type="team-shinchan:misae", model="sonnet", prompt=
     "mode: DESIGN_NEXT_QUESTION
     DOC_ID: {DOC_ID} | WORKFLOW_STATE: .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml
@@ -134,37 +151,53 @@ for turn in 1..maxTurns:
     prior_answers: {answers}
     user_request: {args}
     vision_context: {vision_context or 'None'}
+    skip_threshold: {skip_threshold}
+    done_threshold: {done_threshold}
+    hard_cap: {hard_cap}
     Return the interview-question JSON block per agents/misae.md contract.")
 
   Parse the last ```interview-question ... ``` fenced block in result.
 
-  GUARD (parsing / options integrity):
+  # FR-1 / AC1: zero-turn fast path on first invocation
+  if turn == 1 and parsed.status == "done" and parsed.reason in {"pre_interview_clear", "user_skip_override"}:
+    exit_reason = parsed.reason
+    break  # skip the loop entirely; jump to FINALIZE_DRAFT with answers == []
+
+  GUARD (parsing / options integrity / FR-4 contract):
     Validate ALL of the following before calling AskUserQuestion:
     (a) An `interview-question` fenced JSON block exists and parses.
     (b) `status` is "ask" or "done".
     (c) If status == "ask":
         - `question` is a non-empty string (>= 5 chars).
-        - `options` is an array with >= 2 entries (개수 상한 없음 — 질문에 필요한 만큼 허용).
+        - `options` is an array with >= 2 entries (no upper bound).
         - Every option has a `label` that is a non-empty string
           (>= 2 chars, NOT whitespace-only, NOT just "A." / "B." prefix).
         - `header` is a non-empty string.
+        - **(FR-4)** `targets_subscore` is one of {"goal_clarity", "constraint_clarity", "success_criteria"}.
+        - **(FR-4)** `closes_unknown` is a non-empty string ≤ 80 chars.
+    (d) If status == "done":
+        - `reason` is one of {"pre_interview_clear", "clarity_threshold_met",
+          "hard_cap_reached", "no_more_actionable_gaps", "user_skip_override"}.
 
     On ANY validation failure:
       Re-invoke Misae with mode=DESIGN_NEXT_QUESTION, appending to the prompt:
       "CRITICAL: Your previous response failed validation: {specific reason,
-       e.g. 'options[1].label was empty', 'no interview-question block
-       found', 'question string too short'}. Re-read agents/misae.md
-       § Parent-Orchestrated Interview Protocol. Emit EXACTLY ONE fenced
-       block tagged `interview-question` containing: non-empty question
-       (>=5 chars), non-empty header, 2개 이상 options each with a
-       substantive label (e.g. 'A. 성능 병목 해결' — NOT empty string,
-       NOT just 'A.'). Do NOT return prose only."
+       e.g. 'targets_subscore missing or not in {goal_clarity|constraint_clarity|success_criteria}',
+       'closes_unknown empty or > 80 chars', 'options[1].label was empty',
+       'no interview-question block found', 'question string too short'}.
+       Re-read agents/misae.md § Parent-Orchestrated Interview Protocol.
+       Emit EXACTLY ONE fenced block tagged `interview-question` containing:
+       non-empty question (>=5 chars), non-empty header, 2 이상 options each
+       with substantive label, AND (FR-4) `targets_subscore` in
+       {goal_clarity|constraint_clarity|success_criteria} AND `closes_unknown`
+       string ≤ 80 chars."
       Retry up to 2 times.
       On 3rd failure: abort the interview, print the raw Misae output
-      verbatim to the user, and STOP. Never call AskUserQuestion with
-      empty/blank options — user would see a question with no choices.
+      verbatim to the user, and STOP.
 
-  If status == "done": break
+  If status == "done":
+    exit_reason = parsed.reason  # propagated to FINALIZE_DRAFT
+    break
   If status == "ask" (and guard passed):
     // OPTIONS OVERFLOW HANDLING:
     // AskUserQuestion tool allows max 4 options per call.
@@ -206,7 +239,8 @@ Task(subagent_type="team-shinchan:misae", model="sonnet",
   answers: ${JSON.stringify(answers)}
   user_request: ${args}
   vision_context: ${vision_context or 'None'}
-  Per agents/misae.md: write REQUESTS.md, run mechanical check, run AK review loop (max 2 retries). Return finalize-result JSON block.`)
+  exit_reason: ${exit_reason || 'clarity_threshold_met'}
+  Per agents/misae.md: write REQUESTS.md (include ## Open Questions if exit_reason in {hard_cap_reached, no_more_actionable_gaps}), run mechanical check, run AK review loop (max 2 retries). Return finalize-result JSON block.`)
 ```
 
 Parse the `finalize-result` JSON block.

@@ -62,65 +62,161 @@ Your parent passes a `mode` field in its prompt. You MUST detect the mode and re
 
 #### Mode: `DESIGN_NEXT_QUESTION`
 
-Input from parent: `turn` (1부터 시작, 상한 없음), `prior_answers` (list of `{turn, question, answer}`), `user_request`, optional `vision_context`.
+Input from parent: `turn` (1부터 시작), `prior_answers` (list of `{turn, question, answer}`),
+`user_request`, optional `vision_context`, `skip_threshold` (default 0.85),
+`done_threshold` (default 0.75), `hard_cap` (default 10).
 
-Your job:
+##### Step 0 — Pre-interview scoring (turn == 1 only, NFR-3, AC1, AC7)
+
+When `turn == 1` AND `prior_answers == []`, BEFORE designing any question:
+
+1. **Escape hatch check (HR-2, AC7)**: If `user_request` (case-insensitive) contains the
+   literal `skip-interview`, write `clarity_score.history[0]` with
+   `source: user_skip_override` and immediately return:
+   ```interview-question
+   {"status": "done", "reason": "user_skip_override", "clarity_score": {...}}
+   ```
+   Skip everything below.
+
+2. **Compute pre-score** using the rubric (no extra LLM call — piggyback on this same
+   invocation, NFR-3). Score `user_request` as if it were the only context. Output ONE
+   line of prose reasoning before the JSON (FR-5, HR-4) of the form:
+   ```
+   Pre-score 0.82 (goal=0.9, constraint=0.7, success=0.85). 4 of 5 fields present (missing: target_user).
+   ```
+
+3. **5-field count** (HR-1, HR-5): match the patterns in the Clarity Scoring Rubric
+   section. Count how many of {problem, scope, constraint, success_criterion, target_user}
+   are explicit.
+
+4. **Decision**:
+   - If `overall ≥ skip_threshold` AND `field_count ≥ 3`:
+     Write `clarity_score.history[0]` with `source: pre_interview`, set
+     `unresolved_unknowns: []`, and return:
+     ```interview-question
+     {"status": "done", "reason": "pre_interview_clear", "clarity_score": {"goal_clarity": ..., "constraint_clarity": ..., "success_criteria": ..., "overall": ...}}
+     ```
+   - Else: persist `clarity_score.history[0]` with `source: pre_interview` (recording
+     the score AND the gap), populate `unresolved_unknowns` with the specific gaps you
+     identified, and proceed to design Turn 1's question (Step 1 below).
+
+##### Step 1 — Design question (turn ≥ 1, FR-4)
+
 1. Read context (codebase, WORKFLOW_STATE.yaml) — 1-2 Read/Glob/Grep calls minimum.
-2. Analyze prior answers; decide the next question for this turn OR whether interview is done.
-3. Update WORKFLOW_STATE.yaml `current.interview` block (step, collected_count, last_question — max 30 chars).
-4. Return your response ending with a **single fenced JSON block** tagged `interview-question`:
+2. Analyze prior answers; pick ONE item from `unresolved_unknowns` to address this turn.
+3. Decide whether to ask or exit:
+   - Exit (`status: done`) IFF: `clarity_score.overall ≥ done_threshold` AND
+     `unresolved_unknowns == []`. Use `reason: clarity_threshold_met`.
+   - Hard-cap exit: if `turn > hard_cap`, emit `status: done, reason: hard_cap_reached`.
+   - Otherwise ask (Step 2).
+4. Update WORKFLOW_STATE.yaml:
+   - `current.interview` block (step, collected_count, last_question — max 30 chars).
+   - Append new `clarity_score.history` entry with `source: post_answer` (turn ≥ 2 only —
+     turn 1's history entry was already written in Step 0).
+5. Emit FR-5 prose rationale ONE LINE before the JSON block:
+   ```
+   Clarity 0.55 (goal=0.7, constraint=0.3, success=0.6). Asking to lift constraint_clarity: "Latency target (p50/p95/p99 ms)".
+   ```
+
+##### Step 2 — Emit interview-question JSON
+
+Return your response ending with a **single fenced JSON block** tagged `interview-question`:
 
 ```interview-question
 {
   "status": "ask",
   "turn": 1,
   "question": "어떤 문제를 해결하려고 하시나요?",
-  "header": "문제 정의 (Turn 1/5)",
+  "header": "문제 정의 (Turn 1)",
   "options": [
     {"label": "A. 성능 병목 해결", "description": "현재 응답 속도가 너무 느림"},
-    {"label": "B. 새 기능 추가", "description": "사용자가 요청한 신규 워크플로"},
-    {"label": "C. 직접 입력", "description": "위에 없는 경우 직접 설명"}
+    {"label": "B. 새 기능 추가", "description": "사용자가 요청한 신규 워크플로"}
   ],
-  "multiSelect": false
+  "multiSelect": false,
+  "targets_subscore": "goal_clarity",
+  "closes_unknown": "Primary failure mode being solved"
 }
 ```
 
-Or, if enough information has been collected (typically after Turn 3–5):
+Or, if the clarity gate is met (`overall ≥ done_threshold` AND `unresolved_unknowns == []`):
 
 ```interview-question
-{"status": "done", "reason": "Problem, scope, and approach are clear; ready to draft REQUESTS.md."}
+{"status": "done", "reason": "clarity_threshold_met", "clarity_score": {"goal_clarity": 0.8, "constraint_clarity": 0.85, "success_criteria": 0.75, "overall": 0.80}}
+```
+
+Or, if `unresolved_unknowns == []` BUT `overall < done_threshold` (HR-3 — no more
+actionable gaps):
+
+```interview-question
+{"status": "done", "reason": "no_more_actionable_gaps", "clarity_score": {...}, "residual_gap": "success_criteria still 0.65 — recorded in Open Questions"}
+```
+
+Or, if `turn > hard_cap`:
+
+```interview-question
+{"status": "done", "reason": "hard_cap_reached", "clarity_score": {...}, "remaining_unknowns": ["Latency target", "Rollback plan"]}
 ```
 
 **Rules for DESIGN_NEXT_QUESTION**:
 - Return EXACTLY ONE question (never batch).
-- Options: 2개 이상, 질문에 필요한 만큼 유연하게 제공. "직접 입력" / "Other"는 포함하지 마라 — 부모가 AskUserQuestion 호출 시 자동으로 추가됨.
-- Header must include turn counter: `(Turn X/N)` — N은 예상 총 턴 수이며, 인터뷰 진행에 따라 유동적으로 조정 가능.
-- The JSON block is the contract — the parent parses it. Prose before the block is fine (for streaming transparency) but the block must be valid JSON.
-- DO NOT call `AskUserQuestion` yourself — you don't have the tool.
+- Options: 2개 이상, 질문에 필요한 만큼. "직접 입력" / "Other"는 포함하지 마라 — 부모가 자동 추가.
+- Header must include turn counter: `(Turn X)` — no projected total.
+- `targets_subscore` MUST be one of `goal_clarity | constraint_clarity | success_criteria`.
+  Questions that don't lift a measurable sub-score are rejected by the parent GUARD.
+- `closes_unknown` MUST be one item from `unresolved_unknowns` (≤80 chars). After the
+  user answers, you pop this item in the next `post_answer` history entry.
+- The JSON block is the contract — the parent parses it. Prose before the block is fine.
+- DO NOT call `AskUserQuestion` yourself.
+- DO NOT batch turns. ONE question per invocation.
 
-#### Interview Plan (guidance, not rigid — 턴 수는 유동적)
+#### Interview Plan (turn topics are EXAMPLES; clarity gate is the real driver)
 
-| Turn | Purpose |
-|------|---------|
-| 1 | 문제 정의 (무엇을, 왜) |
-| 2 | 범위 선택 — may use `multiSelect: true` |
-| 3 | 대안 접근법 |
-| 4+ | 숨은 요구사항 / 리스크 / 추가 제약 확인 — 충분히 수집되면 `status: done` |
+The table below lists TYPICAL topics by turn — but the actual driver is the clarity gate
+(`overall ≥ done_threshold` AND `unresolved_unknowns == []`). You are free to skip any
+turn's topic if the previous answer already lifted the relevant sub-score, and free to
+revisit topics in later turns if the gate hasn't closed.
 
-질문이 2~3턴으로 충분하면 조기 종료하고, 복잡한 요구사항이면 필요한 만큼 계속 진행.
+| Turn | Typical topic | Typical `targets_subscore` |
+|------|---------------|----------------------------|
+| 1 | 문제 정의 (무엇을, 왜) | `goal_clarity` |
+| 2 | 범위 선택 — may use `multiSelect: true` | `goal_clarity` or `constraint_clarity` |
+| 3 | 대안 접근법 / 제약 | `constraint_clarity` |
+| 4 | 성공 기준 정의 | `success_criteria` |
+| 5+ | 남은 unresolved_unknowns 항목 (extension) | any sub-score still < done_threshold |
+
+Extension past Turn 4 is normal when `overall < done_threshold`. Hard cap (default 10)
+is the only ceiling. Soft cap is removed.
 
 **Self-check before emitting each JSON block**: "Stage=requirements. 요구사항만 수집. 코드 수정/구현 금지."
 
 #### Mode: `FINALIZE_DRAFT`
 
-Input from parent: `answers` (complete list of `{turn, question, answer}`), `user_request`, optional `vision_context`.
+Input from parent: `answers` (complete list of `{turn, question, answer}`),
+`user_request`, optional `vision_context`,
+optional `exit_reason` (one of: `clarity_threshold_met` | `pre_interview_clear` |
+`user_skip_override` | `hard_cap_reached` | `no_more_actionable_gaps`).
 
 Your job:
 1. Run Phase C (Hidden Requirements Analysis — STRIDE, scalability, elicitation).
 2. Run Phase D (write `.shinchan-docs/{DOC_ID}/REQUESTS.md` with all required sections).
-3. Run Mechanical Pre-Check (`node src/mechanical-check.js --file ...`) — fix errors until it passes.
-4. Run Phase E-1 (AK review loop, up to 2 retries). Persist retry state in WORKFLOW_STATE.yaml.
-5. Return a summary ending with a fenced JSON block tagged `finalize-result`:
+3. **If `exit_reason ∈ {hard_cap_reached, no_more_actionable_gaps}`**: append a
+   `## Open Questions` section to REQUESTS.md listing every item that was in
+   `unresolved_unknowns` at exit, one per line:
+   ```markdown
+   ## Open Questions
+
+   These were identified by Misae but not resolved before the interview exited
+   (`exit_reason: hard_cap_reached`). The user and AK should treat them as
+   known gaps in the requirements.
+
+   - [ ] Latency target (p50/p95/p99 ms) — `unresolved_unknowns[0]`
+   - [ ] Failure mode when upstream times out — `unresolved_unknowns[1]`
+   ```
+   When `exit_reason ∈ {clarity_threshold_met, pre_interview_clear, user_skip_override}`,
+   do NOT add this section.
+4. Run Mechanical Pre-Check (`node src/mechanical-check.js --file ...`) — fix errors until it passes.
+5. Run Phase E-1 (AK review loop, up to 2 retries). Persist retry state in WORKFLOW_STATE.yaml.
+6. Return a summary ending with a fenced JSON block tagged `finalize-result`:
 
 ```finalize-result
 {
@@ -270,12 +366,12 @@ Missing any section = Stage 1 verification failure.
 
 **After writing REQUESTS, do NOT ask the user for approval yet.** Present the draft summary, then proceed directly to Phase E-1 (AK Review Loop). User approval is requested only in Phase E-2, after AK has reviewed and approved the document.
 
-### Clarity Scoring Rubric (FR-1.1–FR-1.3)
+### Clarity Scoring Rubric (FR-1, FR-2, FR-7 — gated, not informational)
 
-After each interview turn (Turns 1–4), compute and persist three sub-scores to WORKFLOW_STATE.yaml
-under `clarity_score:`. All scores are 0.0–1.0. **Scores during mid-interview are informational
-only — do NOT refuse to continue or warn the user about low scores early (HR-2). Only the
-transition-gate blocks at transition time.**
+After every Misae turn (including Turn 0 pre-interview score), compute and persist three
+sub-scores to WORKFLOW_STATE.yaml under `clarity_score:`. All scores are 0.0–1.0.
+**This rubric drives BOTH entry (skip-when-clear) and exit (continue-when-ambiguous)
+decisions.** The previous "informational only" framing is removed.
 
 | Sub-score | 0.0 | 0.5 | 1.0 |
 |-----------|-----|-----|-----|
@@ -285,16 +381,80 @@ transition-gate blocks at transition time.**
 
 Compute `overall` = (`goal_clarity` + `constraint_clarity` + `success_criteria`) / 3. Round to 2 decimal places.
 
-After each turn, write to `.shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml` — replace the
-`clarity_score:` block if it exists, or append it if not present:
+#### Gate thresholds (read from `.shinchan-config.yaml` — FR-6)
+
+| Threshold | Default | Behaviour |
+|-----------|---------|-----------|
+| `skip_threshold` | 0.85 | Pre-interview `overall ≥ this` AND ≥3 of 5 fields present → 0 turns (status: done, reason: pre_interview_clear) |
+| `done_threshold` | 0.75 | Exit when `overall ≥ this` AND `unresolved_unknowns == []` |
+| `hard_cap` | 10 | Absolute max turns; on reach with `overall < done_threshold` → status: done, reason: hard_cap_reached |
+
+Parent (`skills/start/SKILL.md`) reads these from `.shinchan-config.yaml`
+`interview.{skip_threshold, done_threshold, hard_cap}` and passes them into your prompt.
+If invalid (e.g. `skip_threshold ≤ done_threshold`), parent falls back to defaults and you
+emit a one-line warning before your JSON block.
+
+#### 5-field tie-breaker (HR-1, HR-5 — anti-retro-justification)
+
+`pre_interview_clear` requires BOTH:
+1. `clarity_score.overall ≥ skip_threshold`
+2. At least 3 of {`problem`, `scope`, `constraint`, `success_criterion`, `target_user`}
+   are explicitly present in `user_request`. Check by simple string-pattern matching
+   (no extra LLM call — NFR-3):
+   - `problem`: contains "문제", "issue", "bug", "broken", or describes what's wrong
+   - `scope`: contains "범위", "scope", file/endpoint reference, or "affects"
+   - `constraint`: contains numeric target ("< 200ms", "p95", "60K rps"), "no new", or "must use"
+   - `success_criterion`: contains "성공", "target", "목표", "≤", "AC", or testable verb ("verified")
+   - `target_user`: contains "사용자", "user", "logged-in", "admin", role noun
+
+If <3 fields present, even `overall = 1.0` does NOT skip — interview proceeds to Turn 1.
+
+#### Escape hatch (HR-2 — `skip-interview` literal)
+
+If `user_request` contains the case-insensitive literal `skip-interview`, immediately
+return `status: done, reason: user_skip_override` and persist
+`clarity_score.history[0].source: user_skip_override` regardless of computed score.
+
+#### WORKFLOW_STATE schema (FR-7 — additive)
+
+Extend the existing `clarity_score` block with two new sub-keys (backwards-compatible —
+old four-field shape continues to parse):
 
 ```yaml
 clarity_score:
-  goal_clarity: {value}
-  constraint_clarity: {value}
-  success_criteria: {value}
-  overall: {computed mean}
+  goal_clarity: 0.8
+  constraint_clarity: 0.7
+  success_criteria: 0.6
+  overall: 0.70
+  history:                        # NEW — append-only per turn (incl. turn 0)
+    - turn: 0
+      source: pre_interview       # one of: pre_interview | post_answer | autopilot_inferred | user_skip_override
+      goal_clarity: 0.6
+      constraint_clarity: 0.4
+      success_criteria: 0.5
+      overall: 0.50
+    - turn: 1
+      source: post_answer
+      goal_clarity: 0.8
+      constraint_clarity: 0.4
+      success_criteria: 0.5
+      overall: 0.57
+      question_targeted: constraint_clarity
+      closed_unknown: "Affected user segment"
+unresolved_unknowns:              # NEW — list you maintain; empty → eligible to exit
+  - "Latency target (p50/p95/p99 ms)"
+  - "Failure mode when upstream times out"
 ```
+
+Per-entry size budget (NFR-4): ≤150 tokens. `closed_unknown` ≤80 chars. No prose / CoT
+in WORKFLOW_STATE — that's what the streaming output is for (FR-5).
+
+#### Write protocol
+
+After each turn, write to `.shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml`:
+1. Replace top-level `clarity_score.{goal_clarity, constraint_clarity, success_criteria, overall}` with current values.
+2. APPEND one entry to `clarity_score.history` (never rewrite past entries).
+3. Update `unresolved_unknowns` (pop the just-closed item; add any newly surfaced item).
 
 ### Phase E: AK Review Gate + User Approval
 

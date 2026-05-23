@@ -116,11 +116,31 @@ Task(subagent_type="team-shinchan:misae", model="sonnet",
   Instead:
   1. Analyze the user request and infer all requirements autonomously
   2. Identify hidden requirements, risks, and edge cases from the request context
-  3. Produce REQUESTS.md (Problem, FR/NFR, Scope, Hidden Requirements, Risks, AC)
-  4. Run mechanical check + AK review per agents/misae.md Phase E (max 2 retries on AK rejection):
+  3. **Persist a clarity_score.history entry** in WORKFLOW_STATE.yaml BEFORE writing
+     REQUESTS.md. This makes the rubric the single shared quality signal across
+     interview and autopilot modes (AC9, NFR-1):
+     ```yaml
+     clarity_score:
+       goal_clarity: <0.0-1.0>
+       constraint_clarity: <0.0-1.0>
+       success_criteria: <0.0-1.0>
+       overall: <mean rounded to 2 decimals>
+       history:
+         - turn: 0
+           source: autopilot_inferred   # NEW enum value — required for autopilot path
+           goal_clarity: <0.0-1.0>
+           constraint_clarity: <0.0-1.0>
+           success_criteria: <0.0-1.0>
+           overall: <mean>
+     unresolved_unknowns: []           # autopilot infers everything → empty list
+     ```
+     Do NOT emit any interview-question JSON block. Do NOT increment
+     `current.interview.collected_count` — keep it at 0 (AC9 requirement).
+  4. Produce REQUESTS.md (Problem, FR/NFR, Scope, Hidden Requirements, Risks, AC)
+  5. Run mechanical check + AK review per agents/misae.md Phase E (max 2 retries on AK rejection):
      - On AK APPROVED: ak_gate.requirements.status becomes 'approved' via the recorded Task verdict (NOT by string-injection — IMMUTABLE rule in agents/misae.md)
      - On AK ESCALATED (max retries reached): STOP autopilot, report rejection reasons to user, do NOT advance to Stage 2
-  5. On approval, set current.stage to 'planning', return summary
+  6. On approval, set current.stage to 'planning', return summary
 
   If visual analysis provided, use as starting point.
   User request: {args}")

@@ -71,6 +71,20 @@ tag: {{TAG}}
 
 ---
 
+<!--
+  OPTIONAL SECTION — populated by Misae only when the interview exited via
+  hard_cap_reached or no_more_actionable_gaps (FR-3, AC8). For workflows that
+  exited cleanly (clarity_threshold_met / pre_interview_clear / user_skip_override),
+  this section is omitted from the rendered REQUESTS.md.
+-->
+
+## Open Questions (optional — present only on hard_cap_reached / no_more_actionable_gaps exit)
+
+- [ ] {{OPEN_QUESTION_1}}
+- [ ] {{OPEN_QUESTION_2}}
+
+---
+
 ## 7. Validation Checklist
 
 - [ ] Problem Statement — defined

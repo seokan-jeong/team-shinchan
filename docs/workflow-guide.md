@@ -58,6 +58,44 @@ if design_decision_needed:
 create_or_update("REQUESTS.md")
 ```
 
+### Clarity Gate (since main-074)
+
+The Stage 1 interview is **clarity-gated**, not turn-counted. Misae scores each turn
+against a 3-axis rubric (`goal_clarity`, `constraint_clarity`, `success_criteria`) and
+the orchestrator (`skills/start/SKILL.md`) honors a two-threshold contract:
+
+| Threshold | Default | What it does |
+|-----------|---------|--------------|
+| `skip_threshold` | 0.85 | Pre-interview `overall ≥ this` AND ≥3 of 5 fields explicit → 0 turns. Misae jumps to FINALIZE_DRAFT with `answers: []`. |
+| `done_threshold` | 0.75 | Exit when `overall ≥ this` AND `unresolved_unknowns == []`. Turn count is NO LONGER the trigger. |
+| `hard_cap` | 10 | Absolute max turns. Hitting it with `overall < done_threshold` writes a `## Open Questions` section to REQUESTS.md listing the residual gaps. |
+
+Configure via `.shinchan-config.yaml` at the project root:
+
+```yaml
+interview:
+  skip_threshold: 0.85
+  done_threshold: 0.75
+  hard_cap: 10
+```
+
+**Escape hatch**: the literal `skip-interview` (case-insensitive) in `user_request`
+triggers `status: done, reason: user_skip_override` regardless of computed score.
+
+**Backwards compatibility**: workflows with `WORKFLOW_STATE.yaml version: 1` (e.g.
+main-069..main-073) continue to load; the rubric for these defaults to "informational
+only" — no clarity gate is applied. Only `version ≥ 2` workflows enforce the gate.
+mechanical-check Check D emits a warning (not a hard fail) on missing
+`clarity_score.history` for `version: 1` docs.
+
+**Visible reasoning**: before each `interview-question` JSON block, Misae emits a
+one-line rationale of the form:
+```
+Clarity 0.55 (goal=0.7, constraint=0.3, success=0.6). Asking to lift constraint_clarity: "Latency target (p50/p95/p99 ms)".
+```
+This prose is for transparency; the structured equivalents (`targets_subscore` and
+`closes_unknown` JSON fields) are the parseable contract.
+
 **REQUESTS.md Quality Checklist:**
 - [ ] Clear problem statement
 - [ ] Acceptance criteria defined

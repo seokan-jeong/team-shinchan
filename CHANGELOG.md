@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.38.0] - 2026-05-24
+
+### Added
+- **agents/misae.md + skills/start/SKILL.md (main-074, FR-1..7)**: Stage 1 interview is now **clarity-gated** instead of turn-counted. A 3-axis rubric (`goal_clarity`, `constraint_clarity`, `success_criteria`) drives both entry and exit. Pre-interview scoring skips the interview entirely when `overall ≥ skip_threshold` (default `0.85`) AND ≥3 of 5 explicit fields are present (problem, scope, constraint, success_criterion, target_user — deterministic regex check to prevent retro-justification skips). Mid-interview exit when `overall ≥ done_threshold` (default `0.75`) AND `unresolved_unknowns == []`. `hard_cap` (default `10`) is an absolute ceiling — when hit with residual unknowns, REQUESTS.md gets a `## Open Questions` section listing the gaps.
+- **gap-targeted question contract (FR-4)**: Each `interview-question` JSON block now declares `targets_subscore` ∈ {goal_clarity, constraint_clarity, success_criteria} and `closes_unknown` (≤80 chars, one item from `unresolved_unknowns`). `skills/start/SKILL.md` GUARD validates both fields. No more formulaic asks.
+- **visible reasoning (FR-5)**: One-line prose rationale of the form `Clarity 0.55 (goal=0.7, constraint=0.3, success=0.6). Asking to lift constraint_clarity: "Latency target (p50/p95/p99 ms)"` precedes every JSON block for transparency.
+- **escape hatch (HR-2)**: Literal `skip-interview` (case-insensitive) in `user_request` triggers immediate `status: done, reason: user_skip_override` regardless of computed score.
+- **autopilot consistency (AC9)**: `skills/autopilot/SKILL.md` Step 5 now requires Misae to persist `clarity_score.history[0]` with `source: autopilot_inferred` so the rubric remains the single shared quality signal across manual and autopilot paths.
+- **configurable thresholds (FR-6)**: `.shinchan-config.yaml` `interview.{skip_threshold, done_threshold, hard_cap}` honored with silent defaults + sanity check (`done_threshold < skip_threshold ≤ 1.0`).
+- **src/mechanical-check.js Check D / Check HD (NFR-1, AC6)**: New version-gated check. For `schema_version: 1` WORKFLOW_STATE.yaml (main-069..main-073) emits a warning only — preserves backwards compat. For `schema_version: 2+` missing `clarity_score.history` emits a hard error. Markdown mode (`checkD`) + HTML mode (`checkHD`) both wired.
+- **tests/mechanical-check-clarity.test.js + 3 fixture dirs**: 6 unit tests covering version-1-no-history (no error), version-2-no-history (1 error matching `/Check D.*clarity_score\.history/`), version-2-with-history (no error), missing WORKFLOW_STATE.yaml (vacuous pass), `checkHD` aliasing, and an explicit AC6 regression assertion against `.shinchan-docs/main-073/REQUESTS.md`.
+- **agents/_shared/templates/REQUESTS.md.tpl**: Optional `## Open Questions` section between Acceptance Criteria and Validation Checklist — present only when interview exits via `hard_cap_reached` or `no_more_actionable_gaps`.
+- **docs/workflow-guide.md**: New `### Clarity Gate (since main-074)` subsection documenting the two-threshold contract, `.shinchan-config.yaml` snippet, escape hatch, version-gated mechanical-check, and FR-5 prose rationale format.
+
+### Notes
+- **AC10 — `agents/actionkamen.md` untouched**: confirmed by empty `git diff --stat`. Action Kamen's review contract remains the constant reference frame for this self-modifying release.
+- **Dogfooded**: main-074 itself ran under autopilot; the workflow's own `WORKFLOW_STATE.yaml` carries `clarity_score.history[0]` with `source: autopilot_inferred` and AK approved final verification 15/15 (correctness 5/5, completeness 5/5, quality 5/5).
+
 ## [4.37.0] - 2026-05-21
 
 ### Added

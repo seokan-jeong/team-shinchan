@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.38.1] - 2026-05-30
+
+Harness-fit maintenance pass via `/meta-harness:improve` (4-phase pipeline). Project-fit re-evaluation moved the harness from `draft` to `good` (2 high coverage-gaps + 1 broken validator route resolved).
+
+### Added
+- **CLAUDE.md § "Source Layer (`src/`)"**: orients contributors to the JavaScript implementation layer (~47 `src/*.js` modules + the `src/dashboard/` htmx+SSE app) and the real run/test commands (`npm run dashboard`, `npm run test:dashboard`, `./run-tests.sh static`, top-level `tests/*.test.js` via `node --test`). Previously the harness documented only the markdown surface.
+
+### Fixed
+- **skills/manage-skills/SKILL.md**: the Step-2 validator map routed `hooks/hooks.json` / `plugin.json` changes to a non-existent `verify-hooks` skill — repointed to `verify-workflow` (which already owns `hooks/*.md`) so the `hook-registration` validator stays reachable.
+- **skills/manage-skills/SKILL.md**: corrected the false "markdown plugin / no `src/`" assertion in the Prohibited list (the project ships a real `src/` JS layer) and clarified the skill is intentionally scoped to the markdown surface.
+- **commands/release.md**: fixed a dangling pointer to the non-existent `skills/release/SKILL.md` (now references the actual `src/release.js`).
+
+### Changed
+- **Conciseness pass**: removed 23 redundant-restatement lines across `agents/{ume,kazama,masumi}.md` and `skills/help/SKILL.md` (Anthropic conciseness test; no behavior change).
+- **Trigger descriptions sharpened** for `skills/skill-feedback`, `agents/midori`, and `agents/ume` (clearer "use when" phrasing + concrete trigger phrases).
+- **.gitignore**: ignore `.meta-harness/` local state (snapshots, improve-state).
+
 ## [4.38.0] - 2026-05-24
 
 ### Added

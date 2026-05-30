@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.39.0] - 2026-05-30
+
+**Release tooling is now a full GitHub release orchestrator.** `src/release.js` previously only bumped version numbers across 4 files; commit/tag/push and the GitHub Release were manual steps.
+
+### Added
+- `src/release.js` opt-in flags `--git`, `--tag`, `--push`, `--gh-release`, and `--full`. The 4-file version bump stays the always-on default; the git/GitHub steps are opt-in.
+- Release-notes resolution: `--notes-file <f>`, falling back to a draft from `git log <last-tag>..HEAD` — the CHANGELOG header is never left silently empty.
+- `--title` for the GitHub Release; `--dry-run` now previews every step (bump + git + gh) with zero side effects.
+- Fail-fast preconditions: semver check, already-current guard, tag-exists guard, `gh auth` check, not-on-main warning.
+- `tests/release.test.js` — 16 `node --test` cases.
+
+### Fixed
+- `commands/release.md` overclaimed it "creates a git commit and tag" while the script did neither — docs now match behavior.
+
+### Notes
+- Commit **and** tag messages are emitted as conventional `chore: release vX.Y.Z` (the harness commit-lint hook rejects non-conventional commit/tag messages).
+- After a release, clear local plugin caches (see `commands/release.md`).
+
 ## [4.38.1] - 2026-05-30
 
 Harness-fit maintenance pass via `/meta-harness:improve` (4-phase pipeline). Project-fit re-evaluation moved the harness from `draft` to `good` (2 high coverage-gaps + 1 broken validator route resolved).

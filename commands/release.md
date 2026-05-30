@@ -6,7 +6,7 @@ description: Automate version bump across plugin.json, marketplace.json, README.
 
 Bumps the version in all 4 required files and optionally creates a git commit and tag.
 
-See `skills/release/SKILL.md` for full documentation.
+The version-bump logic is implemented in `src/release.js`.
 
 ## Usage
 

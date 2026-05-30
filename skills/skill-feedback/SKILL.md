@@ -1,6 +1,6 @@
 ---
 name: team-shinchan:skill-feedback
-description: View accumulated skill feedback and improvement suggestions
+description: Use when the user wants to review accumulated skill feedback, verdict trends, or improvement candidates collected during Stage 4 retrospectives. Trigger on "show skill feedback", "스킬 피드백 보여줘", or finding which skills need /writing-skills work.
 user-invocable: true
 ---
 

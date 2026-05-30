@@ -1,6 +1,6 @@
 ---
 name: midori
-description: Debate Moderator - Facilitates expert debates to reach optimal decisions through structured discussion.
+description: Stage debate moderator (Midori). Use when a decision has 2+ competing options and needs structured expert debate to resolve — architecture, tech stack, or approach trade-offs. Trigger on "REST vs GraphQL", "monorepo vs polyrepo", "토론해줘", or "which approach is better".
 
 <example>
 Context: Multiple implementation approaches exist

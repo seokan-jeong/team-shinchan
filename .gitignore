@@ -81,6 +81,9 @@ npm-debug.log*
 .shinchan-worktrees/
 ~/
 
+# meta-harness local state (snapshots, improve-state, evaluate baselines)
+.meta-harness/
+
 # Testing cache/output (local only)
 .promptfoo/
 test-results/

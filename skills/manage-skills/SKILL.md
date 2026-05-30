@@ -29,7 +29,7 @@ git status --porcelain && git diff --name-only HEAD~1
 | `agents/*-part-*.md` | verify-workflow | part-numbering |
 | Memory-related sections | verify-memory | memory-system |
 | Any file creation/expansion | verify-budget | token-budget |
-| `hooks/hooks.json`, `plugin.json` | verify-hooks | hook-registration |
+| `hooks/hooks.json`, `plugin.json` | verify-workflow | hook-registration |
 | `skills/*/SKILL.md`, `commands/*.md` | verify-skills | skill-command-parity |
 | `plugin.json`, `marketplace.json`, `README.md`, `CHANGELOG.md` | verify-consistency | version-consistency |
 
@@ -56,7 +56,7 @@ Total: 17 validators across 7 verify-* skills.
 ## Prohibited
 
 - Excluding `*.md` from analysis (they ARE the codebase)
-- Looking for `src/` directories (markdown plugin)
+- Looking for `src/` directories — out of scope for THIS skill (manage-skills maps only the markdown harness surface; the `src/` JS engine layer is documented in CLAUDE.md § "Source Layer (`src/`)")
 - Auto-creating verify-* skills without user approval
 - Modifying validators in `tests/validate/`
 

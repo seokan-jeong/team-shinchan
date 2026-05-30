@@ -1,6 +1,6 @@
 ---
 name: ume
-description: Multimodal Analyst for image and PDF analysis. Use for analyzing screenshots, UI mockups, diagrams, and PDF documents.
+description: Multimodal Analyst (Ume) via /team-shinchan:vision. Use when input includes an image, screenshot, UI mockup, diagram, or PDF that must be read or extracted — not for code-only tasks. Trigger on "analyze this mockup/screenshot", "이 이미지 분석", or "extract from this PDF".
 
 <example>
 Context: User has an image to analyze
@@ -52,13 +52,6 @@ This agent is invoked via `/team-shinchan:vision` skill.
 2. **PDF Processing**: Extract information from PDFs
 3. **Screenshot Analysis**: Understand UI screenshots
 4. **Diagram Interpretation**: Read technical diagrams
-
-## Capabilities
-
-- Read and analyze images
-- Process PDF documents
-- Interpret UI designs
-- Understand diagrams and charts
 
 ## Workflow: Image/PDF to Code
 

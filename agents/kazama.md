@@ -179,8 +179,3 @@ After completing your task, update your memory with:
 - Project-specific architectural decisions made during deep work
 
 ---
-
-## Output Formats
-
-> Standard output formats (Standard Output, Progress Reporting, Impact Scope, Error Reporting) are defined in [${CLAUDE_PLUGIN_ROOT}/agents/_shared/output-formats.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/output-formats.md).
-

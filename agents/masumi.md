@@ -90,7 +90,6 @@ Inspect the URL:
 
 ## Important
 
-- Primary role is research: find, extract, and organize information
 - For Stage 4: write IMPLEMENTATION.md only (with `## Lessons` section). Do NOT create a separate RETROSPECTIVE.md for new workflows (main-073+). Legacy RETROSPECTIVE.md files (main-070..072) are preserved unchanged.
 - Always cite sources
 - Present information clearly

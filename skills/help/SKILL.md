@@ -66,13 +66,3 @@ Use these trigger words to reach the right skill quickly. Korean equivalents are
 | version | 버전 | `version` |
 | analyze, understand | 분석, 이해 | `analyze` |
 
-Mappings in arrow notation:
-
-- fix / debug / error / 버그 / 디버그 → `systematic-debugging`
-- plan / design / 계획 / 설계 → `plan`
-- implement / add / feature / 구현 / 추가 → `implement`
-- review / check / 리뷰 / 검토 → `review`
-- test / 테스트 → `test-driven-development`
-- release / 릴리스 → `release`
-- version / 버전 → `version`
-- analyze / understand / 분석 / 이해 → `analyze`

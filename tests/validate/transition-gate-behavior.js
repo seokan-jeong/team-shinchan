@@ -32,6 +32,12 @@
  *  TC-11b: requirements→planning WITH AK APPROVED on disk     → ALLOW
  *  TC-12: planning→execution (no AK APPROVED)                 → BLOCK
  *  TC-12b: planning→execution WITH AK APPROVED on disk        → ALLOW
+ *  TC-DG1: planning→execution WITHOUT debate record/waiver    → BLOCK (debate gate)
+ *  TC-DG2: planning→execution citing DECISION-NNN             → ALLOW
+ *  TC-DG3: planning→execution WITH bold-markdown waiver       → ALLOW (markdown-tolerant)
+ *  TC-DG4: planning→execution WITH bare waiver (no reason)    → BLOCK (reason required)
+ *  TC-DG5: planning→execution WITH design signals + waiver    → BLOCK (waiver insufficient when a choice exists)
+ *  TC-DG6: planning→execution WITH design signals + DECISION  → ALLOW
  *  TC-13: S1→S2 injection bypass (AK only in payload)         → BLOCK (AC-1 canonical)
  *  TC-14: S2→S3 injection bypass (AK only in payload)         → BLOCK (AC-3 canonical)
  *  TC-AC4: partial Edit with on-disk AK approval              → ALLOW (AC-4 regression)
@@ -445,7 +451,7 @@ function runValidation() {
       );
       fs.writeFileSync(
         path.join(docsDir, 'PROGRESS.md'),
-        '# PROGRESS\n\n## Phase 1: Implement the core feature with full AC coverage\nImplement the feature with proper error handling.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests for all edge cases.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n',
+        '# PROGRESS\n\nDesign decisions: none — straightforward implementation, no competing approaches.\n\n## Phase 1: Implement the core feature with full AC coverage\nImplement the feature with proper error handling.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests for all edge cases.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n',
         'utf-8'
       );
 
@@ -776,7 +782,7 @@ function runValidation() {
       );
       fs.writeFileSync(
         path.join(docsDir, 'PROGRESS.md'),
-        '# PROGRESS\n\n## Phase 1: Implement the core feature with full AC coverage\nImplement the feature.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n',
+        '# PROGRESS\n\nDesign decisions: none — straightforward implementation.\n\n## Phase 1: Implement the core feature with full AC coverage\nImplement the feature.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n',
         'utf-8'
       );
       // No AK review in WORKFLOW_STATE.yaml
@@ -814,7 +820,7 @@ function runValidation() {
       );
       fs.writeFileSync(
         path.join(docsDir, 'PROGRESS.md'),
-        '# PROGRESS\n\n## Phase 1: Implement the core feature with full AC coverage\nImplement the feature.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n',
+        '# PROGRESS\n\nDesign decisions: none — straightforward implementation.\n\n## Phase 1: Implement the core feature with full AC coverage\nImplement the feature.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n',
         'utf-8'
       );
       // Payload contains only the new stage — AK approval already exists on disk
@@ -827,6 +833,184 @@ function runValidation() {
         ok('TC-12b: planning→execution (valid PROGRESS.md + AK APPROVED on disk) → ALLOW');
       } else {
         fail(`TC-12b: planning→execution (with AK APPROVED on disk) → expected ALLOW, got BLOCK: ${(result.reason || '').slice(0, 120)}`);
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // ── TC-DG1/DG2: Debate Gate — design-decision record required (planning→execution) ──
+
+  section('5b. Debate Gate — design-decision record required at planning→execution');
+
+  // TC-DG1: planning→execution, AK on disk, PROGRESS.md has NO debate marker → BLOCK
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('planning', { akStage: 'planning' });
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- Requirement A\n',
+        'utf-8'
+      );
+      // Valid plan, AK approved on disk — but NO debate reference and NO waiver line
+      fs.writeFileSync(
+        path.join(docsDir, 'PROGRESS.md'),
+        '# PROGRESS\n\n## Phase 1: Implement the core feature with full AC coverage\nImplement it.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n',
+        'utf-8'
+      );
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile,
+          content: '---\nstage: execution\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      const mentionsDebate = (result.reason || '').includes('DEBATE GATE');
+      if (result.decision === 'block' && mentionsDebate) {
+        ok('TC-DG1: planning→execution (no debate record, no waiver) → BLOCK with DEBATE GATE in reason');
+      } else if (result.decision === 'block') {
+        ok(`TC-DG1: planning→execution (no debate record) → BLOCK (reason: ${(result.reason || '').slice(0, 80)})`);
+      } else {
+        fail('TC-DG1: planning→execution (no debate record, no waiver) → expected BLOCK, got ALLOW (debate gate not enforced)');
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // TC-DG2: planning→execution, AK on disk, PROGRESS.md cites DECISION-NNN → ALLOW
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('planning', { akStage: 'planning' });
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- Requirement A\n',
+        'utf-8'
+      );
+      // Plan cites a recorded debate decision → debate gate satisfied
+      fs.writeFileSync(
+        path.join(docsDir, 'PROGRESS.md'),
+        '# PROGRESS\n\nDesign decision: REST chosen over GraphQL — see DECISION-001.\n\n## Phase 1: Implement the core feature with full AC coverage\nImplement it.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n',
+        'utf-8'
+      );
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile,
+          content: '---\nstage: execution\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      if (result.decision !== 'block') {
+        ok('TC-DG2: planning→execution (PROGRESS.md cites DECISION-001) → ALLOW');
+      } else {
+        fail(`TC-DG2: planning→execution (cites DECISION-001) → expected ALLOW, got BLOCK: ${(result.reason || '').slice(0, 120)}`);
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // TC-DG3: planning→execution, AK on disk, PROGRESS.md has a bold-markdown waiver → ALLOW (markdown-tolerant)
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('planning', { akStage: 'planning' });
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- Requirement A\n',
+        'utf-8'
+      );
+      // Waiver written with markdown bold around the label, as the PROGRESS template renders it
+      fs.writeFileSync(
+        path.join(docsDir, 'PROGRESS.md'),
+        '# PROGRESS\n\n- **Design decisions**: none — single obvious approach.\n\n## Phase 1: Implement the core feature with full AC coverage\nImplement it.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n',
+        'utf-8'
+      );
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile,
+          content: '---\nstage: execution\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      if (result.decision !== 'block') {
+        ok('TC-DG3: planning→execution (bold-markdown waiver) → ALLOW (markdown-tolerant regex)');
+      } else {
+        fail(`TC-DG3: planning→execution (bold waiver) → expected ALLOW, got BLOCK: ${(result.reason || '').slice(0, 120)}`);
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // TC-DG4: planning→execution, bare waiver with NO reason → BLOCK (waiver must justify)
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('planning', { akStage: 'planning' });
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- Requirement A\n',
+        'utf-8'
+      );
+      // Content-free waiver (no reason after "none") — must NOT clear the gate
+      fs.writeFileSync(
+        path.join(docsDir, 'PROGRESS.md'),
+        '# PROGRESS\n\nDesign decisions: none\n\n## Phase 1: Implement the core feature with full AC coverage\nImplement it.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n',
+        'utf-8'
+      );
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile,
+          content: '---\nstage: execution\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      if (result.decision === 'block') {
+        ok('TC-DG4: planning→execution (bare waiver, no reason) → BLOCK (reason required)');
+      } else {
+        fail('TC-DG4: planning→execution (content-free waiver) → expected BLOCK, got ALLOW (rubber-stamp hole open)');
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // TC-DG5: planning→execution, design signals present + waiver (no debate) → BLOCK (waiver insufficient)
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('planning', { akStage: 'planning' });
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- Requirement A\n',
+        'utf-8'
+      );
+      // A real design choice (REST vs GraphQL) is in the plan, but only a waiver — must BLOCK
+      fs.writeFileSync(
+        path.join(docsDir, 'PROGRESS.md'),
+        '# PROGRESS\n\nDesign decisions: none — looks simple.\n\n## Phase 1: Choose REST vs GraphQL for the public API\nBuild the endpoint.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n',
+        'utf-8'
+      );
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile,
+          content: '---\nstage: execution\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      const mentionsDebate = (result.reason || '').includes('DEBATE GATE');
+      if (result.decision === 'block' && mentionsDebate) {
+        ok('TC-DG5: planning→execution (design signals + waiver, no debate) → BLOCK (waiver insufficient when a choice exists)');
+      } else if (result.decision === 'block') {
+        ok(`TC-DG5: planning→execution (signals + waiver) → BLOCK (reason: ${(result.reason || '').slice(0, 80)})`);
+      } else {
+        fail('TC-DG5: planning→execution (signals + waiver) → expected BLOCK, got ALLOW (signal hard-layer not enforced)');
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // TC-DG6: planning→execution, design signals present + DECISION-NNN cited → ALLOW
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('planning', { akStage: 'planning' });
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- Requirement A\n',
+        'utf-8'
+      );
+      // Same design choice, but the debate happened and is cited → satisfied
+      fs.writeFileSync(
+        path.join(docsDir, 'PROGRESS.md'),
+        '# PROGRESS\n\nDesign decision: REST vs GraphQL resolved — REST chosen, see DECISION-002.\n\n## Phase 1: Implement the core feature with full AC coverage\nBuild the endpoint.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n',
+        'utf-8'
+      );
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile,
+          content: '---\nstage: execution\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      if (result.decision !== 'block') {
+        ok('TC-DG6: planning→execution (design signals + DECISION-002 cited) → ALLOW');
+      } else {
+        fail(`TC-DG6: planning→execution (signals + DECISION cited) → expected ALLOW, got BLOCK: ${(result.reason || '').slice(0, 120)}`);
       }
     } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
   }

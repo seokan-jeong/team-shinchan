@@ -22,6 +22,14 @@ flowchart TD
 
 ---
 
+## Design Decisions
+
+> **Required before Stage 3 (execution).** The transition gate blocks the planning → execution transition until this is filled. If the work involves a design choice (2+ viable approaches, or an architecture / schema / API / auth / irreversible call), run `/team-shinchan:debate` — or `/team-shinchan:fierce-debate` for high-stakes — and cite the resulting decision id. If there is genuinely no design choice, replace the placeholder with an explicit one-line waiver and a reason.
+
+- {{DESIGN_DECISION_RECORD}}
+
+---
+
 ### Wave Execution Summary
 
 | Wave | Phases | Parallel | Artifact Dependency |

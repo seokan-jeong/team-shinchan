@@ -346,6 +346,8 @@ Delegate to Midori when: 2+ approaches, architecture change, pattern break, perf
 
 After results: deliver to user, confirm before proceeding.
 
+**High-stakes escalation**: if the decision is irreversible (schema migration, public API contract, security boundary, data-loss risk), do NOT silently auto-debate. Surface a one-line opt-in: _"This looks irreversible — run a fierce Workflow debate (`/team-shinchan:fierce-debate`)? It guarantees a refutation round + scored judge."_ Only the user launches it (Workflow is main-loop only); never delegate `team-shinchan:fierce-debate` to a subagent.
+
 ---
 
 ## RULE 2.5: Quick Fix Path

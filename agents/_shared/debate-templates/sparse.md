@@ -37,10 +37,11 @@ Select the 2 most relevant domain experts:
 - **Agent A**: State position with rationale (3-5 sentences)
 - **Agent B**: State counter-position with rationale (3-5 sentences)
 
-### Round 2: Rebuttal & Resolution (optional — skip if Round 1 reaches agreement)
-- **Agent A**: Brief rebuttal addressing Agent B's points (2-3 sentences)
-- **Agent B**: Brief rebuttal addressing Agent A's points (2-3 sentences)
-- **Hiroshi**: Synthesis if disagreement persists (final authority)
+### Round 2: Rebuttal & Resolution (MANDATORY — never skipped, even on apparent agreement)
+- **Agent A**: Refute Agent B's strongest point (2-3 sentences). If you concede, state explicitly what you tried to refute and why it survived — silent agreement is not allowed.
+- **Agent B**: Refute Agent A's strongest point (2-3 sentences), same rule.
+- **Red-team pass**: Each agent names the one assumption that, if false, breaks their own position.
+- **Hiroshi**: Synthesis (final authority). Must record what was challenged; `dissenting_views` may not be silently empty — if none remain, record "none — survived rebuttal: {what was challenged}".
 
 ## Evaluation Criteria
 | Criterion | Weight | Description |

@@ -62,6 +62,8 @@ When entering Stage 2 (planning), explicitly enter Plan Mode:
 
 > Note: `permissionMode: plan` in frontmatter is a static default. `EnterPlanMode`/`ExitPlanMode` are runtime signals for explicit transparency.
 
+> **Debate Gate (required to leave planning)**: PROGRESS.md MUST contain a `## Design Decisions` record before the planning → execution transition — the transition-gate hook blocks otherwise. If the work has a real design choice (2+ approaches, architecture/schema/API/auth, or an irreversible call), run `/team-shinchan:debate` (or `/team-shinchan:fierce-debate` for high-stakes) and cite the `DECISION-NNN`. If not, waive explicitly: `Design decisions: none — {reason}`. The markdown PROGRESS template already includes this section.
+
 ## Planning Process
 
 Read REQUESTS.md → **Impact Scope Analysis** → Codebase analysis → Phased plan → Testable AC → Risks + mitigations.

@@ -312,7 +312,7 @@ function checkSubagentRouting(errors, warnings) {
   // Known skills (not agents) — these are expected references in shinnosuke.md
   const KNOWN_SKILLS = new Set([
     'start', 'status', 'autopilot', 'ralph', 'ultrawork', 'plan', 'analyze', 'deepsearch',
-    'debate', 'orchestrate', 'learn', 'memories', 'forget', 'help', 'resume', 'review',
+    'debate', 'fierce-debate', 'orchestrate', 'learn', 'memories', 'forget', 'help', 'resume', 'review',
     'frontend', 'backend', 'devops', 'implement', 'requirements', 'vision', 'bigproject',
     'verify-implementation', 'manage-skills', 'verify-agents', 'verify-skills',
     'verify-consistency', 'verify-workflow', 'verify-memory', 'verify-budget',

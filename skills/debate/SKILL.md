@@ -20,6 +20,18 @@ If args empty: ask user for topic and STOP. If args > 2000 chars: truncate + war
 
 On detection: announce "Design decision needed: [situation]", proceed Steps 1-3. Record decision in REQUESTS.md (Stage 1) or PROGRESS.md (Stage 2+).
 
+## Escalation: Tier 1 (this skill) vs Tier 2 (fierce-debate)
+
+This skill (Midori, consensus-seeking, cheap, auto-triggerable) is **Tier 1** and the default. For **irreversible / high-stakes** decisions, escalate to **Tier 2 — `team-shinchan:fierce-debate`** (a deterministic main-loop Workflow with a non-skippable refutation round + scored judge).
+
+| Stay on Tier 1 (this skill) | Escalate to fierce-debate |
+|---|---|
+| Reversible, low-stakes, simple 2-option | Irreversible: schema migration, public API contract, security boundary, data-loss |
+| Quick consensus acceptable | A guaranteed refutation round is worth the cost |
+| Auto-triggered, silent | Explicit user opt-in only (Workflow can't fire silently) |
+
+**Auto-detect never silently jumps to Tier 2** — on a high-stakes detection, announce the design decision and offer the opt-in; the user launches `/team-shinchan:fierce-debate`. Both tiers write to the same `.shinchan-docs/debate-decisions.md` ledger (see `agents/_shared/debate-decisions.md`).
+
 ## Competitive Code Mode Detection
 
 **Triggers**: args contains any of: "경쟁 구현", "competitive", "best of N", "best of", "parallel implementation", "competitive-code"

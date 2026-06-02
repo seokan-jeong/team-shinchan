@@ -219,6 +219,33 @@ process.stdin.on('end', () => {
                 missing.push('Plan Validation: Phase ' + (i+1) + ' description too short (< 20 chars): \"' + firstLine.trim().substring(0, 40) + '\"');
               }
             }
+
+            // === Debate Gate (design-decision record required) ===
+            // Telemetry showed Midori never fired (0 of thousands of logged actions) because debate
+            // was a soft auto-detect. This makes the debate/no-debate choice VISIBLE at the
+            // planning to execution boundary: require a recorded debate OR an explicit one-line waiver.
+            const yamlForDebate = (() => { try { return fs.readFileSync(filePath, 'utf-8'); } catch(e) { return ''; } })();
+            let reqForDebate = '';
+            try { reqForDebate = fs.readFileSync(reqFile, 'utf-8'); } catch(e) {}
+            const hasDebateRef = /DECISION-\\d+/.test(content) ||
+              /event:\\s*debate|agent:\\s*midori|\\bmidori\\b|fierce-debate/i.test(yamlForDebate);
+            // Waiver must include a REASON (not a content-free 'none') — a bare waiver was the rubber-stamp hole.
+            const hasWaiver = /design\\s+decisions?\\s*\\**\\s*:\\s*\\**\\s*(none|n\\/a)\\b\\s*[—:,\\-(]\\s*\\S/i.test(content) ||
+              /no\\s+design\\s+decisions?\\b[^\\n]*[—:,\\-(]\\s*\\S/i.test(content) ||
+              /토론\\s*(불필요|없음)\\s*[—:,\\-(]?\\s*\\S/.test(content) ||
+              /debate\\s*\\**\\s*:\\s*\\**\\s*(none|waived|n\\/a)\\b\\s*[—:,\\-(]\\s*\\S/i.test(content);
+            // Design-decision signals = a CHOICE is present (choice vocabulary, not mere topic keywords — avoids false-positive friction).
+            const designSignals = /\\bvs\\.?\\b|\\bversus\\b|option\\s+[ab]\\b|approach\\s+[12]\\b|trade-?off|alternative approach|irreversible|두 가지 (방식|접근)|중 (선택|어느)/i;
+            const hasSignals = designSignals.test(content) || designSignals.test(reqForDebate);
+            if (hasDebateRef) {
+              // A debate decision is recorded (DECISION-NNN or a debate event) — gate satisfied.
+            } else if (hasSignals) {
+              // Floor + signal hard-layer: when a choice is detected, a waiver is NOT enough — debate is required.
+              missing.push('DEBATE GATE: design-decision signals (vs / option A|B / approach 1|2 / trade-off / alternative / irreversible) detected in the plan or requirements, but no debate decision is recorded. A waiver is NOT sufficient here — run /team-shinchan:debate (or /team-shinchan:fierce-debate for irreversible/high-stakes) and cite the resulting DECISION-NNN in PROGRESS.md.');
+            } else if (!hasWaiver) {
+              missing.push('DEBATE GATE: planning to execution requires a design-decision record. Either run /team-shinchan:debate and cite the DECISION-NNN in PROGRESS.md, OR add a one-line waiver WITH A REASON to PROGRESS.md: \"Design decisions: none - {why no design choice exists}\".');
+            }
+            // else: no signals + a waiver that includes a reason → allow (trivial transition, minimal friction).
           }
         }
 

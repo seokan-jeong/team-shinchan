@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.40.0] - 2026-06-02
+
+### Two-tier debate — now actually enforced
+
+Telemetry showed the debate moderator never fired in practice (**0 of 4,813 logged actions**) because debate was only a soft auto-detect. This release makes design-decision debate a real, enforced part of the workflow, and adds a fiercer adversarial tier for high-stakes calls.
+
+**Enforced trigger gate (planning → execution)**
+- The transition gate now blocks advancing from planning to execution until `PROGRESS.md` records a design decision: cite a `DECISION-NNN` from a debate, or write an explicit one-line waiver with a reason.
+- Floor + signal hard-layer: when design-choice signals (vs / option A|B / approach 1|2 / trade-off / alternative / irreversible) appear, a waiver is not enough — a debate is required.
+- The PROGRESS template prompts for it; Nene's planning guidance documents it.
+
+**Tier 1 (Midori) hardening**
+- Sparse-debate Round 2 (rebuttal) is now mandatory, with a red-team pass.
+- `dissenting_views` may no longer be silently empty.
+
+**Tier 2 — `/team-shinchan:fierce-debate` (new, opt-in)**
+- A deterministic main-loop Workflow for irreversible / high-stakes decisions: advocates argue each option maximally, then mandatory cross-refutation, then an Action-Kamen-scored judge, with schema-validated output that rejects empty dissent.
+- Shares the single `debate-decisions.md` ledger with Midori.
+
+The gate design was itself stress-tested with the new fierce-debate flow. All static validation passes; the transition-gate behavior suite covers the new gate (TC-DG1..DG6).
+
 ## [4.39.0] - 2026-05-30
 
 **Release tooling is now a full GitHub release orchestrator.** `src/release.js` previously only bumped version numbers across 4 files; commit/tag/push and the GitHub Release were manual steps.

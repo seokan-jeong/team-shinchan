@@ -19,7 +19,7 @@ Read `.shinchan-docs/debate-decisions.md`. If an Active decision matches the top
 
 ## Step 2: Run the fierce-debate Workflow
 
-Give each option a `persona` — a 1-2 sentence ROLE/EXPERTISE descriptor drawn from the matching team-shinchan agent. (The Workflow runtime cannot load plugin subagents, so the persona is **injected into the prompt**, not passed as `agentType`.) Suggested lenses: Backend/API → Bunta's backend rigor; Frontend/UI → Aichan's UX lens; DevOps/Infra → Masao's ops lens; Architecture/general → Hiroshi's deep analysis; hidden requirements → Misae. Then call the Workflow tool with the shipped script:
+Give each option a `persona` — a ROLE/EXPERTISE descriptor drawn from the matching team-shinchan agent. (The Workflow runtime cannot load plugin subagents, so the persona is **injected into the prompt**, not passed as `agentType`.) Map each option to a lens — Backend/API → Bunta; Frontend/UI → Aichan; DevOps/Infra → Masao; Architecture/general → Hiroshi; hidden requirements → Misae — then resolve that agent's persona string from its definition (DRY) with `node ${CLAUDE_PLUGIN_ROOT}/src/workflow-personas.js <agent>` and pass it as the option's `persona`. Then call the Workflow tool with the shipped script:
 
 ```
 Workflow({
@@ -28,8 +28,9 @@ Workflow({
     topic: "<the decision>",
     category: "<architecture|security|performance|tech-selection>",
     options: [
-      { label: "<Option A>", persona: "You are Hiroshi, the Oracle — deep technical analysis and pattern recognition." },
-      { label: "<Option B>", persona: "You are Misae — you surface hidden requirements and edge cases." }
+      // persona = the string printed by `workflow-personas.js <agent>` for the option's lens
+      { label: "<Option A>", persona: "<output of workflow-personas.js hiroshi>" },
+      { label: "<Option B>", persona: "<output of workflow-personas.js misae>" }
     ]
   }
 })

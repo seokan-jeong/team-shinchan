@@ -119,6 +119,8 @@ Kazama is available through multiple invocation paths:
 When invoked via ralph, Kazama loops through implementation cycles until all acceptance criteria are met.
 When invoked during standard workflow, Kazama handles a single complex phase with deep focus.
 
+> For high-stakes, genuinely long-running work where a stalled or prematurely-stopped loop is costly, this narrated boulder loop can be *escalated* to a deterministic main-loop Workflow whose loop condition is owned by the script — see the `team-shinchan:fierce-ralph` skill (opt-in: worker→verifier iterations bounded by iteration cap, token budget, and stagnation limit, closed by an Action-Kamen gate). Never silently jump to it; offer the opt-in.
+
 ---
 
 ## Stage Awareness

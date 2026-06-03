@@ -18,6 +18,18 @@ If args length > 2000 characters:
   Warn user: "Request was truncated to 2000 characters"
 ```
 
+## Escalation: Tier 1 (this skill) vs Tier 2 (fierce-review)
+
+This skill (Action Kamen via Task — thorough, cheap, auto-triggerable, delegatable) is **Tier 1** and the default. For **high-stakes scope**, escalate to **Tier 2 — `team-shinchan:fierce-review`** (a deterministic main-loop Workflow with independent per-dimension agents, a non-skippable per-finding refutation, a completeness critic, and a schema-validated rubric judge that reuses `eval-rubrics.json`).
+
+| Stay on Tier 1 (this skill) | Escalate to fierce-review |
+|---|---|
+| Routine change, single file, quick check | Pre-release diff, security / payment / auth boundary, data-loss path |
+| One thorough pass is acceptable | You want guaranteed per-dimension coverage + adversarial per-finding verification |
+| Auto-triggered or delegated, cheap | Explicit user opt-in only (Workflow can't fire silently or from a subagent) |
+
+**Never silently jump to Tier 2** — on a high-stakes scope, finish this review, then offer the opt-in; the user launches `/team-shinchan:fierce-review`.
+
 ## Step 2: Execute Task
 
 **Do not read further. Execute this Task NOW:**

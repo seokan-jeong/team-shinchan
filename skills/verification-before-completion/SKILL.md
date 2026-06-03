@@ -55,3 +55,13 @@ Use this format in your completion report:
 ```
 
 If the verdict is FAIL, fix the issue before claiming completion. Do not report a task as done with a FAIL verdict.
+
+## Fierce-review as code-review evidence
+
+At the **before-PR** and **before-completion** checkpoints, an APPROVED fierce-review artifact satisfies the code-review evidence requirement (it is a schema-validated, adversarially-verified rubric pass — stronger than a single read-through). If `.shinchan-docs/reviews/REVIEW-{NNN}.json` exists for the current scope with `verdict.verdict == "APPROVED"` and an empty `must_fix`, cite it:
+
+- **Command**: `/team-shinchan:fierce-review <scope>`
+- **Artifact**: `.shinchan-docs/reviews/REVIEW-{NNN}.json`
+- **Verdict**: APPROVED (rubric {total}/{max_total}, 0 must_fix)
+
+A REJECTED artifact, a non-empty `must_fix`, or a stale one (scope no longer matches the current diff) is NOT evidence — re-run the review. This does not replace the test/build evidence above; it adds the review dimension.

@@ -1,5 +1,52 @@
 # Changelog
 
+## [Unreleased]
+
+### Tier 2 — `/team-shinchan:fierce-review` (new, opt-in)
+
+The two-tier pattern proven for debate now covers code review — the canonical case for the failure modes the Workflow tier exists to fix: agentic laziness (a single pass quietly stops at "good enough"), self-preferential bias (the team's own reviewer going easy on the team's code), and rule adherence.
+
+**`/team-shinchan:fierce-review` (new)**
+- A main-loop Workflow: dimensions (correctness / security / performance / quality / tests / principles) fan out as independent agents, EVERY finding is challenged by a skeptic (`is_real` only if it holds against the actual code), a completeness critic hunts the files and rules nobody examined, and an Action-Kamen judge scores against the shared rubric with schema-validated output.
+- Reuses `agents/_shared/eval-rubrics.json` as the single rubric source — the main loop injects the chosen rubric into the Workflow (the script has no filesystem access), so the judge never forks it.
+- Writes `.shinchan-docs/reviews/REVIEW-{NNN}.json`. An APPROVED artifact (empty `must_fix`) counts as code-review evidence at the `verification-before-completion` pre-PR / pre-completion checkpoint.
+- Opt-in only (Workflow is main-loop only; never delegated). `team-shinchan:review` stays the cheap, auto-triggerable Tier 1 default; Action Kamen surfaces the escalation on high-stakes scope.
+
+Mirrors the runtime constraints fierce-debate already handles: `args` is parsed defensively (delivered as a JSON string), and the Action Kamen persona is delivered by prompt injection (the Workflow agent registry does not expose plugin subagents).
+
+### Workflow persona helper — `src/workflow-personas.js` (Tier C infra)
+
+Workflow-tier skills must inject an agent's role/voice by prompt (the runtime can't load plugin subagents via `agentType`), and the Workflow script itself can't read files — so hard-coded persona strings drift from the canonical `agents/<name>.md`.
+
+- New `src/workflow-personas.js` derives a concise, faithful persona descriptor from an agent's definition (identity from "You are **X**", role from frontmatter `description`, voice from the Personality & Tone line). Runs in the main loop (`node src/workflow-personas.js <agent>`); the SKILL injects the result via `args`.
+- `fierce-review` and `fierce-debate` now resolve their personas through the helper instead of hard-coded strings — single source of truth is the agent file.
+- `tests/workflow-personas.test.js` — 8 `node --test` cases (extraction fidelity, "Use for" stripping, boilerplate exclusion, missing-agent throw, path-traversal sanitization). Unlike the `.workflow.js` scripts, this helper is `require()`-able and therefore directly unit-tested.
+- Foundation for the next Workflow tiers (ralph loop, competitive-code tournament): they inject Kazama / Bo / Action Kamen personas through the same helper.
+
+### Tier 2 — `/team-shinchan:fierce-ralph` (new, opt-in)
+
+The two-tier pattern reaches persistence/looping. `ralph` (Kazama's narrated boulder loop) can only *describe* "don't stop until done" — the loop lives in one agent context and depends on the model honoring it (agentic-laziness exposure). `fierce-ralph` makes the loop condition the SCRIPT's, not the agent's.
+
+**`/team-shinchan:fierce-ralph` (new)**
+- A main-loop Workflow: a worker agent does the next unit of work, a verifier independently checks progress + completion against the real repo (tests, ACs), and it repeats — bounded by a hard iteration cap, the token budget (`budget.remaining()`), and a stagnation limit (3 no-progress iterations) — then an Action-Kamen final gate runs.
+- `completed` is **deterministic**: true only if the loop reached `done` AND the gate shows `verdict APPROVED && tests_pass && goal_met && no blockers` — not the LLM's verdict label alone.
+- Carries forward every fierce-review hardening lesson: defensive `args` parse, personas injected via `src/workflow-personas.js` (kazama=worker, actionkamen=verifier/gate), **every** agent call (worker, verifier, and gate) guarded for null so a transient null never crashes the loop or reads as "done", and an honest `stop_reason` (completed / max_iterations / stagnation / budget_exhausted). Writes `.shinchan-docs/ralph-runs/RALPH-{NNN}.json`; an APPROVED gate is completion evidence for verification-before-completion.
+- Opt-in only; `team-shinchan:ralph` stays the cheap, delegatable Tier 1 default. Added to the CI KNOWN_SKILLS allow-lists alongside its siblings.
+
+The script has no filesystem/git access, so progress/completion is judged by the verifier agent (which runs tests and reads PROGRESS.md); the script owns only the deterministic control flow (loop, caps, budget, stagnation counter) — it cannot call `stagnation-detector.js` the way the Tier 1 narrated loop does.
+
+### Tier 2 — `/team-shinchan:fierce-compete` (new, opt-in)
+
+The two-tier pattern reaches competitive code. `/team-shinchan:debate` competitive-code mode (Midori + worktrees, Task-orchestrated) gets a deterministic Workflow sibling.
+
+**`/team-shinchan:fierce-compete` (new)**
+- A main-loop Workflow tournament: N (2–4) builder agents independently solve the same task and each returns an apply-ready unified-diff **patch** — read-only, so there are no parallel working-tree collisions and nothing to merge (the patch-return model sidesteps Workflow worktree mechanics). An Action-Kamen judge scores each on correctness / completeness / quality.
+- The **winner is selected deterministically** in-script (max clamped total, tie → higher correctness), never trusting an LLM "winner" label; `dissent` is non-empty by contract. The SKILL's main loop applies the winner with `git apply` and then runs the tests (builders are read-only, so patches are untested until applied — surfaced honestly).
+- Personas injected via `src/workflow-personas.js` (bo=builder, actionkamen=judge); judge guarded for null; degenerate tournaments (<2 surviving impls) return an error rather than proceeding. Writes `.shinchan-docs/tournaments/COMPETE-{NNN}.json` and records the winner to the shared `debate-decisions.md` ledger. Added to the CI KNOWN_SKILLS allow-lists.
+- Opt-in only; debate's competitive-code mode stays the cheap, keyword-triggered Tier 1 default.
+
+This completes the Workflow-tier sweep seeded by fierce-debate: **review → fierce-review**, **ralph → fierce-ralph**, **debate competitive-code → fierce-compete**, all sharing the `src/workflow-personas.js` foundation and the same hardening (defensive args, null-guarded agents, deterministic gates/winners, no silent drops).
+
 ## [4.40.0] - 2026-06-02
 
 ### Two-tier debate — now actually enforced

@@ -202,6 +202,8 @@ Use lightweight mode for simple debates; full process for complex ones.
 
 ## Competitive Code Workflow
 
+> For a high-value contested implementation where a deterministic, schema-validated tournament is worth the cost, this Task/worktree path can be *escalated* to the `team-shinchan:fierce-compete` skill (opt-in main-loop Workflow: read-only builders return patches → Action-Kamen scored judge → winner picked deterministically and applied). Never silently jump to it; offer the opt-in.
+
 When invoked with competitive-code mode (from `skills/debate/SKILL.md`):
 
 ### Pre-Flight Checks (run before any worktree operations)

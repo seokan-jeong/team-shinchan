@@ -21,6 +21,18 @@ If args length > 2000 characters:
   Warn user: "Request was truncated to 2000 characters"
 ```
 
+## Escalation: Tier 1 (this skill) vs Tier 2 (fierce-ralph)
+
+This skill (Kazama's narrated boulder loop via Task — cheap, delegatable, auto-recovering) is **Tier 1** and the default. For **high-stakes, genuinely long-running** work where a stalled or prematurely-stopped loop is costly, escalate to **Tier 2 — `team-shinchan:fierce-ralph`** (a main-loop Workflow whose loop condition is owned by the script: worker→verifier iterations bounded by an iteration cap, a token budget, and a stagnation limit, closed by an Action-Kamen gate).
+
+| Stay on Tier 1 (this skill) | Escalate to fierce-ralph |
+|---|---|
+| Routine persistence, quick "keep going till done" | High-stakes long task; a stalled/early-stopped loop is costly |
+| A narrated loop in one context is acceptable | You want the loop + stop bounds ENFORCED deterministically |
+| Auto-triggered or delegated, cheaper | Explicit user opt-in only (Workflow can't fire from a subagent; set a budget) |
+
+**Never silently jump to Tier 2** — on a high-stakes long task, offer the opt-in; the user launches `/team-shinchan:fierce-ralph`.
+
 ## Step 2: Execute Task with Boulder Mechanism
 
 **Do not read further. Execute this Task NOW:**

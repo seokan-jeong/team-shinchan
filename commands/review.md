@@ -21,3 +21,7 @@ See `skills/review/SKILL.md` for full documentation.
 /team-shinchan:review "Review my recent changes to the payment module"
 /team-shinchan:review "Check the new API endpoints for security issues"
 ```
+
+## Two tiers
+
+This command is **Tier 1** — one thorough Action Kamen pass, cheap and delegatable. For high-stakes scope (pre-release, security/payment/auth boundary, data-loss path), escalate to **Tier 2 — `/team-shinchan:fierce-review`**, a deterministic Workflow with independent per-dimension agents, per-finding adversarial verification, a completeness critic, and a schema-validated rubric judge.

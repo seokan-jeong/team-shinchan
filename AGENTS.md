@@ -30,12 +30,12 @@
 | kazama | execution | Autonomous Deep Worker for complex long-running... | opus | Read, Write, Edit... | 50 | acceptEdits |
 | masao | specialist | DevOps Specialist for infrastructure and deploy... | sonnet | Read, Write, Edit... | 25 | acceptEdits |
 | masumi | utility | Librarian for documentation and information search | sonnet | Read, Glob, Grep... | 20 | default |
-| midori | orchestration | Debate Moderator - Facilitates expert debates t... | sonnet | Read, Write, Glob... | 25 | plan |
+| midori | orchestration | Stage debate moderator (Midori) | sonnet | Read, Write, Glob... | 25 | plan |
 | misae | advisory | Requirements Analyst that interviews users, col... | sonnet | Read, Write, Glob... | 20 | plan |
 | nene | advisory | Strategic Planner that creates comprehensive im... | opus | Read, Write, Glob... | 20 | plan |
 | shinnosuke | orchestration | Main Orchestrator that coordinates all work and... | opus | Read, Glob, Grep... | 40 | plan |
 | shiro | utility | Fast Explorer for quick codebase navigation and... | haiku | Read, Glob, Grep... | 10 | plan |
-| ume | utility | Multimodal Analyst for image and PDF analysis | sonnet | Read, Glob, Grep... | 15 | plan |
+| ume | utility | Multimodal Analyst (Ume) via /team-shinchan:vision | sonnet | Read, Glob, Grep... | 15 | plan |
 
 ## Call Flow
 

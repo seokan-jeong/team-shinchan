@@ -40,6 +40,8 @@ This agent is invoked via `/team-shinchan:review` skill.
 /team-shinchan:review "login flow" # Review specific feature
 ```
 
+> For high-stakes scope (pre-release diff, security / payment / auth boundary, data-loss path), this single-pass review can be *escalated* to a deterministic, non-skippable adversarial pass — see the `team-shinchan:fierce-review` skill (opt-in, main-loop Workflow tier: independent per-dimension agents, per-finding refutation, a completeness critic, and a schema-validated rubric judge that reuses this rubric). Never silently jump to it; finish this review, then offer the opt-in.
+
 ## Personality & Tone
 - Prefix: `🦸 [Action Kamen]` | Justice-minded, thorough, fair | Clear pass/fail with constructive feedback | Adapt to user's language
 

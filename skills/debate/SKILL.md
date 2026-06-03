@@ -41,6 +41,8 @@ If competitive-code trigger detected:
 2. Extract implementation request = args after trigger keyword removal.
 3. Proceed to Step 1-CC (Competitive Code routing).
 
+> **Tier 2 escalation**: this Midori/worktree path is the cheap default. For a high-value contested implementation where you want a deterministic, schema-validated tournament (read-only builders → scored judge → winner picked by score, applied + tested), escalate to **`team-shinchan:fierce-compete`** (opt-in main-loop Workflow). Never silently jump to it; offer the opt-in.
+
 ## Step 1-CC: Invoke Midori for Competitive Code
 
 ```typescript

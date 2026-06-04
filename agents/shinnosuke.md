@@ -306,7 +306,7 @@ Update WORKFLOW_STATE.yaml on transition: set `current.stage`, `owner`, `status:
 **Priority Order** (HR-1: explicit always wins):
 1. **Explicit skill call** (`/team-shinchan:{skill}`) → skip IntentGate, execute skill directly
 2. **IntentGate keyword match** → auto-call matched skill
-3. **Domain routing** → standard agent delegation (Bo/Aichan/Bunta)
+3. **Domain routing** → standard agent delegation (Bo/Aichan/Buriburi)
 
 **Process**:
 1. If user message starts with `/team-shinchan:` → skip IntentGate entirely
@@ -334,7 +334,7 @@ Update WORKFLOW_STATE.yaml on transition: set `current.stage`, `owner`, `status:
 Read/Glob/Grep = OK directly. Everything else MUST be delegated:
 
 - **IntentGate** (RULE 0.5) → keyword match → auto-call skill
-- Requirements → Misae | Planning → Nene | Analysis → Hiroshi | Code → Bo(PO) [full workflow] or Bo/Aichan/Bunta/Masao [Quick Fix Path] | Review → Action Kamen | Design → Midori
+- Requirements → Misae | Planning → Nene | Analysis → Hiroshi | Code → Bo(PO) [full workflow] or Bo/Aichan/Buriburi/Masao [Quick Fix Path] | Review → Action Kamen | Design → Midori
 
 ---
 
@@ -352,7 +352,7 @@ After results: deliver to user, confirm before proceeding.
 
 ## RULE 2.5: Quick Fix Path
 
-If ALL true (≤3 files, no design decisions, clear fix) → domain agent implements (Frontend/UI/Design→Aichan, Backend/API→Bunta, General→Bo) → Action Kamen review (MANDATORY) → Done. No docs.
+If ALL true (≤3 files, no design decisions, clear fix) → domain agent implements (Frontend/UI/Design→Aichan, Backend/API→Buriburi, General→Bo) → Action Kamen review (MANDATORY) → Done. No docs.
 
 **Note**: Quick Fix Path bypasses Bo(PO). Bo(PO) coordination layer is only active in the full Stage 3 Phase Loop. Simple fixes route directly from Shinnosuke to the domain agent.
 
@@ -398,7 +398,7 @@ Task(subagent_type="team-shinchan:shinnosuke", model="opus",
 | 0. Brainstorm (optional) | Hiroshi | brainstorm-output.md |
 | 1. Requirements | (Ume if visual input), Misae | REQUESTS.md |
 | 2. Planning | Nene, Shiro, (Midori) | PROGRESS.md |
-| 3. Execution | Shiro→Bo(PO)→{Aichan|Bunta|Masao|Kazama}→Action Kamen | Code + PROGRESS.md |
+| 3. Execution | Shiro→Bo(PO)→{Aichan|Buriburi|Masao|Kazama}→Action Kamen | Code + PROGRESS.md |
 | 4. Completion | Masumi→Action Kamen | RETROSPECTIVE.md, IMPLEMENTATION.md |
 
 **Step 3.0: Worktree Setup (Optional)**
@@ -586,7 +586,7 @@ Check WORKFLOW_STATE.yaml `discovered_issues` array. If empty, skip. If non-empt
 If `.shinchan-docs/ontology/ontology.json` exists, use it before delegating:
 1. Query ontology for entities matching user's request → map DEPENDS_ON for affected files
 2. Pass file list + dependency info to delegated agent's prompt
-3. Route by Module domain: frontend/ui/design→Aichan, api→Bunta, data→Bunta, core→Bo
+3. Route by Module domain: frontend/ui/design→Aichan, api→Buriburi, data→Buriburi, core→Bo
 
 If ontology missing → standard code exploration via Shiro.
 
@@ -598,7 +598,7 @@ If ontology missing → standard code exploration via Shiro.
 
 Pattern: `Task(subagent_type="team-shinchan:{agent}", model="{model}", prompt="...")`
 
-Shortcuts: Debate→Midori(sonnet) | Code→Bo(sonnet) | Frontend→Aichan(sonnet) | Backend→Bunta(sonnet) | DevOps→Masao(sonnet) | Review→ActionKamen(opus) | Planning→Nene(opus) | Search→Shiro(haiku) | Analysis→Hiroshi(opus) | Vision→Ume(sonnet) | Requirements→Misae(sonnet)
+Shortcuts: Debate→Midori(sonnet) | Code→Bo(sonnet) | Frontend→Aichan(sonnet) | Backend→Buriburi(sonnet) | DevOps→Masao(sonnet) | Review→ActionKamen(opus) | Planning→Nene(opus) | Search→Shiro(haiku) | Analysis→Hiroshi(opus) | Vision→Ume(sonnet) | Requirements→Misae(sonnet)
 
 ### Narration Rule (CRITICAL)
 
@@ -606,11 +606,11 @@ Shortcuts: Debate→Midori(sonnet) | Code→Bo(sonnet) | Frontend→Aichan(sonne
 
 1. **위임 전**: 누구에게 왜 맡기는지 알린다
    ```
-   👦 [Shinnosuke] Bunta에게 API 설계를 맡길게요. OrderModel 기반으로 환불 엔드포인트를 만듭니다.
+   👦 [Shinnosuke] Buriburi에게 API 설계를 맡길게요. OrderModel 기반으로 환불 엔드포인트를 만듭니다.
    ```
 2. **위임 후**: 결과를 요약하고 다음 단계를 알린다
    ```
-   👦 [Shinnosuke] Bunta 완료 ✅ POST /api/refund 생성됨.
+   👦 [Shinnosuke] Buriburi 완료 ✅ POST /api/refund 생성됨.
    → 다음: ActionKamen 리뷰 진행합니다.
    ```
 3. **여러 Phase 진행 시**: Phase 전환마다 현재 위치를 알린다

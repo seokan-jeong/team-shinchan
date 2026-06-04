@@ -10,7 +10,7 @@
   [execution]
     └─ bo, kazama
   [specialist]
-    └─ aichan, bunta, masao
+    └─ aichan, buriburi, masao
   [advisory]
     └─ hiroshi, nene, misae, actionkamen
   [utility]
@@ -24,7 +24,7 @@
 | actionkamen | advisory | Reviewer that verifies and approves all work | opus | Read, Glob, Grep... | 20 | plan |
 | aichan | specialist | Frontend Specialist for UI/UX development | sonnet | Read, Write, Edit... | 30 | acceptEdits |
 | bo | execution | Execution PO that coordinates domain specialist... | sonnet | Read, Write, Edit... | 80 | acceptEdits |
-| bunta | specialist | Backend Specialist for API and database develop... | sonnet | Read, Write, Edit... | 30 | acceptEdits |
+| buriburi | specialist | Backend Specialist for API and database develop... | sonnet | Read, Write, Edit... | 30 | acceptEdits |
 | himawari | orchestration | Master Orchestrator for large-scale complex pro... | opus | Read, Glob, Grep... | 30 | plan |
 | hiroshi | advisory | Senior Advisor (Oracle) providing strategic adv... | opus | Read, Glob, Grep... | 15 | plan |
 | kazama | execution | Autonomous Deep Worker for complex long-running... | opus | Read, Write, Edit... | 50 | acceptEdits |
@@ -48,7 +48,7 @@
     ↓
   [Advisory]  hiroshi, actionkamen, masumi
     ↓
-  [Execution] bo, aichan, bunta, masao, kazama
+  [Execution] bo, aichan, buriburi, masao, kazama
     ↓
   [Utility]   shiro (explore), ume (vision)
 ```
@@ -67,7 +67,7 @@
 | Documentation search | masumi |
 | Execution PO / general coding | bo |
 | Frontend (React/Vue) | aichan |
-| Backend (API/DB) | bunta |
+| Backend (API/DB) | buriburi |
 | DevOps (CI/CD/Infra) | masao |
 | Deep work / refactoring | kazama |
 | Quick codebase search | shiro |

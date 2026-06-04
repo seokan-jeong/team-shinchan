@@ -169,7 +169,7 @@ Stage: {current_stage} ({n}/4) | Phase: {current_phase|N/A} | Owner: {current_ow
 | execution | Bo/Specialist | Sonnet | REQUESTS.md + PROGRESS.md + phase tasks |
 | completion | Bo + Action Kamen | Sonnet + Opus | All docs |
 
-**Execution routing**: frontend -> Aichan, backend -> Bunta, infra -> Masao, default -> Bo.
+**Execution routing**: frontend -> Aichan, backend -> Buriburi, infra -> Masao, default -> Bo.
 
 ```typescript
 Task(subagent_type="team-shinchan:{agent}", model="{model}",

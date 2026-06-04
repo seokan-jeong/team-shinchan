@@ -30,7 +30,7 @@ Read `${CLAUDE_PLUGIN_ROOT}/agents/_shared/domain-router.json` to determine the 
 
 **Routing decision:**
 - Frontend match → `subagent_type="team-shinchan:aichan"`
-- Backend match → `subagent_type="team-shinchan:bunta"`
+- Backend match → `subagent_type="team-shinchan:buriburi"`
 - DevOps match → `subagent_type="team-shinchan:masao"`
 - No match → `subagent_type="team-shinchan:bo"` (fallback)
 

@@ -25,8 +25,8 @@
 Select the 2 most relevant domain experts:
 | Domain Combination | Agent A | Agent B |
 |-------------------|---------|---------|
-| Frontend vs Backend | Aichan | Bunta |
-| Backend vs DevOps | Bunta | Masao |
+| Frontend vs Backend | Aichan | Buriburi |
+| Backend vs DevOps | Buriburi | Masao |
 | Frontend vs DevOps | Aichan | Masao |
 | Implementation approach | Hiroshi | Nene |
 | Quality vs Speed | Action Kamen | Bo |

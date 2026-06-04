@@ -129,7 +129,7 @@ Model tier assignment:
 
 ```typescript
 Task(
-  subagent_type="team-shinchan:{domain_agent}",  // Bo | Aichan | Bunta | Masao
+  subagent_type="team-shinchan:{domain_agent}",  // Bo | Aichan | Buriburi | Masao
   model="{task.model}",  // haiku | sonnet | opus — set in Step 2.5 via collaboration-score.js
   prompt=`You are implementing a SINGLE micro-task.
 
@@ -335,7 +335,7 @@ Output final summary:
 |--------|-------|-------|
 | General code | Bo | collaboration-score model_tier |
 | Frontend/UI/CSS | Aichan | collaboration-score model_tier |
-| Backend/API/DB | Bunta | collaboration-score model_tier |
+| Backend/API/DB | Buriburi | collaboration-score model_tier |
 | DevOps/CI/Docker | Masao | collaboration-score model_tier |
 | All reviews | Action Kamen | opus (fixed) |
 | Plan generation | Nene | opus (fixed) |

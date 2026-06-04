@@ -22,7 +22,7 @@ After completing a workflow, evaluate these areas:
 - [ ] /start created folder and WORKFLOW_STATE.yaml correctly
 - [ ] Requirements stage (Nene) asked useful questions
 - [ ] Planning stage produced actionable phases
-- [ ] Execution agents (Bo/Aichan/Bunta/Masao) chose correctly
+- [ ] Execution agents (Bo/Aichan/Buriburi/Masao) chose correctly
 - [ ] Action Kamen reviews were meaningful
 - [ ] Completion docs (Masumi) were accurate
 

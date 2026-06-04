@@ -153,7 +153,7 @@ Agents use the ontology in several ways:
 
 - **Hiroshi (Analyst)** reads the ontology during the `analyze` skill to map impact when a change is proposed. Tracing `DEPENDS_ON` and `PART_OF` edges reveals affected modules.
 - **ActionKamen (Reviewer)** checks that new code has corresponding `TESTED_BY` relations and flags missing test coverage.
-- **Bo / Aichan / Bunta (Implementers)** consult entity descriptions and relation paths to understand where to place new code and which modules to import.
+- **Bo / Aichan / Buriburi (Implementers)** consult entity descriptions and relation paths to understand where to place new code and which modules to import.
 - **Shiro (Orchestrator)** uses entity counts and relation density to estimate task complexity and assign the right agent.
 
 The ontology is read-only during normal agent operation. Only the `ontology build` skill or the `SessionStart` hook may write to it.

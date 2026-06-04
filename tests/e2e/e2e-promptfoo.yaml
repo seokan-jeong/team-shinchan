@@ -13,7 +13,7 @@ prompts:
 
       Key rules:
       - Follow the 4-stage workflow: Requirements → Planning → Execution → Completion
-      - Delegate to Nene for requirements/planning, Bo/Aichan/Bunta/Masao for implementation
+      - Delegate to Nene for requirements/planning, Bo/Aichan/Buriburi/Masao for implementation
       - Trigger Midori debate when 2+ approaches exist or design decisions are needed
       - Escalate to Himawari for large projects (3+ phases, 20+ files, 3+ domains)
       - Action Kamen review is MANDATORY before completing any phase
@@ -40,10 +40,10 @@ prompts:
 
       Panel selection by topic:
       - UI/Frontend: Aichan, Hiroshi
-      - API/Backend: Bunta, Hiroshi
+      - API/Backend: Buriburi, Hiroshi
       - Architecture: Hiroshi, Nene, Misae
-      - Security: Hiroshi, Bunta, Masao
-      - Performance: Hiroshi, Bunta
+      - Security: Hiroshi, Buriburi, Masao
+      - Performance: Hiroshi, Buriburi
 
       Debate patterns:
       - Lightweight: 2-3 panel, 1 round, quick consensus
@@ -168,13 +168,13 @@ tests:
   - description: "E2E-3b: Midori facilitates structured debate"
     prompt: midori-e2e
     vars:
-      task: "Debate topic: WebSocket vs Server-Sent Events for real-time notifications. Background: We need push notifications for a web dashboard. Options: A) WebSocket - bidirectional, B) SSE - simpler server-push. Panel: Hiroshi, Bunta"
+      task: "Debate topic: WebSocket vs Server-Sent Events for real-time notifications. Background: We need push notifications for a web dashboard. Options: A) WebSocket - bidirectional, B) SSE - simpler server-push. Panel: Hiroshi, Buriburi"
     assert:
       - type: javascript
         value: |
           const lower = output.toLowerCase();
           // Should structure as debate with panel
-          return (lower.includes("hiroshi") || lower.includes("bunta") || lower.includes("panel")) &&
+          return (lower.includes("hiroshi") || lower.includes("buriburi") || lower.includes("panel")) &&
                  (lower.includes("opinion") || lower.includes("task") || lower.includes("debate")) &&
                  // Should cover both options
                  (lower.includes("websocket") || lower.includes("sse") || lower.includes("server-sent"));
@@ -198,14 +198,14 @@ tests:
   - description: "E2E-4b: Shinnosuke identifies multi-domain scope"
     prompt: shinnosuke-e2e
     vars:
-      task: "This project needs: React frontend (Aichan domain), Node.js backend API (Bunta domain), and AWS infrastructure with CI/CD (Masao domain). How should we organize this?"
+      task: "This project needs: React frontend (Aichan domain), Node.js backend API (Buriburi domain), and AWS infrastructure with CI/CD (Masao domain). How should we organize this?"
     assert:
       - type: javascript
         value: |
           const lower = output.toLowerCase();
           // Should recognize multiple domains
           return (lower.includes("aichan") || lower.includes("frontend")) &&
-                 (lower.includes("bunta") || lower.includes("backend")) &&
+                 (lower.includes("buriburi") || lower.includes("backend")) &&
                  (lower.includes("masao") || lower.includes("infra") || lower.includes("devops"));
 
   # ═══════════════════════════════════════

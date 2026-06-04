@@ -18,7 +18,7 @@ const MODEL_PRICING = {
 const AGENT_MODEL = {
   shinnosuke: 'opus', himawari: 'opus', midori: 'sonnet',
   bo: 'sonnet', kazama: 'opus',
-  aichan: 'sonnet', bunta: 'sonnet', masao: 'sonnet',
+  aichan: 'sonnet', buriburi: 'sonnet', masao: 'sonnet',
   hiroshi: 'opus', nene: 'opus', misae: 'sonnet', actionkamen: 'opus',
   shiro: 'sonnet', masumi: 'sonnet', ume: 'sonnet',
 };

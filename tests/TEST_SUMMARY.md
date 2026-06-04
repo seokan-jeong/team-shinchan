@@ -38,7 +38,7 @@ Three tiers of testing ensure plugin quality:
 
 ## Promptfoo Agent Tests (29 total)
 
-Individual agent behavior tests covering: Shiro (read-only, Glob, Grep), Bo (implementation), Hiroshi (analysis), Shinnosuke (delegation, stage transitions, quick fix), Nene (planning), Action Kamen (review verdicts), Midori (debate), Misae (hidden requirements), Masumi (documentation), Kazama (persistence), Ume (multimodal), Aichan (frontend), Bunta (backend), stage awareness, error handling, Himawari escalation, input validation, CI awareness, and status checking. (29 test cases total)
+Individual agent behavior tests covering: Shiro (read-only, Glob, Grep), Bo (implementation), Hiroshi (analysis), Shinnosuke (delegation, stage transitions, quick fix), Nene (planning), Action Kamen (review verdicts), Midori (debate), Misae (hidden requirements), Masumi (documentation), Kazama (persistence), Ume (multimodal), Aichan (frontend), Buriburi (backend), stage awareness, error handling, Himawari escalation, input validation, CI awareness, and status checking. (29 test cases total)
 
 ## E2E Workflow Tests (11 total)
 

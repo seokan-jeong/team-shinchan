@@ -8,7 +8,7 @@
 | Agent | Role | Why |
 |-------|------|-----|
 | Hiroshi | Oracle | Security patterns and vulnerability analysis |
-| Bunta | Backend | API security and data protection implementation |
+| Buriburi | Backend | API security and data protection implementation |
 | Masao | DevOps | Infrastructure security and deployment concerns |
 
 ## Evaluation Criteria

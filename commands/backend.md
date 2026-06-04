@@ -1,5 +1,5 @@
 ---
-description: Backend development with Bunta (API, database, server logic)
+description: Backend development with Buriburi (API, database, server logic)
 ---
 
 # Backend Command

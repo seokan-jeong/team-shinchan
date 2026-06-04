@@ -19,7 +19,7 @@ Read `.shinchan-docs/debate-decisions.md`. If an Active decision matches the top
 
 ## Step 2: Run the fierce-debate Workflow
 
-Give each option a `persona` — a ROLE/EXPERTISE descriptor drawn from the matching team-shinchan agent. (The Workflow runtime cannot load plugin subagents, so the persona is **injected into the prompt**, not passed as `agentType`.) Map each option to a lens — Backend/API → Bunta; Frontend/UI → Aichan; DevOps/Infra → Masao; Architecture/general → Hiroshi; hidden requirements → Misae — then resolve that agent's persona string from its definition (DRY) with `node ${CLAUDE_PLUGIN_ROOT}/src/workflow-personas.js <agent>` and pass it as the option's `persona`. Then call the Workflow tool with the shipped script:
+Give each option a `persona` — a ROLE/EXPERTISE descriptor drawn from the matching team-shinchan agent. (The Workflow runtime cannot load plugin subagents, so the persona is **injected into the prompt**, not passed as `agentType`.) Map each option to a lens — Backend/API → Buriburi; Frontend/UI → Aichan; DevOps/Infra → Masao; Architecture/general → Hiroshi; hidden requirements → Misae — then resolve that agent's persona string from its definition (DRY) with `node ${CLAUDE_PLUGIN_ROOT}/src/workflow-personas.js <agent>` and pass it as the option's `persona`. Then call the Workflow tool with the shipped script:
 
 ```
 Workflow({

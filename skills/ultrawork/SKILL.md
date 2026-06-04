@@ -72,7 +72,7 @@ Task(subagent_type="team-shinchan:shinnosuke", model="opus",
   Parallel execution:
   1. Break into independent units (or follow plan)
   2. Assign to agents in parallel (run_in_background=true)
-     Routing: Analysis→Shiro/Misae/Hiroshi | Execution→Bo/Kazama | Frontend→Aichan | Backend→Bunta | DevOps→Masao | Verification→Action Kamen
+     Routing: Analysis→Shiro/Misae/Hiroshi | Execution→Bo/Kazama | Frontend→Aichan | Backend→Buriburi | DevOps→Masao | Verification→Action Kamen
   3. Queue sequential tasks, wait for completion
   4. Integrate results + Action Kamen verification
   Done when: all TODOs complete, features working, tests pass, no errors. Keep working if not met.

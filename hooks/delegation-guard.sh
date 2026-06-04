@@ -100,7 +100,7 @@ if [ -z "$MATCHED_DOMAIN" ] && [ -n "$EXTENSION" ]; then
     ext_trimmed=$(echo "$ext" | tr -d '[:space:]')
     if [ -n "$ext_trimmed" ] && [ "$EXTENSION" = "$ext_trimmed" ]; then
       MATCHED_DOMAIN="backend"
-      MATCHED_AGENT="Bunta(team-shinchan:bunta)"
+      MATCHED_AGENT="Buriburi(team-shinchan:buriburi)"
       break
     fi
   done <<< "$BACKEND_EXTS"

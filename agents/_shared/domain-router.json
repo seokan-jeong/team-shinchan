@@ -12,7 +12,7 @@
       "keywords": ["api", "endpoint", "database", "migration", "query", "orm", "model", "schema", "rest", "graphql", "backend", "server", "auth", "middleware", "refund", "payment"],
       "capabilities": ["rest-api", "graphql", "database-design", "sql-migrations", "backend-security"],
       "server_ts_keywords": ["api", "endpoint", "route", "controller", "service", "repository"],
-      "agent": "team-shinchan:bunta"
+      "agent": "team-shinchan:buriburi"
     },
     "devops": {
       "extensions": [".tf", ".hcl"],

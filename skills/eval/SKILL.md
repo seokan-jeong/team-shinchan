@@ -60,7 +60,7 @@ Show dimension, latest score, moving average, and delta.
 **--compare:**
 ```
 Agent Comparison (last 5 evaluations)
-  Dimension    | bo   | aichan | bunta | masao
+  Dimension    | bo   | aichan | buriburi | masao
   correctness  | 4.2  | 4.0    | 3.8   | 4.5
   efficiency   | 4.5  | 3.8    | 4.2   | 4.0
   compliance   | 4.0  | 4.2    | 4.0   | 3.9

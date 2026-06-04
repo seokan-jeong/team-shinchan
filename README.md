@@ -189,7 +189,7 @@ If you see the help menu, you are ready to go.
 | Agent | Role |
 |-------|------|
 | **Aichan** | Frontend/UI |
-| **Bunta** | Backend/API |
+| **Buriburi** | Backend/API |
 | **Masao** | DevOps/Infra |
 
 ### Advisors
@@ -353,7 +353,7 @@ No commands needed -- just say:
 | `/ralph` | Kazama -> Persistent loop |
 | `/implement` | Bo -> Code execution |
 | `/frontend` | Aichan -> Frontend/UI |
-| `/backend` | Bunta -> Backend/API |
+| `/backend` | Buriburi -> Backend/API |
 | `/devops` | Masao -> Infrastructure |
 | `/review` | Action Kamen -> Code review |
 | `/requirements` | Misae -> Requirements analysis |

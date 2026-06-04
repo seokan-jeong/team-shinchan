@@ -24,7 +24,7 @@ If args length > 2000 characters:
 
 ```typescript
 Task(
-  subagent_type="team-shinchan:bunta",
+  subagent_type="team-shinchan:buriburi",
   model="sonnet",
   prompt=`/team-shinchan:backend has been invoked.
 

@@ -7,7 +7,7 @@ function rf(p){try{return fs.readFileSync(p,'utf-8')}catch{return null}}
 function fm(c){if(!c)return{};const m=c.match(/^---\n([\s\S]*?)\n---/);if(!m)return{};const o={};m[1].split('\n').forEach(l=>{const i=l.indexOf(':');if(i>0)o[l.slice(0,i).trim()]=l.slice(i+1).trim()});return o}
 function lsmd(d){try{return fs.readdirSync(d).filter(f=>f.endsWith('.md'))}catch{return[]}}
 function lsdir(d){try{return fs.readdirSync(d).filter(f=>{try{return fs.statSync(path.join(d,f)).isDirectory()}catch{return false}})}catch{return[]}}
-const ck=(c,p,d)=>({check:c,pass:p,details:d}),EX=['bo','aichan','bunta','masao','kazama'];
+const ck=(c,p,d)=>({check:c,pass:p,details:d}),EX=['bo','aichan','buriburi','masao','kazama'];
 
 function checkAgents(){
   const cks=[],files=lsmd(D('agents')).filter(f=>f!=='_shared');

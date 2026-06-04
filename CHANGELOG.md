@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed — Agent rename: `bunta` → `buriburi` (Buriburizaemon 부리부리자에몽)
+
+Resolves issue #5 ("petition to hire buri buri zaemon"). The Backend specialist was the one agent whose name was **not** a canonical Crayon Shin-chan character — every other agent maps to the family, the Kasukabe Defense Group, the kindergarten teachers, Aichan, or Action Kamen. It is now **Buriburi**, the self-proclaimed hero 부리부리자에몽.
+
+- **Role unchanged** — still the Backend Specialist (REST/GraphQL APIs, database design, server logic, security). Same `description`, tools, `skills: [backend]`, capabilities, `maxTurns`, and success metrics. Only identity, persona voice, and signature emoji (🍜 → 🐗) changed.
+- **Functional identifier** `team-shinchan:bunta` → `team-shinchan:buriburi` updated everywhere it routes: `agents/_shared/{domain-router,layer-map,team-presets}.json`, the `/backend`, `/implement`, `/debate`, `/micro-execute`, `/eval`, `/help`, `/resume`, `/ultrawork`, `/fierce-debate` skills, `hooks/{delegation-guard.sh,shinnosuke-orchestrate.md}`, and `src/{agent-context,cost-estimator,harness-lint,agent-metrics-baseline}.js`.
+- **Display name** `Bunta` → `Buriburi` across all agent prose (shinnosuke, bo, himawari, midori, nene), shared docs, and the promptfoo/e2e suites (`bunta-prompt` id and `includes("bunta")` assertions updated).
+- **Generated maps** `AGENTS.md` and `ARCHITECTURE.md` regenerated from the updated generators (`src/gen-agents-map.js`, `src/gen-architecture-map.js`).
+- **Preserved by design**: historical CHANGELOG entries below and the frozen golden test fixtures (`tests/fixtures/templates/*-golden.{md,html}`) keep `bunta` — they are dated records, not the live registry.
+
+Static validation (24 validators) and the `node --test` suites pass; harness-lint advisory count is unchanged (one fewer, since Buriburi now uses the canonical `Prefix:` personality format).
+
 ## [4.41.0] - 2026-06-03
 
 ### Tier 2 — `/team-shinchan:fierce-review` (new, opt-in)

@@ -130,10 +130,10 @@ See `agents/midori.md` for full criteria. Quick reference:
 | Topic | Panel |
 |-------|-------|
 | Frontend/UI | Aichan, Hiroshi |
-| Backend/API | Bunta, Hiroshi |
+| Backend/API | Buriburi, Hiroshi |
 | DevOps/Infra | Masao, Hiroshi |
 | Architecture | Hiroshi, Nene, Misae |
-| Security | Hiroshi, Bunta, Masao |
+| Security | Hiroshi, Buriburi, Masao |
 
 ## Auto-Detection Signals
 

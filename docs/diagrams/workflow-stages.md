@@ -24,7 +24,7 @@ This is the integrated main workflow for all non-trivial tasks in Team-Shinchan.
 │  │  For each Phase:                                  │      │
 │  │  1. Shiro: Impact analysis for this phase         │      │
 │  │  2. Design needed? → Debate                       │      │
-│  │  3. Delegate: Bo/Aichan/Bunta/Masao              │      │
+│  │  3. Delegate: Bo/Aichan/Buriburi/Masao              │      │
 │  │  4. Action Kamen: Review                          │      │
 │  │  5. Update PROGRESS.md with retrospective         │      │
 │  └───────────────────────────────────────────────────┘      │

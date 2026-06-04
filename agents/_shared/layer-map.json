@@ -3,7 +3,7 @@
   "layers": {
     "orchestration": ["shinnosuke", "himawari", "midori"],
     "execution": ["bo", "kazama"],
-    "specialist": ["aichan", "bunta", "masao"],
+    "specialist": ["aichan", "buriburi", "masao"],
     "advisory": ["hiroshi", "nene", "misae", "actionkamen"],
     "utility": ["shiro", "masumi", "ume"]
   },
@@ -48,8 +48,8 @@
     {
       "from": "execution",
       "to": "specialist",
-      "agent": "bunta",
-      "reason": "Bo(PO) routes backend/API sub-tasks to Bunta during Stage 3 execution"
+      "agent": "buriburi",
+      "reason": "Bo(PO) routes backend/API sub-tasks to Buriburi during Stage 3 execution"
     },
     {
       "from": "execution",

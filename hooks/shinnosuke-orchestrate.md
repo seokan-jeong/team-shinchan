@@ -63,14 +63,14 @@ Use this to override model when delegating to agents:
 | Type | Action |
 |------|--------|
 | Simple question | Answer directly, no workflow |
-| Quick fix (≤3 files, no design decisions, clear fix) | Domain agent implements (Frontend/UI/Design→Aichan, Backend/API→Bunta, General→Bo) → Action Kamen review, skip docs |
+| Quick fix (≤3 files, no design decisions, clear fix) | Domain agent implements (Frontend/UI/Design→Aichan, Backend/API→Buriburi, General→Bo) → Action Kamen review, skip docs |
 | Standard task | Full 4-stage Workflow |
 | Complex/Multi-phase | Full Workflow + Debate |
 
 **Classification**: ≤3 files, no design decisions, clear fix → Lite (Quick Fix). Otherwise → Full.
 **Bo vs Specialists**: Domain-specific → specialist. General → Bo.
   - Frontend/UI (React, Vue, CSS, styling, design, UI, component, 디자인, 화면, 레이아웃) → Aichan
-  - Backend/API (REST, GraphQL, database, server, endpoint) → Bunta
+  - Backend/API (REST, GraphQL, database, server, endpoint) → Buriburi
   - DevOps/Infra (CI/CD, Docker, deploy, pipeline) → Masao
 **Kazama**: Use /ralph for complex phases requiring 30+ min focused work.
 
@@ -82,12 +82,12 @@ Use this to override model when delegating to agents:
 | /ralph | kazama | /analyze | hiroshi |
 | /deepsearch | shiro+masumi | /debate | midori |
 | /review, /verify-implementation | actionkamen | /frontend | aichan |
-| /backend | bunta | /devops | masao |
+| /backend | buriburi | /devops | masao |
 | /implement, /manage-skills | bo | /requirements | misae |
 | /vision | ume | /bigproject | himawari |
 | /research | masumi | | |
 
-**Domain routing**: Code exploration→shiro, Analysis→hiroshi, Planning→nene, Code writing→bo, Frontend/UI/Design→aichan, Backend/API→bunta, Infra/DevOps→masao, Verification→actionkamen
+**Domain routing**: Code exploration→shiro, Analysis→hiroshi, Planning→nene, Code writing→bo, Frontend/UI/Design→aichan, Backend/API→buriburi, Infra/DevOps→masao, Verification→actionkamen
 
 ## Step 2: Full Workflow Stages
 
@@ -109,7 +109,7 @@ Nene: phase breakdown + AC. Shiro: impact analysis. Create PROGRESS.md.
 ```
 1. Shiro → impact analysis
 2. Design needed? → Debate (Midori)
-3. Delegate: Frontend/UI/Design→Aichan, Backend/API→Bunta, DevOps/Infra→Masao, General→Bo
+3. Delegate: Frontend/UI/Design→Aichan, Backend/API→Buriburi, DevOps/Infra→Masao, General→Bo
 4. Action Kamen → Review (MANDATORY)
 5. Update PROGRESS.md
 **Phase 완료 후:**

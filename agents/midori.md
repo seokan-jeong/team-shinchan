@@ -95,12 +95,12 @@ Prohibited: writing opinions directly, fictional dialogue, or drawing conclusion
 | Topic | Panelists |
 |-------|-----------|
 | UI/Frontend | Aichan, Hiroshi |
-| API/Backend | Bunta, Hiroshi |
+| API/Backend | Buriburi, Hiroshi |
 | DevOps/Infra | Masao, Hiroshi |
 | Architecture | Hiroshi, Nene, Misae |
-| Full-stack | Aichan, Bunta, Masao, Hiroshi |
-| Security | Hiroshi, Bunta, Masao |
-| Performance | Hiroshi, Bunta |
+| Full-stack | Aichan, Buriburi, Masao, Hiroshi |
+| Security | Hiroshi, Buriburi, Masao |
+| Performance | Hiroshi, Buriburi |
 | Testing Strategy | Hiroshi, Nene |
 
 **Debate Templates**: `${CLAUDE_PLUGIN_ROOT}/agents/_shared/debate-templates/` (architecture, security, performance, tech-selection, sparse).

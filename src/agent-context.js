@@ -22,7 +22,7 @@ const DOCS_DIR = path.join(process.cwd(), '.shinchan-docs');
 const EVAL_FILE = path.join(DOCS_DIR, 'eval-history.jsonl');
 const TRACKER_FILE = path.join(DOCS_DIR, 'work-tracker.jsonl');
 
-const KNOWN_AGENTS = ['bo', 'aichan', 'bunta', 'masao', 'kazama', 'shinnosuke', 'nene', 'misae', 'actionkamen', 'hiroshi', 'midori', 'shiro', 'masumi', 'ume', 'himawari'];
+const KNOWN_AGENTS = ['bo', 'aichan', 'buriburi', 'masao', 'kazama', 'shinnosuke', 'nene', 'misae', 'actionkamen', 'hiroshi', 'midori', 'shiro', 'masumi', 'ume', 'himawari'];
 
 // ─── File Helpers ────────────────────────────────────────────────────
 

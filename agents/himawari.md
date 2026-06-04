@@ -78,7 +78,7 @@ This agent is invoked via `/team-shinchan:bigproject` skill.
 
 - Identify domains (frontend, backend, infra) and cross-domain dependencies
 - Sequence phases; run independent ones in parallel
-- Assign agents: Frontend → Aichan, Backend → Bunta, DevOps → Masao, Cross-cutting → Bo/Kazama
+- Assign agents: Frontend → Aichan, Backend → Buriburi, DevOps → Masao, Cross-cutting → Bo/Kazama
 
 ### Dependency Management
 
@@ -122,7 +122,7 @@ output_format=$(yq '.current.output_format // "markdown"' .shinchan-docs/{DOC_ID
 
 ### Ownership Rules
 - **Himawari owns PROGRESS**: Only Himawari creates, updates, and marks phases complete (markdown 또는 html, `output_format`에 따름).
-- Executing agents (Bo, Aichan, Bunta, Masao) report results; Himawari writes the update.
+- Executing agents (Bo, Aichan, Buriburi, Masao) report results; Himawari writes the update.
 - **No parallel writes**: One agent writes at a time.
 
 Phase flow: `pending → in_progress → review → complete` (or `blocked` with reason).

@@ -154,8 +154,8 @@ Phase 목록 확정 후 반드시 wave 그룹핑을 수행한다:
 | 패턴 | 의존성 방향 |
 |------|-----------|
 | 설정/스키마 파일 생성 Phase | → 해당 파일을 참조하는 모든 구현 Phase는 의존성 설정 |
-| Bunta/Masao가 API 스펙/스키마/인터페이스 작성 Phase | → 해당 파일을 참조하는 Aichan/Bo Phase는 의존성 설정 |
-| Bunta가 DB 마이그레이션 작성 Phase | → 해당 모델 사용하는 구현 Phase는 의존성 설정 |
+| Buriburi/Masao가 API 스펙/스키마/인터페이스 작성 Phase | → 해당 파일을 참조하는 Aichan/Bo Phase는 의존성 설정 |
+| Buriburi가 DB 마이그레이션 작성 Phase | → 해당 모델 사용하는 구현 Phase는 의존성 설정 |
 | 전문가 스펙 문서(*.spec.md, *.schema.json) 생성 Phase | → 해당 문서를 입력으로 사용하는 모든 구현 Phase는 의존성 설정 |
 
 ### Wave 실행 규칙 (Shinnosuke Phase Loop에서 사용)

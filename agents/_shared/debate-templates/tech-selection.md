@@ -8,7 +8,7 @@
 | Agent | Role | Why |
 |-------|------|-----|
 | Aichan | Frontend | Frontend technology expertise |
-| Bunta | Backend | Backend technology expertise |
+| Buriburi | Backend | Backend technology expertise |
 | Masao | DevOps | Infrastructure and deployment considerations |
 | Hiroshi | Oracle | Overall technical assessment and risk analysis |
 

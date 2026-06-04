@@ -132,7 +132,7 @@ for phase in phases:
     if phase.type == "frontend":
         delegate_to("aichan", phase.task)
     elif phase.type == "backend":
-        delegate_to("bunta", phase.task)
+        delegate_to("buriburi", phase.task)
     elif phase.type == "devops":
         delegate_to("masao", phase.task)
     else:

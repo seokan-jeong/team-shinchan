@@ -386,7 +386,7 @@ function checkSubagentRouting(errors, warnings) {
   const stageTableRe = /^\|\s*\d+\.\s*\w+[^|]*\|\s*([^|]+)\|/mg;
   let stm;
   while ((stm = stageTableRe.exec(shinnosukeContent)) !== null) {
-    const agents = stm[1].match(/\b(Misae|Nene|Bo|Shiro|Masumi|Hiroshi|Midori|Aichan|Bunta|Masao|Kazama|Himawari)\b/g) || [];
+    const agents = stm[1].match(/\b(Misae|Nene|Bo|Shiro|Masumi|Hiroshi|Midori|Aichan|Buriburi|Masao|Kazama|Himawari)\b/g) || [];
     agents.forEach(a => shinnosukeShorthand.add(a.toLowerCase()));
   }
 

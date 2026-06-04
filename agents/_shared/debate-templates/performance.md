@@ -8,7 +8,7 @@
 | Agent | Role | Why |
 |-------|------|-----|
 | Hiroshi | Oracle | Performance analysis and optimization patterns |
-| Bunta | Backend | Database and API performance expertise |
+| Buriburi | Backend | Database and API performance expertise |
 
 ## Evaluation Criteria
 | Criterion | Weight | Description |

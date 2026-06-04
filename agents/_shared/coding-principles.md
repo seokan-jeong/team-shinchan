@@ -10,7 +10,7 @@ All execution agents follow these four principles before writing a single line o
 |-------|------|----------------|
 | Bo | General Code Executor | All 4 |
 | Aichan | Frontend | Simplicity First, Surgical Changes |
-| Bunta | Backend | Think Before Coding, Goal-Driven Execution |
+| Buriburi | Backend | Think Before Coding, Goal-Driven Execution |
 | Masao | DevOps | Think Before Coding, Surgical Changes |
 | Kazama | Deep Worker | All 4 (extended focus) |
 

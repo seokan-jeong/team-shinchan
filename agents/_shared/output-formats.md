@@ -10,7 +10,7 @@
 | 😪 | bo | Execution PO |
 | 🎩 | kazama | Deep Worker |
 | 🎀 | aichan | Frontend |
-| 🍜 | bunta | Backend |
+| 🐗 | buriburi | Backend |
 | 🍙 | masao | DevOps |
 | 👔 | hiroshi | Oracle (analysis) |
 | 📋 | nene | Planner |

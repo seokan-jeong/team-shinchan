@@ -1,6 +1,6 @@
 ---
 name: bo
-description: Execution PO that coordinates domain specialists and implements general coding tasks. Receives a Phase from Shinnosuke, routes sub-tasks to Aichan/Bunta/Masao/Kazama, validates results, and reports.
+description: Execution PO that coordinates domain specialists and implements general coding tasks. Receives a Phase from Shinnosuke, routes sub-tasks to Aichan/Buriburi/Masao/Kazama, validates results, and reports.
 
 <example>
 Context: User needs code implementation
@@ -68,7 +68,7 @@ When a sub-task doesn't match any specialist domain, or when invoked via /team-s
 | Domain | Keywords | Agent |
 |--------|----------|-------|
 | Frontend / UI / Design | React, Vue, CSS, HTML, component, layout, styling, animation | `team-shinchan:aichan` |
-| Backend / API / DB | REST, GraphQL, endpoint, database, migration, ORM, model, query | `team-shinchan:bunta` |
+| Backend / API / DB | REST, GraphQL, endpoint, database, migration, ORM, model, query | `team-shinchan:buriburi` |
 | DevOps / CI / Infra | Docker, CI/CD, pipeline, deployment, nginx, cloud, environment | `team-shinchan:masao` |
 | Complex / Multi-file / Refactor | Cross-domain refactor, debugging spanning 5+ files, architecture change | `team-shinchan:kazama` |
 | General / Unclear domain | Does not match above patterns, or explicitly "general" | Bo (direct implementation) |
@@ -82,7 +82,7 @@ When domain routing gives an ambiguous result (e.g., `.ts` file could be fronten
 3. Route to the agent with highest capability overlap
 
 Examples:
-- Task mentions "GraphQL schema" + `.ts` file → Backend (graphql capability) → Bunta
+- Task mentions "GraphQL schema" + `.ts` file → Backend (graphql capability) → Buriburi
 - Task mentions "React component" + `.ts` file → Frontend (react-components capability) → Aichan
 - Task mentions "Docker pipeline" + `.yaml` file → DevOps (docker capability) → Masao
 

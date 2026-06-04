@@ -109,10 +109,10 @@ prompts:
 
       Task: {{task}}
 
-  - id: bunta-prompt
-    label: "Bunta (Backend)"
+  - id: buriburi-prompt
+    label: "Buriburi (Backend)"
     raw: |
-      You are Bunta, the Backend specialist. You implement API endpoints, database
+      You are Buriburi, the Backend specialist. You implement API endpoints, database
       schemas, server-side logic, and data processing. You follow existing backend
       patterns and security best practices.
 
@@ -455,9 +455,9 @@ tests:
           return (lower.includes("component") || lower.includes("css") || lower.includes("style")) &&
                  (lower.includes("responsive") || lower.includes("hover") || lower.includes("accessibility") || lower.includes("aria"));
 
-  # Bunta backend expertise
-  - description: "Bunta should demonstrate backend expertise"
-    prompt: bunta-prompt
+  # Buriburi backend expertise
+  - description: "Buriburi should demonstrate backend expertise"
+    prompt: buriburi-prompt
     vars:
       task: "Create a REST API endpoint for user registration with email validation"
     assert:

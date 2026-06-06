@@ -1,11 +1,11 @@
 export const meta = {
   name: 'fierce-review',
-  description: 'Adversarial multi-dimension code review: dimensions fan out as independent agents, every finding is challenged by a skeptic (false-positive unless proven against the code), a completeness critic hunts uncovered files/rules, and an Action-Kamen judge scores against the shared rubric.',
+  description: 'Adversarial multi-dimension code review: dimensions fan out as independent agents, every finding is challenged by a skeptic (false-positive unless proven against the code), completeness + interaction critics hunt uncovered files/rules and cross-dimension issues, and three diverse-lens Action-Kamen judges score against the shared rubric (reconciled by min-score-per-item).',
   phases: [
     { title: 'Review', detail: 'one agent per dimension — correctness / security / performance / quality / tests / principles' },
     { title: 'Verify', detail: 'a skeptic refutes each finding; is_real=true only if it holds against the actual code' },
-    { title: 'Critic', detail: 'completeness critic finds uncovered files, paths, and rule families (fights agentic laziness)' },
-    { title: 'Judge',  detail: 'Action Kamen scores; the pass gate is recomputed deterministically and blocked by any confirmed CRITICAL/HIGH' },
+    { title: 'Critic', detail: 'completeness critic (uncovered files/paths/rules) + interaction critic (cross-dimension issues) — fights agentic laziness' },
+    { title: 'Judge',  detail: 'three diverse-lens judges (correctness / security / maintainability); the gate takes the MIN score per rubric item and is blocked by any confirmed CRITICAL/HIGH' },
   ],
 }
 
@@ -27,7 +27,7 @@ function parseArgs(a) {
 const A = parseArgs(args)
 const scope = A.scope || 'working tree changes'
 const files = Array.isArray(A.files) ? A.files : []
-const deepen = A.deepen === true
+const deepen = A.deepen !== false   // quality-first: deepen is the DEFAULT; only an explicit deepen:false opts out (honors the user knob)
 
 // OFFLINE FALLBACK ONLY. This script has no filesystem access, so it cannot read
 // agents/_shared/eval-rubrics.json. The SKILL's main loop injects the canonical rubric via
@@ -54,9 +54,19 @@ const rubric = (A.rubric && typeof A.rubric === 'object'
 // (DRY with agents/actionkamen.md); the review-specific directives are appended. The literal
 // fallback keeps the script self-contained when no persona is injected.
 const REVIEW_DIRECTIVES = 'Read the actual files before judging; show your work; never rubber-stamp. Be specific and file:line-anchored.'
-const AK = (A.persona && String(A.persona).trim())
+// Dogfood-proven failure mode: reviewers/skeptics that lack the Workflow runtime API as ground
+// truth false-positive on valid primitives (e.g. flag `pipeline()` as "undefined / crashes the
+// script") when the file under review is itself a *.workflow.js. Inject the API + an empiricism
+// rule so EVERY reviewer, skeptic, critic and judge (all built on AK) reasons from fact, not
+// inference. Scoped to runs that actually include a Workflow script so normal reviews stay lean.
+const reviewingWorkflowScript = files.some(f => /\.workflow\.js$/.test(String(f)))
+const WORKFLOW_API_NOTE = reviewingWorkflowScript
+  ? ' WORKFLOW-RUNTIME GROUND TRUTH (some files under review are Claude Code Workflow scripts, *.workflow.js): the runtime provides these GLOBAL primitives — never flag them as undefined or as missing imports: agent(prompt, opts?), parallel(thunks), pipeline(items, ...stages), phase(title), log(msg), workflow(name, args), plus the globals args and budget. Such a script starts with `export const meta = {...}` and runs its body with top-level await. EMPIRICAL EXECUTION OUTWEIGHS INFERENCE: if a script produced output it necessarily ran through the primitives on that path, so do not raise a "this primitive does not exist / the script crashes at this call" finding unless you have evidence the runtime itself rejected it.'
+  : ''
+const AK = ((A.persona && String(A.persona).trim())
   ? `${String(A.persona).trim()} ${REVIEW_DIRECTIVES}`
-  : `You are Action Kamen, team-shinchan’s uncompromising, justice-minded reviewer. ${REVIEW_DIRECTIVES}`
+  : `You are Action Kamen, team-shinchan’s uncompromising, justice-minded reviewer. ${REVIEW_DIRECTIVES}`)
+  + WORKFLOW_API_NOTE
 const fileList = files.length ? files.join('\n') : '(no explicit file list — discover changed files yourself with git)'
 
 const DIMENSIONS = [
@@ -165,9 +175,20 @@ const gaps = await agent(
   { label: 'completeness-critic', phase: 'Critic', schema: GAPS }
 )
 
+// Interaction critic — cross-dimension issues a per-dimension reviewer structurally cannot see
+// (a perf fix that weakens a security boundary, two changes that now duplicate/contradict, a
+// refactor that breaks an implicit contract). Runs alongside the completeness critic.
+const interaction = await agent(
+  `${AK}\n\nScope: ${scope}\nFiles in scope:\n${fileList}\n\nConfirmed findings so far:\n${confirmedDigest}\n\nYou are the INTERACTION critic. Ignore single-dimension issues (others cover those). Find ONLY cross-cutting problems: where two changes interact badly (a performance optimization that weakens a validation/security boundary; two modules that now duplicate or contradict logic; a refactor that breaks an implicit contract another file relies on). Report concrete, file:line-anchored interaction issues only — an empty array is correct if there are none.`,
+  { label: 'interaction-critic', phase: 'Critic', schema: GAPS }
+)
+
 // Critic findings: in `deepen` mode they pass the SAME adversarial gate as dimension findings;
 // otherwise they are single-pass and are surfaced as `unverified` (never presented as verified).
-const criticRaw = (gaps && Array.isArray(gaps.missed)) ? gaps.missed : []
+const criticRaw = [
+  ...((gaps && Array.isArray(gaps.missed)) ? gaps.missed : []),
+  ...((interaction && Array.isArray(interaction.missed)) ? interaction.missed : []),
+]
 let criticFindings
 if (deepen && criticRaw.length) {
   criticFindings = (await parallel(criticRaw.map(fnd => () => challengeFinding(fnd, 'critic', 'Critic')))).filter(Boolean)
@@ -203,7 +224,10 @@ const baseReturn = {
   unverified,
   dismissed,
   // gaps.missed findings already live in confirmed/unverified — return only `uncovered` to avoid double-emission.
-  gaps: { uncovered: (gaps && Array.isArray(gaps.uncovered)) ? gaps.uncovered : [] },
+  gaps: { uncovered: [
+    ...((gaps && Array.isArray(gaps.uncovered)) ? gaps.uncovered : []),
+    ...((interaction && Array.isArray(interaction.uncovered)) ? interaction.uncovered : []),
+  ] },
 }
 
 // Honest digest: tag each finding verified vs UNVERIFIED and carry its suggested_fix so the judge's
@@ -213,44 +237,67 @@ const digestLine = (f) => `- [${f.severity}] (${f.dim}, ${f.verified ? 'verified
 const findingsDigest = forJudge.length ? forJudge.map(digestLine).join('\n') : '(no findings)'
 const uncovered = baseReturn.gaps.uncovered.length ? baseReturn.gaps.uncovered.join(', ') : 'none reported'
 
-const verdictRaw = await agent(
-  `${AK}\n\nProduce the final verdict for the review of: ${scope}\n\nScore against this rubric (the shared eval-rubrics definition — use these exact item labels and pass threshold):\n${JSON.stringify(rubric)}\n\nFindings are tagged 'verified' (survived the adversarial skeptic) or 'UNVERIFIED' (the verifier did not return, or a single-pass critic find). Treat UNVERIFIED findings with skepticism — do NOT assume they are real, but do weigh them:\n${findingsDigest}\n\nUncovered areas flagged by the completeness critic: ${uncovered}\n\nScore each rubric item 0..max with a one-sentence rationale (one score entry per rubric item, using the item's exact label). Populate must_fix (CRITICAL/HIGH) / should_fix (MEDIUM) / could_fix (LOW) for the human reader; each entry MUST begin with "[SEVERITY] file:line" and include the suggested fix. NOTE: the script recomputes the gate deterministically — it re-sums your per-item scores (clamped to each item's max) and BLOCKS approval on any confirmed CRITICAL/HIGH finding regardless of your must_fix list — so be accurate, not strategic.`,
-  { label: 'judge', phase: 'Judge', schema: VERDICT }
-)
+// THREE independent judges, each through a distinct lens. A single judge has one blind spot and one
+// risk-appetite; three lenses reconciled by MIN-per-item means approval must satisfy the HARSHEST
+// relevant lens on every rubric item. (Quality-first: more judges is pure signal here because the
+// lenses are diverse, not N copies of the same prompt — INVARIANT 10.)
+const JUDGE_LENSES = [
+  { key: 'correctness',     emphasis: 'correctness & completeness — does it actually do what the scope requires; are edge cases, failure paths, and the stated spec genuinely met' },
+  { key: 'security',        emphasis: 'security & safety — trust boundaries, injection, authn/authz, secrets, unsafe handling of untrusted input, and data-loss risk' },
+  { key: 'maintainability', emphasis: 'maintainability & operability — readability, DRY/SRP, pattern compliance, test quality, and the 6-month cost of living with this change' },
+]
+const judgePromptFor = (lens) =>
+  `${AK}\n\nYou are ONE of three independent judges; YOUR lens is **${lens.emphasis}**. Produce a full verdict for the review of: ${scope}\n\nScore against this rubric (use these exact item labels and pass threshold):\n${JSON.stringify(rubric)}\n\nFindings are tagged 'verified' (survived the adversarial skeptic) or 'UNVERIFIED' (verifier did not return, or a single-pass critic find). Treat UNVERIFIED with skepticism but weigh it:\n${findingsDigest}\n\nUncovered areas flagged by the completeness critic: ${uncovered}\n\nScore each rubric item 0..max with a one-sentence rationale FROM YOUR LENS (one entry per rubric item, exact labels). Do NOT soften your lens to be "balanced" — the other two lenses cover other angles. Populate must_fix (CRITICAL/HIGH) / should_fix (MEDIUM) / could_fix (LOW); each entry MUST begin with "[SEVERITY] file:line" and include the suggested fix. NOTE: the script reconciles the three judges deterministically — MIN score per item across judges, union of fix lists, and BLOCKS approval on any confirmed CRITICAL/HIGH finding — so be accurate to your lens, not strategic.`
+const judgeResults = await parallel(JUDGE_LENSES.map(l => () =>
+  agent(judgePromptFor(l), { label: `judge:${l.key}`, phase: 'Judge', schema: VERDICT }).then(v => (v ? { lens: l.key, v } : null))
+))
+const judges = judgeResults.filter(Boolean)
 
-// Guard the judge result for null exactly as every other agent call is guarded — a null judge must
-// NOT crash the workflow and discard all upstream findings. Degrade to a conservative REJECTED.
-if (!verdictRaw) {
+// All three judges null → conservative REJECTED, preserving every upstream finding (same contract
+// as the prior single-judge null guard).
+if (!judges.length) {
   return {
     ...baseReturn,
     verdict: {
       scores: [], total: 0, max_total: maxTotal, verdict: 'REJECTED',
-      must_fix: ['Judge agent returned no verdict — the review could not be scored. Re-run the review.'],
+      must_fix: ['All judge agents returned no verdict — the review could not be scored. Re-run the review.'],
       should_fix: [], could_fix: [],
-      summary: 'Judge agent returned null; returning REJECTED conservatively with all findings preserved.',
+      summary: 'Every judge agent returned null; returning REJECTED conservatively with all findings preserved.',
       gate: { computed_deterministically: true, judge_failed: true, total: 0, max_total: maxTotal, pass_threshold_pct: passPct, blocker_count: blockers.length, blockers: blockerLines },
     },
   }
 }
 
-// Recompute `total` by pairing each rubric item to its score by label and CLAMPING to [0, item.max].
-// This bounds 0 <= total <= maxTotal even if the judge over-scores or returns mismatched item sets.
-const total = rubric.items.reduce((s, i) => {
-  const sc = (verdictRaw.scores || []).find(x => x.item === i.label)
-  return s + Math.max(0, Math.min(Number(sc && sc.score) || 0, Number(i.max) || 0))
-}, 0)
+// Reconcile deterministically. Per rubric item: clamp each judge's score to [0, max], take the MIN
+// (the harshest relevant lens governs). The SCRIPT owns the gate — never the LLMs' arithmetic.
+const uniq = (arr) => Array.from(new Set(arr))
+const scores = rubric.items.map((i) => {
+  const perJudge = judges.map((j) => {
+    const sc = (j.v.scores || []).find(x => x.item === i.label)
+    return { lens: j.lens, score: Math.max(0, Math.min(Number(sc && sc.score) || 0, Number(i.max) || 0)), rationale: (sc && sc.rationale) || '' }
+  })
+  const harshest = perJudge.reduce((m, p) => (p.score < m.score ? p : m), perJudge[0])
+  return { item: i.label, score: harshest.score, max: Number(i.max) || 0, rationale: `[harshest: ${harshest.lens}] ${harshest.rationale}` }
+})
+const total = scores.reduce((s, x) => s + x.score, 0)
+const must_fix = uniq(judges.flatMap(j => j.v.must_fix || []))
+const should_fix = uniq(judges.flatMap(j => j.v.should_fix || []))
+const could_fix = uniq(judges.flatMap(j => j.v.could_fix || []))
 const passed = maxTotal > 0 && (total / maxTotal) * 100 >= passPct && blockers.length === 0
 const verdict = {
-  ...verdictRaw,
+  scores,
   total,
   max_total: maxTotal,
   verdict: passed ? 'APPROVED' : 'REJECTED',
+  must_fix, should_fix, could_fix,
+  summary: judges.map(j => `(${j.lens}) ${j.v.summary || ''}`).join('  '),
   gate: {
     computed_deterministically: true,
     total, max_total: maxTotal, pass_threshold_pct: passPct,
     blocker_count: blockers.length,
     blockers: blockerLines,
-    llm_reported: { total: verdictRaw.total, max_total: verdictRaw.max_total, verdict: verdictRaw.verdict, must_fix_count: (verdictRaw.must_fix || []).length },
+    reconciliation: 'min-score-per-item across 3 lenses; union of fix lists',
+    judges: judges.map(j => ({ lens: j.lens, llm_total: j.v.total, llm_verdict: j.v.verdict, must_fix_count: (j.v.must_fix || []).length })),
   },
 }
 

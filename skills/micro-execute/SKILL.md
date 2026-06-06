@@ -90,9 +90,9 @@ User request: ${args}`)
 
 Store result as `{micro_plan}`.
 
-## Step 2.5: Determine Model Tier per Task
+## Step 2.5: Score Complexity (Annotation Only — Implementer Runs on Opus)
 
-Before execution, score each micro-task with collaboration-score.js and assign a model tier.
+The implementer is the only agent that writes code, so under the quality-first default it ALWAYS runs on **opus** — the strongest model raises the floor of every diff before review. `collaboration-score.js` is still run, but only as an informational complexity annotation (telemetry + planning insight), NOT to down-route the model.
 
 **For EACH micro-task in the plan:**
 
@@ -102,22 +102,18 @@ score_result = node ${CLAUDE_PLUGIN_ROOT}/src/collaboration-score.js \
   --files {len(task.files)} \
   --domains {task.domain_count || 1}
 
-Parse JSON output → output.model_tier
-Validate: model_tier must be one of ['haiku', 'sonnet', 'opus']
-If unknown value: fallback to 'sonnet'
-Store as task.model
+Parse JSON output → output.score, output.mode  (complexity annotation only)
+task.complexity = output.score
+task.model = 'opus'    // quality-first: implementer always strongest; never down-routed
 ```
 
-Example output from collaboration-score.js:
-```json
-{ "score": 45, "mode": "delegate", "model_tier": "sonnet", ... }
-```
+> The `model_tier` field is intentionally ignored for routing. Down-routing to haiku/sonnet to save tokens is exactly the cost lever the quality-first default rejects. The only model movement is upward — and the implementer is already at the ceiling.
 
 After scoring all tasks, announce the plan:
 ```
-Model tier assignment:
-  Task 1: {title} → {task.model} (score: {score})
-  Task 2: {title} → {task.model} (score: {score})
+Task plan (all implementers on opus):
+  Task 1: {title} → opus (complexity: {score})
+  Task 2: {title} → opus (complexity: {score})
   ...
 ```
 
@@ -130,7 +126,7 @@ Model tier assignment:
 ```typescript
 Task(
   subagent_type="team-shinchan:{domain_agent}",  // Bo | Aichan | Buriburi | Masao
-  model="{task.model}",  // haiku | sonnet | opus — set in Step 2.5 via collaboration-score.js
+  model="{task.model}",  // always 'opus' (quality-first default; set in Step 2.5)
   prompt=`You are implementing a SINGLE micro-task.
 
 ## Prompt Template
@@ -209,16 +205,7 @@ You MUST independently verify by READING THE ACTUAL CODE.
 - Issues (if FAIL): what's wrong, spec says X, code does Y, file:line`)
 ```
 
-**If FAIL**: Escalate model tier for retry using `escalateModel`:
-
-```javascript
-const { escalateModel } = require('./src/collaboration-score.js');
-// escalateModel: haiku → sonnet, sonnet → opus, opus → opus (cap)
-task.model = escalateModel(task.model);
-// Announce: "Task {N} FAIL — escalating model tier to {task.model}"
-```
-
-Re-dispatch implementer at the escalateModel-returned tier with spec reviewer's issues → re-run spec review. Max 1 escalation per task (R-1 cost cap).
+**If FAIL**: Re-dispatch the implementer (model stays **opus** — already at the ceiling) with the spec reviewer's concrete issues injected → re-run spec review. Max 2 retries per task (matches Execution Rule 5). No model escalation is needed — the implementer is already on opus by default (Step 2.5).
 
 ### 3c. Dispatch Code Quality Reviewer
 
@@ -262,6 +249,43 @@ ${rubric_override || '(none — use default 3-item rubric from actionkamen.md)'}
 ```
 
 **If NEEDS_FIXES with CRITICAL issues**: Re-dispatch implementer → re-run quality review. Max 1 retry.
+
+### 3c-bis. Independent Skeptic Cross-Check (runs on the POSITIVE verdict)
+
+**Only after spec PASS and quality APPROVED, before marking complete.** The pipeline distrusts the implementer but never the reviewers — a reviewer that rubber-stamps while missing a real bug has no second line of defense. This read-only refuter exists to catch reviewer false-negatives.
+
+```typescript
+Task(
+  subagent_type="team-shinchan:actionkamen",
+  model="opus",
+  prompt=`You are an INDEPENDENT SKEPTIC. READ-ONLY: inspect the code/diff only — do not modify any file. Two reviewers already returned Spec: PASS and Quality: APPROVED for this micro-task. Your ONLY job is to DISPROVE that green verdict by reading the ACTUAL code/diff — not the reports.
+
+## Prompt Template
+// See: ${CLAUDE_PLUGIN_ROOT}/agents/_shared/micro-task-prompts/skeptic-prompt.md
+
+## The Spec
+${task_description}
+
+## Changed Files
+${changed_files}
+
+## Prior Verdicts (to be attacked, not trusted)
+- Spec: PASS — ${spec_verdict_summary}
+- Quality: APPROVED — ${quality_verdict_summary}
+
+## YOUR MISSION
+Assume the green is WRONG until proven otherwise. Manufacture a concrete reason it should be red:
+- A failing input / edge case the tests do not cover
+- A spec requirement satisfied only superficially (happy-path only)
+- A test that passes WITHOUT exercising the behavior (assertion-free, fully mocked, tautological)
+- A security/correctness hole both reviewers anchored past
+
+## Output
+- Verdict: UPHELD (genuinely found no counterexample) or REFUTED (concrete counterexample)
+- If REFUTED: the exact counterexample (input → expected vs actual) and file:line`)
+```
+
+**If REFUTED**: treat as a FAIL — re-dispatch the implementer (opus) with the skeptic's counterexample, then re-run spec → quality → skeptic. Max 1 skeptic-triggered retry per task. A counterexample the skeptic cannot make concrete is NOT a blocker (no vague "could be risky").
 
 ### 3d. Mark Task Complete
 
@@ -333,11 +357,12 @@ Output final summary:
 
 | Domain | Agent | Model |
 |--------|-------|-------|
-| General code | Bo | collaboration-score model_tier |
-| Frontend/UI/CSS | Aichan | collaboration-score model_tier |
-| Backend/API/DB | Buriburi | collaboration-score model_tier |
-| DevOps/CI/Docker | Masao | collaboration-score model_tier |
+| General code | Bo | opus (quality-first) |
+| Frontend/UI/CSS | Aichan | opus (quality-first) |
+| Backend/API/DB | Buriburi | opus (quality-first) |
+| DevOps/CI/Docker | Masao | opus (quality-first) |
 | All reviews | Action Kamen | opus (fixed) |
+| Skeptic cross-check | Action Kamen | opus (fixed) |
 | Plan generation | Nene | opus (fixed) |
 
 ## Execution Rules
@@ -345,6 +370,6 @@ Output final summary:
 1. **Sequential tasks**: Implementation tasks run one at a time (no parallel). Review subagents for each task also run sequentially.
 2. **Fresh subagent per task**: Each task gets a new subagent. No context pollution.
 3. **Controller provides full context**: The controller reads the plan once and provides full task text to each subagent. Subagents never read the plan file.
-4. **Two-stage review**: Spec compliance BEFORE code quality. Never skip.
-5. **Retry limits**: Max 2 retries for spec compliance, max 1 retry for code quality. If still failing, report to user and pause.
+4. **Two-stage review + skeptic**: Spec compliance BEFORE code quality. Never skip. Every positive verdict (PASS + APPROVED) is then cross-checked by an independent read-only skeptic (Step 3c-bis) that tries to REFUTE it; a concrete counterexample reopens the task.
+5. **Retry limits**: Max 2 retries for spec compliance, max 1 retry for code quality, max 1 skeptic-triggered retry. If still failing, report to user and pause.
 6. **Evidence required**: No "should work" or "looks correct". Every claim needs a verification command output.

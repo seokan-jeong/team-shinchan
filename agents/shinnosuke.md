@@ -427,7 +427,8 @@ If worktree is chosen, all Phase execution happens inside the worktree directory
       Warning: `⚠️ Phase {N} blocked: artifact dependency on Phase {M} not met.`
       **artifact_dependency always takes priority over wave parallelization.**
    b. **Parallel Execution**: Launch all unblocked Phases in this wave as parallel Tasks:
-      `Task(subagent_type="team-shinchan:bo", ...)` × N (one per Phase)
+      `Task(subagent_type="team-shinchan:bo", model="opus", ...)` × N (one per Phase)
+      **Quality-first default**: every Phase dispatch — and Bo's onward dispatch to a domain agent — runs on **opus**. The Phase Loop never down-routes by complexity; the only model movement is upward.
    c. **Wait**: Collect all results
    d. **Failure Isolation**: If any Phase fails, keep successful results.
       Re-run only failed Phases sequentially (1 retry each).

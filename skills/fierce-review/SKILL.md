@@ -1,12 +1,12 @@
 ---
 name: team-shinchan:fierce-review
-description: Deterministic adversarial code review for high-stakes scope — independent per-dimension review, a non-skippable per-finding refutation, a completeness critic, and a schema-validated rubric judge. Opt-in main-loop Workflow tier.
+description: Deterministic adversarial code review for high-stakes scope — independent per-dimension review, a non-skippable per-finding refutation, completeness + interaction critics, and a deterministic 3-lens rubric judge panel. Opt-in main-loop Workflow tier.
 user-invocable: false
 ---
 
 # EXECUTE IMMEDIATELY
 
-Fierce review is a main-loop **Workflow** that GUARANTEES thorough, adversarial review — dimensions fan out as independent agents, EVERY finding is challenged by a skeptic (false-positive unless it holds against the code), a completeness critic hunts the files/rules nobody examined, and an Action-Kamen judge scores against the shared rubric with schema-validated output. The Task path (`team-shinchan:review`) can only *request* thoroughness at the prompt level; this tier *enforces* it. Use ONLY for high-stakes scope (pre-release diff, security / payment / auth boundary, data-loss path) or when you need a structural coverage guarantee. The cheap default stays `team-shinchan:review`.
+Fierce review is a main-loop **Workflow** that GUARANTEES thorough, adversarial review — dimensions fan out as independent agents, EVERY finding is challenged by a skeptic (false-positive unless it holds against the code), completeness + interaction critics hunt what nobody examined, and a 3-lens Action-Kamen judge panel scores against the shared rubric with schema-validated output. The Task path (`team-shinchan:review`) can only *request* thoroughness at the prompt level; this tier *enforces* it. Use ONLY for high-stakes scope (pre-release diff, security / payment / auth boundary, data-loss path) or when you need a structural coverage guarantee. The cheap default stays `team-shinchan:review`.
 
 ## Step 0: Validate + opt-in
 
@@ -41,12 +41,12 @@ Workflow({
     baseRef: "main",
     rubric: { /* the object loaded from eval-rubrics.json */ },
     persona: "<the string printed by workflow-personas.js actionkamen>",
-    deepen: false          // true → also adversarially verify the completeness critic's own finds (more thorough, more tokens)
+    deepen: true           // default: also verifies the critics' own finds (set false for a lighter pass)
   }
 })
 ```
 
-The script runs **Review** (one agent per dimension) → **Verify** (per-finding refutation; `is_real` only if it holds) → **Critic** (completeness) → **Judge** (rubric score). Returns `{ scope, dimensions, confirmed, unverified, dismissed, gaps, verdict }`: `confirmed` survived the skeptic; `unverified` was retained but not confirmed (null verifier or single-pass critic) — never erased; `dismissed` = refuted false positives. The gate is **recomputed deterministically** from the rubric (`verdict.gate` keeps the LLM self-report); APPROVED needs the threshold AND no confirmed CRITICAL/HIGH.
+The script runs **Review** (one agent per dimension) → **Verify** (per-finding refutation; `is_real` only if it holds) → **Critic** (completeness + cross-dimension interaction) → **Judge** (3-lens panel — correctness/security/maintainability, min score per item). Returns `{ scope, dimensions, confirmed, unverified, dismissed, gaps, verdict }`: `confirmed` survived the skeptic; `unverified` was retained but not confirmed (null verifier or single-pass critic) — never erased; `dismissed` = refuted false positives. The gate is **recomputed deterministically** from the rubric (`verdict.gate` keeps the LLM self-report); APPROVED needs the threshold AND no confirmed CRITICAL/HIGH.
 
 ## Step 3: Record the review artifact
 
@@ -60,4 +60,4 @@ Present, in this order:
 - **must_fix** (CRITICAL/HIGH — block APPROVED) → **should_fix** (MEDIUM) → **could_fix** (LOW)
 - **Confirmed findings** (`file:line`); **unverified** ones (null verifier / single-pass critic — flag so they aren't taken as confirmed); the **dismissed** count; **uncovered** areas
 
-If REJECTED, list must_fix ordered by severity with the suggested fixes. An **APPROVED** `REVIEW-{NNN}.json` counts as code-review evidence for `team-shinchan:verification-before-completion` at the pre-commit / pre-PR checkpoint. **Never finalize without confirmation** — ask the user to accept, fix-and-re-run, or re-run with `deepen: true`.
+If REJECTED, list must_fix ordered by severity with the suggested fixes. An **APPROVED** `REVIEW-{NNN}.json` counts as code-review evidence for `team-shinchan:verification-before-completion` at the pre-commit / pre-PR checkpoint. **Never finalize without confirmation** — ask the user to accept, fix-and-re-run, or re-run with `deepen: false` for a lighter pass (deepen is on by default).

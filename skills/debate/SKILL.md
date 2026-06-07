@@ -103,7 +103,7 @@ Ask user if they accept the winner's implementation. If yes: proceed to completi
 
 ```typescript
 Task(subagent_type="team-shinchan:midori", model="sonnet",
-  prompt="Debate topic: {topic}\nPanel: {panel list}\nProcedure: Announce, collect opinions (parallel), Hiroshi derives consensus, report decision.")
+  prompt="Debate topic: {topic}\nPanel: {panel list}\nProcedure: Announce, collect opinions (parallel), ALWAYS run a separate refutation round (even on apparent agreement), then a separate scored judge picks the winner with surviving dissent, report decision.")
 ```
 
 ## Step 2: Deliver Results

@@ -30,7 +30,7 @@ Workflow({
   args: {
     goal: "<the task to complete, with success criteria>",
     progressDoc: ".shinchan-docs/{DOC_ID}/PROGRESS.md",   // optional
-    maxIterations: 10,                                     // capped at 20
+    maxIterations: 20,                                     // capped at 20 (default 20 when the user did not specify)
     workerPersona: "<workflow-personas.js kazama>",
     judgePersona: "<workflow-personas.js actionkamen>"
   }

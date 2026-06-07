@@ -21,7 +21,7 @@ function parseArgs(a) {
 }
 const A = parseArgs(args)
 const task = (A.task && String(A.task).trim()) || 'Implement the requested change.'
-const N = (Number.isInteger(A.n) && A.n >= 2) ? Math.min(A.n, 4) : 2
+const N = (Number.isInteger(A.n) && A.n >= 2) ? Math.min(A.n, 4) : 4   // quality-first: default to the cap (4) for a full tournament when N is unspecified; an explicit A.n still wins (INVARIANT 8)
 const ctx = (Array.isArray(A.files) && A.files.length) ? `Relevant files:\n${A.files.join('\n')}\n\n` : ''
 
 const BUILD_DIRECTIVES = 'Read the relevant code, design your BEST solution, and return it as an apply-ready unified git diff (correct file paths and context lines). Do NOT modify the working tree — return the patch as text only. Note any tests you would run.'

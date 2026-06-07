@@ -71,10 +71,11 @@ Prohibited: writing opinions directly, fictional dialogue, or drawing conclusion
 
 1. Collect opinions in parallel: `Task(team-shinchan:hiroshi, "Debate topic: {topic}. Provide expert opinion in 3-5 sentences.")` — repeat per panelist.
 2. Output each result immediately upon receipt.
-3. **Refutation pass** (mandatory for high-stakes categories; on disagreement otherwise): `Task(team-shinchan:hiroshi, "Synthesize: [opinions...]. FIRST state the strongest objection to the leading option and whether it holds, THEN present consensus and final decision with any surviving dissent.")`
-4. Report final decision.
+3. **Refutation pass (ALWAYS — a separate step, never gated)**: runs even when Round 1 appears to agree. `Task(team-shinchan:hiroshi, "Refute: [opinions...]. Attempt to REFUTE the leading option — state the single strongest objection to it and whether it survives scrutiny. Output ONLY the objection and its verdict; do not conclude here.")` Premature consensus is the #1 failure of consensus-seeking debate, so an independent objection always precedes the decision.
+4. **Scored judge (a separate step — NOT the same agent self-critiquing in one breath)**: `Task(team-shinchan:actionkamen, "Judge the debate: [options + opinions + the refutation]. Score each option on correctness / risk / reversibility, pick the winner with rationale, and record any dissent that survived rebuttal — dissenting_views may NOT be silently empty.")`
+5. Report the final decision with the surviving dissent.
 
-**Execution order**: Define topic/panel → Announce start → Collect opinions via Task (parallel) → Output each opinion → Synthesize if disagreement → Report conclusion.
+**Execution order**: Define topic/panel → Announce start → Collect opinions via Task (parallel) → Output each opinion → Refutation (always) → Scored judge → Report conclusion.
 
 ---
 
@@ -123,7 +124,7 @@ Before any debate: read `.shinchan-docs/debate-decisions.md`. If matching active
 | Expert Panel | Complex multi-domain | Domain experts → cross-review → conclusion |
 | Sparse | 2-domain tradeoff, quick decision, ≤3 panelists | 2 agents only, max 2 rounds → Hiroshi synthesis if needed |
 
-**Rules**: Max 3 rounds (usually 2 sufficient). Opinions: 3-5 sentences each. **Mandatory refutation**: for architecture / security / performance / tech-selection (high-stakes) categories, at least one rebuttal round is required even when Round 1 appears to agree — each panelist must attempt to refute the strongest opposing point before consensus. If consensus fails: Hiroshi exercises final authority. Document important disagreements; `dissenting_views` may not be silently empty — if none remain after rebuttal, record `"none — survived rebuttal: {what was challenged}"`.
+**Rules**: Max 3 rounds (usually 2 sufficient). Opinions: 3-5 sentences each. **Mandatory refutation (ALWAYS)**: at least one rebuttal round is required for EVERY debate — even on apparent agreement, regardless of category — each panelist must attempt to refute the strongest opposing point, followed by a separate scored judge, before consensus. If consensus fails: Hiroshi exercises final authority. Document important disagreements; `dissenting_views` may not be silently empty — if none remain after rebuttal, record `"none — survived rebuttal: {what was challenged}"`.
 
 > For genuinely high-stakes / irreversible decisions (schema migration, public API contract, security boundary, data-loss risk), this prompt-level rebuttal can be *escalated* to a deterministic, non-skippable adversarial pass — see the `team-shinchan:fierce-debate` skill (opt-in, main-loop Workflow tier).
 

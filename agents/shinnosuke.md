@@ -490,6 +490,15 @@ Task(subagent_type="team-shinchan:masumi", model="sonnet",
   Base content on: actual git diff, PROGRESS.md phases, REQUESTS.md acceptance criteria.")
 ```
 
+**Step 3.5: Ground the docs against the real diff (anti-confabulation)**
+
+A single-author pass over a large diff drifts into claims the code does not support, and Stage 4 treats these docs as the record of what shipped. Before the final gate, run an independent grounding check:
+```typescript
+Task(subagent_type="team-shinchan:actionkamen", model="opus",
+  prompt="GROUNDING CHECK for {DOC_ID}. READ-ONLY — do not modify any file. Read RETROSPECTIVE.md and IMPLEMENTATION.md, then read the ACTUAL `git diff` for this work plus PROGRESS.md. Flag EVERY claim in either doc that no real code change supports: 'Files Changed' rows with no matching diff hunk, 'What Went Well' / 'Decisions' the diff contradicts or does not evidence, and any AC marked done without a supporting change. Output a per-doc list of unsupported/contradicted claims (doc line -> missing/contradicting evidence), or 'GROUNDED' if every claim is backed.")
+```
+If unsupported claims are found, have Masumi revise the two docs to remove or correct them BEFORE the final gate. Do not proceed to Step 4 with confabulated docs.
+
 **Step 4: Final Action Kamen Review**
 ```typescript
 Task(subagent_type="team-shinchan:actionkamen", model="opus",

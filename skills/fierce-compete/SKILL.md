@@ -11,7 +11,7 @@ Fierce compete is a main-loop **Workflow** that runs a guaranteed competitive to
 ## Step 0: Validate + opt-in
 
 - This skill calls the **Workflow tool** (main-loop only). Invoking `/team-shinchan:fierce-compete` IS the opt-in. **Never delegate to a subagent** — `workflow()` throws inside a Task child.
-- If args lack a clear implementation task: ask for it and **STOP**. Parse `N` (number of implementations, default 2, max 4) from "best of N"/"N개" if present. If > 2000 chars: truncate + warn.
+- If args lack a clear implementation task: ask for it and **STOP**. Parse `N` (number of implementations, default 4, max 4 — full tournament unless the user asks for fewer) from "best of N"/"N개" if present. If > 2000 chars: truncate + warn.
 
 ## Step 1: Resolve task + personas (main loop — the script can't read files)
 
@@ -28,7 +28,7 @@ Workflow({
   scriptPath: "${CLAUDE_PLUGIN_ROOT}/skills/fierce-compete/fierce-compete.workflow.js",
   args: {
     task: "<the implementation request>",
-    n: 2,                                  // 2..4
+    n: 4,                                  // 2..4 (default 4 when the user did not specify)
     files: ["<path>", "..."],              // context the builders should read
     builderPersona: "<workflow-personas.js bo>",
     judgePersona: "<workflow-personas.js actionkamen>"

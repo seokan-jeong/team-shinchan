@@ -24,7 +24,7 @@ const A = parseArgs(args)
 const goal = (A.goal && String(A.goal).trim()) || 'Complete the outstanding task.'
 const progressDoc = A.progressDoc && String(A.progressDoc).trim()
 const progressCtx = progressDoc ? `Track acceptance criteria / TODOs in ${progressDoc}.` : ''
-const MAX = (Number.isInteger(A.maxIterations) && A.maxIterations > 0) ? Math.min(A.maxIterations, 20) : 10
+const MAX = (Number.isInteger(A.maxIterations) && A.maxIterations > 0) ? Math.min(A.maxIterations, 20) : 20   // quality-first: default to the high end (20) when unspecified; RESERVE + STAGN_LIMIT stay the real backstops; an explicit A.maxIterations still wins (INVARIANT 8)
 const STAGN_LIMIT = 3      // consecutive no-progress iterations before giving up (mirrors ralph's idle threshold)
 const RESERVE = 60000      // output-token reserve kept for the final gate + tail before the budget cap
 

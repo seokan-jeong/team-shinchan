@@ -427,7 +427,8 @@ If worktree is chosen, all Phase execution happens inside the worktree directory
       Warning: `⚠️ Phase {N} blocked: artifact dependency on Phase {M} not met.`
       **artifact_dependency always takes priority over wave parallelization.**
    b. **Parallel Execution**: Launch all unblocked Phases in this wave as parallel Tasks:
-      `Task(subagent_type="team-shinchan:bo", ...)` × N (one per Phase)
+      `Task(subagent_type="team-shinchan:bo", model="opus", ...)` × N (one per Phase)
+      **Quality-first default**: every Phase dispatch — and Bo's onward dispatch to a domain agent — runs on **opus**. The Phase Loop never down-routes by complexity; the only model movement is upward.
    c. **Wait**: Collect all results
    d. **Failure Isolation**: If any Phase fails, keep successful results.
       Re-run only failed Phases sequentially (1 retry each).
@@ -488,6 +489,15 @@ Task(subagent_type="team-shinchan:masumi", model="sonnet",
   ## Known Limitations (if any)
   Base content on: actual git diff, PROGRESS.md phases, REQUESTS.md acceptance criteria.")
 ```
+
+**Step 3.5: Ground the docs against the real diff (anti-confabulation)**
+
+A single-author pass over a large diff drifts into claims the code does not support, and Stage 4 treats these docs as the record of what shipped. Before the final gate, run an independent grounding check:
+```typescript
+Task(subagent_type="team-shinchan:actionkamen", model="opus",
+  prompt="GROUNDING CHECK for {DOC_ID}. READ-ONLY — do not modify any file. Read RETROSPECTIVE.md and IMPLEMENTATION.md, then read the ACTUAL `git diff` for this work plus PROGRESS.md. Flag EVERY claim in either doc that no real code change supports: 'Files Changed' rows with no matching diff hunk, 'What Went Well' / 'Decisions' the diff contradicts or does not evidence, and any AC marked done without a supporting change. Output a per-doc list of unsupported/contradicted claims (doc line -> missing/contradicting evidence), or 'GROUNDED' if every claim is backed.")
+```
+If unsupported claims are found, have Masumi revise the two docs to remove or correct them BEFORE the final gate. Do not proceed to Step 4 with confabulated docs.
 
 **Step 4: Final Action Kamen Review**
 ```typescript

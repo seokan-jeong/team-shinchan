@@ -18,21 +18,25 @@ If args length > 2000 characters:
   Warn user: "Request was truncated to 2000 characters"
 ```
 
-## Escalation: Tier 1 (this skill) vs Tier 2 (fierce-review)
+## Step 2: Review — default to the fierce-review Workflow (main loop)
 
-This skill (Action Kamen via Task — thorough, cheap, auto-triggerable, delegatable) is **Tier 1** and the default. For **high-stakes scope**, escalate to **Tier 2 — `team-shinchan:fierce-review`** (a deterministic main-loop Workflow with independent per-dimension agents, a non-skippable per-finding refutation, a completeness critic, and a schema-validated rubric judge that reuses `eval-rubrics.json`).
+Quality-first: a single agent juggling all five dimensions in one context under-attends the later ones and never re-checks its own findings. When `/team-shinchan:review` runs in the **main loop**, the adversarial multi-dimension Workflow is the **default** — independent per-dimension agents, a non-skippable per-finding refutation, completeness + interaction critics, and a deterministic 3-lens judge panel.
 
-| Stay on Tier 1 (this skill) | Escalate to fierce-review |
-|---|---|
-| Routine change, single file, quick check | Pre-release diff, security / payment / auth boundary, data-loss path |
-| One thorough pass is acceptable | You want guaranteed per-dimension coverage + adversarial per-finding verification |
-| Auto-triggered or delegated, cheap | Explicit user opt-in only (Workflow can't fire silently or from a subagent) |
+1. Resolve `scope` + `files` (git diff), pick the rubric from `${CLAUDE_PLUGIN_ROOT}/agents/_shared/eval-rubrics.json`, and resolve Action Kamen's persona via `node ${CLAUDE_PLUGIN_ROOT}/src/workflow-personas.js actionkamen` — exactly as `team-shinchan:fierce-review` Step 1 specifies.
+2. Launch the Workflow (`deepen` defaults to true):
+   ```
+   Workflow({
+     scriptPath: "${CLAUDE_PLUGIN_ROOT}/skills/fierce-review/fierce-review.workflow.js",
+     args: { scope: "<one-line scope>", files: ["<path>", "..."], baseRef: "main",
+             rubric: { /* object from eval-rubrics.json */ },
+             persona: "<string from workflow-personas.js actionkamen>" }
+   })
+   ```
+3. Record + present per `team-shinchan:fierce-review` Steps 3–4 (write `.shinchan-docs/reviews/REVIEW-{NNN}.json`; an APPROVED artifact counts as code-review evidence for `team-shinchan:verification-before-completion`). Never finalize without user confirmation.
 
-**Never silently jump to Tier 2** — on a high-stakes scope, finish this review, then offer the opt-in; the user launches `/team-shinchan:fierce-review`.
+## Fallback: single-pass Task (ONLY where the Workflow legally can't run)
 
-## Step 2: Execute Task
-
-**Do not read further. Execute this Task NOW:**
+`workflow()` throws inside a Task child, and a Workflow can't be fired from a hook (HARD INVARIANT). So **only** when this skill is reached by **delegation into a subagent** (e.g. Shinnosuke/Action Kamen invoked it) or from a **hook**, skip the Workflow and run the single Action-Kamen Task below — the one remaining cheap single-pass path.
 
 ```typescript
 Task(
@@ -66,4 +70,4 @@ User request: ${args || '(Please describe what to review)'}
 )
 ```
 
-**STOP HERE. The above Task handles everything.**
+**STOP HERE.**

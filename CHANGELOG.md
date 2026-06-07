@@ -1,6 +1,23 @@
 # Changelog
 
-## [Unreleased]
+## [4.42.0] - 2026-06-07
+
+### Quality-first harness upgrade — the best-quality path is now the default
+
+Token cost is no longer the constraint that shapes the harness, so the highest-quality path is now the default wherever it is a main-loop, read-only fan-out. (The opt-in fierce-* Workflow tier stays opt-in — a Workflow can never be hook-fired.) Batches 1 + 2-a:
+
+- **Opus by default in execution** — `micro-execute` implementers and the Stage-3 Phase Loop now dispatch on `opus`; `collaboration-score.js` is kept as a complexity annotation only (no down-routing to save tokens).
+- **Independent skeptic on every PASS** — `micro-execute` Step 3c-bis adds a read-only refuter that challenges every spec-PASS + quality-APPROVED verdict (new `agents/_shared/micro-task-prompts/skeptic-prompt.md`), catching reviewer false-negatives.
+- **`fierce-review` hardened** — `deepen` defaults true; a cross-dimension **interaction critic** joins the completeness critic; the single judge becomes a **3-lens judge panel** (correctness / security / maintainability) reconciled deterministically by min-score-per-item. The deterministic gate, exhaustive finding partition, and null-guards are preserved. When a `*.workflow.js` is under review it injects the Workflow-runtime API + an "empirical execution outranks inference" rule so reviewers stop false-positiving on valid primitives.
+- **`/review` defaults to fierce-review** in the main loop, with a single-Task fallback for delegated/hook paths (where `workflow()` can't run).
+- **`/analyze` diverse-lens panel** — parallel read-only lenses (architecture+root-cause / correctness+security / hidden-requirements, plus a code-flow trace for bugs) → synthesis; `--single` opt-out.
+- **`/research` orchestrator-worker fan-out** — narrow vs breadth routing; breadth questions decompose into parallel Masumi workers → synthesis, with an opt-in escalation to the native deep-research for claim-critical work (`masumi` gains worker/synthesis roles).
+- **`/debate` always refutes** — a separate refutation round runs for every debate (no longer gated on disagreement/category), followed by a separate scored judge (not the same agent self-critiquing in one breath).
+- **fierce-* default to max depth** — `fierce-compete` defaults `N` to the cap (4) and `fierce-ralph` defaults `maxIterations` to 20 when unspecified; explicit user values still win, and the token reserve / stagnation limits remain the backstops.
+- **Stage-1 risk discovery uncapped** — the Hidden Requirements "max 5" cap is dropped (report every material finding, ranked H/M/L); the requirements rubric now demands all six STRIDE threats be addressed or justified N/A.
+- **Stage-4 grounding** — an independent pass cross-checks RETROSPECTIVE/IMPLEMENTATION against the real `git diff` + PROGRESS.md before the final gate, blocking confabulated claims.
+
+All 24 static validators pass. The upgraded `/fierce-review` was dogfooded on its own diff, which surfaced and fixed a retry-budget contradiction, a `--single` over-match, an unbound `target`, a dead `escalateModel` coupling, and a missing skeptic read-only contract.
 
 ### Changed — Agent rename: `bunta` → `buriburi` (Buriburizaemon 부리부리자에몽)
 

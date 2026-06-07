@@ -354,7 +354,7 @@ Create REQUESTS with frontmatter (`document_type: requirements`, `status: draft`
 1. **Problem Statement** — what problem are we solving and why
 2. **Requirements** — FR (functional) and NFR (non-functional)
 3. **Scope** — In scope / Out of scope
-4. **Hidden Requirements** — findings from STRIDE + elicitation (max 5)
+4. **Hidden Requirements** — findings from STRIDE + elicitation (report EVERY material finding, ranked H/M/L; do NOT cap — a payment/auth feature can have more than five real threats)
 5. **Risks** — with severity (H/M/L) and mitigation
 6. **Acceptance Criteria** — testable checkboxes
 7. **Validation Checklist** — checkboxes for each section + User approval
@@ -499,7 +499,7 @@ LOOP:
            success criteria, and WHY it matters?
          FR/NFR Coverage (max 5): Are all functional requirements complete, non-overlapping,
            and testable? Are NFRs present and quantified?
-         Scope & AC Testability (max 5): Is scope delineated? STRIDE analysis present?
+         Scope & AC Testability (max 5): Is scope delineated? Are all six STRIDE threats addressed or justified N/A?
            Are ACs phrased as testable checkboxes?
        pass_threshold: 9/15 (60%)
 

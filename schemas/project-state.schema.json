@@ -1,0 +1,155 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Team-Shinchan Big-Project State",
+  "description": "Tracks a large-scale bigproject and its constituent phases. Each phase is executed as its own full start workflow (see schemas/workflow-state.schema.json). Lives at .shinchan-docs/{PROJECT_ID}/PROJECT.yaml — a distinct filename so the */WORKFLOW_STATE.yaml globs never treat it as a workflow.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "number",
+      "description": "Schema version for migration"
+    },
+    "kind": {
+      "const": "project",
+      "description": "Discriminator distinguishing a project file from a workflow state file"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Unique project ID (e.g., main-074). Child phase DOC_IDs are {project_id}-phase-{n}"
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable project title"
+    },
+    "output_format": {
+      "enum": [
+        "markdown",
+        "html"
+      ],
+      "description": "Doc format inherited by child phase workflows"
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "current": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "active",
+            "paused",
+            "completed",
+            "blocked"
+          ]
+        },
+        "active_phase": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Phase number the loop is currently on (null before the loop starts)"
+        }
+      },
+      "required": [
+        "status"
+      ]
+    },
+    "phases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "n": {
+            "type": "number",
+            "description": "1-based phase number, unique within the project"
+          },
+          "title": {
+            "type": "string"
+          },
+          "domain": {
+            "enum": [
+              "frontend",
+              "backend",
+              "devops",
+              "fullstack",
+              "infra"
+            ]
+          },
+          "depends_on": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "Phase numbers that must complete before this phase"
+          },
+          "child_doc_id": {
+            "type": "string",
+            "description": "DOC_ID of the start workflow for this phase ({project_id}-phase-{n})"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "in_progress",
+              "complete",
+              "blocked"
+            ]
+          },
+          "suggested_agent": {
+            "type": "string",
+            "description": "Advisory specialist suggested by Himawari (e.g., buriburi)"
+          },
+          "acceptance_criteria": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "n",
+          "title",
+          "domain",
+          "child_doc_id",
+          "status"
+        ]
+      }
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "event": {
+            "type": "string"
+          },
+          "agent": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "timestamp",
+          "event"
+        ]
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "project_id",
+    "current",
+    "phases"
+  ]
+}

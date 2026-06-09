@@ -10,6 +10,8 @@ const path = require('path');
 
 const ROOT_DIR = path.join(__dirname, '../..');
 const START_SKILL = path.join(ROOT_DIR, 'skills/start/SKILL.md');
+const BIGPROJECT_SKILL = path.join(ROOT_DIR, 'skills/bigproject/SKILL.md');
+const PROJECT_SCHEMA = path.join(ROOT_DIR, 'schemas/project-state.schema.json');
 const CLAUDE_MD = path.join(ROOT_DIR, 'CLAUDE.md');
 
 const REQUIRED_STAGES = ['requirements', 'planning', 'execution', 'completion'];
@@ -40,6 +42,40 @@ function runValidation() {
   } else {
     errors.push('Missing WORKFLOW_STATE.yaml template in SKILL.md');
     console.log('  \x1b[31m✗\x1b[0m Missing WORKFLOW_STATE.yaml template in SKILL.md');
+  }
+
+  // Check bigproject PROJECT.yaml schema + template (nested big-project layer)
+  console.log('\nChecking big-project layer...');
+  if (fs.existsSync(PROJECT_SCHEMA)) {
+    try {
+      const schema = JSON.parse(fs.readFileSync(PROJECT_SCHEMA, 'utf-8'));
+      if (schema && schema.properties && schema.properties.phases) {
+        console.log('  \x1b[32m✓\x1b[0m schemas/project-state.schema.json parses');
+      } else {
+        errors.push('project-state.schema.json missing phases property');
+        console.log('  \x1b[31m✗\x1b[0m project-state.schema.json missing phases property');
+      }
+    } catch (e) {
+      errors.push(`project-state.schema.json invalid JSON: ${e.message}`);
+      console.log('  \x1b[31m✗\x1b[0m project-state.schema.json invalid JSON');
+    }
+  } else {
+    errors.push('Missing schemas/project-state.schema.json');
+    console.log('  \x1b[31m✗\x1b[0m Missing schemas/project-state.schema.json');
+  }
+
+  if (fs.existsSync(BIGPROJECT_SKILL)) {
+    const bpContent = fs.readFileSync(BIGPROJECT_SKILL, 'utf-8');
+    const hasProjectTemplate = bpContent.match(/```yaml[\s\S]*?kind:\s*project[\s\S]*?phases:[\s\S]*?```/);
+    if (hasProjectTemplate) {
+      console.log('  \x1b[32m✓\x1b[0m PROJECT.yaml template found in bigproject/SKILL.md');
+    } else {
+      errors.push('Missing PROJECT.yaml template in bigproject/SKILL.md');
+      console.log('  \x1b[31m✗\x1b[0m Missing PROJECT.yaml template in bigproject/SKILL.md');
+    }
+  } else {
+    errors.push('skills/bigproject/SKILL.md not found');
+    console.log('  \x1b[31m✗\x1b[0m skills/bigproject/SKILL.md not found');
   }
 
   // Check CLAUDE.md exists

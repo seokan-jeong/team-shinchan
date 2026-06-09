@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.43.0] - 2026-06-09
+
+### Changed — `bigproject` is now nested: each phase runs the full `start` workflow
+
+`/team-shinchan:bigproject` no longer has Himawari directly assign specialists and own a single `PROGRESS.md` (the old *flat* model). Instead Himawari **decomposes only** — returning a structured `phase-plan` — and the `bigproject` skill runs **each phase as its own complete `start` workflow** (Stage 1 Requirements with a full Misae interview → Stage 2 Planning → Stage 3 micro-execute → Stage 4 Completion + AK). The user explicitly chose **a full requirements interview per phase**.
+
+- **Main-thread loop, by necessity** — each phase's Stage-1 interview uses `AskUserQuestion`, which only the main thread can call (a sub-agent cannot). So the `bigproject` SKILL drives the phase loop itself; Himawari is reduced to decomposition + dependency sequencing + cross-phase risk surfacing.
+- **Flat sibling layout** — a project lives at `.shinchan-docs/{PROJECT_ID}/PROJECT.yaml`; each phase is a flat sibling workflow `.shinchan-docs/{PROJECT_ID}-phase-N/`. Nested dirs were rejected because `workflow-guard.sh` and `/resume` glob `.shinchan-docs/*/WORKFLOW_STATE.yaml` (single-level) and would not see them. The `PROJECT.yaml` filename is intentionally invisible to that glob.
+- **Schema** — `WORKFLOW_STATE.yaml` gains optional `current.parent_doc_id` / `current.phase_number` (absent on standalone workflows); new `schemas/project-state.schema.json` for `PROJECT.yaml`. Both the hand schema and `src/gen-schemas.js` source are updated (drift-checked).
+- **`start` is reusable** — accepts an injected `DOC_ID` + parent context, skips Step 0 expiry when injected, ignores `*-phase-*` dirs in standalone index computation, and passes `PHASE_CONTEXT` to Misae. Standalone behavior is unchanged.
+- **`/resume`** lists projects as a unit (`P#`) and re-enters the phase loop at the first non-complete phase, suppressing child phases from the flat list.
+- **Validator** — `tests/validate/workflow-state-schema.js` now also checks the project schema parses and that `bigproject/SKILL.md` carries a `PROJECT.yaml` template; `agents/himawari.md` rewritten (decompose-only, `Task` tool dropped, `maxTurns` 30→15); `AGENTS.md`/`ARCHITECTURE.md` regenerated; `docs/workflow-guide.md` gains a "Big Project Layer" section.
+
 ## [4.42.0] - 2026-06-07
 
 ### Quality-first harness upgrade — the best-quality path is now the default

@@ -12,7 +12,7 @@ user-invocable: false
 
 | Validator | Command | What it checks |
 |-----------|---------|---------------|
-| workflow-state-schema | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/workflow-state-schema.js` | WORKFLOW_STATE.yaml files follow required schema |
+| workflow-state-schema | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/workflow-state-schema.js` | WORKFLOW_STATE.yaml template + stage/transition gates, plus the big-project layer (project-state.schema.json parses, bigproject PROJECT.yaml template present) |
 | error-handling | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/error-handling.js` | Error handling patterns are properly defined |
 | part-numbering | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/part-numbering.js` | Multi-part agent files have correct numbering |
 | quick-fix-path | `cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/quick-fix-path.js` | Quick-fix (lite mode) workflow path is valid |
@@ -34,7 +34,9 @@ cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/workflow-state-schema.js
 
 **Success criteria:**
 - Exit code 0
-- All WORKFLOW_STATE.yaml files follow schema
+- WORKFLOW_STATE.yaml template + transition gates present
+- Big-project layer intact: `schemas/project-state.schema.json` parses and
+  `skills/bigproject/SKILL.md` contains a `PROJECT.yaml` template
 
 **On failure:**
 - Issue: Invalid WORKFLOW_STATE.yaml structure

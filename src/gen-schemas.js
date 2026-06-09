@@ -35,7 +35,9 @@ const workflowStateSchema = {
         "stage": { "enum": ["requirements", "planning", "execution", "completion"] },
         "phase": { "type": ["number", "string", "null"] },
         "owner": { "type": "string", "description": "Current agent responsible" },
-        "status": { "enum": ["active", "paused", "completed", "blocked"] }
+        "status": { "enum": ["active", "paused", "completed", "blocked"] },
+        "parent_doc_id": { "type": "string", "description": "Project ID this phase workflow belongs to (set by bigproject; absent for standalone workflows)" },
+        "phase_number": { "type": ["number", "null"], "description": "1-based phase index within the parent project (set by bigproject; absent for standalone workflows)" }
       },
       "required": ["stage", "owner", "status"]
     },

@@ -264,3 +264,32 @@ All must pass before workflow completion:
 - [ ] IMPLEMENTATION.md written
 - [ ] Learnings extracted to .shinchan-docs/learnings.md
 - [ ] Action Kamen final review passed
+
+---
+
+## Big Project Layer (`/team-shinchan:bigproject`)
+
+For large-scale work (3+ phases / 20+ files / 3+ domains / multi-session), Himawari
+**decomposes** the project into phases and the `bigproject` skill runs **each phase as its
+own full Stage 1–4 workflow** (the same S1→S2→S3→S4 gates above, once per phase). The skill
+drives the loop on the **main thread** because each phase's Stage-1 interview needs
+`AskUserQuestion`, which a sub-agent cannot call — so Himawari only produces the plan.
+
+**Layout** (flat siblings; the parent dir holds only `PROJECT.yaml`, which the
+`*/WORKFLOW_STATE.yaml` globs ignore):
+
+```
+.shinchan-docs/{PROJECT_ID}/PROJECT.yaml                  # parent (schemas/project-state.schema.json)
+.shinchan-docs/{PROJECT_ID}-phase-1/WORKFLOW_STATE.yaml   # child = a normal start workflow
+.shinchan-docs/{PROJECT_ID}-phase-1/REQUESTS.md / PROGRESS.md / RETROSPECTIVE.md / …
+.shinchan-docs/{PROJECT_ID}-phase-2/...
+```
+
+- Child phase workflows carry `current.parent_doc_id` + `current.phase_number` so they can be
+  linked back to the project (both optional — absent on standalone workflows).
+- One phase is `active` at a time, so the workflow guard's most-recent-mtime selector always
+  targets the current phase.
+- `/team-shinchan:resume` lists projects as a unit (`P#`) and re-enters the phase loop at the
+  first phase that is not `complete`.
+- Project completion aggregates every phase's RETROSPECTIVE.md into
+  `.shinchan-docs/{PROJECT_ID}/PROJECT_RETROSPECTIVE.md` and runs a final cross-phase AK pass.

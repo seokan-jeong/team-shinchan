@@ -12,15 +12,26 @@ Resume a paused/interrupted workflow by loading saved state and delegating to th
 
 If DOC_ID not provided:
 
+**Big projects (nested bigproject):**
+Scan `.shinchan-docs/*/PROJECT.yaml`, filter `current.status: active|paused|blocked`.
+For each, collect `project_id`, `title`, `current.active_phase`, and the phase count from
+`phases[]`. These are resumed as a **unit** (see Step 0.5).
+
 **Active/Paused workflows:**
 Scan `.shinchan-docs/*/WORKFLOW_STATE.yaml` (exclude `archived/` subfolder), filter
-`status: active|paused`, display list.
+`status: active|paused`. **Suppress any workflow that is a project child** — i.e. its
+`current.parent_doc_id` is set, or its DOC_ID matches `{project_id}-phase-*` for a project
+listed above — so phases don't appear twice.
 
 **Archived workflows:**
 Scan `.shinchan-docs/archived/*/*/WORKFLOW_STATE.yaml`, collect all entries.
 
 Display combined output:
 ```
+Projects:
+  P1. {project_id} — {title} (phase {active_phase}/{total}, {status})
+  ...
+
 Active/Paused:
   1. {DOC_ID} ({status}, {stage})
   ...
@@ -30,7 +41,21 @@ Archived:
   ...
 ```
 
-If both lists empty: suggest `/team-shinchan:start`.
+If all lists empty: suggest `/team-shinchan:start`.
+
+## Step 0.5: Resume a Project (Conditional)
+
+**If the user selects a `P#` project entry:** resume = re-enter the `bigproject` phase loop.
+1. Read `.shinchan-docs/{project_id}/PROJECT.yaml`.
+2. Find the first phase with `status != complete` (in `execution_order` if present, else by `n`).
+3. If that phase's child workflow already exists and is mid-flight
+   (`.shinchan-docs/{project_id}-phase-{n}/WORKFLOW_STATE.yaml` with `status` active/paused),
+   resume **that child** via Steps 1–5 below (using its DOC_ID), then return to the loop.
+   Otherwise start the phase fresh per `skills/bigproject/SKILL.md` Step 5.
+4. Continue executing `bigproject` Step 5 (phase loop) and Step 6 (completion) on the main
+   thread from that phase onward. Do NOT delegate the whole project to a sub-agent.
+
+Standalone (non-project) selections continue with Steps 1–5 unchanged.
 
 **If user selects an archived entry:**
 1. Move `.shinchan-docs/archived/{YYYY-MM}/{DOC_ID}/` → `.shinchan-docs/{DOC_ID}/`

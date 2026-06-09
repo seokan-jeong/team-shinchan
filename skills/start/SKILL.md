@@ -8,6 +8,26 @@ user-invocable: true
 
 **When this skill is invoked, execute immediately. Do not explain.**
 
+## Injected Context (bigproject phase mode)
+
+This skill is normally invoked standalone. It can also be **driven by the `bigproject`
+phase loop** (`skills/bigproject/SKILL.md` Step 5), which executes these same steps on the
+main thread with the following inputs **already resolved**:
+
+- `DOC_ID` — pre-set to `{PROJECT_ID}-phase-{N}`. **Use it verbatim; do NOT generate one.**
+- `parent_doc_id` — the owning `{PROJECT_ID}`.
+- `phase_number` — the 1-based phase index.
+- `PHASE_CONTEXT` — project title + this phase's title/domain/acceptance criteria +
+  summaries of completed phases.
+
+**When invoked with injected context:**
+- **Skip Step 0 entirely** (expiry/archive is the project's concern, run once by bigproject).
+- In Step 1, use the injected `DOC_ID` and write `parent_doc_id` / `phase_number` into the
+  state (see Step 1).
+- In Step 2A, pass `PHASE_CONTEXT` to Misae so the interview is scoped to this phase.
+
+When invoked standalone (no injected context), behave exactly as before.
+
 ## Step 0: Expire and Archive Stale Workflows
 
 Read `workflow_expiry_days` from:
@@ -45,7 +65,7 @@ Use `/team-shinchan:resume` to switch the guard target to a different workflow.
 
 ## Step 1: Setup (Folder + State)
 
-1. **DOC_ID**: If args contains ISSUE-xxx use it; else `{branch}-{next_index}` from git branch + ls. Truncate + warn if args > 2000 chars.
+1. **DOC_ID**: If a `DOC_ID` was **injected** (bigproject phase mode), use it verbatim and skip generation. Otherwise: if args contains ISSUE-xxx use it; else `{branch}-{next_index}` from git branch + ls. When computing `{next_index}`, **ignore directories matching `*-phase-*`** — those belong to a bigproject and are not standalone workflows. Truncate + warn if args > 2000 chars.
 2. `mkdir -p .shinchan-docs/{DOC_ID}`
 3. Create WORKFLOW_STATE.yaml:
 
@@ -59,6 +79,9 @@ current:
   phase: null
   owner: misae
   status: active
+  # parent_doc_id / phase_number: ONLY when injected by bigproject phase mode; omit standalone.
+  # parent_doc_id: "{parent_doc_id}"
+  # phase_number: {phase_number}
   interview: { step: 0, collected_count: 0, last_question: null }
   ak_gate:
     requirements:
@@ -151,6 +174,7 @@ for turn in 1..hard_cap:
     prior_answers: {answers}
     user_request: {args}
     vision_context: {vision_context or 'None'}
+    phase_context: {PHASE_CONTEXT or 'None'}   # bigproject phase mode: scope questions to this phase
     skip_threshold: {skip_threshold}
     done_threshold: {done_threshold}
     hard_cap: {hard_cap}

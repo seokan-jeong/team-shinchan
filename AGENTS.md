@@ -25,7 +25,7 @@
 | aichan | specialist | Frontend Specialist for UI/UX development | sonnet | Read, Write, Edit... | 30 | acceptEdits |
 | bo | execution | Execution PO that coordinates domain specialist... | sonnet | Read, Write, Edit... | 80 | acceptEdits |
 | buriburi | specialist | Backend Specialist for API and database develop... | sonnet | Read, Write, Edit... | 30 | acceptEdits |
-| himawari | orchestration | Master Orchestrator for large-scale complex pro... | opus | Read, Glob, Grep... | 30 | plan |
+| himawari | orchestration | Master Orchestrator for large-scale complex pro... | opus | Read, Glob, Grep... | 15 | plan |
 | hiroshi | advisory | Senior Advisor (Oracle) providing strategic adv... | opus | Read, Glob, Grep... | 15 | plan |
 | kazama | execution | Autonomous Deep Worker for complex long-running... | opus | Read, Write, Edit... | 50 | acceptEdits |
 | masao | specialist | DevOps Specialist for infrastructure and deploy... | sonnet | Read, Write, Edit... | 25 | acceptEdits |

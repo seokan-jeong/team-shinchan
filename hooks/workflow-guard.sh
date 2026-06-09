@@ -20,6 +20,12 @@ if [ ! -d "$DOCS_DIR" ]; then
 fi
 
 # Find most recent WORKFLOW_STATE.yaml with status: active
+# Note on bigproject: a big project's phase workflows live at flat siblings
+# .shinchan-docs/{PROJECT_ID}-phase-N/WORKFLOW_STATE.yaml — these ARE normal workflows and
+# are correctly matched by the single-level glob below and guarded. The parent project file
+# .shinchan-docs/{PROJECT_ID}/PROJECT.yaml has a different filename, so it is intentionally
+# NOT matched here (it is not a workflow). bigproject runs one phase active at a time, so the
+# most-recent-mtime selector resolves to the current phase.
 ACTIVE_YAML=""
 LATEST_TS=""
 for yaml in "$DOCS_DIR"/*/WORKFLOW_STATE.yaml; do

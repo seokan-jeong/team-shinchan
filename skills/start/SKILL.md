@@ -149,16 +149,37 @@ Store result as `{vision_context}`. Skip if no visual input.
 ```
 # Read .shinchan-config.yaml if present (project root), else use defaults.
 config = read_yaml(".shinchan-config.yaml") if file_exists else {}
-skip_threshold = config.get("interview.skip_threshold", 0.85)
-done_threshold = config.get("interview.done_threshold", 0.75)
-hard_cap       = config.get("interview.hard_cap", 10)
+skip_threshold    = config.get("interview.skip_threshold",    0.85)
+done_threshold    = config.get("interview.done_threshold",    0.75)
+hard_cap          = config.get("interview.hard_cap",          10)
+gate_loop_enabled = config.get("interview.gate_loop_enabled", True)        # NEW
+gate_threshold    = config.get("interview.gate_threshold",    0.8)         # NEW
+stagnation_delta  = config.get("interview.stagnation_delta",  0.05)        # NEW
+stagnation_window = config.get("interview.stagnation_window", 2)           # NEW
+soft_cap          = config.get("interview.soft_cap",          6)           # NEW
+ak_double_check   = config.get("interview.ak_double_check",   False)       # NEW
+project_type      = config.get("interview.project_type",      "greenfield")# NEW
 
-# Sanity check (FR-6): if invalid, silently fall back to defaults
+# Sanity check (FR-6, HR-2, HR-3): invalid values → fall back to defaults + warn
+warnings = []
 if not (0 < done_threshold < skip_threshold <= 1.0) or not (1 <= hard_cap <= 50):
-  print("⚠️ [start] invalid interview thresholds in .shinchan-config.yaml — using defaults (0.85 / 0.75 / 10)")
-  skip_threshold = 0.85
-  done_threshold = 0.75
-  hard_cap       = 10
+  warnings.append("skip/done/hard_cap out of range"); skip_threshold = 0.85; done_threshold = 0.75; hard_cap = 10
+if gate_threshold <= done_threshold:
+  warnings.append("gate_threshold must be > done_threshold"); gate_threshold = 0.8
+if soft_cap >= hard_cap:
+  warnings.append("soft_cap must be < hard_cap"); soft_cap = 6
+if stagnation_window < 2:
+  warnings.append("stagnation_window must be >= 2 (HR-3 DoS protection)"); stagnation_window = 2
+if stagnation_delta <= 0:
+  warnings.append("stagnation_delta must be > 0"); stagnation_delta = 0.05
+if project_type not in ("brownfield", "greenfield"):
+  warnings.append("project_type must be brownfield|greenfield"); project_type = "greenfield"
+if warnings:
+  print("⚠️ [start] .shinchan-config.yaml validation errors — using defaults: " + "; ".join(warnings))
+
+# Write resolved gate_loop_enabled + gate_threshold into WORKFLOW_STATE.current so
+# mechanical-check Check D can enforce the gate without reading .shinchan-config.yaml.
+write_to_state({"current.gate_loop_enabled": gate_loop_enabled, "current.gate_threshold": gate_threshold})
 ```
 
 **2A.1 — Interview loop (clarity-gated, hard_cap is the only ceiling):**
@@ -178,6 +199,13 @@ for turn in 1..hard_cap:
     skip_threshold: {skip_threshold}
     done_threshold: {done_threshold}
     hard_cap: {hard_cap}
+    gate_loop_enabled: {gate_loop_enabled}
+    gate_threshold: {gate_threshold}
+    stagnation_delta: {stagnation_delta}
+    stagnation_window: {stagnation_window}
+    soft_cap: {soft_cap}
+    ak_double_check: {ak_double_check}
+    project_type: {project_type}
     Return the interview-question JSON block per agents/misae.md contract.")
 
   Parse the last ```interview-question ... ``` fenced block in result.
@@ -201,7 +229,10 @@ for turn in 1..hard_cap:
         - **(FR-4)** `closes_unknown` is a non-empty string ≤ 80 chars.
     (d) If status == "done":
         - `reason` is one of {"pre_interview_clear", "clarity_threshold_met",
-          "hard_cap_reached", "no_more_actionable_gaps", "user_skip_override"}.
+          "user_skip_override",
+          "stagnation_escalate", "soft_cap_escalate",
+          "no_more_actionable_gaps_escalate", "hard_cap_escalate",   # gate_loop_enabled: true
+          "hard_cap_reached", "no_more_actionable_gaps"}.            # legacy (gate_loop_enabled: false)
 
     On ANY validation failure:
       Re-invoke Misae with mode=DESIGN_NEXT_QUESTION, appending to the prompt:
@@ -254,6 +285,44 @@ for turn in 1..hard_cap:
     answers.push({turn, question, answer: user_answer})
 ```
 
+**2A.1b — ESCALATE 3-way prompt (FR-3, `gate_loop_enabled: true`):**
+
+When the loop exits with an ESCALATE reason, do NOT silently proceed and do NOT loop
+forever — hand the user a 3-way choice. (`clarity_threshold_met` / `pre_interview_clear`
+/ `user_skip_override` skip this block and go straight to 2A.2.)
+
+```
+ESCALATE_REASONS = {"stagnation_escalate", "soft_cap_escalate",
+                    "no_more_actionable_gaps_escalate", "hard_cap_escalate"}
+
+while gate_loop_enabled and exit_reason in ESCALATE_REASONS:
+  current_score = parsed.clarity_score.get("weighted_overall") or parsed.clarity_score.get("overall", "?")
+  unresolved    = parsed.get("remaining_unknowns") or []
+  choice = AskUserQuestion(questions=[{
+    "question": "인터뷰가 [{exit_reason}]로 종료 기준({gate_threshold})을 충족하지 못했습니다.\n"
+                "현재 weighted_overall: {current_score} (목표 {gate_threshold})\n미해결: {unresolved}",
+    "header": "인터뷰 에스컬레이션",
+    "options": [
+      {"label": "A. 인터뷰 계속 진행", "description": "추가 질문으로 명확도를 더 끌어올립니다 (hard_cap까지)"},
+      {"label": "B. Open Questions로 기록 후 진행", "description": "미해결 항목을 REQUESTS.md에 남기고 다음 스테이지로"},
+      {"label": "C. 인터뷰 처음부터 다시", "description": "이전 답변을 초기화하고 재시작"}
+    ],
+    "multiSelect": false
+  }])
+  # HR-1 audit: persist choice + score
+  write_to_state({"current.interview.escalation_choice": choice})
+  append_history({"event": "escalation_prompt", "agent": "shinnosuke",
+                  "exit_reason": exit_reason, "weighted_overall": current_score, "escalation_choice": choice})
+
+  if choice == "A":      # continue — re-enter the interview loop up to hard_cap (NFR-3)
+    exit_reason = null
+    resume the 2A.1 loop from turn+1 (do NOT reset answers); re-evaluate on next done
+  elif choice == "C":    # restart
+    answers = []; exit_reason = null; turn = 0; restart the 2A.1 loop
+  else:                  # B — fall through to 2A.2 with exit_reason intact (Open Questions written)
+    break
+```
+
 **2A.2 — Finalize draft (Misae writes REQUESTS.md + runs AK review):**
 
 ```typescript
@@ -264,10 +333,15 @@ Task(subagent_type="team-shinchan:misae", model="sonnet",
   user_request: ${args}
   vision_context: ${vision_context or 'None'}
   exit_reason: ${exit_reason || 'clarity_threshold_met'}
-  Per agents/misae.md: write REQUESTS.md (include ## Open Questions if exit_reason in {hard_cap_reached, no_more_actionable_gaps}), run mechanical check, run AK review loop (max 2 retries). Return finalize-result JSON block.`)
+  gate_loop_enabled: ${gate_loop_enabled} | ak_double_check: ${ak_double_check}
+  Per agents/misae.md: run the materiality audit (step 0, only when exit_reason == clarity_threshold_met and gate_loop_enabled), write REQUESTS.md (include ## Open Questions if exit_reason in the ESCALATE/legacy-gap set), run mechanical check, run AK review loop (max 2 retries). Return finalize-result JSON block.`)
 ```
 
 Parse the `finalize-result` JSON block.
+- If `next == "materiality_reject"` (gate-loop materiality audit failed) → re-enter the
+  2A.1 interview loop from turn+1 with `failed_item` re-added to `unresolved_unknowns`
+  (do NOT reset prior answers), then re-run 2A.2. This keeps the gate honest: a PASS score
+  is necessary but not sufficient — material ambiguity sends it back.
 - If `ak_verdict == "APPROVED"` → continue to 2A.3.
 - If `ak_verdict == "ESCALATED"` → show rejection_reasons to user and stop (user decides next step per Misae Phase E-4).
 
@@ -329,6 +403,43 @@ Task(subagent_type="team-shinchan:shinnosuke", model="opus",
 
   Nene's summary: {nene_result_summary}")
 ```
+
+## Stage 3 (Executing): DAG-Driven Dispatch via dag-executor
+
+The `executing` stage drives implementation as a topologically-ordered task DAG using
+`src/dag-executor.js` instead of an ad-hoc sequential loop (FR-9). The
+`requirements → planning → executing → done` stage machine is preserved; only the executing
+stage's dispatch logic changes.
+
+Protocol for the executing stage:
+
+1. Parse the plan's task DAG (`src/dag-executor.js` `parsePlan()` reads the six-field schema —
+   `id / depends_on / touches / verify / estimate / scope` — from PLAN.md or a structured object).
+2. `topoSort()` orders tasks by `depends_on` and **throws on a circular dependency before any
+   task is dispatched** (no partial execution).
+3. `buildConflictGraph()` + `connectedComponents()` compute the static conflict graph from
+   `touches[]`: tasks in the same component serialize; disjoint components dispatch in parallel
+   up to `executor.concurrency_cap` (`.shinchan-config.yaml`, default 4) — mapped onto the
+   Workflow `parallel()` primitive.
+4. Each task runs through the per-task **verify gate**: its `verify` command must exit 0 to be
+   marked `DONE`; an absent/NL-only `verify` is `FAILED` (never a silent `SKIP`), and downstream
+   dependents become `BLOCKED`.
+5. On task error the **recovery ladder** branches by error type (transient → retry ≤ 3;
+   deterministic → local-patch; scope-drift → replan, bounded) with counters persisted to
+   WORKFLOW_STATE (no infinite loops, survives restart).
+6. After all per-task gates pass, the **post-merge integration test** (`plan_meta.integration_test`)
+   runs; if absent it warns but does not block.
+7. The **completion gate** (`evaluateCompletionGate()`) enforces strict ALL-PASS — zero
+   `FAILED`/`SKIP`, all `DONE`, integration passing — and **blocks the executing → done stage
+   transition** otherwise.
+
+**Serial-fallback / escape hatch (high coupling)**: when the conflict graph collapses to a
+single connected component (every task shares a resource), execution is fully serial and the
+executor logs an NFR-5 warning (`serial_fallback: true` in `.shinchan-config.yaml`). This mirrors
+the `gate_loop_enabled`-style escape so operators can inspect plan granularity rather than chase
+phantom parallelism.
+
+See `src/dag-executor.js` and `docs/dag-executor.md` for the module contract.
 
 ## Prohibited
 

@@ -87,3 +87,28 @@ cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/quick-fix-path.js
 - Issue: Quick-fix path references invalid stage or agent
 - Severity: HIGH
 - Fix: Update lite mode workflow to match current agent structure
+
+### Check 5: DAG Executor Schema Coverage
+
+The executing stage is driven by `src/dag-executor.js` over a task DAG. Each PLAN.md task MUST
+carry the six DAG fields (`id`, `depends_on`, `touches`, `verify`, `estimate`, `scope`) and the
+plan SHOULD declare `integration_test` metadata. The executor enforces a per-task verify gate and
+a strict ALL-PASS completion gate before the `executing → done` transition.
+
+```bash
+cd "${CLAUDE_PLUGIN_ROOT}" && node --test tests/dag-executor.test.js
+```
+
+**Success criteria:**
+- Exit code 0
+- dag-executor unit suite passes (topological order, conflict serialization, verify gate,
+  recovery ladder, completion-gate blocking, counter persistence, cycle detection)
+- `src/dag-executor.js` exposes `parsePlan`, `topoSort`, `buildConflictGraph`,
+  `connectedComponents`, `evaluateVerify`, `recoveryStep`, `evaluateCompletionGate`,
+  `runIntegration`, `executePlan`
+
+**On failure:**
+- Issue: DAG schema or executor gate regressed
+- Severity: HIGH
+- Fix: Restore the six-field schema in PLAN.md and the dag-executor module contract (see
+  `docs/dag-executor.md`)

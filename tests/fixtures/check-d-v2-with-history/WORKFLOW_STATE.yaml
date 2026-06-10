@@ -1,11 +1,12 @@
 version: 2
 doc_id: "check-d-v2-with"
 clarity_score:
-  goal_clarity: 0.8
-  constraint_clarity: 0.7
-  success_criteria: 0.6
-  overall: 0.70
+  goal_clarity: 0.9
+  constraint_clarity: 0.85
+  success_criteria: 0.8
+  overall: 0.85
+  weighted_overall: 0.85
   history:
     - turn: 0
       source: pre_interview
-      overall: 0.70
+      overall: 0.85

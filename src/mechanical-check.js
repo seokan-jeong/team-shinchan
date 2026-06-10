@@ -274,6 +274,42 @@ function checkD(requestsPath) {
     // We intentionally do NOT add to errors[] so AC6 holds.
   }
 
+  // ── Extended Check D: clarity gate (interview-metrics-researc-001 FR-7) ──────
+  // Only active when version >= 2 and gate_loop_enabled is not explicitly false.
+  // NFR-2: version 1 docs must NEVER hard-fail here.
+  if (version < 2) return errors;
+  // The gate evaluates a complete clarity_score block. If history is missing, that
+  // (already-reported) defect is the primary error — don't pile a gate error on top.
+  if (!present) return errors;
+
+  // gate_loop_enabled is resolved by skills/start/SKILL.md from .shinchan-config.yaml
+  // and written into WORKFLOW_STATE. mechanical-check is $0 static — it reads only its
+  // sibling WORKFLOW_STATE, never a second file. Absent flag is treated as enabled (the
+  // version < 2 guard above already protects all legacy workflows).
+  const gateLoopDisabled = /gate_loop_enabled:\s*false\b/.test(wsHead);
+  if (gateLoopDisabled) return errors; // feature flag off → skip gate check (NFR-2)
+
+  // gate_threshold (fallback 0.8 — the default in .shinchan-config.yaml)
+  const gateThreshMatch = wsHead.match(/gate_threshold:\s*([\d.]+)/);
+  const gateThreshold = gateThreshMatch ? parseFloat(gateThreshMatch[1]) : 0.8;
+
+  // Clarity score: prefer weighted_overall, fall back to unweighted overall.
+  const weightedMatch = wsHead.match(/^\s+weighted_overall:\s*([\d.]+)/m);
+  const overallMatch  = wsHead.match(/^\s+overall:\s*([\d.]+)/m);
+  const score = weightedMatch
+    ? parseFloat(weightedMatch[1])
+    : (overallMatch ? parseFloat(overallMatch[1]) : null);
+
+  if (score === null) return errors; // no score field → can't evaluate; pass vacuously
+
+  if (score < gateThreshold) {
+    const usedKey = weightedMatch ? 'weighted_overall' : 'overall';
+    errors.push(
+      'Check D: clarity gate not met (' + usedKey + ' ' + score +
+      ' < gate_threshold ' + gateThreshold + ') — FR-7'
+    );
+  }
+
   return errors;
 }
 

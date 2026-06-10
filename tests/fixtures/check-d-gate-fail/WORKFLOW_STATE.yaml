@@ -1,0 +1,14 @@
+version: 2
+doc_id: "check-d-gate-fail"
+clarity_score:
+  goal_clarity: 0.7
+  constraint_clarity: 0.6
+  success_criteria: 0.6
+  overall: 0.75
+  history:
+    - turn: 0
+      source: pre_interview
+      overall: 0.75
+current:
+  gate_loop_enabled: true
+  gate_threshold: 0.8

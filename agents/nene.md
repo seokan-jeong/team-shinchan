@@ -294,6 +294,54 @@ Sprint-Contract (FR-3) uses these as the basis for AK's TESTABLE/VAGUE/UNVERIFIA
 **Violation**: If an AC violates any rule, AK will mark it VAGUE or UNVERIFIABLE in Sprint-Contract review.
 Do not ship PROGRESS.md with known violations — revise before outputting PLANNING_COMPLETE.
 
+## DAG Plan Schema (for dag-executor mode)
+
+When the orchestrator requests a **DAG plan** (consumed by `src/dag-executor.js`), emit each
+task as a YAML object carrying ALL SIX fields. The executor parses `touches[]` to build a
+static conflict graph and runs the `verify` command as a per-task gate, so these fields are
+mandatory, not decorative.
+
+| Field | Meaning |
+|-------|---------|
+| `id` | Unique string identifier within the plan |
+| `depends_on` | List of task `id`s that must be `DONE` before this task starts (`[]` if none) |
+| `touches` | List of file paths / named resources this task reads or writes — the conflict graph serializes any two tasks whose `touches[]` intersect |
+| `verify` | An **executable shell command** that exits 0 iff the task is complete. A natural-language-only `verify` (or a trivially-passing one like `true` / `exit 0`) is classified `weak` and **auto-FAILs at the completion gate** — never write prose here |
+| `estimate` | Human-readable time estimate, e.g. `"45m"` |
+| `scope` | Free-text change-boundary description; note which AC(s) the task satisfies |
+
+Top-level plan metadata SHOULD declare `integration_test` (the FR-7 post-merge integration
+command). Emit the task list inside a fenced ```yaml block under a `tasks:` key so
+`parsePlan()` can read it directly from PLAN.md.
+
+### Granularity Rule (the planner owns granularity)
+
+**One task = one cohesive change verifiable by a single command.** This is the binding rule.
+Stated canonically: "one task = one cohesive change verifiable by a single command".
+Two failure modes are BOTH prohibited:
+
+- **Over-splitting** — 5-minute micro-slices are explicitly prohibited; serialization and
+  coordination overhead then exceeds any parallel gain.
+- **Over-coupling** — bundling multiple unrelated files into one task destroys parallelism and
+  inflates the `touches[]` set so the conflict graph needlessly serializes siblings.
+
+Set `touches[]` accurately: tasks that genuinely share a file SHOULD share that entry (the
+executor will correctly serialize them); tasks that do not share files MUST NOT list overlapping
+`touches[]`, so the conflict graph can run them in parallel. **Automatic task merging by the
+executor is prohibited** — granularity is the planner's decision, made here in the plan.
+
+### Example task
+
+```yaml
+tasks:
+  - id: T1-core
+    depends_on: []
+    touches: ["src/foo.js"]
+    verify: "node --test tests/foo.test.js"
+    estimate: "45m"
+    scope: "Implement foo() core; satisfies AC-3"
+```
+
 ## Plan Quality Standards
 
 - 80%+ claims with file/line references

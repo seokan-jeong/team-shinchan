@@ -1,0 +1,13 @@
+version: 2
+doc_id: "check-d-gate-disabled"
+clarity_score:
+  goal_clarity: 0.5
+  constraint_clarity: 0.5
+  success_criteria: 0.5
+  overall: 0.50
+  history:
+    - turn: 0
+      source: pre_interview
+      overall: 0.50
+current:
+  gate_loop_enabled: false

@@ -29,6 +29,8 @@ src/*
 !src/slop-cleaner.js
 !src/token-estimator.js
 !src/cost-estimator.js
+!src/option-metrics.js
+!src/dag-executor.js
 !src/hook-matcher.js
 !src/statusline/
 !src/statusline/index.js

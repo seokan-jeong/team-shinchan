@@ -1,0 +1,15 @@
+version: 2
+doc_id: "check-d-gate-pass"
+clarity_score:
+  goal_clarity: 0.9
+  constraint_clarity: 0.85
+  success_criteria: 0.82
+  overall: 0.856
+  weighted_overall: 0.856
+  history:
+    - turn: 0
+      source: pre_interview
+      overall: 0.856
+current:
+  gate_loop_enabled: true
+  gate_threshold: 0.8

@@ -66,6 +66,69 @@ Input from parent: `turn` (1부터 시작), `prior_answers` (list of `{turn, que
 `user_request`, optional `vision_context`, `skip_threshold` (default 0.85),
 `done_threshold` (default 0.75), `hard_cap` (default 10).
 
+Gate-Loop params (interview-metrics-researc-001): `gate_loop_enabled` (default true),
+`gate_threshold` (default 0.8), `stagnation_delta` (default 0.05),
+`stagnation_window` (default 2), `soft_cap` (default 6),
+`ak_double_check` (default false), `project_type` (default greenfield).
+
+##### Option Generation Pipeline (4-step) — interview-metrics-researc-002 Phase 1
+
+When you design a question's `options` (Step 2 below), do NOT generate A/B/C choices in a
+single pass. The current single-pass approach causes diversity collapse (Diversity Collapse,
+EMNLP 2025: schema-constrained generation suppresses diversity) and exposes un-calibrated
+RLHF-overconfident scores. Generate options through this **4-step pipeline** instead:
+
+1. **Structure-free generation** (FR-1). Generate candidate options WITHOUT any schema
+   constraints. The generation prompt MUST NOT contain `A:`, `B:`, `C:`, enumeration markers,
+   or an option-count target. A/B/C labels are applied ONLY in the separate formatting step
+   (Step 2's JSON assembly), never during generation.
+
+2. **Verbalized sampling + weight validation** (FR-2, HR-6). Produce N candidates PLUS a
+   relative weight vector (e.g. `[0.45, 0.35, 0.20]`). Weights are ranking signals only —
+   NEVER present them to users as calibrated confidence. Validate via
+   `validateWeights()` in `src/option-metrics.js`: sum ∈ [0.98, 1.02], no negatives,
+   length = N. Malformed → uniform fallback + a one-line stderr warning (NEVER written to
+   WORKFLOW_STATE).
+
+3. **Missing-alternative critic** (FR-3, HR-7). Ask: "Is there a substantially better
+   alternative NOT in this set?" judged on three dimensions — coverage, alternativeness (is
+   it genuinely different?), and evidence quality. "No better alternative exists" is a
+   **first-class valid response**: do NOT retry, do NOT treat it as an error — the set
+   proceeds unchanged. A surfaced alternative is appended to the candidate set BEFORE
+   calibration (`applyMissingAlternativeCritic()`).
+
+4. **DINCO calibration** (FR-4, HR-1, HR-9). Each option receives an INDEPENDENT score; the
+   full set is then normalized using NLI-weighted + max-clamped normalization. Simple
+   summation normalization is PROHIBITED (it degrades ECE). Options MUST be fully enumerated
+   before any calibration score is computed (AC-6). The K-bound truncation
+   (`fierce_panel_k_max`, default 6) is applied **AFTER** the missing-alternative critic pass
+   — not before — so the critic-appended option is never silently dropped (NFR-4, HR-9).
+   **Raw self-confidence MUST NEVER be written anywhere** — not to WORKFLOW_STATE, not to
+   logs, not to debug output. Surfacing any `raw_confidence`, `self_confidence`, or
+   `uncalibrated_score` value is a hard bug (FR-4, HR-1). Only DINCO-normalized values leave
+   the pipeline.
+
+**Per-option code evidence (FR-5)**: each generated option carries an `evidence` field — a
+file path / function reference where the answer is derivable from the codebase, or
+`evidence: inferred` when it cannot be grounded. At least one option per turn should be
+code-grounded.
+
+**fierce-option-panel is DEFAULT-ON** (FR-10.2). The `fierce-option-panel` Workflow
+(`skills/fierce-option-panel/`) runs the hardened path (diverse generators →
+SelfCheckGPT majority-vote consensus → SteerConf cautious-confidence judge → top-K) for every
+question turn. This is an **explicit, intentional exception to the fierce-\* opt-in
+convention** (every other fierce-* skill is opt-in), made under quality-over-cost. Opt OUT
+via `.shinchan-config.yaml` → `interview.fierce_option_panel: false` (FR-10.3), which runs the
+basic B-path (steps 1-4 above) instead. Record `current.interview.option_source`
+(`fierce_panel` | `basic` | `basic_fallback`) per turn (FR-6.4). On any panel failure, fall
+back to the basic B-path (`basic_fallback`) — never block a turn (NFR-3). See
+`docs/fierce-option-panel.md`.
+
+**Transferability gap (NFR-5)**: the calibration metrics (ECE/AUROC in
+`src/option-metrics.js`) transfer from factual-QA literature via a proxy (user's eventual
+option selection = ground truth) and are unvalidated for design options. Treat the gating
+bars as pragmatic targets, not universal guarantees.
+
 ##### Step 0 — Pre-interview scoring (turn == 1 only, NFR-3, AC1, AC7)
 
 When `turn == 1` AND `prior_answers == []`, BEFORE designing any question:
@@ -105,14 +168,42 @@ When `turn == 1` AND `prior_answers == []`, BEFORE designing any question:
 1. Read context (codebase, WORKFLOW_STATE.yaml) — 1-2 Read/Glob/Grep calls minimum.
 2. Analyze prior answers; pick ONE item from `unresolved_unknowns` to address this turn.
 3. Decide whether to ask or exit:
-   - Exit (`status: done`) IFF: `clarity_score.overall ≥ done_threshold` AND
-     `unresolved_unknowns == []`. Use `reason: clarity_threshold_met`.
-   - Hard-cap exit: if `turn > hard_cap`, emit `status: done, reason: hard_cap_reached`.
+
+   **If `gate_loop_enabled: false`** (legacy path — preserves prior behaviour):
+   - Exit IFF `clarity_score.overall ≥ done_threshold` AND `unresolved_unknowns == []` →
+     `reason: clarity_threshold_met`.
+   - Hard-cap exit: if `turn > hard_cap` → `reason: hard_cap_reached`.
    - Otherwise ask (Step 2).
+
+   **If `gate_loop_enabled: true`** (Gate-Loop — default). First update the stagnation
+   counter (turn ≥ 2): `delta = weighted_overall − prev_turn.weighted_overall`; if
+   `delta < stagnation_delta` increment `stagnation_counter`, else reset it to 0. Then
+   evaluate in STRICT priority order:
+
+   1. **PASS** — `weighted_overall ≥ gate_threshold` AND `unresolved_unknowns == []`
+      AND the materiality audit (FINALIZE_DRAFT Phase B-pre, FR-4) will run. Emit
+      `status: done, reason: clarity_threshold_met`. (If the later materiality audit
+      REJECTS, the parent re-invokes you with the failed item back in
+      `unresolved_unknowns` — you do NOT pre-run it here.)
+   2. **ESCALATE — stagnation** — `stagnation_counter ≥ stagnation_window` →
+      `status: done, reason: stagnation_escalate`.
+   3. **ESCALATE — soft_cap** — `turn ≥ soft_cap` AND PASS not met →
+      `status: done, reason: soft_cap_escalate`. (NOT a hard ceiling — if the user later
+      chooses "continue", the parent re-enters the loop up to `hard_cap`.)
+   4. **ESCALATE — no_more_actionable_gaps** — `unresolved_unknowns == []` AND
+      `weighted_overall < gate_threshold` → `status: done,
+      reason: no_more_actionable_gaps_escalate`. (Replaces the old silent pass.)
+   5. **ESCALATE — hard_cap** — `turn > hard_cap` → `status: done,
+      reason: hard_cap_escalate`. (Replaces the old silent pass; hard_cap stays the
+      absolute safety net.)
+   6. **Continue** — none of the above → ask (Step 2).
+
 4. Update WORKFLOW_STATE.yaml:
-   - `current.interview` block (step, collected_count, last_question — max 30 chars).
+   - `current.interview` block (step, collected_count, last_question — max 30 chars,
+     and `stagnation_counter` when `gate_loop_enabled: true`).
    - Append new `clarity_score.history` entry with `source: post_answer` (turn ≥ 2 only —
-     turn 1's history entry was already written in Step 0).
+     turn 1's history entry was already written in Step 0). Include `weighted_overall`
+     (turn ≥ 1) when `gate_loop_enabled: true`.
 5. Emit FR-5 prose rationale ONE LINE before the JSON block:
    ```
    Clarity 0.55 (goal=0.7, constraint=0.3, success=0.6). Asking to lift constraint_clarity: "Latency target (p50/p95/p99 ms)".
@@ -138,27 +229,34 @@ Return your response ending with a **single fenced JSON block** tagged `intervie
 }
 ```
 
-Or, if the clarity gate is met (`overall ≥ done_threshold` AND `unresolved_unknowns == []`):
+Or, if the clarity gate is met (PASS — `weighted_overall ≥ gate_threshold` AND `unresolved_unknowns == []`):
 
 ```interview-question
-{"status": "done", "reason": "clarity_threshold_met", "clarity_score": {"goal_clarity": 0.8, "constraint_clarity": 0.85, "success_criteria": 0.75, "overall": 0.80}}
+{"status": "done", "reason": "clarity_threshold_met", "clarity_score": {"goal_clarity": 0.9, "constraint_clarity": 0.85, "success_criteria": 0.8, "overall": 0.85, "weighted_overall": 0.85}}
 ```
 
-Or, if `unresolved_unknowns == []` BUT `overall < done_threshold` (HR-3 — no more
-actionable gaps):
+Gate-Loop ESCALATE variants (`gate_loop_enabled: true`) — emit the matching `reason`:
+
+```interview-question
+{"status": "done", "reason": "stagnation_escalate", "clarity_score": {...}, "weighted_overall": 0.72, "stagnation_counter": 2, "remaining_unknowns": ["..."]}
+{"status": "done", "reason": "soft_cap_escalate", "clarity_score": {...}, "weighted_overall": 0.74, "remaining_unknowns": ["..."]}
+{"status": "done", "reason": "no_more_actionable_gaps_escalate", "clarity_score": {...}, "weighted_overall": 0.72, "residual_gap": "..."}
+{"status": "done", "reason": "hard_cap_escalate", "clarity_score": {...}, "weighted_overall": 0.71, "remaining_unknowns": ["..."]}
+```
+
+Legacy variants (`gate_loop_enabled: false` only):
 
 ```interview-question
 {"status": "done", "reason": "no_more_actionable_gaps", "clarity_score": {...}, "residual_gap": "success_criteria still 0.65 — recorded in Open Questions"}
-```
-
-Or, if `turn > hard_cap`:
-
-```interview-question
 {"status": "done", "reason": "hard_cap_reached", "clarity_score": {...}, "remaining_unknowns": ["Latency target", "Rollback plan"]}
 ```
 
 **Rules for DESIGN_NEXT_QUESTION**:
 - Return EXACTLY ONE question (never batch).
+- Generate option CONTENT via the 4-step Option Generation Pipeline above (structure-free
+  first). The `A.`/`B.`/`C.` prefixes in `options[].label` are applied ONLY here, in this
+  final JSON-assembly/formatting step — never during the structure-free generation pass (FR-1,
+  AC-1).
 - Options: 2개 이상, 질문에 필요한 만큼. "직접 입력" / "Other"는 포함하지 마라 — 부모가 자동 추가.
 - Header must include turn counter: `(Turn X)` — no projected total.
 - `targets_subscore` MUST be one of `goal_clarity | constraint_clarity | success_criteria`.
@@ -184,8 +282,11 @@ revisit topics in later turns if the gate hasn't closed.
 | 4 | 성공 기준 정의 | `success_criteria` |
 | 5+ | 남은 unresolved_unknowns 항목 (extension) | any sub-score still < done_threshold |
 
-Extension past Turn 4 is normal when `overall < done_threshold`. Hard cap (default 10)
-is the only ceiling. Soft cap is removed.
+Extension past Turn 4 is normal when the gate is not yet met. Under
+`gate_loop_enabled: true`, `soft_cap` (default 6) is an ESCALATE trigger (hands the user
+a 3-way choice), NOT a hard stop — the user may choose to continue up to `hard_cap`
+(default 10), the absolute ceiling. Under `gate_loop_enabled: false`, `hard_cap` is the
+only ceiling and there is no soft cap.
 
 **Self-check before emitting each JSON block**: "Stage=requirements. 요구사항만 수집. 코드 수정/구현 금지."
 
@@ -194,14 +295,43 @@ is the only ceiling. Soft cap is removed.
 Input from parent: `answers` (complete list of `{turn, question, answer}`),
 `user_request`, optional `vision_context`,
 optional `exit_reason` (one of: `clarity_threshold_met` | `pre_interview_clear` |
-`user_skip_override` | `hard_cap_reached` | `no_more_actionable_gaps`).
+`user_skip_override` | `stagnation_escalate` | `soft_cap_escalate` |
+`no_more_actionable_gaps_escalate` | `hard_cap_escalate` |
+`hard_cap_reached` | `no_more_actionable_gaps`).
 
 Your job:
+0. **Phase B-pre: Materiality Audit (FR-4)** — run ONLY when `exit_reason == clarity_threshold_met`
+   and `gate_loop_enabled: true`. Skip for all ESCALATE reasons (the user knowingly accepted
+   lower clarity) and for the legacy/skip exits.
+
+   **Stage 1 — Checklist filter ($0 static, NFR-1)**. Evaluate against `answers` + `user_request`:
+   - [ ] **File paths**: at least one target file/dir path is explicitly named.
+   - [ ] **Rollback**: a rollback/disable path is named (config flag, revert, undo).
+   - [ ] **Binary ACs**: at least one AC is a testable command or yes/no check.
+
+   All 3 pass → `materiality: low`; proceed to Phase C. Any fail → Stage 2 for the failing items only.
+
+   **Stage 2 — Edge-case generation (LLM; failing items only)**. For each failed item, generate
+   2 edge cases that a missing constraint would make behave differently. If ANY pair would change
+   the implementation materially → `materiality: high` → REJECT: return a `finalize-result` with
+   `next: "materiality_reject"` and the failed item; the parent re-invokes you with
+   mode=DESIGN_NEXT_QUESTION (turn+1) and that item re-added to `unresolved_unknowns`. If none
+   differ materially → `materiality: low`; proceed.
+
+   **Stage 3 — opt-in `ak_double_check: true`**. Run the AK materiality judgment at two
+   temperatures (0.2 and 0.8); on disagreement → REJECT (reason: "ak_double_check disagreement").
+   Write the verdict to `current.interview.ak_double_check_result`.
+
+   Defense rationale (HR-8): CLAMBER reports a single LLM is only ~54% accurate at binary
+   ambiguity calls — the human-readable 3-item checklist is the primary defense; edge-cases and
+   the opt-in double-check are the secondary layers.
 1. Run Phase C (Hidden Requirements Analysis — STRIDE, scalability, elicitation).
 2. Run Phase D (write `.shinchan-docs/{DOC_ID}/REQUESTS.md` with all required sections).
-3. **If `exit_reason ∈ {hard_cap_reached, no_more_actionable_gaps}`**: append a
+3. **If `exit_reason ∈ {hard_cap_reached, no_more_actionable_gaps, stagnation_escalate,
+   soft_cap_escalate, no_more_actionable_gaps_escalate, hard_cap_escalate}`**: append a
    `## Open Questions` section to REQUESTS.md listing every item that was in
-   `unresolved_unknowns` at exit, one per line:
+   `unresolved_unknowns` at exit, one per line. For the ESCALATE reasons, also record
+   the user's `escalation_choice` and the `weighted_overall` at exit (HR-1 audit trail):
    ```markdown
    ## Open Questions
 
@@ -235,6 +365,18 @@ If AK escalates (2 retries both REJECTED):
   "ak_retries": 2,
   "rejection_reasons": ["...", "...", "..."],
   "next": "user_escalation"
+}
+```
+
+If the materiality audit (step 0) REJECTS (`materiality: high` or `ak_double_check`
+disagreement), return BEFORE writing the final REQUESTS — the parent re-enters the
+interview with the failed item re-added to `unresolved_unknowns`:
+
+```finalize-result
+{
+  "materiality": "high",
+  "failed_item": "Rollback path unspecified — edge cases [flag-off mid-interview] vs [hard cutover] diverge",
+  "next": "materiality_reject"
 }
 ```
 
@@ -381,18 +523,48 @@ decisions.** The previous "informational only" framing is removed.
 
 Compute `overall` = (`goal_clarity` + `constraint_clarity` + `success_criteria`) / 3. Round to 2 decimal places.
 
+#### Weighted overall (FR-2 — `gate_loop_enabled: true`)
+
+From turn 1 onward (once `project_type` is known), also compute `weighted_overall`:
+
+| `project_type` | Goal | Constraint | Success | Context |
+|----------------|------|-----------|---------|---------|
+| `greenfield`   | 0.40 | 0.30 | 0.30 | — |
+| `brownfield`   | 0.35 | 0.25 | 0.25 | 0.15 |
+
+- `greenfield`: `weighted_overall = goal*0.40 + constraint*0.30 + success*0.30`
+- `brownfield`: `weighted_overall = goal*0.35 + constraint*0.25 + success*0.25 + context*0.15`
+
+For `brownfield`, `context_clarity` is a 4th sub-score: how well the request/answers
+demonstrate understanding of the existing codebase (specific file/function references,
+known patterns = 1.0; vague or absent = 0.0). Round `weighted_overall` to 2 decimals;
+write it top-level and into each history entry from turn ≥ 1.
+
+**Turn 0 boundary (HR-7)**: `weighted_overall` is NOT written at turn 0 — `project_type`
+is only confirmed at turn 1. Turn 0 uses the unweighted `overall` only.
+
+**Brownfield auto-detect (turn 1, `gate_loop_enabled: true`)**: if the repo has ≥1 commit
+(`git rev-list --count HEAD 2>/dev/null` — read-only) or `user_request` references existing
+files/modules, recommend `brownfield`; surface the recommendation in the Turn 1 question's
+`closes_unknown` when `project_type` is unset, and write `current.project_type` after the
+user confirms.
+
 #### Gate thresholds (read from `.shinchan-config.yaml` — FR-6)
 
 | Threshold | Default | Behaviour |
 |-----------|---------|-----------|
 | `skip_threshold` | 0.85 | Pre-interview `overall ≥ this` AND ≥3 of 5 fields present → 0 turns (status: done, reason: pre_interview_clear) |
-| `done_threshold` | 0.75 | Exit when `overall ≥ this` AND `unresolved_unknowns == []` |
-| `hard_cap` | 10 | Absolute max turns; on reach with `overall < done_threshold` → status: done, reason: hard_cap_reached |
+| `done_threshold` | 0.75 | Legacy (`gate_loop_enabled: false`): exit when `overall ≥ this` AND `unresolved_unknowns == []` |
+| `gate_threshold` | 0.8 | Gate-Loop PASS requires `weighted_overall ≥ this` (must be > done_threshold) |
+| `soft_cap` | 6 | Gate-Loop ESCALATE trigger (must be < hard_cap); not a hard stop |
+| `hard_cap` | 10 | Absolute max turns; on reach → ESCALATE (gate-loop) or reason: hard_cap_reached (legacy) |
 
 Parent (`skills/start/SKILL.md`) reads these from `.shinchan-config.yaml`
-`interview.{skip_threshold, done_threshold, hard_cap}` and passes them into your prompt.
-If invalid (e.g. `skip_threshold ≤ done_threshold`), parent falls back to defaults and you
-emit a one-line warning before your JSON block.
+`interview.{skip_threshold, done_threshold, hard_cap, gate_loop_enabled, gate_threshold,
+stagnation_delta, stagnation_window, soft_cap, ak_double_check, project_type}` and passes
+them into your prompt. If invalid (e.g. `gate_threshold ≤ done_threshold`, `soft_cap ≥
+hard_cap`, `stagnation_window < 2`), parent falls back to defaults and you emit a one-line
+warning before your JSON block.
 
 #### 5-field tie-breaker (HR-1, HR-5 — anti-retro-justification)
 
@@ -425,7 +597,9 @@ clarity_score:
   goal_clarity: 0.8
   constraint_clarity: 0.7
   success_criteria: 0.6
+  context_clarity: 0.5            # NEW — brownfield only (4th axis); absent for greenfield
   overall: 0.70
+  weighted_overall: 0.74         # NEW — project-type-weighted; present from turn 1 onward (HR-7)
   history:                        # NEW — append-only per turn (incl. turn 0)
     - turn: 0
       source: pre_interview       # one of: pre_interview | post_answer | autopilot_inferred | user_skip_override
@@ -433,18 +607,38 @@ clarity_score:
       constraint_clarity: 0.4
       success_criteria: 0.5
       overall: 0.50
+      # weighted_overall ABSENT at turn 0 — project_type not yet confirmed (HR-7)
     - turn: 1
       source: post_answer
       goal_clarity: 0.8
       constraint_clarity: 0.4
       success_criteria: 0.5
       overall: 0.57
+      weighted_overall: 0.61      # NEW — present from turn >= 1
       question_targeted: constraint_clarity
       closed_unknown: "Affected user segment"
 unresolved_unknowns:              # NEW — list you maintain; empty → eligible to exit
   - "Latency target (p50/p95/p99 ms)"
   - "Failure mode when upstream times out"
+
+# Gate-Loop bookkeeping (interview-metrics-researc-001 — gate_loop_enabled: true)
+current:
+  project_type: greenfield        # NEW — brownfield | greenfield (default greenfield)
+  interview:
+    step: 0
+    collected_count: 0
+    last_question: null
+    stagnation_counter: 0         # NEW — consecutive low-Δ turns (reset on Δ ≥ stagnation_delta)
+    escalation_choice: null       # NEW — A | B | C after an ESCALATE prompt
+    ak_double_check_result: null  # NEW — opt-in materiality double-check result
+  gate_loop_enabled: true         # NEW — resolved from .shinchan-config.yaml by skills/start; read by mechanical-check Check D
+  gate_threshold: 0.8             # NEW — written so Check D can read it ($0, no second file)
 ```
+
+**Write protocol additions (gate_loop_enabled: true):**
+- From turn 1 onward, compute and write `clarity_score.weighted_overall` (top-level current value) and append `weighted_overall` to each history entry (HR-7: never at turn 0).
+- Maintain `current.interview.stagnation_counter`: increment when `Δweighted_overall < stagnation_delta`, reset to 0 otherwise.
+- Mirror the resolved `gate_loop_enabled` and `gate_threshold` into `current.` so mechanical-check Check D can enforce the gate without reading `.shinchan-config.yaml`.
 
 Per-entry size budget (NFR-4): ≤150 tokens. `closed_unknown` ≤80 chars. No prose / CoT
 in WORKFLOW_STATE — that's what the streaming output is for (FR-5).

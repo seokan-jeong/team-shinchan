@@ -64,20 +64,40 @@ The Stage 1 interview is **clarity-gated**, not turn-counted. Misae scores each 
 against a 3-axis rubric (`goal_clarity`, `constraint_clarity`, `success_criteria`) and
 the orchestrator (`skills/start/SKILL.md`) honors a two-threshold contract:
 
-| Threshold | Default | What it does |
-|-----------|---------|--------------|
-| `skip_threshold` | 0.85 | Pre-interview `overall ≥ this` AND ≥3 of 5 fields explicit → 0 turns. Misae jumps to FINALIZE_DRAFT with `answers: []`. |
-| `done_threshold` | 0.75 | Exit when `overall ≥ this` AND `unresolved_unknowns == []`. Turn count is NO LONGER the trigger. |
-| `hard_cap` | 10 | Absolute max turns. Hitting it with `overall < done_threshold` writes a `## Open Questions` section to REQUESTS.md listing the residual gaps. |
+| Parameter | Default | Constraint | What it does |
+|-----------|---------|-----------|--------------|
+| `skip_threshold` | 0.85 | > done_threshold | Pre-interview `overall ≥ this` AND ≥3 of 5 fields explicit → 0 turns. Misae jumps to FINALIZE_DRAFT with `answers: []`. |
+| `done_threshold` | 0.75 | < gate_threshold | Legacy exit: `overall ≥ this` AND `unresolved_unknowns == []` (only when `gate_loop_enabled: false`). |
+| `gate_loop_enabled` | true | bool | `true`: Gate-Loop state machine (escalation). `false`: legacy silent-pass behaviour. |
+| `gate_threshold` | 0.8 | > done_threshold | PASS requires `weighted_overall ≥ this`. |
+| `stagnation_delta` | 0.05 | > 0 | Min Δ`weighted_overall` per turn; below this counts toward `stagnation_window`. |
+| `stagnation_window` | 2 | ≥ 2 | Consecutive low-Δ turns before ESCALATE-stagnation fires (≥2 prevents 1-turn false trigger). |
+| `soft_cap` | 6 | < hard_cap | Turn limit before ESCALATE-soft_cap fires when PASS not yet met (NOT a hard ceiling). |
+| `hard_cap` | 10 | 1..50 | Absolute ceiling; on reach → ESCALATE-hard_cap. |
+| `ak_double_check` | false | bool | opt-in: 2-temperature AK judge on the materiality audit. |
+| `project_type` | greenfield | brownfield \| greenfield | Selects weighted-average formula for the clarity score. |
+
+**Gate-Loop (escalation) — since interview-metrics-researc-001.** When `gate_loop_enabled: true` (default), the interview no longer *silently* passes below the bar. Each turn evaluates, in priority order: **PASS** (`weighted_overall ≥ gate_threshold` + materiality audit) → **ESCALATE-stagnation** (Δ < `stagnation_delta` for `stagnation_window` turns) → **ESCALATE-soft_cap** (`turn ≥ soft_cap`) → **ESCALATE-no_more_actionable_gaps** (`unresolved == []` but score low) → **ESCALATE-hard_cap** (`turn > hard_cap`) → **continue**. Every ESCALATE hands a 3-way choice to the user (continue / record Open Questions & proceed / restart) — never an infinite loop, never a silent pass. The legacy `no_more_actionable_gaps`/`hard_cap_reached` silent-pass paths survive only under `gate_loop_enabled: false`.
 
 Configure via `.shinchan-config.yaml` at the project root:
 
 ```yaml
 interview:
+  gate_loop_enabled: true
+  gate_threshold: 0.8
+  stagnation_delta: 0.05
+  stagnation_window: 2
+  soft_cap: 6
   skip_threshold: 0.85
   done_threshold: 0.75
   hard_cap: 10
+  ak_double_check: false
+  project_type: greenfield
 ```
+
+**Validation**: the parent (`skills/start/SKILL.md` §2A.0) validates on startup. Violations silently fall back to defaults with a one-line warning. Rules: `gate_threshold > done_threshold`, `soft_cap < hard_cap`, `stagnation_window ≥ 2`, `stagnation_delta > 0`, `project_type ∈ {brownfield, greenfield}`.
+
+**Weighted clarity score**: `weighted_overall` replaces the unweighted average from turn 1 onward. `greenfield` = Goal 0.40 / Constraint 0.30 / Success 0.30; `brownfield` = Goal 0.35 / Constraint 0.25 / Success 0.25 / Context 0.15 (Context = "is the existing codebase understood?"). Turn 0 pre-interview score stays unweighted (`project_type` not yet confirmed).
 
 **Escape hatch**: the literal `skip-interview` (case-insensitive) in `user_request`
 triggers `status: done, reason: user_skip_override` regardless of computed score.
@@ -86,7 +106,10 @@ triggers `status: done, reason: user_skip_override` regardless of computed score
 main-069..main-073) continue to load; the rubric for these defaults to "informational
 only" — no clarity gate is applied. Only `version ≥ 2` workflows enforce the gate.
 mechanical-check Check D emits a warning (not a hard fail) on missing
-`clarity_score.history` for `version: 1` docs.
+`clarity_score.history` for `version: 1` docs. For `version ≥ 2` docs with
+`gate_loop_enabled` not set to `false`, Check D additionally **hard-fails** when
+`weighted_overall` (fallback `overall`) is below `gate_threshold` — this is the $0
+static enforcement of the clarity gate before REQUESTS.md is finalized.
 
 **Visible reasoning**: before each `interview-question` JSON block, Misae emits a
 one-line rationale of the form:

@@ -69,3 +69,27 @@ cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/debate-consistency.js
 - Issue: Debate config references invalid agent or missing topic
 - Severity: MEDIUM
 - Fix: Update debate configuration to match available agents
+
+### Check 4: DAG / Cross-Phase Regression
+
+Phase 2 (`interview-metrics-researc-002`) added the DAG executor on top of the frozen Phase 1
+contracts (`agents/misae.md` 4-step option pipeline, `skills/fierce-option-panel/` Workflow,
+`src/option-metrics.js`). Phase 2 only ADDS new exports/modules; it MUST NOT alter Phase 1
+function signatures. The DAG schema fields (`id`, `depends_on`, `touches`, `verify`, `estimate`,
+`scope`) and the executor module must remain consistent with `docs/dag-executor.md`.
+
+```bash
+cd "${CLAUDE_PLUGIN_ROOT}" && node --test tests/option-metrics.test.js && node --test tests/dag-executor.test.js
+```
+
+**Success criteria:**
+- Exit code 0
+- Phase 1 `tests/option-metrics.test.js` still passes (no signature regression, NFR-2)
+- Phase 2 `tests/dag-executor.test.js` passes
+- No import from `dag-executor.js` into `option-metrics.js` (dependency-inversion ban)
+
+**On failure:**
+- Issue: a Phase 2 change broke a Phase 1 contract, or the DAG schema drifted
+- Severity: HIGH
+- Fix: revert the offending signature change; Phase 1 artifacts are frozen (see REQUESTS.md
+  NFR-2 and `docs/dag-executor.md` cross-phase safety)

@@ -1,0 +1,43 @@
+# Team-Shinchan project configuration
+# Optional. Absent keys fall back to documented defaults.
+
+interview:
+  # fierce-option-panel: opt-in Workflow that hardens interview option generation
+  # (diverse generators -> SelfCheckGPT majority-vote consensus -> SteerConf
+  # cautious-confidence judge -> top-K).
+  #
+  # DEFAULT-ON EXCEPTION: this is the ONE fierce-* skill that is enabled by default.
+  # It is an explicit, intentional exception to the fierce-* opt-in convention,
+  # made under the quality-over-cost principle (option quality during requirements
+  # gathering compounds across the whole downstream workflow). To opt OUT, set this
+  # to false — the basic B-path (structure-free gen -> verbalized sampling ->
+  # missing-alternative critic -> DINCO calibration) runs instead.
+  fierce_option_panel: true            # default: true (ON) — escape hatch per FR-6.3
+
+  # Max options handed to DINCO calibration. Bounds the O(K^2) NLI step (NFR-4).
+  # K-bound truncation is applied AFTER the missing-alternative critic pass.
+  fierce_panel_k_max: 6                 # default: 6
+
+  # Number of diverse generators in the SelfCheckGPT consensus stage. The
+  # majority-vote threshold is ceil(N/2 + 1) (HR-2) — strictly more than half.
+  fierce_panel_generators: 3           # default: 3
+
+  # Per-turn token budget cap for the panel path (HR-3 DoS guard). If a turn's
+  # panel run would exceed this, fall back to the basic B-path (NFR-3) and record
+  # option_source: basic_fallback. 0 or unset = no cap (rely on graceful degradation).
+  fierce_panel_token_budget_per_turn: 60000   # default: 60000
+
+# DAG executor (interview-metrics-researc-002 Phase 2). Drives the executing stage as a
+# topologically-ordered task DAG with static conflict-graph serialization, a per-task verify
+# gate, a recovery ladder, and a strict ALL-PASS completion gate. See src/dag-executor.js and
+# docs/dag-executor.md.
+executor:
+  # Max tasks dispatched concurrently across DISJOINT conflict-graph components (NFR-3).
+  # Tasks within one component (shared touches[]) always serialize regardless of this cap.
+  # Values outside [1, 20] fall back to the default (4) with a warning.
+  concurrency_cap: 4                   # default: 4
+
+  # When the conflict graph collapses to a single connected component (every task shares a
+  # resource), execution is fully serial. With serial_fallback true the executor logs an
+  # NFR-5 warning so operators can inspect plan granularity. (default: true)
+  serial_fallback: true                # default: true

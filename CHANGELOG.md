@@ -1,5 +1,35 @@
 # Changelog
 
+## [4.44.0] - 2026-06-10
+
+### Interview & execution quality — research-driven, no-silent-pass everywhere
+
+Three improvements grounded in deep research (Q00/ouroboros benchmark + CLAMBER / VeriMAP / MAST / Diversity-Collapse / DINCO literature, ~450 verified claims). One recurring meta-pattern: **replace single-pass model judgment with multi-candidate generation + adjudication + a hard verification gate that has no silent pass.**
+
+#### Gate-Loop interview escalation
+The Stage-1 clarity score is now a real gate, not a record. Previously `no_more_actionable_gaps` / `hard_cap_reached` silently advanced below the bar.
+
+- **`mechanical-check.js` Check D** hard-fails when `weighted_overall` < `gate_threshold` (version ≥ 2, `gate_loop_enabled` ≠ false) — $0 static, reads only the sibling `WORKFLOW_STATE.yaml`.
+- **`misae.md` 6-priority state machine**: PASS / stagnation-escalate / soft_cap-escalate / no_more_actionable_gaps-escalate / hard_cap-escalate / continue. Weighted clarity score with a brownfield Context axis; a materiality audit on the PASS path.
+- **`start/SKILL.md`** gate-loop config + validation and a 3-way ESCALATE prompt (continue / record Open Questions & proceed / restart) — never an infinite loop, never a silent pass.
+- Legacy behavior preserved behind `interview.gate_loop_enabled: false`.
+
+#### Recommendation option quality
+Fixes "the best option isn't even among the offered choices."
+
+- **`misae.md` 4-step option pipeline**: structure-free generation → verbalized sampling → missing-alternative critic → DINCO calibration, with A/B/C labeling deferred (the rigid schema itself was collapsing diversity). Each option cites code evidence; raw RLHF-overconfident scores are never exposed.
+- **`fierce-option-panel` Workflow** (default-on, config escape hatch): diverse generators → SelfCheckGPT consensus → SteerConf cautious-confidence judge → top-K.
+- **`src/option-metrics.js`**: ECE / AUROC / Distinct-2 / self-BLEU (correctness proxy = the user's eventual selection).
+
+#### DAG executor + completion gate
+Granular planning, dependency-aware parallelism, and 100%-verified completion.
+
+- **`src/dag-executor.js`**: topological dispatch with a concurrency cap, static `touches[]`-intersection conflict-graph serialization (coupled tasks run serial), a per-task verify gate (absent verify = auto-FAIL — no silent pass), an error-type recovery ladder (transient → retry≤3 / deterministic → local-patch / scope-drift → replan), a post-merge integration pass, and a strict ALL-PASS completion gate that blocks stage transition.
+- **`nene.md`** DAG schema (`id` / `depends_on` / `touches` / `verify` / `estimate` / `scope`) with a granularity rule — "one cohesive change verifiable by one command," not 5-minute micro-slices. `start` executing-stage wired to the executor.
+
+#### Tests & safety
++80 tests (interview-gate-loop, option-metrics ×25, dag-executor ×30, Check D gate). The two follow-up phases shipped as a `bigproject` with a frozen cross-phase contract (Phase-1 `option-metrics.js` 0-diff at the Phase-2 gate). `.gitignore` allowlists the two new `src/` modules. Honest limitation: option-calibration thresholds derive from factual-QA literature and need real usage data to validate against the user-selection proxy.
+
 ## [4.43.0] - 2026-06-09
 
 ### Changed — `bigproject` is now nested: each phase runs the full `start` workflow

@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Debate gate — false-positive reduction (PRO-2406 field report)
+
+The planning→execution debate gate's design-signal scan no longer greps the whole document for choice vocabulary. Field use showed a comparison phrase in a risk table ("body '1h' vs badge '60m'") or carry-over prose could escalate a legitimately reasoned waiver into a hard DECISION-NNN requirement.
+
+- **`hooks/transition-gate.sh`**: signal scan is now scoped to the plan's `## Design Decisions` (or `설계 결정`) section when one exists — the contract surface where the planner must declare choices. Plans without the section keep the whole-document fallback scan (TC-DG5 unchanged). Markdown table rows and fenced code blocks are stripped before scanning in both PROGRESS.md and REQUESTS.md.
+- The hard layer is intact: choice vocabulary *inside* the Design Decisions section still requires a recorded debate — a waiver remains insufficient there.
+- **Tests**: TC-DG7 (signals only in risk table / non-decision prose + reasoned waiver → ALLOW) and TC-DG8 (signals inside the Design Decisions section + waiver → BLOCK) added to `tests/validate/transition-gate-behavior.js`.
+
 ## [4.46.0] - 2026-06-16
 
 ### Added

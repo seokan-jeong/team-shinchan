@@ -38,6 +38,8 @@
  *  TC-DG4: planning→execution WITH bare waiver (no reason)    → BLOCK (reason required)
  *  TC-DG5: planning→execution WITH design signals + waiver    → BLOCK (waiver insufficient when a choice exists)
  *  TC-DG6: planning→execution WITH design signals + DECISION  → ALLOW
+ *  TC-DG7: signals only in risk table / outside Design Decisions section + reasoned waiver → ALLOW (scoped scan)
+ *  TC-DG8: signals INSIDE Design Decisions section + waiver   → BLOCK (hard layer preserved)
  *  TC-13: S1→S2 injection bypass (AK only in payload)         → BLOCK (AC-1 canonical)
  *  TC-14: S2→S3 injection bypass (AK only in payload)         → BLOCK (AC-3 canonical)
  *  TC-AC4: partial Edit with on-disk AK approval              → ALLOW (AC-4 regression)
@@ -1192,6 +1194,67 @@ function runValidation() {
         ok('TC-DG6: planning→execution (design signals + DECISION-002 cited) → ALLOW');
       } else {
         fail(`TC-DG6: planning→execution (signals + DECISION cited) → expected ALLOW, got BLOCK: ${(result.reason || '').slice(0, 120)}`);
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // TC-DG7: planning→execution, reasoned waiver in a Design Decisions section; comparison "vs"
+  // appears only in a risk table row and in prose OUTSIDE that section → ALLOW
+  // (signal scan is scoped to the Design Decisions section and strips tables/code fences —
+  //  PRO-2406 false-positive regression)
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('planning', { akStage: 'planning' });
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- Requirement A\n',
+        'utf-8'
+      );
+      fs.writeFileSync(
+        path.join(docsDir, 'PROGRESS.md'),
+        '# PROGRESS\n\n## Design Decisions\n\nDesign decisions: none — the format rule was fixed by the user in REQUESTS FR-1; this is a single-file display fix with no open choice.\n\n## Phase 1: Implement the display format fix end to end\nImplement it.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n\n## Risks\n\n| ID | Risk |\n| R-1 | body shows 1h vs badge 60m mismatch |\n\nThe legacy copy stays as-is vs the new copy until rollout completes.\n',
+        'utf-8'
+      );
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile,
+          content: '---\nstage: execution\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      if (result.decision !== 'block') {
+        ok('TC-DG7: planning→execution (reasoned waiver; "vs" only in risk table / non-decision prose) → ALLOW (no false positive)');
+      } else {
+        fail(`TC-DG7: planning→execution (scoped signals) → expected ALLOW, got BLOCK: ${(result.reason || '').slice(0, 160)}`);
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // TC-DG8: planning→execution, choice vocabulary INSIDE the Design Decisions section + waiver,
+  // no debate → BLOCK (the hard layer is preserved exactly where choices must be declared)
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('planning', { akStage: 'planning' });
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- Requirement A\n',
+        'utf-8'
+      );
+      fs.writeFileSync(
+        path.join(docsDir, 'PROGRESS.md'),
+        '# PROGRESS\n\n## Design Decisions\n\nDesign decisions: none — the only remaining choice is inline branch vs helper extraction, and helper extraction looks fine.\n\n## Phase 1: Implement the display format fix end to end\nImplement it.\n\n### 성공 기준\n- [ ] AC-1: Feature works end to end\n\n## Phase 2: Write comprehensive tests for all components\nWrite tests.\n\n### 성공 기준\n- [ ] AC-2: All tests pass\n',
+        'utf-8'
+      );
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile,
+          content: '---\nstage: execution\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      const mentionsDebate = (result.reason || '').includes('DEBATE GATE');
+      if (result.decision === 'block' && mentionsDebate) {
+        ok('TC-DG8: planning→execution (choice vocabulary inside Design Decisions section + waiver) → BLOCK (hard layer preserved)');
+      } else if (result.decision === 'block') {
+        ok(`TC-DG8: planning→execution (in-section signals + waiver) → BLOCK (reason: ${(result.reason || '').slice(0, 80)})`);
+      } else {
+        fail('TC-DG8: planning→execution (in-section signals + waiver) → expected BLOCK, got ALLOW (hard layer lost by scoping)');
       }
     } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
   }

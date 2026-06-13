@@ -10,7 +10,7 @@
 
 15 specialist agents with structured workflows, project ontology, budget controls, analytics, and self-learning.
 
-[![Version](https://img.shields.io/badge/version-4.44.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
+[![Version](https://img.shields.io/badge/version-4.45.0-blue.svg)](https://github.com/seokan-jeong/team-shinchan/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://claude.ai)
 ![GitHub stars](https://img.shields.io/github/stars/seokan-jeong/team-shinchan?style=social)
@@ -458,7 +458,7 @@ Yes, Team-Shinchan is **MIT licensed** and free to use. Agent calls consume your
 ### How many API calls does it make?
 
 **Quick fixes:** ~3 calls (Bo implements -> Action Kamen reviews -> done)
-**Standard tasks:** 10-30 calls (requirements -> planning -> execution -> completion)
+**Standard tasks:** 10-30 calls (requirements -> design -> planning -> execution -> completion)
 **Complex tasks with debates:** 20-50 calls (includes expert panel discussions)
 
 Each call is purposeful, traced, and documented in the workflow.

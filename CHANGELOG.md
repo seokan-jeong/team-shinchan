@@ -1,5 +1,34 @@
 # Changelog
 
+## [4.45.0] - 2026-06-13
+
+### Stage 1.5: dedicated interactive Design stage
+
+Design is now its own workflow stage between Requirements and Planning
+(`requirements → design → planning → execution → completion`), owned by **Hiroshi**. It fixes
+the long-standing gap where the Stage-1 interview only extracted requirement *clarity* (never
+felt like designing) and Stage-2 planning was *autonomous* (no co-design dialogue). The design
+stage is a parent-orchestrated interview that mirrors the Stage-1 mechanism: each turn advances
+a running **design sketch** and asks the user ONE design decision (options = architecture
+alternatives with trade-offs + code evidence), so the user watches the design take shape and
+steers it.
+
+- **`agents/hiroshi.md`**: new `DESIGN_NEXT_DECISION` / `FINALIZE_DESIGN` / `REVISE` /
+  `TRANSITION` modes; writes `DESIGN.md` (Approach, Components, Key Decisions + rationale,
+  Interfaces, Open Questions) and runs a design-stage Action Kamen review. Gains scoped
+  `Write` (DESIGN.md only) + `Task` (AK review); stays read-only on project code.
+- **`skills/start/SKILL.md`**: Step 2B design interview loop (decision-completeness-gated,
+  3-way ESCALATE prompt, user approval) between requirements and planning; `skip-design` /
+  Quick Fix Path routes `requirements → planning` directly. `ak_gate.design` added to state.
+- **`hooks/transition-gate.sh`**: new `design → planning` gate (DESIGN.md present + AK design
+  APPROVED); the requirements gate now also covers `→ design`. **`workflow-guard.sh`**: `design`
+  registered as a read-only-on-code stage (was silently allowed as an unknown stage).
+- **`agents/misae.md`** transitions to `design`; **`agents/nene.md`** plans *against* the
+  approved DESIGN.md (no longer re-decides architecture).
+- Schema enum, stage-tool matrix, stage→agent map, dashboard AK-gate display, and validators
+  (`stage-matrix.js`, `workflow-state-schema.js`) updated; new behavior tests TC-D1..D3
+  (transition gate) and TC-5b/5c (workflow guard).
+
 ## [4.44.0] - 2026-06-10
 
 ### Interview & execution quality — research-driven, no-silent-pass everywhere

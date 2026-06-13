@@ -243,7 +243,7 @@ fi
 
 # ── 7. Agent Failure Hints (FR-P1-2.2) ─────────────────────────────
 if command -v node &>/dev/null && [ -f "${PLUGIN_ROOT}/src/agent-context.js" ]; then
-  STAGE_AGENT_MAP='{"requirements":"misae","planning":"nene","execution":"bo","completion":"masumi"}'
+  STAGE_AGENT_MAP='{"requirements":"misae","design":"hiroshi","planning":"nene","execution":"bo","completion":"masumi"}'
   ACTIVE_AGENT=""
   for yaml in "$DOCS_DIR"/*/WORKFLOW_STATE.yaml; do
     [ -f "$yaml" ] || continue

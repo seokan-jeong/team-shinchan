@@ -1,6 +1,6 @@
 #!/bin/bash
 # Team-Shinchan Workflow Guard — Programmatic PreToolUse Hook
-# Enforces stage-tool matrix: blocks Edit/Write/Bash/TodoWrite during requirements/planning.
+# Enforces stage-tool matrix: blocks Edit/Write/Bash/TodoWrite during requirements/design/planning.
 #
 # Stdin: {"tool_name":"...","tool_input":{...}}
 # Stdout: {"decision":"block","reason":"..."} or empty (allow)
@@ -77,7 +77,7 @@ process.stdin.on('end', () => {
   const stage = stageMatch[1].trim().replace(/[\"']/g, '');
 
   // Stage-Tool Matrix
-  // requirements/planning: BLOCK Edit, Write, TodoWrite; Bash only for read-only commands
+  // requirements/design/planning: BLOCK Edit, Write, TodoWrite; Bash only for read-only commands
   // execution: ALLOW all
   // completion: BLOCK Edit, TodoWrite; Bash only for read-only; Write only for docs
   //
@@ -101,7 +101,7 @@ process.stdin.on('end', () => {
     }
   }
 
-  if (stage === 'requirements' || stage === 'planning') {
+  if (stage === 'requirements' || stage === 'design' || stage === 'planning') {
     // Bash: block destructive commands, allow read-only
     if (toolName === 'Bash') {
       const cmd = toolInput.command || '';

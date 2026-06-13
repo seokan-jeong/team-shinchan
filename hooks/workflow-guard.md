@@ -17,14 +17,16 @@ event: PreToolUse
 
 ## Stage-Tool Matrix
 
-| Tool | requirements | planning | execution | completion |
-|------|:---:|:---:|:---:|:---:|
-| Read/Glob/Grep/Task | OK | OK | OK | OK |
-| AskUserQuestion | OK | OK | OK | BLOCK |
-| Edit | BLOCK | BLOCK | OK | BLOCK |
-| Write | BLOCK* | BLOCK | OK | docs only** |
-| TodoWrite | BLOCK | BLOCK | OK | BLOCK |
-| Bash | BLOCK | BLOCK | OK*** | BLOCK |
+| Tool | requirements | design | planning | execution | completion |
+|------|:---:|:---:|:---:|:---:|:---:|
+| Read/Glob/Grep/Task | OK | OK | OK | OK | OK |
+| AskUserQuestion | OK | OK | OK | OK | BLOCK |
+| Edit | BLOCK | BLOCK | BLOCK | OK | BLOCK |
+| Write | BLOCK* | BLOCK* | BLOCK | OK | docs only** |
+| TodoWrite | BLOCK | BLOCK | BLOCK | OK | BLOCK |
+| Bash | BLOCK | BLOCK | BLOCK | OK*** | BLOCK |
+
+> **design** stage mirrors requirements/planning: code edits BLOCKED, but Write to `.shinchan-docs/` (DESIGN.md) is allowed via the global exception, and AskUserQuestion drives the design interview.
 
 **\*\*\* Bash in execution**: `git commit` and `git push` are **BLOCKED** during execution stage. Commits are deferred to Stage 4 (Completion) after Action Kamen review. `git add`/`commit`/`push` are allowed in completion stage.
 

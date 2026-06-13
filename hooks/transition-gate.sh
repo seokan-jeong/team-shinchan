@@ -45,8 +45,8 @@ process.stdin.on('end', () => {
 
   // For Edit: if new_string is just the stage name (partial replace), check old_string for context
   if (!stageMatch && toolName === 'Edit' && toolInput.old_string && toolInput.new_string) {
-    const oldHasStage = /stage:\\s*\\w+/.test(toolInput.old_string) || /^\\s*(requirements|planning|execution|completion)\\s*$/.test(toolInput.old_string);
-    const newIsStage = /^\\s*(requirements|planning|execution|completion)\\s*$/.test(toolInput.new_string.trim());
+    const oldHasStage = /stage:\\s*\\w+/.test(toolInput.old_string) || /^\\s*(requirements|design|planning|execution|completion)\\s*$/.test(toolInput.old_string);
+    const newIsStage = /^\\s*(requirements|design|planning|execution|completion)\\s*$/.test(toolInput.new_string.trim());
     if (oldHasStage && newIsStage) {
       stageMatch = [null, toolInput.new_string.trim()];
     }
@@ -84,13 +84,15 @@ process.stdin.on('end', () => {
   // === Stage transition gates ===
   if (stageMatch && newStage) {
     if (currentStage !== newStage) {
-      const stageOrder = ['requirements', 'planning', 'execution', 'completion'];
+      const stageOrder = ['requirements', 'design', 'planning', 'execution', 'completion'];
       const currentIdx = stageOrder.indexOf(currentStage);
       const newIdx = stageOrder.indexOf(newStage);
 
       if (newIdx > currentIdx && currentIdx !== -1 && newIdx !== -1) {
-        // Gate: requirements -> planning
-        if (currentStage === 'requirements' && newStage === 'planning') {
+        // Gate: requirements -> design (normal path) OR requirements -> planning (skip-design / quick-fix path)
+        // Both consume Misae's requirements output, so they share the same prerequisites:
+        // REQUESTS.md present + AK APPROVED for requirements + the ambiguity (clarity) gate.
+        if (currentStage === 'requirements' && (newStage === 'design' || newStage === 'planning')) {
           const reqFile = path.join(docDir, 'REQUESTS.md');
           if (!fs.existsSync(reqFile)) {
             missing.push('REQUESTS.md does not exist');
@@ -154,6 +156,33 @@ process.stdin.on('end', () => {
               );
             }
             // overall >= 0.8 and arithmetic valid: pass silently (FR-1.5)
+          }
+        }
+
+        // Gate: design -> planning
+        // The design stage (Hiroshi, interactive design interview) must produce an
+        // AK-approved DESIGN.md before Nene plans against it.
+        if (currentStage === 'design' && newStage === 'planning') {
+          const designFile = path.join(docDir, 'DESIGN.md');
+          if (!fs.existsSync(designFile)) {
+            missing.push('DESIGN.md does not exist — the design stage must produce an architecture/design document before planning');
+          } else {
+            const content = fs.readFileSync(designFile, 'utf-8');
+            if (!content.match(/architecture|component|approach|설계|아키텍처|컴포넌트|접근/i)) {
+              missing.push('DESIGN.md missing an Architecture / Approach / Components section');
+            }
+            if (!content.match(/decision|결정|trade-?off|rationale|근거/i)) {
+              missing.push('DESIGN.md missing Key Decisions / rationale — record the design choices made during the interview');
+            }
+          }
+          // Defense-in-depth: AK APPROVED must exist in history for design stage
+          const yamlOnDiskDesign = (() => { try { return fs.readFileSync(filePath, 'utf-8'); } catch(e) { return ''; } })();
+          const hasAkApprovedDesign = yamlOnDiskDesign.includes('event: ak_review') &&
+                                      yamlOnDiskDesign.includes('stage: design') &&
+                                      yamlOnDiskDesign.includes('verdict: APPROVED') &&
+                                      yamlOnDiskDesign.includes('agent: action_kamen');
+          if (!hasAkApprovedDesign) {
+            missing.push('No Action Kamen APPROVED review recorded for design stage in workflow history → Run: Task(subagent_type=\'team-shinchan:actionkamen\') for stage: design, then record verdict in WORKFLOW_STATE.yaml history');
           }
         }
 

@@ -20,8 +20,9 @@ Read `.shinchan-docs/*/WORKFLOW_STATE.yaml` for `status: active`:
 ```
 
 Then read the relevant doc:
-- **requirements**: Read REQUESTS.md → Nene handles it. STOP. Do NOT reclassify.
-- **planning**: Read PROGRESS.md → Nene handles it. STOP.
+- **requirements**: Read REQUESTS.md → Misae handles it. STOP. Do NOT reclassify.
+- **design**: Read DESIGN.md → Hiroshi runs the interactive design interview. STOP.
+- **planning**: Read PROGRESS.md → Nene handles it (plans against DESIGN.md). STOP.
 - **execution**: Read PROGRESS.md → find first incomplete phase → delegate to appropriate agent.
 - **completion**: Masumi + ActionKamen handle it. STOP.
 

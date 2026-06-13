@@ -393,12 +393,17 @@ Revise REQUESTS.md per feedback, re-run Mechanical Pre-Check and AK review, retu
 Input from parent: no additional fields (user has approved REQUESTS.md).
 
 Update WORKFLOW_STATE.yaml:
-- `current.stage: planning`
-- `current.owner: nene`
+- `current.stage: design`
+- `current.owner: hiroshi`
 - `current.ak_gate.requirements.status: approved`
-- Append history: `event: stage_transition, from: requirements, to: planning, agent: misae`
+- Append history: `event: stage_transition, from: requirements, to: design, agent: misae`
 
 Return a short confirmation (no JSON block required).
+
+> **Note**: Requirements now hand off to the **design stage** (Hiroshi, interactive design
+> interview) — NOT directly to planning. Hiroshi produces an AK-approved DESIGN.md, then
+> transitions `design → planning` for Nene. (The quick-fix / `skip-design` path may still go
+> `requirements → planning` directly; that is set by the orchestrator, not this TRANSITION.)
 
 ### Backward Compatibility
 

@@ -14,9 +14,10 @@ const BIGPROJECT_SKILL = path.join(ROOT_DIR, 'skills/bigproject/SKILL.md');
 const PROJECT_SCHEMA = path.join(ROOT_DIR, 'schemas/project-state.schema.json');
 const CLAUDE_MD = path.join(ROOT_DIR, 'CLAUDE.md');
 
-const REQUIRED_STAGES = ['requirements', 'planning', 'execution', 'completion'];
+const REQUIRED_STAGES = ['requirements', 'design', 'planning', 'execution', 'completion'];
 const REQUIRED_GATES = [
-  'requirements_to_planning',
+  'requirements_to_design',
+  'design_to_planning',
   'planning_to_execution',
   'execution_to_completion',
   'completion_to_done'
@@ -119,7 +120,8 @@ function runValidation() {
   console.log('\nChecking transition_gates...');
 
   const gateLabels = {
-    'requirements_to_planning': /requirements.*→.*planning|requirements.*planning|Stage 1→2|Stage 1.*Stage 2|S1→S2|S1.*S2.*REQUESTS/i,
+    'requirements_to_design': /requirements\s*→\s*design|requirements.*design.*planning|1\.5\s*Design|REQUESTS.*DESIGN/i,
+    'design_to_planning': /design\s*→\s*planning|design.*to.*planning|DESIGN\.md.*planning|Stage 1\.5.*Planning/i,
     'planning_to_execution': /planning.*→.*execution|planning.*execution|Stage 2→3|Stage 2.*Stage 3|S2→S3|S2.*S3.*PROGRESS/i,
     'execution_to_completion': /execution.*→.*completion|execution.*completion|Stage 3→4|Stage 3.*Stage 4|S3→S4|S3.*S4.*complete/i,
     'completion_to_done': /completion.*→.*done|Final review|Completion.*RETROSPECTIVE|Completion Gate|final.*review.*passed|Done:.*RETROSPECTIVE/i

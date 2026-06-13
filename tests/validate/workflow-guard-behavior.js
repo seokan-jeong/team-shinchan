@@ -281,6 +281,46 @@ function runValidation() {
     }
   }
 
+  // ── Block Cases: design stage ──────────────────────────────────────────────
+
+  section('2b. Block Cases — Stage: design');
+
+  // TC-5b: Edit tool in design → BLOCK (design is read-only on code, like requirements/planning)
+  {
+    const tmpDir = mkTmpFixture('design');
+    try {
+      const result = runHook(
+        { tool_name: 'Edit', tool_input: { file_path: 'src/baz.js', old_string: 'x', new_string: 'y' } },
+        tmpDir
+      );
+      if (result.decision === 'block') {
+        ok('TC-5b: design + Edit → BLOCK (correct — design is read-only on code)');
+      } else {
+        fail(`TC-5b: design + Edit → expected BLOCK, got decision="${result.decision}" (raw: ${result.raw.slice(0, 80)})`);
+      }
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  }
+
+  // TC-5c: Write DESIGN.md to .shinchan-docs/ in design → ALLOW (the design artifact exception)
+  {
+    const tmpDir = mkTmpFixture('design');
+    try {
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: path.join(tmpDir, '.shinchan-docs/test-doc/DESIGN.md'), content: '# Design\n## Approach\n...' } },
+        tmpDir
+      );
+      if (result.decision !== 'block') {
+        ok('TC-5c: design + Write(.shinchan-docs/DESIGN.md) → ALLOW (correct — doc artifact exception)');
+      } else {
+        fail(`TC-5c: design + Write(DESIGN.md) → expected ALLOW, got BLOCK (raw: ${result.raw.slice(0, 80)})`);
+      }
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  }
+
   // ── Allow Cases ─────────────────────────────────────────────────────────────
 
   section('3. Allow Cases');

@@ -32,7 +32,7 @@ const workflowStateSchema = {
     "current": {
       "type": "object",
       "properties": {
-        "stage": { "enum": ["requirements", "planning", "execution", "completion"] },
+        "stage": { "enum": ["requirements", "design", "planning", "execution", "completion"] },
         "phase": { "type": ["number", "string", "null"] },
         "owner": { "type": "string", "description": "Current agent responsible" },
         "status": { "enum": ["active", "paused", "completed", "blocked"] },

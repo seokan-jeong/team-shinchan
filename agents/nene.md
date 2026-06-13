@@ -66,7 +66,15 @@ When entering Stage 2 (planning), explicitly enter Plan Mode:
 
 ## Planning Process
 
-Read REQUESTS.md → **Impact Scope Analysis** → Codebase analysis → Phased plan → Testable AC → Risks + mitigations.
+Read REQUESTS.md **and DESIGN.md** → **Impact Scope Analysis** → Codebase analysis → Phased plan → Testable AC → Risks + mitigations.
+
+> **DESIGN.md is your architecture input.** The design stage (Hiroshi) has already settled the
+> approach, components, interfaces, and key design decisions in `.shinchan-docs/{DOC_ID}/DESIGN.md`.
+> You do NOT re-decide architecture — you **plan against the approved design**: turn its components
+> and decisions into phases/tasks. If DESIGN.md and REQUESTS.md conflict, STOP and flag it rather
+> than silently choosing. If DESIGN.md is absent (skip-design / quick-fix path), plan from
+> REQUESTS.md as before. Each `## Design Decisions` entry in PROGRESS.md should reference the
+> `DEC-N` it came from in DESIGN.md (or cite a `DECISION-NNN` debate / waive explicitly).
 
 ### Mandatory Impact Scope Analysis
 
@@ -91,6 +99,8 @@ Skipping this step is the #1 cause of post-implementation bugs. If ontology exis
 
 Before starting, verify:
 - REQUESTS.md exists and has `status: approved`
+- DESIGN.md exists (normal path) — read it as the architecture input. Absent only on the
+  skip-design / quick-fix path, in which case plan from REQUESTS.md alone.
 - WORKFLOW_STATE.yaml `current.stage` is `planning`
 - If not met, STOP and report the issue
 

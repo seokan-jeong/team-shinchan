@@ -79,6 +79,7 @@ current:
   phase: null
   owner: misae
   status: active
+  execution_mode: micro-execute   # /start default — pins Stage 3 to the per-task (spec→quality→skeptic) review chain. Set to `dag` ONLY when explicitly opting into parallel dag-executor dispatch.
   # parent_doc_id / phase_number: ONLY when injected by bigproject phase mode; omit standalone.
   # parent_doc_id: "{parent_doc_id}"
   # phase_number: {phase_number}
@@ -88,6 +89,10 @@ current:
       status: pending          # pending | in_review | approved | rejected | escalated
       retry_count: 0           # 0, 1, or 2 (max)
       last_rejection_reasons: []  # list of strings — most recent rejection points
+    design:
+      status: pending
+      retry_count: 0
+      last_rejection_reasons: []
     planning:
       status: pending
       retry_count: 0
@@ -372,15 +377,106 @@ If user picked A (or equivalent):
 
 ### Step 2A-post: Requirements Complete
 
-Misae has performed hidden requirements analysis as part of FINALIZE_DRAFT. Once TRANSITION returns, proceed to Step 2B.
+Misae has performed hidden requirements analysis as part of FINALIZE_DRAFT. Misae's TRANSITION
+moves the workflow to `stage: design` (owner: hiroshi). Once TRANSITION returns, proceed to
+**Step 2B (Design Stage)**.
 
-### Step 2B: Stage Transition Narration
+### Step 2B: Design Stage — Parent-Orchestrated Design Interview
+
+**CRITICAL: Sub-agents cannot call `AskUserQuestion`.** Exactly like the requirements interview
+(2A), the main thread drives the design interview; **Hiroshi** designs each decision. See
+`agents/hiroshi.md` § "Design Stage Interview Protocol".
+
+**Skip conditions** (route `requirements → planning` directly, skip this whole step):
+- `user_request`/args contains literal `skip-design`, OR
+- this is a Quick Fix Path / trivial change (no architecture decision to make).
+
+When skipped, narrate "Design stage skipped (trivial/quick-fix)" and write
+`current.stage: planning` directly, then go to Step 2C. Otherwise run the loop below.
+
+**2B.0 — Read design interview config** (`.shinchan-config.yaml`, else defaults):
+`design.soft_cap` (default 5), `design.hard_cap` (default 8).
+
+**2B.1 — Design decision loop (design-completeness-gated, hard_cap is the ceiling):**
+
+```
+decisions    = []
+exit_reason  = null
+for turn in 1..design_hard_cap:
+  result = Task(subagent_type="team-shinchan:hiroshi", model="opus", prompt=
+    "mode: DESIGN_NEXT_DECISION
+    DOC_ID: {DOC_ID} | WORKFLOW_STATE: .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml
+    REQUESTS.md: .shinchan-docs/{DOC_ID}/REQUESTS.md
+    turn: {turn}
+    prior_decisions: {decisions}
+    user_request: {args}
+    vision_context: {vision_context or 'None'}
+    soft_cap: {design_soft_cap} | hard_cap: {design_hard_cap}
+    Return the design-question JSON block per agents/hiroshi.md contract.")
+
+  Parse the last ```design-question ... ``` fenced block in result.
+
+  GUARD (mirror 2A.1): a `design-question` block must parse; `status` ∈ {ask, done};
+    if status == "ask": `question` ≥ 5 chars, `header` non-empty, `options` ≥ 2 each with a
+    substantive `label`, `decision_id` present, `closes_decision` ≤ 80 chars.
+    On failure: re-invoke Hiroshi with the specific reason appended, max 2 retries; on 3rd
+    failure print raw output and STOP.
+
+  if status == "done":
+    exit_reason = parsed.reason; break
+  if status == "ask" (guard passed):
+    // Same options-overflow pagination as 2A.1 (>4 options → "더 많은 선택지 보기").
+    user_answer = AskUserQuestion(questions=[{question, header, options, multiSelect}])
+    decisions.push({turn, decision: parsed.closes_decision, choice: user_answer})
+```
+
+**2B.1b — ESCALATE 3-way prompt** (when `exit_reason` ∈ {`soft_cap_escalate`, `hard_cap_escalate`}):
+hand the user a choice exactly like 2A.1b — A. 설계 계속 (hard_cap까지), B. Open Questions로 기록 후
+진행, C. 처음부터. (`design_complete` / `user_skip_override` skip this and go to 2B.2.)
+
+**2B.2 — Finalize design (Hiroshi writes DESIGN.md + runs AK review):**
+
+```typescript
+Task(subagent_type="team-shinchan:hiroshi", model="opus",
+  prompt=`mode: FINALIZE_DESIGN
+  DOC_ID: ${DOC_ID} | REQUESTS.md: .shinchan-docs/${DOC_ID}/REQUESTS.md
+  decisions: ${JSON.stringify(decisions)}
+  exit_reason: ${exit_reason || 'design_complete'}
+  Per agents/hiroshi.md: write DESIGN.md (## Open Questions only if escalated), run the
+  design-stage AK review loop (max 2 retries). Return finalize-design-result JSON block.`)
+```
+
+Parse the `finalize-design-result` block.
+- If `ak_verdict == "APPROVED"` → continue to 2B.3.
+- If `ak_verdict == "ESCALATED"` → show rejection_reasons to user and stop.
+
+**2B.3 — User approval of DESIGN.md (parent drives AskUserQuestion):**
+
+```
+user_decision = AskUserQuestion(questions=[{
+  question: "DESIGN.md(설계)를 승인하시겠어요?",
+  header: "설계 승인",
+  options: [
+    {label: "A. 승인 — Stage 2 (Planning)로 진행", description: "이 설계대로 Nene가 계획 수립"},
+    {label: "B. 수정 필요 — 피드백 제공", description: "어떤 설계를 바꿔야 하는지 알려주세요"}
+  ],
+  multiSelect: false
+}])
+
+If B: Task(hiroshi, mode: REVISE, user_feedback: feedback) → repeat 2B.3.
+If A: Task(subagent_type="team-shinchan:hiroshi", model="opus",
+        prompt="mode: TRANSITION\nDOC_ID: {DOC_ID}\nUser approved DESIGN.md. Transition WORKFLOW_STATE design → planning.")
+```
+
+Once TRANSITION returns (stage → planning), proceed to Step 2C.
+
+### Step 2C: Stage Transition Narration
 
 **Shinnosuke 호출 전에 사용자에게 직접 알린다:**
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-👦 [Shinnosuke] Stage 1 완료 ✅ 요구사항 확정됨
-→ Stage 2: Planning 시작합니다. Nene가 Phase를 설계합니다.
+👦 [Shinnosuke] Stage 1.5 완료 ✅ 설계 확정됨 (DESIGN.md)
+→ Stage 2: Planning 시작합니다. Nene가 설계대로 Phase를 구성합니다.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -388,26 +484,49 @@ Then invoke Shinnosuke:
 ```typescript
 Task(subagent_type="team-shinchan:shinnosuke", model="opus",
   prompt="Continue from Stage 2 via /team-shinchan:start.
-  DOC_ID: {DOC_ID} | REQUESTS.md: approved and complete.
-  Stage 1 DONE. Start Stage 2 (Planning) via Nene, then Stage 3 (Execution), then Stage 4 (Completion).
+  DOC_ID: {DOC_ID} | REQUESTS.md: approved | DESIGN.md: approved (architecture settled in Stage 1.5).
+  Stages 1 + 1.5 DONE. Start Stage 2 (Planning) via Nene, then Stage 3 (Execution), then Stage 4 (Completion).
   CRITICAL: After Stage 3, you MUST execute Stage 4 — write RETROSPECTIVE.md, IMPLEMENTATION.md, and run final Action Kamen review. See 'Stage 4: Completion' section in agents/shinnosuke.md.
 
-  ## Micro-Task Execution (RULE 2.7)
-  When invoking Nene for Stage 2 planning, request MICRO-TASK FORMAT for PROGRESS.md.
-  Each phase should be broken into 2-3 minute tasks with exact file paths, complete code,
-  and verification commands. See agents/nene.md 'Micro-Task Plan Format' section.
+  ## Micro-Task Execution (RULE 2.7) — MANDATORY, this is the /start default
+  WORKFLOW_STATE.current.execution_mode is `micro-execute`. Stage 3 MUST run via the
+  micro-execute path — do NOT fall back to the standard Phase Loop and do NOT use the
+  dag-executor (that path skips the per-task review chain and is opt-in only).
 
-  In Stage 3, use the micro-execute pattern (RULE 2.7): for each micro-task,
-  dispatch a fresh implementer subagent, then spec compliance review, then code quality review.
-  See skills/micro-execute/SKILL.md for the full execution protocol.
+  When invoking Nene for Stage 2 planning, request MICRO-TASK FORMAT for PROGRESS.md
+  (agents/nene.md 'Micro-Task Plan Format' — NOT the DAG Plan Schema). Nene plans AGAINST the
+  approved DESIGN.md (architecture is already decided — do NOT re-decide it). Each phase should be
+  broken into 2-3 minute tasks with exact file paths, complete code, and verification commands.
+
+  In Stage 3, use the micro-execute pattern (RULE 2.7): for EACH micro-task, dispatch a fresh
+  implementer subagent → spec-compliance review → code-quality review → independent skeptic
+  refutation. Never skip any of these four steps. See skills/micro-execute/SKILL.md for the
+  full execution protocol.
 
   Nene's summary: {nene_result_summary}")
 ```
 
-## Stage 3 (Executing): DAG-Driven Dispatch via dag-executor
+## Stage 3 (Executing): Dispatch Mode
 
-The `executing` stage drives implementation as a topologically-ordered task DAG using
-`src/dag-executor.js` instead of an ad-hoc sequential loop (FR-9). The
+The executing stage has two dispatch modes, selected by `current.execution_mode` in
+WORKFLOW_STATE.yaml (set in Step 1):
+
+- **`micro-execute` (DEFAULT for `/start`)** — each task runs through the full per-task review
+  chain: implementer → spec-compliance review → code-quality review → independent skeptic
+  refutation (`skills/micro-execute/SKILL.md`). This is the accuracy backbone; do NOT bypass it.
+  Stage 2B already requests MICRO-TASK FORMAT from Nene so PROGRESS.md feeds this mode directly.
+- **`dag` (OPT-IN ONLY)** — the DAG-driven dispatch below. Faster via parallelism, but its only
+  per-task gate is the `verify` shell command exit code — it does NOT run the spec/quality/skeptic
+  review chain. Use ONLY when the user explicitly opts in (sets `execution_mode: dag`) and accepts
+  the weaker per-task verification. **Never the silent default.**
+
+> ⚠️ Routing rule: if `execution_mode` is `micro-execute` or absent → use micro-execute (RULE 2.7).
+> Only when `execution_mode: dag` is explicitly set do you follow the DAG protocol below.
+
+### DAG-Driven Dispatch via dag-executor (`execution_mode: dag` only)
+
+When opted in, the `executing` stage drives implementation as a topologically-ordered task DAG
+using `src/dag-executor.js` instead of an ad-hoc sequential loop (FR-9). The
 `requirements → planning → executing → done` stage machine is preserved; only the executing
 stage's dispatch logic changes.
 

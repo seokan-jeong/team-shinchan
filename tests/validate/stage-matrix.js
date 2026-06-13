@@ -11,7 +11,7 @@ const ROOT_DIR = path.join(__dirname, '../..');
 const CLAUDE_MD = path.join(ROOT_DIR, 'CLAUDE.md');
 const GUARD_MD = path.join(ROOT_DIR, 'hooks/workflow-guard.md');
 
-const STAGES = ['requirements', 'planning', 'execution', 'completion'];
+const STAGES = ['requirements', 'design', 'planning', 'execution', 'completion'];
 const TOOLS = ['Read', 'Glob', 'Grep', 'Task', 'Edit', 'Write', 'TodoWrite', 'Bash', 'AskUserQuestion'];
 
 // Extract matrix from markdown table

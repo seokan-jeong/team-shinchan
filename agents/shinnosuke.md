@@ -362,15 +362,18 @@ Otherwise → full 4-Stage Workflow.
 
 ## RULE 2.7: Micro-Execute Mode
 
-**When to use**: Complex features where per-task review prevents accumulated errors. Triggers when:
-- WORKFLOW_STATE.yaml has `execution_mode: micro-execute`
+**When to use**: This is the **default Stage 3 path for `/team-shinchan:start`** — per-task review prevents accumulated errors. Triggers when:
+- WORKFLOW_STATE.yaml has `execution_mode: micro-execute` (set by `/start` Step 1 — so this is the default)
 - User explicitly requests micro-execute mode
 - PROGRESS.md contains micro-task format (Tasks with `**Files:**` and `**Step N:**` structure)
+
+When `execution_mode` is `micro-execute` or absent, prefer this over the standard Phase Loop (RULE 3) — the standard loop reviews only once per wave, which is coarser and lets task-level errors slip through. Only use the dag-executor when `execution_mode: dag` is explicitly set.
 
 **How it works**: Instead of dispatching one agent per phase, break each phase into 2-3 minute micro-tasks. Each micro-task gets:
 1. Fresh implementer subagent (no context pollution)
 2. Spec compliance review (did it build exactly what was specified?)
 3. Code quality review (is the code well-built?)
+4. Independent skeptic refutation (tries to DISPROVE the green verdict by reading the actual code — catches reviewer false-negatives)
 
 **Dispatch**:
 ```typescript
@@ -397,9 +400,16 @@ Task(subagent_type="team-shinchan:shinnosuke", model="opus",
 |-------|-----------|--------|
 | 0. Brainstorm (optional) | Hiroshi | brainstorm-output.md |
 | 1. Requirements | (Ume if visual input), Misae | REQUESTS.md |
+| 1.5 Design | Hiroshi (interactive design interview) | DESIGN.md |
 | 2. Planning | Nene, Shiro, (Midori) | PROGRESS.md |
 | 3. Execution | Shiro→Bo(PO)→{Aichan|Buriburi|Masao|Kazama}→Action Kamen | Code + PROGRESS.md |
 | 4. Completion | Masumi→Action Kamen | RETROSPECTIVE.md, IMPLEMENTATION.md |
+
+> **Stage 1.5 (Design)** sits between Requirements and Planning: Hiroshi runs a parent-orchestrated
+> design interview (`requirements → design → planning`), advancing a design sketch turn-by-turn and
+> producing an AK-approved `DESIGN.md` that Nene then plans against. It is default-on for `/start`
+> but skippable via `skip-design` or the Quick Fix Path (which routes `requirements → planning`
+> directly). See `agents/hiroshi.md` § "Design Stage Interview Protocol".
 
 **Step 3.0: Worktree Setup (Optional)**
 

@@ -535,6 +535,83 @@ function runValidation() {
     }
   }
 
+  // ── Design Stage Gate (requirements → design → planning) ─────────────────────
+
+  section('2b. Design Stage Gate — requirements→design and design→planning');
+
+  // TC-D1: design→planning WITHOUT DESIGN.md → BLOCK
+  {
+    const { tmpDir, workflowFile } = mkTmpFixture('design', { akStage: 'design' });
+    try {
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile, content: '---\nstage: planning\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      if (result.decision === 'block' && /DESIGN\.md/.test(result.reason || '')) {
+        ok('TC-D1: design→planning (no DESIGN.md) → BLOCK with DESIGN.md in reason');
+      } else {
+        fail(`TC-D1: design→planning (no DESIGN.md) → expected BLOCK, got decision="${result.decision}" (raw: ${result.raw.slice(0, 120)})`);
+      }
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  }
+
+  // TC-D2: design→planning WITH DESIGN.md + AK design APPROVED on disk → ALLOW
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('design', { akStage: 'design' });
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'DESIGN.md'),
+        [
+          '# Design',
+          '## Approach',
+          'Event-driven queue with a worker pool.',
+          '## Architecture / Components',
+          'Ingest API, Queue, Worker, Store.',
+          '## Key Decisions',
+          '- DEC-1: idempotency keyed on message-id — rationale: dedup; trade-off: extra lookup.',
+          ''
+        ].join('\n'),
+        'utf-8'
+      );
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile, content: '---\nstage: planning\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      if (result.decision !== 'block') {
+        ok('TC-D2: design→planning (DESIGN.md + AK design APPROVED on disk) → ALLOW');
+      } else {
+        fail(`TC-D2: design→planning (valid DESIGN.md + AK APPROVED) → expected ALLOW, got BLOCK (reason: ${(result.reason || '').slice(0, 120)})`);
+      }
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  }
+
+  // TC-D3: requirements→design WITH valid REQUESTS.md + AK requirements APPROVED → ALLOW
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('requirements', { akStage: 'requirements' });
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nWe need X.\n\n# Requirements\n- Requirement A\n',
+        'utf-8'
+      );
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile, content: '---\nstage: design\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      if (result.decision !== 'block') {
+        ok('TC-D3: requirements→design (valid REQUESTS.md + AK APPROVED on disk) → ALLOW');
+      } else {
+        fail(`TC-D3: requirements→design (valid REQUESTS.md + AK APPROVED) → expected ALLOW, got BLOCK (reason: ${(result.reason || '').slice(0, 120)})`);
+      }
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  }
+
   // ── Edge Cases ───────────────────────────────────────────────────────────────
 
   section('3. Edge Cases — Behavior Documentation');

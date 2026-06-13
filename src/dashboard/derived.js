@@ -227,7 +227,7 @@ function computeActionHint(meta) {
     return { kind: 'interview', text: '인터뷰 진행 중 — 사용자 답변 대기' };
   }
   // AK rejection.
-  for (const gateName of ['requirements', 'planning']) {
+  for (const gateName of ['requirements', 'design', 'planning']) {
     const g = ak[gateName];
     if (g && g.status === 'rejected') {
       return { kind: 'ak_rejected', text: `AK ${gateName} 게이트 거부 — 수정 필요` };

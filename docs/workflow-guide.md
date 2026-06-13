@@ -126,10 +126,39 @@ This prose is for transparency; the structured equivalents (`targets_subscore` a
 - [ ] Edge cases identified
 - [ ] User approved
 
+## Stage 1.5: Design (interactive design interview)
+
+Between Requirements and Planning, the workflow runs a dedicated **design stage** owned by
+**Hiroshi** (`requirements → design → planning`). Unlike Stage 2 (which is autonomous
+plan-authoring), the design stage is an **interactive, parent-orchestrated interview** that
+mirrors the Stage 1 mechanism: the main thread drives `AskUserQuestion`, Hiroshi designs each
+decision. This is what gives the user the sense of *designing while being asked*, rather than
+just answering requirement-clarity questions.
+
+```python
+# Parent-orchestrated loop (skills/start/SKILL.md Step 2B)
+for turn in 1..design_hard_cap:
+    q = delegate_to("hiroshi", "mode: DESIGN_NEXT_DECISION ...")  # advances design_sketch, asks ONE decision
+    if q.status == "done": break
+    answer = AskUserQuestion(q)                                    # parent only
+delegate_to("hiroshi", "mode: FINALIZE_DESIGN ...")               # writes DESIGN.md + runs design-stage AK review
+# user approves DESIGN.md → hiroshi TRANSITION design → planning
+```
+
+- **Output**: `DESIGN.md` (Approach, Architecture/Components, Key Decisions + rationale,
+  Interfaces & Data Flow, Open Questions if escalated).
+- **Gate (`design → planning`)**: DESIGN.md present + Action Kamen APPROVED for `stage: design`.
+- **Each turn surfaces the evolving design sketch** so the user watches the design take shape
+  and steers it (options are design alternatives with trade-offs + code evidence).
+- **Skippable**: `skip-design` in the request, or the Quick Fix Path, routes
+  `requirements → planning` directly (no design interview for trivial changes).
+
+See `agents/hiroshi.md` § "Design Stage Interview Protocol" for the full mode contract.
+
 ## Stage 2: Planning
 
 ```python
-delegate_to("nene", "Break into phases with acceptance criteria")
+delegate_to("nene", "Break into phases with acceptance criteria")  # plans AGAINST approved DESIGN.md
 delegate_to("shiro", "Analyze impact across codebase")
 create("PROGRESS.md")
 ```

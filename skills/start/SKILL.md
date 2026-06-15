@@ -357,7 +357,7 @@ user_decision = AskUserQuestion(questions=[{
   question: "REQUESTS.md을 승인하시겠어요?",
   header: "최종 승인",
   options: [
-    {label: "A. 승인 — Stage 2 (Planning)로 진행", description: "현재 REQUESTS.md 내용 그대로 확정"},
+    {label: "A. 승인 — Stage 1.5 (Design)로 진행", description: "요구사항 확정 → Hiroshi와 설계를 진행합니다"},
     {label: "B. 수정 필요 — 피드백 제공", description: "어떤 부분을 바꿔야 하는지 알려주세요"}
   ],
   multiSelect: false
@@ -372,8 +372,14 @@ If user picked A (or equivalent):
   Task(subagent_type="team-shinchan:misae", model="sonnet",
     prompt=`mode: TRANSITION
     DOC_ID: ${DOC_ID}
-    User approved REQUESTS.md. Transition WORKFLOW_STATE to planning.`)
+    User approved REQUESTS.md. Transition WORKFLOW_STATE requirements → design (Stage 1.5,
+    owner: hiroshi) per agents/misae.md TRANSITION. Do NOT transition to planning — the design
+    stage (Step 2B) runs next.`)
 ```
+
+> **Do NOT skip to planning here.** The next step is the design stage (Step 2B). Going straight
+> to planning is the pre-4.45.0 behavior and is a bug — design only gets skipped via the explicit
+> Step 2B skip conditions (`skip-design` / Quick Fix Path), evaluated in Step 2B, not here.
 
 ### Step 2A-post: Requirements Complete
 
@@ -387,12 +393,21 @@ moves the workflow to `stage: design` (owner: hiroshi). Once TRANSITION returns,
 (2A), the main thread drives the design interview; **Hiroshi** designs each decision. See
 `agents/hiroshi.md` § "Design Stage Interview Protocol".
 
-**Skip conditions** (route `requirements → planning` directly, skip this whole step):
-- `user_request`/args contains literal `skip-design`, OR
-- this is a Quick Fix Path / trivial change (no architecture decision to make).
+**Skip conditions — design is DEFAULT-ON; skip is the narrow exception.** Skip ONLY when one of
+these is unambiguously true (when in doubt, do NOT skip — run the loop):
+- `user_request`/args contains the literal token `skip-design`, OR
+- the workflow entered via the **Quick Fix Path** (Shinnosuke classified it Lite: ≤3 files,
+  no design decisions), OR
+- REQUESTS.md has **zero** architecture/design choices: no competing approaches, no new
+  component/interface/schema/data-flow/layout decision, and an explicit
+  `Design decisions: none — {reason}` style waiver is warranted.
 
-When skipped, narrate "Design stage skipped (trivial/quick-fix)" and write
-`current.stage: planning` directly, then go to Step 2C. Otherwise run the loop below.
+A multi-FR feature, anything with `## Open Questions` that are design-shaped (layouts, ranges,
+contracts, new keys), or any "approach A vs B" is NOT skippable — run the design loop.
+
+When (and only when) a skip condition holds: narrate "Design stage skipped ({which condition})"
+and transition `design → planning` (`Task(hiroshi, mode: TRANSITION)` if already in `design`,
+else write `current.stage: planning`), then go to Step 2C. Otherwise run the loop below.
 
 **2B.0 — Read design interview config** (`.shinchan-config.yaml`, else defaults):
 `design.soft_cap` (default 5), `design.hard_cap` (default 8).

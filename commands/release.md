@@ -30,6 +30,7 @@ node src/release.js <X.Y.Z> [flags]
 | `--push` | Push the current branch + tag to `origin` (implies `--git`). |
 | `--gh-release` | Create a GitHub Release via `gh` (implies `--tag`). |
 | `--full` | `--git --tag --push --gh-release`. |
+| `--allow-dirty` | Skip the clean-working-tree guard. Lets a release proceed with uncommitted feature work in the tree — the release commit still stages ONLY the 4 version files, so the tag will NOT contain those changes. Use only for an intentional bump-only commit. |
 
 ## Examples
 
@@ -70,6 +71,10 @@ node src/release.js 4.39.0 --full --dry-run
 
 - valid semver `X.Y.Z`, and not already the current version
 - `--tag`: tag `vX.Y.Z` must not already exist
+- `--git`: **clean working tree** — blocks if any tracked file other than the 4 version files
+  has uncommitted changes. The release commit stages ONLY those 4 files, so dirty feature work
+  would be tagged-but-not-shipped. **Commit feature work first, then release** (override with
+  `--allow-dirty` for an intentional bump-only commit). Untracked files are ignored.
 - `--git`: warns if not on `main`
 - `--gh-release`: requires `gh auth status` to succeed
 - `--push` may be blocked by the pre-push-gate (IMPLEMENTATION + RETROSPECTIVE docs)

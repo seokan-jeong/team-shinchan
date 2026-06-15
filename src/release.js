@@ -52,11 +52,12 @@ function isValidSemver(v) {
 function parseArgs(argv) {
   const o = {
     version: null, dryRun: false, notesFile: null, title: null,
-    git: false, tag: false, push: false, ghRelease: false,
+    git: false, tag: false, push: false, ghRelease: false, allowDirty: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--dry-run') o.dryRun = true;
+    else if (a === '--allow-dirty') o.allowDirty = true;
     else if (a === '--git') o.git = true;
     else if (a === '--tag') o.tag = true;
     else if (a === '--push') o.push = true;
@@ -165,8 +166,36 @@ function main() {
   }
   const branch = (safeSh('git rev-parse --abbrev-ref HEAD').trim()) || 'main';
   if (opts.git && branch !== 'main') warn(`not on main (on "${branch}")`);
-  if (opts.git && safeSh('git status --porcelain').trim() && !opts.dryRun) {
-    warn('working tree has uncommitted changes beyond the bump — the release commit will include only the 4 bumped files');
+  // Fail-fast: a release commit stages ONLY the 4 bumped files. If feature work is still
+  // uncommitted, the tag would ship a version bump WITHOUT the feature it claims to release
+  // (the v4.45.0 incident). Block when tracked files other than the 4 release files are dirty.
+  // In dry-run this only WARNS (preview writes nothing) so the preview reflects the live block.
+  if (opts.git) {
+    const releaseFiles = new Set([
+      '.claude-plugin/plugin.json', '.claude-plugin/marketplace.json', 'README.md', 'CHANGELOG.md',
+    ]);
+    const dirtyTracked = safeSh('git status --porcelain')
+      .split('\n')
+      .map((l) => l.replace(/\r$/, ''))
+      .filter(Boolean)
+      .filter((l) => !l.startsWith('??'))                 // ignore untracked files
+      .map((l) => l.slice(3).replace(/^"|"$/g, '').split(' -> ').pop())  // strip XY status + rename arrow
+      .filter((p) => !releaseFiles.has(p));
+    if (dirtyTracked.length > 0) {
+      const preview = dirtyTracked.slice(0, 20).join('\n  ');
+      if (opts.dryRun) {
+        warn(`would BLOCK a live release: ${dirtyTracked.length} uncommitted tracked file(s) would NOT be in the release commit (only the 4 bumped files are). Commit feature work first, or pass --allow-dirty:\n  ${preview}`);
+      } else if (opts.allowDirty) {
+        warn(`--allow-dirty: ${dirtyTracked.length} uncommitted tracked file(s) will NOT be in the release commit (only the 4 bumped files are): ${dirtyTracked.slice(0, 8).join(', ')}${dirtyTracked.length > 8 ? ' …' : ''}`);
+      } else {
+        fail(
+          `uncommitted feature work detected — the release commit stages ONLY the 4 version files, so the tag would NOT contain these changes:\n  ` +
+          preview +
+          `\n\nCommit your feature work FIRST, then run the release. ` +
+          `(Use --allow-dirty only if you intentionally want to ship a bump-only commit.)`
+        );
+      }
+    }
   }
   if (opts.ghRelease && !opts.dryRun) {
     try { sh('gh auth status'); } catch { fail('gh is not authenticated — run `gh auth login`'); }

@@ -45,6 +45,11 @@ test('parseArgs: --dry-run recognised', () => {
   assert.ok(R.parseArgs(['4.39.0', '--dry-run']).dryRun);
 });
 
+test('parseArgs: --allow-dirty defaults false, set true when present', () => {
+  assert.equal(R.parseArgs(['4.39.0', '--full']).allowDirty, false);
+  assert.equal(R.parseArgs(['4.39.0', '--full', '--allow-dirty']).allowDirty, true);
+});
+
 test('parseArgs: accepts both positional and --version forms', () => {
   assert.equal(R.parseArgs(['4.39.0']).version, '4.39.0');
   assert.equal(R.parseArgs(['--version', '4.39.0', '--full']).version, '4.39.0');

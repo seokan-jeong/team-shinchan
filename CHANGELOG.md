@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.45.2] - 2026-06-15
+
+### Fixed
+
+- **Second design-skip path closed.** `misae.md` Step E-3 still wrote `current.stage: planning` (autonomous FINALIZE phase-E flow), contradicting Misae's `Mode: TRANSITION` (-> design) — so design could be skipped even after the v4.45.1 fix to Step 2A.3.
+
+### Changed
+
+- **Single source of truth for stage transitions.** Each transition's destination is now defined ONLY in the owning agent's `Mode: TRANSITION` block (misae: requirements->design, hiroshi: design->planning). Skills/orchestrators invoke `mode: TRANSITION` with approval context only — they no longer restate a destination stage or write `current.stage` themselves. This removes the duplication that caused the v4.45.0/.1 design-skip regressions.
+
 ## [4.45.1] - 2026-06-15
 
 ### Fixed

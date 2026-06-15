@@ -1,5 +1,11 @@
 # Changelog
 
+## [4.45.1] - 2026-06-15
+
+### Fixed
+
+- **Design stage was silently skipped** (regression in v4.45.0). Step 2A.3 (requirements approval) still routed `requirements -> planning` and told Misae to transition to planning, contradicting the new `requirements -> design` TRANSITION — so `/start` jumped straight to planning and Stage 1.5 (Design) never ran. 2A.3 now routes to the design stage; Step 2B skip conditions tightened (design is default-on; skip only on `skip-design` / Quick Fix Path / a genuinely zero-design-choice request).
+
 ## [4.45.0] - 2026-06-13
 
 ### Stage 1.5: dedicated interactive Design stage

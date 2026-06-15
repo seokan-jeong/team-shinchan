@@ -372,14 +372,14 @@ If user picked A (or equivalent):
   Task(subagent_type="team-shinchan:misae", model="sonnet",
     prompt=`mode: TRANSITION
     DOC_ID: ${DOC_ID}
-    User approved REQUESTS.md. Transition WORKFLOW_STATE requirements → design (Stage 1.5,
-    owner: hiroshi) per agents/misae.md TRANSITION. Do NOT transition to planning — the design
-    stage (Step 2B) runs next.`)
+    User approved REQUESTS.md. Apply your TRANSITION mode.`)
 ```
 
-> **Do NOT skip to planning here.** The next step is the design stage (Step 2B). Going straight
-> to planning is the pre-4.45.0 behavior and is a bug — design only gets skipped via the explicit
-> Step 2B skip conditions (`skip-design` / Quick Fix Path), evaluated in Step 2B, not here.
+> **Single source of truth for the destination stage = the agent's `Mode: TRANSITION` block.**
+> Do NOT name a destination stage in this prompt and do NOT write `current.stage` from the skill —
+> Misae's TRANSITION already targets the **design** stage. (Naming "planning" here was the
+> v4.45.0 bug that skipped Stage 1.5.) The next step is the design stage (Step 2B); design is only
+> skipped via the explicit Step 2B skip conditions, evaluated in Step 2B.
 
 ### Step 2A-post: Requirements Complete
 
@@ -406,8 +406,9 @@ A multi-FR feature, anything with `## Open Questions` that are design-shaped (la
 contracts, new keys), or any "approach A vs B" is NOT skippable — run the design loop.
 
 When (and only when) a skip condition holds: narrate "Design stage skipped ({which condition})"
-and transition `design → planning` (`Task(hiroshi, mode: TRANSITION)` if already in `design`,
-else write `current.stage: planning`), then go to Step 2C. Otherwise run the loop below.
+and run `Task(subagent_type="team-shinchan:hiroshi", prompt="mode: TRANSITION\nDOC_ID: {DOC_ID}\nDesign skipped ({reason}). Apply your TRANSITION mode.")` to advance to the next stage — do
+NOT write `current.stage` from the skill (the destination lives in hiroshi.md's TRANSITION). Then
+go to Step 2C. Otherwise run the loop below.
 
 **2B.0 — Read design interview config** (`.shinchan-config.yaml`, else defaults):
 `design.soft_cap` (default 5), `design.hard_cap` (default 8).
@@ -480,10 +481,13 @@ user_decision = AskUserQuestion(questions=[{
 
 If B: Task(hiroshi, mode: REVISE, user_feedback: feedback) → repeat 2B.3.
 If A: Task(subagent_type="team-shinchan:hiroshi", model="opus",
-        prompt="mode: TRANSITION\nDOC_ID: {DOC_ID}\nUser approved DESIGN.md. Transition WORKFLOW_STATE design → planning.")
+        prompt="mode: TRANSITION\nDOC_ID: {DOC_ID}\nUser approved DESIGN.md. Apply your TRANSITION mode.")
 ```
 
-Once TRANSITION returns (stage → planning), proceed to Step 2C.
+> Destination stage is defined by hiroshi.md's `Mode: TRANSITION` (→ planning) — do not restate
+> it here or write `current.stage` from the skill.
+
+Once TRANSITION returns, proceed to Step 2C.
 
 ### Step 2C: Stage Transition Narration
 

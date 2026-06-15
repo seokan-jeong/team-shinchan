@@ -198,6 +198,10 @@ updated `finalize-design-result` block.
 
 #### Mode: `TRANSITION`
 
+> **SINGLE SOURCE OF TRUTH for the `design →` transition.** This block alone defines the
+> destination. Skills/orchestrators invoke `mode: TRANSITION` and must NOT restate or hardcode the
+> destination stage, nor write `current.stage` themselves.
+
 Input: none (user approved DESIGN.md). Update WORKFLOW_STATE.yaml:
 - `current.stage: planning`
 - `current.owner: nene`

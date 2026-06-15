@@ -390,6 +390,10 @@ Revise REQUESTS.md per feedback, re-run Mechanical Pre-Check and AK review, retu
 
 #### Mode: `TRANSITION`
 
+> **SINGLE SOURCE OF TRUTH for the `requirements →` transition.** This block alone defines the
+> destination. Skills/orchestrators (and Step E-3 below) invoke this mode and must NOT restate or
+> hardcode the destination stage, nor write `current.stage` themselves.
+
 Input from parent: no additional fields (user has approved REQUESTS.md).
 
 Update WORKFLOW_STATE.yaml:
@@ -746,15 +750,11 @@ LOOP:
 - If approved: proceed to Step E-3
 
 #### Step E-3: Stage Transition (only reached after AK APPROVED and user approved)
-- Update WORKFLOW_STATE.yaml:
-    current.stage: planning
-    current.owner: nene
-    current.ak_gate.requirements.status: approved
-  Append to history:
-    event: stage_transition
-    from: requirements
-    to: planning
-    agent: misae
+- Perform the transition **exactly as defined in `#### Mode: TRANSITION` above** — that block is
+  the SINGLE SOURCE OF TRUTH for the destination stage/owner. Do NOT restate or hardcode a
+  destination here (requirements hands off to the **design** stage / owner **hiroshi**, NOT
+  directly to planning). Set `current.ak_gate.requirements.status: approved` and append the
+  `stage_transition` history entry as specified there.
 
 #### Step E-4: Escalation (only reached after 2 failed retries)
 Present to user:

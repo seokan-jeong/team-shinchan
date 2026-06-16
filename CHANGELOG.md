@@ -1,5 +1,27 @@
 # Changelog
 
+## [4.46.0] - 2026-06-16
+
+### Added
+
+- **gajae-code 벤치마크 채택 — 4/4 티켓 10종** (외부 MIT 레포 `gajae-code` 분석 → 채택; 전부 additive, 회귀 0):
+  - `src/orchestration-token-benchmark.js` — 결정론적 fixture 기반 토큰 벤치마크(`cacheHitRate`, CI 회귀 검증). (INFRA-01)
+  - `src/spawn-plan-gate.js` — `SpawnPlanReceipt`를 요구하는 하드 fan-out 게이트. **opt-in**(advisory exit-0 관례 유지, 침묵 기본 훅 아님). (INFRA-02)
+  - `src/evidence-gated-approval.js` — 효율화 변경을 벤치마크 증거(token↓, success≥) + 앵커드 승인 없이 차단. (INFRA-04)
+  - `src/goal-ledger.js` — append-only 멀티-goal ledger(동결 objective, 타입드 감사 steering, 하드삭제 금지). (DUR-01)
+  - `src/evidence-receipt.js` — surface 타입드 완료 증거 영수증(`gui/cli/api/native/math`) + freshness 스코핑. (WS-06 + DUR-02)
+  - **Misae 인터뷰 프로토콜 강화**(`agents/misae.md`, `skills/start/SKILL.md`): 토폴로지 게이트(컴포넌트별 weakest-score, WS-01), 양방향·비단조 모호도 + `established_facts`(WS-02), closure/restate 게이트(WS-03), 앵커-시그널 인터뷰 스킵(WS-09).
+  - `skills/verification-before-completion/SKILL.md`: typed evidence-receipt 채택 섹션.
+- 각 신규 모듈 헤더에 MIT origin 출처 인용. 신규 단위 테스트 5종(73 케이스).
+
+### Fixed
+
+- **transition-gate.sh HTML/스테이지 인지 버그 4종** (HTML 산출물 워크플로가 드러냄; 각각 양성 ALLOW + 음성 BLOCK 테스트로 검증):
+  1. requirements 게이트가 `output_format: html`의 `REQUESTS.html`을 인식하지 못하고 `REQUESTS.md`만 찾던 deadlock.
+  2. ambiguity 게이트가 `gate_loop_enabled` 시 `weighted_overall`/`gate_threshold`를 무시하고 unweighted `overall < 0.8`로 오차단하던 문제(들여쓰기 앵커로 `weighted_overall` 오매칭도 차단).
+  3. design→planning 게이트가 `DESIGN.html` 미인식.
+  4. debate 게이트가 AK-승인 Stage 1.5 설계(`DESIGN.md/.html`)를 설계-결정 기록으로 인정하지 않아 중복 debate를 강요하던 마찰 — 설계-스킵/레거시 경로의 debate-or-waiver 요구는 그대로 유지(게이트 강도 미약화).
+
 ## [4.45.2] - 2026-06-15
 
 ### Fixed

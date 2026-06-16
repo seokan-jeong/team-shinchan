@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 
+# Local tooling caches (MCP, etc.)
+.openchrome/
+
 # Build output (legacy, no longer needed)
 dist/
 src/*
@@ -32,6 +35,11 @@ src/*
 !src/option-metrics.js
 !src/dag-executor.js
 !src/hook-matcher.js
+!src/orchestration-token-benchmark.js
+!src/spawn-plan-gate.js
+!src/evidence-gated-approval.js
+!src/goal-ledger.js
+!src/evidence-receipt.js
 !src/statusline/
 !src/statusline/index.js
 !src/dashboard/

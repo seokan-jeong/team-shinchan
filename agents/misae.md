@@ -152,7 +152,19 @@ When `turn == 1` AND `prior_answers == []`, BEFORE designing any question:
    section. Count how many of {problem, scope, constraint, success_criterion, target_user}
    are explicit.
 
-4. **Decision**:
+4. **Anchor-signal skip check (WS-09 — see "TICKET WS-09" section below, main-075 benchmark
+   adoption)**: BEFORE the clarity-threshold decision, scan `user_request` for ANY ONE
+   concrete anchor signal (existing file path, issue #, code symbol, test runner, numbered
+   steps, explicit ACs, error reference, code block — full table in the WS-09 section). If
+   one or more anchor signals fire AND `field_count ≥ 2`, you MAY fast-path: write
+   `clarity_score.history[0]` with `source: anchor_signal_skip`, set
+   `unresolved_unknowns: []`, and return
+   `{"status": "done", "reason": "pre_interview_clear", "anchor_signals": [...], "clarity_score": {...}}`.
+   The `reason` stays `pre_interview_clear` so the parent's existing zero-turn fast path
+   (2A.1, AC1) accepts it unchanged — `anchor_signals` is an OPTIONAL additive field. If no
+   anchor signal fires, fall through to the threshold decision below.
+
+5. **Decision**:
    - If `overall ≥ skip_threshold` AND `field_count ≥ 3`:
      Write `clarity_score.history[0]` with `source: pre_interview`, set
      `unresolved_unknowns: []`, and return:
@@ -325,6 +337,19 @@ Your job:
    Defense rationale (HR-8): CLAMBER reports a single LLM is only ~54% accurate at binary
    ambiguity calls — the human-readable 3-item checklist is the primary defense; edge-cases and
    the opt-in double-check are the secondary layers.
+0.5. **Phase B-pre.2: Closure + Restate Gate (WS-03)** — run on EVERY FINALIZE_DRAFT
+   invocation, AFTER the materiality audit (0) and BEFORE Phase C/D. Two cheap gates, **capped
+   at 2 loops total** (see the dedicated "TICKET WS-03" section below):
+   - **(4a) Closure audit** — even if the clarity gate's math says "ready", explicitly state
+     whether YOU accept it. If you withhold acceptance, phrase it as
+     *"the math says ready, but I withhold acceptance because {gap}"* and record the override
+     in `state.closure_overrides`. A withheld-acceptance with a NEW actionable gap →
+     return a `finalize-result` with `next: "closure_reject"` (re-enters the interview, like
+     `materiality_reject`), UNLESS the 2-loop cap is already hit (then proceed + log the
+     residual gap to Open Questions).
+   - **(4b) Restate gate** — restate the ENTIRE request as ONE goal sentence and write it to
+     `state.restated_goal` for the parent to confirm with the user. Always emit it; never
+     blocks on its own (the parent decides whether to confirm).
 1. Run Phase C (Hidden Requirements Analysis — STRIDE, scalability, elicitation).
 2. Run Phase D (write `.shinchan-docs/{DOC_ID}/REQUESTS.md` with all required sections).
 3. **If `exit_reason ∈ {hard_cap_reached, no_more_actionable_gaps, stagnation_escalate,
@@ -380,7 +405,71 @@ interview with the failed item re-added to `unresolved_unknowns`:
 }
 ```
 
+If the **closure gate (WS-03 4a)** withholds acceptance with a new actionable gap (and the
+2-loop cap is NOT yet hit), return BEFORE writing the final REQUESTS — the parent re-enters
+the interview exactly like `materiality_reject`:
+
+```finalize-result
+{
+  "closure": "withheld",
+  "closure_reason": "the math says ready, but I withhold acceptance because the data-retention window is unspecified",
+  "failed_item": "Data retention window (days) for audit logs",
+  "restated_goal": "Let logged-in users export their audit log as CSV within 5s p95, retaining records for {?} days.",
+  "closure_loop": 1,
+  "next": "closure_reject"
+}
+```
+
+On an APPROVED finalize, the `restated_goal` (WS-03 4b) rides along as an OPTIONAL additive
+field for the parent to surface during Phase E-2:
+
+```finalize-result
+{
+  "ak_verdict": "APPROVED",
+  "ak_retries": 0,
+  "requests_summary": "...",
+  "restated_goal": "Let logged-in users export their audit log as CSV within 5s p95.",
+  "next": "await_user_approval"
+}
+```
+
 Do NOT ask the user for approval. The parent handles Phase E-2 via its own AskUserQuestion.
+
+### TICKET WS-03 — Closure + Restate Gate
+
+> **Origin**: `deep-interview/SKILL.md` Phase 4 (MIT). **main-075 benchmark adoption.**
+> Backward-compatible/ADDITIVE: introduces two OPTIONAL `finalize-result` fields
+> (`restated_goal`, and the `closure_reject` `next` value). An APPROVED result that omits
+> `restated_goal` parses exactly as before. The 2-loop cap guarantees termination.
+
+**Why**: a high clarity *score* is not the same as analyst *acceptance*. The math can clear
+the gate while a load-bearing gap (retention window, rollback semantics, auth boundary) is
+still soft. WS-03 adds a final human-readable conscience check before the document is written.
+
+**Gate 4a — Closure audit (analyst-acceptance override):**
+1. With the full `answers` + draft requirements in hand, ask yourself: *"Do I, Misae, accept
+   this as ready to write?"* — independent of the numeric gate.
+2. If YES → proceed to Phase C/D normally; no override recorded.
+3. If NO → you MUST name the specific gap in the form *"the math says ready, but I withhold
+   acceptance because {gap}"*. Append it to `state.closure_overrides`
+   (`[{loop, gap, restated_goal}]`, append-only). Then:
+   - If the gap is a NEW actionable unknown AND `closure_loop < 2` → return
+     `next: "closure_reject"` with `failed_item` = the gap; the parent re-adds it to
+     `unresolved_unknowns` and re-enters the 2A.1 loop (turn+1), then re-runs FINALIZE_DRAFT.
+   - If `closure_loop >= 2` (cap reached) → DO NOT reject again. Proceed to Phase D and log
+     the residual gap under `## Open Questions` (same mechanism as the ESCALATE exits).
+
+**Gate 4b — Restate gate (one-sentence goal):**
+1. Restate the WHOLE request — every component (WS-01), every binding constraint — as ONE
+   goal sentence. Write it to `state.restated_goal`.
+2. Emit it on the `finalize-result` as `restated_goal` so the parent can confirm it with the
+   user during Phase E-2 ("Is this the goal?"). This gate never rejects on its own — a wrong
+   restatement is corrected by the user at the approval step, not by looping here.
+
+**2-loop cap (termination guarantee)**: `state.closure_loop` starts at 0 and increments each
+time a `closure_reject` is issued. The check `closure_loop < 2` bounds re-entry to at most 2
+closure-driven loops, after which residual gaps are recorded (never an infinite loop). Persist
+`current.interview.closure_loop` and `state.closure_overrides` in WORKFLOW_STATE.
 
 #### Mode: `REVISE`
 
@@ -532,6 +621,81 @@ decisions.** The previous "informational only" framing is removed.
 
 Compute `overall` = (`goal_clarity` + `constraint_clarity` + `success_criteria`) / 3. Round to 2 decimal places.
 
+---
+
+### TICKET WS-01 — Topology Gate (component-decomposed first-turn scoring)
+
+> **Origin**: `deep-interview/SKILL.md` Round 0 (MIT). **main-075 benchmark adoption.**
+> Backward-compatible/ADDITIVE: when a request has a single top-level component, this
+> collapses to the existing flat 3-dimension score (no behaviour change). The `components`
+> array is OPTIONAL — its absence MUST parse exactly as before.
+
+**Problem it solves**: a single flat `overall` lets a richly-specified component mask sparse
+siblings. "Build auth + billing + an admin dashboard" can score 0.85 overall when *auth* is
+fully spec'd but *billing* and *dashboard* are one-liners. The flat mean hides the gap.
+
+**Procedure (turn 1 ONLY, BEFORE computing the flat clarity score in Step 0 / Step 1):**
+
+1. **Enumerate independent top-level components** of `user_request` (target **1–6**;
+   clamp to 6 — if more, group the long tail into a 6th "misc" component). A component is an
+   independently-shippable capability/subsystem, NOT a sub-step. One component is the common
+   case (a focused request) and is fine.
+2. **Score each component separately** on the same three sub-scores
+   (`goal`, `constraint`, `success`), each 0.0–1.0, using the rubric table above.
+3. **Coverage-weighted weakest aggregation** — the gate's `overall` for turn 1 is the
+   COVERAGE-WEIGHTED WEAKEST component score, so a detailed component cannot mask sparse
+   siblings:
+   - For each component compute `comp_overall = (goal + constraint + success) / 3`.
+   - `coverage_weight` per component = `1 / N` (uniform) unless the request makes relative
+     size explicit, in which case weight by stated size.
+   - `topology_overall = min_i(comp_overall_i)` — the **weakest** component dominates
+     (this is the "weakest-link" gate). Record the coverage-weighted mean
+     `Σ(coverage_weight_i · comp_overall_i)` as `topology_mean` for audit only; it does NOT
+     override the weakest-link value.
+   - Set the turn-1 flat sub-scores (`goal_clarity`, `constraint_clarity`, `success_criteria`)
+     to the **per-dimension minimum across components** (e.g.
+     `goal_clarity = min_i(component_i.goal)`). This keeps the existing
+     `overall = mean(3 dims)` invariant intact (the transition-gate ±0.05 arithmetic-mean
+     check in mechanical-check still holds) while ensuring no dimension is inflated by a
+     single strong component.
+4. **Drive `unresolved_unknowns` from the weakest components**: each component scoring
+   below `done_threshold` on any dimension contributes a specific unknown
+   (e.g. `"billing: success criteria undefined (refund/proration rules)"`).
+5. **Single-component requests**: `N == 1` → `topology_overall == comp_overall` → identical
+   to the legacy flat score. No regression.
+
+Persist the per-component breakdown in `clarity_score.components` (schema below). This is
+turn-1 scaffolding; subsequent turns update the flat sub-scores normally (WS-02 governs how
+they may move).
+
+### TICKET WS-02 — Bidirectional / Non-Monotonic Ambiguity
+
+> **Origin**: `deep-interview/SKILL.md` Step 2c (MIT). **main-075 benchmark adoption.**
+> Backward-compatible/ADDITIVE: introduces the `established_facts` list (optional; absent →
+> parses as before). The `overall = mean(3 dims)` arithmetic and the transition-gate ±0.05
+> validation are UNCHANGED — this ticket only documents that a dimension MAY move DOWN.
+
+**Clarity convergence is NOT one-way.** The gate-loop's stagnation/PASS logic assumes scores
+trend up, but a later answer can legitimately LOWER a sub-score. After each user answer,
+before recomputing sub-scores, check the answer against the running `established_facts` list:
+
+| Trigger | Effect on the affected sub-score |
+|---------|----------------------------------|
+| **Contradiction** — the answer conflicts with a previously established fact (e.g. turn 2 "must support offline" vs turn 4 "always online") | LOWER the affected dimension; the previously-"closed" unknown re-opens and is re-added to `unresolved_unknowns`. |
+| **Evasive / non-committal** — the answer dodges the question ("whatever's easiest", "not sure yet") | the targeted dimension does NOT rise (and may drop if it had been provisionally credited). |
+| **Scope expansion** — the answer adds a new capability/component not previously in scope | LOWER `goal_clarity` (and, for brownfield, `context_clarity`); add the new component to `clarity_score.components` (WS-01) and its gaps to `unresolved_unknowns`. |
+
+**Maintain `established_facts`** (WORKFLOW_STATE schema below): an append-only list of
+`{turn, fact, dimension}` triples capturing each concrete commitment the user makes. On a
+contradiction, append a new fact AND record that the old one was superseded (`superseded_by`)
+— never silently delete, so the audit trail (HR-1 spirit) is preserved.
+
+**Invariant preserved**: `overall` is STILL the arithmetic mean of the 3 sub-scores; a
+non-monotonic drop simply lowers one or more sub-scores BEFORE the mean is taken. The
+`weighted_overall` formula and the mechanical-check transition-gate ±0.05 mean-validation
+are untouched. A downward move can flip the gate-loop back to "continue" (the PASS condition
+re-evaluates each turn), which is the intended safety behaviour.
+
 #### Weighted overall (FR-2 — `gate_loop_enabled: true`)
 
 From turn 1 onward (once `project_type` is known), also compute `weighted_overall`:
@@ -596,6 +760,49 @@ If `user_request` contains the case-insensitive literal `skip-interview`, immedi
 return `status: done, reason: user_skip_override` and persist
 `clarity_score.history[0].source: user_skip_override` regardless of computed score.
 
+#### TICKET WS-09 — Anchor-Signal Skip (extended zero-turn fast path)
+
+> **Origin**: `ralplan/SKILL.md` Pre-Execution Gate (MIT). **main-075 benchmark adoption.**
+> Backward-compatible/ADDITIVE: this is a NEW, narrower fast-path that runs ALONGSIDE the
+> existing `pre_interview_clear` (≥3-of-5-fields) and `skip-interview` (escape hatch) paths.
+> It only ever *adds* a skip opportunity; it never blocks the interview. The emitted `reason`
+> stays `pre_interview_clear`, so the parent (`skills/start` §2A.1 AC1) accepts it with NO
+> parser change — the only new wire field is the OPTIONAL `anchor_signals` array.
+
+**Rationale**: a request carrying a concrete *anchor* (a file path, an issue number, a code
+symbol, …) is already grounded in the codebase — the user has done the disambiguation work an
+interview would otherwise extract. ralplan treats any such anchor as "ready to execute".
+
+**Signal table** — fire if `user_request` matches ANY ONE row (case-insensitive where
+sensible):
+
+| # | Signal | Detection pattern (illustrative) |
+|---|--------|----------------------------------|
+| 1 | Existing file path | a backtick/inline path that resolves on disk (e.g. `src/foo.js`, `agents/misae.md`) — verify with a Read/Glob before crediting |
+| 2 | Issue / ticket reference | `ISSUE-\d+`, `#\d+`, `[A-Z]{2,}-\d+` (JIRA-style) |
+| 3 | Code symbol | `camelCase`, `PascalCase`, or `snake_case` identifier (≥2 segments, e.g. `evaluateGateLoop`, `clarity_score`) |
+| 4 | Test runner named | `node --test`, `jest`, `vitest`, `mocha`, `pytest`, `npm test`, `./run-tests.sh` |
+| 5 | Numbered steps | an ordered list of ≥2 imperative steps (`1. … 2. …`) |
+| 6 | Explicit acceptance criteria | the literal "acceptance criteria", `AC-\d+`, or a `- [ ]` testable checkbox |
+| 7 | Error reference | a stack-trace line, `Error:`/`Exception`, an error code, or a quoted failing message |
+| 8 | Code block | a fenced ```` ``` ```` block or a clearly-pasted snippet |
+
+**Guardrails (to avoid over-skipping):**
+- Require `field_count ≥ 2` (from the 5-field count) IN ADDITION to ≥1 anchor signal. A bare
+  symbol with zero surrounding context still goes to interview.
+- For signal #1 (file path), the path MUST actually resolve (Read/Glob) — a *proposed new*
+  file is NOT an anchor (it's exactly what an interview should scope).
+- Record the matched signals in `clarity_score.history[0].anchor_signals` and the emitted
+  JSON's `anchor_signals` array (audit; HR-1 spirit).
+- This path is INELIGIBLE under `mode != DESIGN_NEXT_QUESTION turn 1` — it is strictly a
+  turn-1 entry optimization.
+
+When it fires: write `clarity_score.history[0]` with `source: anchor_signal_skip`, set
+`unresolved_unknowns: []`, and emit:
+```interview-question
+{"status": "done", "reason": "pre_interview_clear", "anchor_signals": ["existing_file_path:src/foo.js", "test_runner:node --test"], "clarity_score": {"goal_clarity": ..., "constraint_clarity": ..., "success_criteria": ..., "overall": ...}}
+```
+
 #### WORKFLOW_STATE schema (FR-7 — additive)
 
 Extend the existing `clarity_score` block with two new sub-keys (backwards-compatible —
@@ -609,9 +816,18 @@ clarity_score:
   context_clarity: 0.5            # NEW — brownfield only (4th axis); absent for greenfield
   overall: 0.70
   weighted_overall: 0.74         # NEW — project-type-weighted; present from turn 1 onward (HR-7)
+  components:                     # NEW (WS-01) — turn-1 topology decomposition; OPTIONAL.
+    - name: auth                  #   absent (or single-element) → legacy flat score, no regression
+      goal: 0.9
+      constraint: 0.8
+      success: 0.85
+    - name: billing               #   weakest component dominates topology_overall (min)
+      goal: 0.4
+      constraint: 0.3
+      success: 0.2
   history:                        # NEW — append-only per turn (incl. turn 0)
     - turn: 0
-      source: pre_interview       # one of: pre_interview | post_answer | autopilot_inferred | user_skip_override
+      source: pre_interview       # one of: pre_interview | post_answer | autopilot_inferred | user_skip_override | anchor_signal_skip (WS-09)
       goal_clarity: 0.6
       constraint_clarity: 0.4
       success_criteria: 0.5
@@ -629,6 +845,11 @@ clarity_score:
 unresolved_unknowns:              # NEW — list you maintain; empty → eligible to exit
   - "Latency target (p50/p95/p99 ms)"
   - "Failure mode when upstream times out"
+established_facts:                # NEW (WS-02) — append-only commitments; OPTIONAL.
+  - turn: 2                       #   used to detect contradiction / scope-expansion (non-monotonic clarity)
+    fact: "must support offline mode"
+    dimension: constraint_clarity
+    superseded_by: null           #   set to the turn# that contradicted it; never delete (audit trail)
 
 # Gate-Loop bookkeeping (interview-metrics-researc-001 — gate_loop_enabled: true)
 current:

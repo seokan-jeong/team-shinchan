@@ -347,14 +347,25 @@ Parse the `finalize-result` JSON block.
   2A.1 interview loop from turn+1 with `failed_item` re-added to `unresolved_unknowns`
   (do NOT reset prior answers), then re-run 2A.2. This keeps the gate honest: a PASS score
   is necessary but not sufficient — material ambiguity sends it back.
+- If `next == "closure_reject"` (WS-03 4a — Misae withheld analyst-acceptance with a new
+  actionable gap, main-075 benchmark adoption) → treat exactly like `materiality_reject`:
+  re-enter the 2A.1 loop from turn+1 with `failed_item` re-added to `unresolved_unknowns`
+  (do NOT reset answers), then re-run 2A.2. The 2-loop cap in Misae's WS-03 guarantees this
+  cannot loop forever — after 2 closure loops Misae proceeds and logs the residual gap to
+  `## Open Questions` instead of rejecting.
+- If `restated_goal` is present on the result (WS-03 4b — OPTIONAL additive field) → carry it
+  into the Phase E-2 approval prompt below so the user confirms the one-sentence goal.
 - If `ak_verdict == "APPROVED"` → continue to 2A.3.
 - If `ak_verdict == "ESCALATED"` → show rejection_reasons to user and stop (user decides next step per Misae Phase E-4).
 
 **2A.3 — Phase E-2 user approval (parent drives AskUserQuestion):**
 
 ```
+# WS-03 4b: if finalize-result carried restated_goal, prepend it so the user confirms the
+# one-sentence goal alongside approval (main-075 benchmark adoption). Optional — omit if absent.
+restate_line = ("목표 확인: " + restated_goal + "\n\n") if restated_goal else ""
 user_decision = AskUserQuestion(questions=[{
-  question: "REQUESTS.md을 승인하시겠어요?",
+  question: restate_line + "REQUESTS.md을 승인하시겠어요?",
   header: "최종 승인",
   options: [
     {label: "A. 승인 — Stage 1.5 (Design)로 진행", description: "요구사항 확정 → Hiroshi와 설계를 진행합니다"},

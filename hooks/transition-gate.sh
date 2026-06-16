@@ -93,16 +93,21 @@ process.stdin.on('end', () => {
         // Both consume Misae's requirements output, so they share the same prerequisites:
         // REQUESTS.md present + AK APPROVED for requirements + the ambiguity (clarity) gate.
         if (currentStage === 'requirements' && (newStage === 'design' || newStage === 'planning')) {
-          const reqFile = path.join(docDir, 'REQUESTS.md');
+          // main-075 fix: honor output_format (REQUESTS.html when html, else REQUESTS.md).
+          // output_format is recorded in WORKFLOW_STATE.yaml (e.g. requests_written history event).
+          const ofMatch = (() => { try { return fs.readFileSync(filePath, 'utf-8').match(/output_format:\\s*(\\S+)/); } catch(e) { return null; } })();
+          const outputFormat = ofMatch ? ofMatch[1].replace(/['\"]/g, '').trim() : 'markdown';
+          const reqLabel = outputFormat === 'html' ? 'REQUESTS.html' : 'REQUESTS.md';
+          const reqFile = path.join(docDir, reqLabel);
           if (!fs.existsSync(reqFile)) {
-            missing.push('REQUESTS.md does not exist');
+            missing.push(reqLabel + ' does not exist');
           } else {
             const content = fs.readFileSync(reqFile, 'utf-8');
             if (!content.match(/problem|목표|objective/i)) {
-              missing.push('REQUESTS.md missing Problem Statement / Objective');
+              missing.push(reqLabel + ' missing Problem Statement / Objective');
             }
             if (!content.match(/requirement|요구사항|기능/i)) {
-              missing.push('REQUESTS.md missing Requirements section');
+              missing.push(reqLabel + ' missing Requirements section');
             }
           }
           // Advisory: Plan Mode — not a hard block (R-5: may not be supported in all versions)
@@ -125,13 +130,20 @@ process.stdin.on('end', () => {
               const goalM = yamlOnDisk.match(/goal_clarity:\\s*([\\d.]+)/);
               const constrM = yamlOnDisk.match(/constraint_clarity:\\s*([\\d.]+)/);
               const successM = yamlOnDisk.match(/success_criteria:\\s*([\\d.]+)/);
-              const overallM = yamlOnDisk.match(/overall:\\s*([\\d.]+)/);
+              // Anchor on indentation so 'weighted_overall' does NOT satisfy the bare 'overall' match.
+              const overallM = yamlOnDisk.match(/^\\s+overall:\\s*([\\d.]+)/m);
+              const weightedM = yamlOnDisk.match(/^\\s+weighted_overall:\\s*([\\d.]+)/m);
+              const gateThreshM = yamlOnDisk.match(/gate_threshold:\\s*([\\d.]+)/);
+              const gateLoopM = yamlOnDisk.match(/gate_loop_enabled:\\s*(true|false)/);
               if (!goalM && !constrM && !successM && !overallM) return null; // absent = legacy
               return {
                 goal: parseFloat(goalM ? goalM[1] : 'NaN'),
                 constraint: parseFloat(constrM ? constrM[1] : 'NaN'),
                 success: parseFloat(successM ? successM[1] : 'NaN'),
                 overall: parseFloat(overallM ? overallM[1] : 'NaN'),
+                weightedOverall: weightedM ? parseFloat(weightedM[1]) : null,
+                gateThreshold: gateThreshM ? parseFloat(gateThreshM[1]) : 0.8,
+                gateLoopEnabled: gateLoopM ? gateLoopM[1] === 'true' : false,
               };
             } catch(e) { return null; }
           })();
@@ -143,19 +155,28 @@ process.stdin.on('end', () => {
             // HR-1: validate arithmetic mean (±0.05 tolerance)
             const computedMean = (clarityRaw.goal + clarityRaw.constraint + clarityRaw.success) / 3;
             const arithmeticValid = Math.abs(computedMean - clarityRaw.overall) <= 0.05;
+            // main-075 fix: Gate-Loop path honors weighted_overall + gate_threshold when
+            // gate_loop_enabled (the interview exit criterion). Legacy workflows fall back to
+            // the unweighted overall < 0.8 check.
+            const useWeighted = clarityRaw.gateLoopEnabled &&
+                                clarityRaw.weightedOverall !== null &&
+                                !Number.isNaN(clarityRaw.weightedOverall);
+            const effectiveScore = useWeighted ? clarityRaw.weightedOverall : clarityRaw.overall;
+            const effectiveThreshold = useWeighted ? clarityRaw.gateThreshold : 0.8;
             if (!arithmeticValid) {
               missing.push(
                 'AMBIGUITY GATE: clarity_score.overall (' + clarityRaw.overall.toFixed(2) +
                 ') does not equal arithmetic mean of sub-scores (' + computedMean.toFixed(2) +
                 ') — possible tampering (HR-1)'
               );
-            } else if (clarityRaw.overall < 0.8) {
+            } else if (effectiveScore < effectiveThreshold) {
               missing.push(
-                'AMBIGUITY GATE: clarity_score.overall = ' + clarityRaw.overall.toFixed(2) +
-                ' < 0.8 — return to Misae for clarification'
+                'AMBIGUITY GATE: ' + (useWeighted ? 'weighted_overall' : 'clarity_score.overall') +
+                ' = ' + effectiveScore.toFixed(2) + ' < ' + effectiveThreshold.toFixed(2) +
+                ' — return to Misae for clarification'
               );
             }
-            // overall >= 0.8 and arithmetic valid: pass silently (FR-1.5)
+            // score >= threshold and arithmetic valid: pass silently (FR-1.5)
           }
         }
 
@@ -163,16 +184,21 @@ process.stdin.on('end', () => {
         // The design stage (Hiroshi, interactive design interview) must produce an
         // AK-approved DESIGN.md before Nene plans against it.
         if (currentStage === 'design' && newStage === 'planning') {
-          const designFile = path.join(docDir, 'DESIGN.md');
+          // main-075 fix: honor output_format (DESIGN.html when html, else DESIGN.md), mirroring
+          // the requirements gate above. Without this, html-format design workflows can never advance.
+          const ofMatchD = (() => { try { return fs.readFileSync(filePath, 'utf-8').match(/output_format:\\s*(\\S+)/); } catch(e) { return null; } })();
+          const outputFormatD = ofMatchD ? ofMatchD[1].replace(/['\"]/g, '').trim() : 'markdown';
+          const designLabel = outputFormatD === 'html' ? 'DESIGN.html' : 'DESIGN.md';
+          const designFile = path.join(docDir, designLabel);
           if (!fs.existsSync(designFile)) {
-            missing.push('DESIGN.md does not exist — the design stage must produce an architecture/design document before planning');
+            missing.push(designLabel + ' does not exist — the design stage must produce an architecture/design document before planning');
           } else {
             const content = fs.readFileSync(designFile, 'utf-8');
             if (!content.match(/architecture|component|approach|설계|아키텍처|컴포넌트|접근/i)) {
-              missing.push('DESIGN.md missing an Architecture / Approach / Components section');
+              missing.push(designLabel + ' missing an Architecture / Approach / Components section');
             }
             if (!content.match(/decision|결정|trade-?off|rationale|근거/i)) {
-              missing.push('DESIGN.md missing Key Decisions / rationale — record the design choices made during the interview');
+              missing.push(designLabel + ' missing Key Decisions / rationale — record the design choices made during the interview');
             }
           }
           // Defense-in-depth: AK APPROVED must exist in history for design stage
@@ -188,10 +214,15 @@ process.stdin.on('end', () => {
 
         // Gate: planning -> execution
         if (currentStage === 'planning' && newStage === 'execution') {
-          const reqFile = path.join(docDir, 'REQUESTS.md');
+          // main-075 fix: honor output_format for REQUESTS (html → REQUESTS.html). PROGRESS.md is
+          // always markdown (Nene's plan), so it is not format-switched.
+          const ofMatchP = (() => { try { return fs.readFileSync(filePath, 'utf-8').match(/output_format:\\s*(\\S+)/); } catch(e) { return null; } })();
+          const outputFormatP = ofMatchP ? ofMatchP[1].replace(/['\"]/g, '').trim() : 'markdown';
+          const reqLabelP = outputFormatP === 'html' ? 'REQUESTS.html' : 'REQUESTS.md';
+          const reqFile = path.join(docDir, reqLabelP);
           const progFile = path.join(docDir, 'PROGRESS.md');
           if (!fs.existsSync(reqFile)) {
-            missing.push('REQUESTS.md does not exist');
+            missing.push(reqLabelP + ' does not exist');
           }
           if (!fs.existsSync(progFile)) {
             missing.push('PROGRESS.md does not exist');
@@ -258,6 +289,16 @@ process.stdin.on('end', () => {
             try { reqForDebate = fs.readFileSync(reqFile, 'utf-8'); } catch(e) {}
             const hasDebateRef = /DECISION-\\d+/.test(content) ||
               /event:\\s*debate|agent:\\s*midori|\\bmidori\\b|fierce-debate/i.test(yamlForDebate);
+            // main-075 fix: an AK-approved Stage 1.5 design stage is itself a recorded, reviewed
+            // design-decision deliberation (DESIGN.md/DESIGN.html with DEC-N choices + AK APPROVED).
+            // The debate gate predates the design stage; recognize it so design-stage workflows are
+            // not forced into a redundant Midori debate. Design-skipped / quick-fix workflows have no
+            // approved design and still require a debate OR a reasoned waiver.
+            const hasApprovedDesign = yamlForDebate.includes('event: ak_review') &&
+              yamlForDebate.includes('stage: design') &&
+              yamlForDebate.includes('verdict: APPROVED') &&
+              yamlForDebate.includes('agent: action_kamen') &&
+              (fs.existsSync(path.join(docDir, 'DESIGN.md')) || fs.existsSync(path.join(docDir, 'DESIGN.html')));
             // Waiver must include a REASON (not a content-free 'none') — a bare waiver was the rubber-stamp hole.
             const hasWaiver = /design\\s+decisions?\\s*\\**\\s*:\\s*\\**\\s*(none|n\\/a)\\b\\s*[—:,\\-(]\\s*\\S/i.test(content) ||
               /no\\s+design\\s+decisions?\\b[^\\n]*[—:,\\-(]\\s*\\S/i.test(content) ||
@@ -266,8 +307,9 @@ process.stdin.on('end', () => {
             // Design-decision signals = a CHOICE is present (choice vocabulary, not mere topic keywords — avoids false-positive friction).
             const designSignals = /\\bvs\\.?\\b|\\bversus\\b|option\\s+[ab]\\b|approach\\s+[12]\\b|trade-?off|alternative approach|irreversible|두 가지 (방식|접근)|중 (선택|어느)/i;
             const hasSignals = designSignals.test(content) || designSignals.test(reqForDebate);
-            if (hasDebateRef) {
-              // A debate decision is recorded (DECISION-NNN or a debate event) — gate satisfied.
+            if (hasDebateRef || hasApprovedDesign) {
+              // A design-decision record exists — either a debate (DECISION-NNN / debate event) OR an
+              // AK-approved Stage 1.5 design stage (DESIGN.md/.html). Gate satisfied.
             } else if (hasSignals) {
               // Floor + signal hard-layer: when a choice is detected, a waiver is NOT enough — debate is required.
               missing.push('DEBATE GATE: design-decision signals (vs / option A|B / approach 1|2 / trade-off / alternative / irreversible) detected in the plan or requirements, but no debate decision is recorded. A waiver is NOT sufficient here — run /team-shinchan:debate (or /team-shinchan:fierce-debate for irreversible/high-stakes) and cite the resulting DECISION-NNN in PROGRESS.md.');

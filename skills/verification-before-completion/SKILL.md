@@ -56,6 +56,8 @@ Use this format in your completion report:
 
 If the verdict is FAIL, fix the issue before claiming completion. Do not report a task as done with a FAIL verdict.
 
+> **Gate-enforced (glucofit / main-075 adoption).** At Stage 4, this `## Verification` section (in `IMPLEMENTATION.md`, or a standalone `VERIFICATION.md`) carrying a `Verdict: PASS` is now a **hard prerequisite** for `status: completed` — `hooks/transition-gate.sh` blocks completion without it. One row per REQUESTS.md acceptance criterion, exercised against REAL behavior (the built-in `verify`/`run` skill for runnable surfaces; the AC check command for non-runnable ones). An `UNVERIFIED` AC blocks completion. This closes the "구현 다 하고 QA하면 엉망" hole where self-graded checklists passed as done.
+
 ## Fierce-review as code-review evidence
 
 At the **before-PR** and **before-completion** checkpoints, an APPROVED fierce-review artifact satisfies the code-review evidence requirement (it is a schema-validated, adversarially-verified rubric pass — stronger than a single read-through). If `.shinchan-docs/reviews/REVIEW-{NNN}.json` exists for the current scope with `verdict.verdict == "APPROVED"` and an empty `must_fix`, cite it:

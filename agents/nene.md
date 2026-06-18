@@ -95,6 +95,15 @@ Read REQUESTS.md **and DESIGN.md** → **Impact Scope Analysis** → Codebase an
 
 Skipping this step is the #1 cause of post-implementation bugs. If ontology exists, combine with ontology impact analysis.
 
+5. **Declare the scope invariant** (`scope.forbidden_paths`). When the work has an explicit do-NOT-touch boundary — a read-only research/analysis deliverable, a "docs only" change, a fix scoped to one layer — write that boundary into `WORKFLOW_STATE.yaml` so it is machine-enforced (not just prose). `hooks/scope-guard.sh` HARD-BLOCKS any Edit/Write to a matching path the moment it is attempted. Globs: `dir/**` (anything under dir), `dir/*` (direct children), `*.lock` (suffix), exact paths.
+   ```yaml
+   scope:
+     forbidden_paths:
+       - "src/**"        # e.g. a read-only benchmark must never modify source
+       - "agents/**"
+   ```
+   This is the lesson of main-075: a plan declared "never touch src/" in prose, execution touched it anyway, and every gate passed. A prose invariant is not an invariant. If the scope must legitimately change mid-flight, update `forbidden_paths` WITH justification — do not edit around it.
+
 ## Pre-conditions
 
 Before starting, verify:

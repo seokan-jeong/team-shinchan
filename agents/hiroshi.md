@@ -178,13 +178,28 @@ Input: `decisions` (all `{turn, decision, choice}`), `DOC_ID`, `REQUESTS.md` pat
      bullet data-flow is good).
    - `## Key Decisions` — one entry per `DEC-N`: the decision, the choice, and the **rationale**
      + the trade-off accepted. Cite `DECISION-NNN` if a /debate was run.
+   - `## Blast Radius & Seam` — **REQUIRED, gate-enforced.** This is what separates a senior fix
+     from a symptom patch. It MUST contain three things:
+     1. **Impact map** — the files/components this change touches and what depends on them. Seed it
+        by running `/team-shinchan:impact-analysis` (you have `Bash`; it runs `ontology-engine.js
+        related` for blast-radius + risk). List affected modules with real paths.
+     2. **Existing mechanisms surveyed** — concrete `file:function` references to any EXISTING
+        mechanism in the codebase that already addresses this problem (the route observer, the
+        gate, the shared service…). "Surveyed, none found" is acceptable ONLY after you actually
+        looked — cite where you looked. Do NOT design new code over an existing seam.
+     3. **Single-seam vs symptom-site** — one line: is this change the single root-cause seam, or
+        one of N symptom sites? If the latter, name the real seam and justify why you are NOT
+        fixing it there. (A recurring-class symptom patch must escalate, not proceed silently.)
    - `## Interfaces & Data Flow` — key contracts between components.
    - `## Open Questions` — ONLY when `exit_reason` is a `*_escalate` and the user chose "record":
      list every unresolved `open_decisions` item.
 2. **Run the design-stage AK review** — `Task(subagent_type="team-shinchan:actionkamen", model="opus")`
-   asking AK to verify DESIGN.md is coherent, complete vs REQUESTS.md, and free of unjustified
-   decisions. Max 2 retries (revise DESIGN.md on REJECT). Record each verdict in
-   WORKFLOW_STATE history as `event: ak_review, agent: action_kamen, stage: design, verdict: ...`.
+   asking AK to verify DESIGN.md is coherent, complete vs REQUESTS.md, free of unjustified
+   decisions, AND that the **`## Blast Radius & Seam`** section is substantive — real impact map,
+   an actual existing-mechanism survey (not an empty claim), and a defensible single-seam-vs-symptom
+   call. REJECT if the change is a symptom patch where a root seam exists. Max 2 retries (revise
+   DESIGN.md on REJECT). Record each verdict in WORKFLOW_STATE history as
+   `event: ak_review, agent: action_kamen, stage: design, verdict: ...`.
 3. Return a single fenced `finalize-design-result` JSON block:
    ```finalize-design-result
    {"ak_verdict": "APPROVED", "next": "user_approval", "design_path": ".shinchan-docs/{DOC_ID}/DESIGN.md"}

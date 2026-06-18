@@ -28,6 +28,7 @@ const workflowGuardBehavior = require('./workflow-guard-behavior');
 const transitionGateBehavior = require('./transition-gate-behavior');
 const agentToolGuardBehavior = require('./agent-tool-guard-behavior');
 const layerGuardBehavior = require('./layer-guard-behavior');
+const scopeGuardBehavior = require('./scope-guard-behavior');
 
 async function runAllValidations() {
   console.log('\n╔════════════════════════════════════════╗');
@@ -58,7 +59,8 @@ async function runAllValidations() {
     workflowGuardBehavior: 0,
     transitionGateBehavior: 0,
     agentToolGuardBehavior: 0,
-    layerGuardBehavior: 0
+    layerGuardBehavior: 0,
+    scopeGuardBehavior: 0
   };
 
   const times = {
@@ -85,7 +87,8 @@ async function runAllValidations() {
     workflowGuardBehavior: 0,
     transitionGateBehavior: 0,
     agentToolGuardBehavior: 0,
-    layerGuardBehavior: 0
+    layerGuardBehavior: 0,
+    scopeGuardBehavior: 0
   };
 
   // Run agent schema validation
@@ -206,6 +209,10 @@ async function runAllValidations() {
   results.layerGuardBehavior = layerGuardBehavior.runValidation();
   times.layerGuardBehavior = Date.now() - start;
 
+  start = Date.now();
+  results.scopeGuardBehavior = scopeGuardBehavior.runValidation();
+  times.scopeGuardBehavior = Date.now() - start;
+
   // Summary
   // Note: tokenBudget stores warning count (not error count) — exclude from totalErrors
   // Warnings are advisory only and do not indicate validation failure.
@@ -242,6 +249,7 @@ async function runAllValidations() {
   console.log(`║  Transition Gate:    ${results.transitionGateBehavior === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.transitionGateBehavior).padStart(5)}ms  ║`);
   console.log(`║  Agent Tool Guard:   ${results.agentToolGuardBehavior === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.agentToolGuardBehavior).padStart(5)}ms  ║`);
   console.log(`║  Layer Guard:        ${results.layerGuardBehavior === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.layerGuardBehavior).padStart(5)}ms  ║`);
+  console.log(`║  Scope Guard:        ${results.scopeGuardBehavior === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.scopeGuardBehavior).padStart(5)}ms  ║`);
   console.log('╠════════════════════════════════════════════════╣');
 
   if (totalErrors === 0 && totalWarnings === 0) {

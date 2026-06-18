@@ -178,6 +178,34 @@ process.stdin.on('end', () => {
             }
             // score >= threshold and arithmetic valid: pass silently (FR-1.5)
           }
+
+          // === Recurrence-Escalation Gate (glucofit adoption) ===
+          // glucofit: one root cause spawned 5 per-widget tickets across runs; nothing ever noticed
+          // \"we keep touching this file.\" When a file referenced in THIS REQUESTS has already been
+          // changed in >=2 prior workflows, make the recurrence VISIBLE: require an explicit
+          // acknowledgment (root-cause stance) before planning — a 3rd+ symptom patch to the same
+          // file must not proceed silently. Conservative: fires only on a concrete file-level repeat.
+          try {
+            const reqText = fs.readFileSync(reqFile, 'utf-8');
+            const reqRefs = (reqText.match(/\`([a-zA-Z0-9_\\-\\/]+\\.[a-z]{1,5})\`/g) || []).map(s => s.replace(/\`/g, ''));
+            if (reqRefs.length > 0) {
+              const shinDir = path.dirname(docDir);
+              const priorImpls = [];
+              const collect = (dir) => { try { for (const e of fs.readdirSync(dir)) {
+                const sub = path.join(dir, e);
+                if (sub === docDir) continue;
+                const impl = path.join(sub, 'IMPLEMENTATION.md');
+                if (fs.existsSync(impl)) priorImpls.push(fs.readFileSync(impl, 'utf-8'));
+              } } catch(_e) {} };
+              collect(shinDir);
+              collect(path.join(shinDir, 'archived'));
+              const recurring = reqRefs.filter(ref => priorImpls.filter(t => t.includes(ref)).length >= 2);
+              const hasAck = /recurrence\\s*[:：]|반복\\s*(인정|확인|이력)|재발|근본\\s*원인|root[-\\s]?cause/i.test(reqText);
+              if (recurring.length > 0 && !hasAck) {
+                missing.push('RECURRENCE GATE: ' + recurring.slice(0, 3).join(', ') + ' has been changed in >=2 prior workflows — this is a recurring class, not a fresh problem. Add a \"Recurrence:\" line to REQUESTS.md naming the ROOT CAUSE (or justify why a fresh fix is correct) before planning. Repeated symptom-patches to the same file must escalate to root-cause.');
+              }
+            }
+          } catch(_e) {}
         }
 
         // Gate: design -> planning
@@ -199,6 +227,17 @@ process.stdin.on('end', () => {
             }
             if (!content.match(/decision|결정|trade-?off|rationale|근거/i)) {
               missing.push(designLabel + ' missing Key Decisions / rationale — record the design choices made during the interview');
+            }
+            // === Seam Gate (glucofit / main-075 adoption) ===
+            // Telemetry: :start produced per-symptom patches (e.g. 5 tickets for 1 root cause)
+            // because no gate ever asked \"where is the single seam, and what is the blast radius?\"
+            // The impact-analysis / systematic-debugging skills already existed but were orphaned.
+            // Make the seam decision VISIBLE at the design→planning boundary (mirrors the DEBATE GATE):
+            // the gate requires the SECTION to exist with substance; AK judges its quality.
+            if (!content.match(/blast\\s*radius|영향\\s*범위|영향범위|영향\\s*반경/i)) {
+              missing.push(designLabel + ' missing a \"## Blast Radius & Seam\" section — map the impact radius (files/components affected) and justify this is the single root-cause seam, not a symptom site. Seed it with /team-shinchan:impact-analysis.');
+            } else if (!content.match(/기존\\s*(메커니즘|구현|코드|솔루션|방식|로직)|existing\\s+(mechanism|implementation|code|solution)|단일\\s*(지점|seam)|root[-\\s]?cause|근본\\s*(원인|지점)|증상\\s*(위치|지점)|symptom\\s*site/i)) {
+              missing.push(designLabel + ' \"Blast Radius & Seam\" section is present but lacks substance — it must (a) name the EXISTING mechanism(s) surveyed for this problem and (b) justify single-seam vs N-symptom-sites. A heading alone is not enough.');
             }
           }
           // Defense-in-depth: AK APPROVED must exist in history for design stage
@@ -356,6 +395,20 @@ process.stdin.on('end', () => {
       })();
       if (!hasLessons && !fs.existsSync(retroFile)) {
         missing.push('RETROSPECTIVE.md missing AND IMPLEMENTATION.md has no `## Lessons` section — one is required before marking workflow as completed (FR-1.4)');
+      }
+      // === Outcome-Verification Gate (glucofit / main-075 adoption) ===
+      // \"구현 다 하고 QA하면 엉망\": completion accepted self-graded checklists + self-authored
+      // tests and never recorded OUTCOME evidence, so broken deliverables passed as done. Require a
+      // Verification record with an explicit PASS verdict — either VERIFICATION.md or a
+      // \"## Verification\" section in IMPLEMENTATION.md. (AK/grounding judge that the evidence is
+      // real; this gate makes its ABSENCE non-skippable.)
+      const implForVerify = (() => { try { return fs.readFileSync(implFile, 'utf-8'); } catch(e) { return ''; } })();
+      const verifFileContent = (() => { try { return fs.readFileSync(path.join(docDir, 'VERIFICATION.md'), 'utf-8'); } catch(e) { return ''; } })();
+      const hasVerifSection = /\\n##\\s+Verification\\b/i.test(implForVerify) || verifFileContent.length > 0;
+      const hasVerdict = /verdict\\s*[:=]\\s*\\**\\s*(pass|passed|✅)/i.test(implForVerify) ||
+                         /verdict\\s*[:=]\\s*\\**\\s*(pass|passed|✅)/i.test(verifFileContent);
+      if (!hasVerifSection || !hasVerdict) {
+        missing.push('OUTCOME-VERIFICATION GATE: no recorded verification evidence with a PASS verdict — add VERIFICATION.md (or a \"## Verification\" section in IMPLEMENTATION.md) that exercises each REQUESTS.md acceptance criterion against REAL behavior (run the built-in `verify`/`run` skill; for non-runnable deliverables run the AC check commands) and records Command / Observed / Verdict: PASS. Self-graded checklists are not evidence.');
       }
     }
   }

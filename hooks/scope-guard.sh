@@ -72,7 +72,51 @@ process.stdin.on('end', () => {
   let yamlContent;
   try { yamlContent = fs.readFileSync(process.env.ACTIVE_YAML, 'utf-8'); } catch(e) { process.exit(0); }
 
-  const stageMatch = yamlContent.match(/^\\s*stage:\\s*(.+)$/m);
+  // === Scope-Invariant Gate (main-075 adoption) — HARD BLOCK ===
+  // The plan may declare scope.forbidden_paths (e.g. a read-only research deliverable that must
+  // NEVER touch src/). main-075 violated its own 'do not touch src/' invariant and the transition
+  // gate certified it clean because nothing compared edits to a declared do-not-touch list. Enforce
+  // it in real time: an Edit/Write to a forbidden path is blocked the moment it is attempted.
+  // Absent forbidden_paths ⇒ no-op (full backward compatibility with legacy workflows).
+  const forbidden = (() => {
+    const out = [];
+    const m = yamlContent.match(/forbidden_paths:\\s*\\n((?:\\s*-\\s*.+\\n?)+)/);
+    if (m) {
+      for (const line of m[1].split('\\n')) {
+        const lm = line.match(/^\\s*-\\s*['\"]?([^'\"\\n]+?)['\"]?\\s*\$/);
+        if (lm) out.push(lm[1].trim());
+      }
+    }
+    return out;
+  })();
+  if (forbidden.length > 0) {
+    const projectRoot0 = process.cwd();
+    let rel0 = filePath;
+    if (filePath.startsWith(projectRoot0)) rel0 = filePath.slice(projectRoot0.length + 1);
+    // Segment-based matching (tolerant of an absolute path prefix — avoids the macOS
+    // /var vs /private/var symlink trap where cwd-stripping silently fails).
+    const isForbidden = (rel) => forbidden.some(g => {
+      g = (g || '').trim();
+      if (!g) return false;
+      if (g.startsWith('*.')) return rel.endsWith(g.slice(1));   // suffix glob, e.g. *.lock
+      let base = g;
+      if (base.endsWith('/**')) base = base.slice(0, -3);
+      else if (base.endsWith('/*')) base = base.slice(0, -2);
+      else if (base.endsWith('/')) base = base.slice(0, -1);
+      else if (base.includes('*')) { const p = base.split('*'); return rel.includes(p[0]) && rel.endsWith(p[p.length - 1]); }
+      // directory / exact: match `base` as a leading path segment, anywhere in an absolute path
+      return rel === base || rel.endsWith('/' + base) || rel.startsWith(base + '/') || rel.includes('/' + base + '/');
+    });
+    if (isForbidden(rel0)) {
+      console.log(JSON.stringify({
+        decision: 'block',
+        reason: 'SCOPE-INVARIANT GATE: \"' + rel0 + '\" matches a plan-declared forbidden path (scope.forbidden_paths in WORKFLOW_STATE.yaml). This workflow declared it must NOT modify this path. If the scope genuinely must change, update scope.forbidden_paths in the plan WITH justification — do not edit around the invariant.'
+      }));
+      return;
+    }
+  }
+
+  const stageMatch = yamlContent.match(/^\\s*stage:\\s*(.+)\$/m);
   if (!stageMatch) process.exit(0);
   const stage = stageMatch[1].trim().replace(/[\"']/g, '');
 

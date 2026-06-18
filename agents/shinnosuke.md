@@ -509,13 +509,24 @@ Task(subagent_type="team-shinchan:actionkamen", model="opus",
 ```
 If unsupported claims are found, have Masumi revise the two docs to remove or correct them BEFORE the final gate. Do not proceed to Step 4 with confabulated docs.
 
-**Step 4: Final Action Kamen Review**
+**Step 3.6: Outcome Verification (run it — do NOT infer)**
+
+The recurring failure was "구현 다 하고 QA하면 엉망": completion was declared on code-written + self-authored tests, never on observed behavior. Before the final gate, exercise the deliverable against **each REQUESTS.md acceptance criterion** and record real evidence to `.shinchan-docs/{DOC_ID}/VERIFICATION.md`:
+
+- **Runnable surfaces** (UI/CLI/API/app): invoke the built-in **`verify`** skill (or **`run`**) to drive the real app and observe behavior per AC. Capture the transcript / screenshot reference.
+- **Non-runnable surfaces** (docs/data/research deliverables): run each AC's concrete check command and paste its actual stdout + exit code.
+- Write one row per AC: `AC-N | Command | Observed | Verdict: PASS|FAIL`. The `## Verification` section (here or in IMPLEMENTATION.md) with a PASS verdict is **gate-enforced** at status→completed.
+- If an AC cannot be exercised, mark it `Verdict: UNVERIFIED` and say so plainly — do NOT write PASS. An UNVERIFIED AC blocks completion until resolved. "should work" / "looks correct" is not evidence.
+
+**Step 4: Final Action Kamen Review (independent — AK runs, not reads)**
 ```typescript
 Task(subagent_type="team-shinchan:actionkamen", model="opus",
-  prompt="FINAL WORKFLOW REVIEW for {DOC_ID}.
-  Verify: all REQUESTS.md acceptance criteria met, all PROGRESS.md phases complete,
-  RETROSPECTIVE.md and IMPLEMENTATION.md exist and are substantive,
-  tests pass, no regressions. This is the last gate before workflow completion.")
+  prompt="FINAL WORKFLOW REVIEW for {DOC_ID}. run_tests: true — do NOT grade the self-report.
+  Independently RE-RUN at least one acceptance-criterion check from VERIFICATION.md yourself and
+  confirm the observed output matches what the report claims (flag any mismatch as a REJECT).
+  Verify: all REQUESTS.md acceptance criteria met AND backed by real Verdict: PASS evidence in
+  VERIFICATION.md, all PROGRESS.md phases complete, RETROSPECTIVE.md and IMPLEMENTATION.md exist
+  and are substantive, no regressions. This is the last gate before workflow completion.")
 ```
 
 **Step 4.5: Branch Completion Options**

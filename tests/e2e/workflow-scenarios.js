@@ -110,6 +110,8 @@ function mkFixture(stage, opts = {}) {
       [
         '# Progress',
         '',
+        'Design decisions: none — single straightforward implementation, no competing approaches.',
+        '',
         '## Phase 1: Initialize project structure and configure all required dependencies (AC-1)',
         '### Phase 1',
         '- [x] Initialize project structure with proper directory layout',

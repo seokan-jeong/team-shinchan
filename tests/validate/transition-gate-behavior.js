@@ -487,7 +487,7 @@ function runValidation() {
       );
       fs.writeFileSync(
         path.join(docsDir, 'IMPLEMENTATION.md'),
-        '# Implementation Notes\n\nFiles changed...\n',
+        '# Implementation Notes\n\nFiles changed...\n\n## Verification\n- AC-1 | `npm test` | 12 passed, 0 failed | Verdict: PASS\n',
         'utf-8'
       );
 
@@ -502,9 +502,34 @@ function runValidation() {
         tmpDir
       );
       if (result.decision !== 'block') {
-        ok('TC-6b: status:completed (RETROSPECTIVE.md + IMPLEMENTATION.md present) → ALLOW');
+        ok('TC-6b: status:completed (RETROSPECTIVE + IMPLEMENTATION + Verification PASS) → ALLOW');
       } else {
         fail(`TC-6b: status:completed (valid artifacts) → expected ALLOW, got BLOCK (reason: ${(result.reason || '').slice(0, 120)})`);
+      }
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  }
+
+  // TC-V1: status:completed WITH RETROSPECTIVE + IMPLEMENTATION but NO Verification evidence → BLOCK
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('completion');
+    try {
+      fs.writeFileSync(path.join(docsDir, 'RETROSPECTIVE.md'), '# Retrospective\n\nWhat went well...\n', 'utf-8');
+      // IMPLEMENTATION.md present but has NO ## Verification section / no PASS verdict
+      fs.writeFileSync(path.join(docsDir, 'IMPLEMENTATION.md'), '# Implementation Notes\n\nFiles changed...\n\n## Lessons\nLearned things.\n', 'utf-8');
+
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile, content: '---\nstage: completion\nstatus: completed\n---\n' } },
+        tmpDir
+      );
+      const mentionsVerify = /OUTCOME-VERIFICATION GATE/.test(result.reason || '');
+      if (result.decision === 'block' && mentionsVerify) {
+        ok('TC-V1: status:completed (no Verification evidence) → BLOCK with OUTCOME-VERIFICATION GATE in reason');
+      } else if (result.decision === 'block') {
+        ok(`TC-V1: status:completed (no Verification evidence) → BLOCK (reason: ${(result.reason || '').slice(0, 80)})`);
+      } else {
+        fail('TC-V1: status:completed (no Verification evidence) → expected BLOCK, got ALLOW (outcome-verification gate not enforced)');
       }
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -571,6 +596,10 @@ function runValidation() {
           'Ingest API, Queue, Worker, Store.',
           '## Key Decisions',
           '- DEC-1: idempotency keyed on message-id — rationale: dedup; trade-off: extra lookup.',
+          '## Blast Radius & Seam',
+          'Impact: src/queue/worker.js, src/ingest/api.js. Existing mechanism surveyed: the existing',
+          'retry helper in src/queue/retry.js — none handles idempotency, so a new seam is justified.',
+          'This is the single root-cause seam (the queue boundary), not a symptom site.',
           ''
         ].join('\n'),
         'utf-8'
@@ -580,7 +609,7 @@ function runValidation() {
         tmpDir
       );
       if (result.decision !== 'block') {
-        ok('TC-D2: design→planning (DESIGN.md + AK design APPROVED on disk) → ALLOW');
+        ok('TC-D2: design→planning (DESIGN.md + Blast Radius & Seam + AK design APPROVED on disk) → ALLOW');
       } else {
         fail(`TC-D2: design→planning (valid DESIGN.md + AK APPROVED) → expected ALLOW, got BLOCK (reason: ${(result.reason || '').slice(0, 120)})`);
       }
@@ -606,6 +635,81 @@ function runValidation() {
         ok('TC-D3: requirements→design (valid REQUESTS.md + AK APPROVED on disk) → ALLOW');
       } else {
         fail(`TC-D3: requirements→design (valid REQUESTS.md + AK APPROVED) → expected ALLOW, got BLOCK (reason: ${(result.reason || '').slice(0, 120)})`);
+      }
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  }
+
+  // ── Seam Gate (design→planning requires Blast Radius & Seam) ─────────────────
+
+  section('2c. Seam Gate — design→planning requires a substantive Blast Radius & Seam section');
+
+  // TC-BR1: design→planning, valid DESIGN.md but NO Blast Radius & Seam section → BLOCK
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('design', { akStage: 'design' });
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'DESIGN.md'),
+        [
+          '# Design',
+          '## Approach',
+          'Patch the stale widget directly.',
+          '## Architecture / Components',
+          'The one widget controller.',
+          '## Key Decisions',
+          '- DEC-1: add a manual refetch on return — rationale: quick; trade-off: per-widget.',
+          ''
+        ].join('\n'),
+        'utf-8'
+      );
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile, content: '---\nstage: planning\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      const mentionsSeam = /Blast Radius & Seam/.test(result.reason || '');
+      if (result.decision === 'block' && mentionsSeam) {
+        ok('TC-BR1: design→planning (no Blast Radius & Seam section) → BLOCK with seam section in reason');
+      } else if (result.decision === 'block') {
+        ok(`TC-BR1: design→planning (no Blast Radius section) → BLOCK (reason: ${(result.reason || '').slice(0, 80)})`);
+      } else {
+        fail('TC-BR1: design→planning (no Blast Radius & Seam) → expected BLOCK, got ALLOW (seam gate not enforced)');
+      }
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  }
+
+  // TC-BR2: design→planning, Blast Radius heading present but NO substance → BLOCK
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('design', { akStage: 'design' });
+    try {
+      fs.writeFileSync(
+        path.join(docsDir, 'DESIGN.md'),
+        [
+          '# Design',
+          '## Approach',
+          'Event-driven queue with a worker pool.',
+          '## Architecture / Components',
+          'Ingest API, Queue, Worker, Store.',
+          '## Key Decisions',
+          '- DEC-1: idempotency keyed on message-id — rationale: dedup; trade-off: extra lookup.',
+          '## Blast Radius & Seam',
+          'TBD.',  // heading only, no existing-mechanism survey, no seam justification
+          ''
+        ].join('\n'),
+        'utf-8'
+      );
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile, content: '---\nstage: planning\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      if (result.decision === 'block' && /lacks substance/.test(result.reason || '')) {
+        ok('TC-BR2: design→planning (Blast Radius heading but no substance) → BLOCK (heading alone insufficient)');
+      } else if (result.decision === 'block') {
+        ok(`TC-BR2: design→planning (empty Blast Radius section) → BLOCK (reason: ${(result.reason || '').slice(0, 80)})`);
+      } else {
+        fail('TC-BR2: design→planning (empty Blast Radius section) → expected BLOCK, got ALLOW (substance not required)');
       }
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -1287,6 +1391,87 @@ function runValidation() {
         fail(`TC-18: ambiguity gate blocks tampered arithmetic — BLOCK but missing "tampering" in reason: ${(result.reason || '').slice(0, 120)}`);
       } else {
         fail('TC-18: ambiguity gate blocks tampered arithmetic (HR-1) — expected BLOCK, got ALLOW');
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // ── Recurrence-Escalation Gate (requirements→planning) ──────────────────────
+
+  section('8. Recurrence Gate — repeated file across prior workflows requires acknowledgment');
+
+  // Helper: seed N prior workflow dirs whose IMPLEMENTATION.md mentions `filePath`
+  function seedPriorWorkflows(docsDir, filePath, n) {
+    const shinDir = path.dirname(docsDir);
+    for (let i = 1; i <= n; i++) {
+      const d = path.join(shinDir, 'prior-' + i);
+      fs.mkdirSync(d, { recursive: true });
+      fs.writeFileSync(path.join(d, 'IMPLEMENTATION.md'),
+        `# Implementation\n\n## Files Changed\n| ${filePath} | edit | fixed the widget |\n`, 'utf-8');
+    }
+  }
+
+  // TC-RG1: REQUESTS references a file changed in >=2 prior workflows, NO acknowledgment → BLOCK
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('requirements', { akStage: 'requirements' });
+    try {
+      seedPriorWorkflows(docsDir, 'src/home.js', 2);
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nThe `src/home.js` card shows stale data on return.\n\n# Requirements\n- Fix the stale card in `src/home.js`\n',
+        'utf-8'
+      );
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile, content: '---\nstage: planning\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      if (result.decision === 'block' && /RECURRENCE GATE/.test(result.reason || '')) {
+        ok('TC-RG1: REQUESTS file changed in 2 prior workflows, no ack → BLOCK with RECURRENCE GATE');
+      } else {
+        fail(`TC-RG1: recurring file, no ack → expected BLOCK(RECURRENCE), got decision="${result.decision}" reason="${(result.reason || '').slice(0, 90)}"`);
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // TC-RG2: same recurrence BUT REQUESTS carries a "Recurrence:" root-cause acknowledgment → ALLOW
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('requirements', { akStage: 'requirements' });
+    try {
+      seedPriorWorkflows(docsDir, 'src/home.js', 2);
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nThe `src/home.js` card shows stale data on return.\n\nRecurrence: 3rd time on `src/home.js` — root cause is the leaky route-observer trigger; this fixes the seam, not the widget.\n\n# Requirements\n- Fix the route-observer gate\n',
+        'utf-8'
+      );
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile, content: '---\nstage: planning\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      if (result.decision !== 'block') {
+        ok('TC-RG2: recurring file WITH Recurrence: root-cause acknowledgment → ALLOW');
+      } else {
+        fail(`TC-RG2: recurring file + ack → expected ALLOW, got BLOCK: ${(result.reason || '').slice(0, 90)}`);
+      }
+    } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
+  }
+
+  // TC-RG3: file referenced but only 1 prior workflow (below threshold) → ALLOW (no false escalation)
+  {
+    const { tmpDir, docsDir, workflowFile } = mkTmpFixture('requirements', { akStage: 'requirements' });
+    try {
+      seedPriorWorkflows(docsDir, 'src/home.js', 1);
+      fs.writeFileSync(
+        path.join(docsDir, 'REQUESTS.md'),
+        '# Problem Statement\nThe `src/home.js` card shows stale data.\n\n# Requirements\n- Fix the stale card in `src/home.js`\n',
+        'utf-8'
+      );
+      const result = runHook(
+        { tool_name: 'Write', tool_input: { file_path: workflowFile, content: '---\nstage: planning\nstatus: active\n---\n' } },
+        tmpDir
+      );
+      if (result.decision !== 'block') {
+        ok('TC-RG3: file in only 1 prior workflow (below threshold) → ALLOW (no false escalation)');
+      } else {
+        fail(`TC-RG3: below-threshold file → expected ALLOW, got BLOCK: ${(result.reason || '').slice(0, 90)}`);
       }
     } finally { fs.rmSync(tmpDir, { recursive: true, force: true }); }
   }

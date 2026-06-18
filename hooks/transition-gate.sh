@@ -345,13 +345,24 @@ process.stdin.on('end', () => {
               /debate\\s*\\**\\s*:\\s*\\**\\s*(none|waived|n\\/a)\\b\\s*[—:,\\-(]\\s*\\S/i.test(content);
             // Design-decision signals = a CHOICE is present (choice vocabulary, not mere topic keywords — avoids false-positive friction).
             const designSignals = /\\bvs\\.?\\b|\\bversus\\b|option\\s+[ab]\\b|approach\\s+[12]\\b|trade-?off|alternative approach|irreversible|두 가지 (방식|접근)|중 (선택|어느)/i;
-            const hasSignals = designSignals.test(content) || designSignals.test(reqForDebate);
+            // False-positive guards (PRO-2406 field report): comparison vocabulary inside markdown
+            // tables and fenced code blocks is data being described, not an open design choice.
+            const stripNonProse = (text) => text
+              .replace(/\`\`\`[\\s\\S]*?\`\`\`/g, ' ')
+              .replace(/^\\s*\\|.*\$/gm, ' ');
+            // Scope the plan scan to the Design Decisions section when one exists — that section is
+            // the contract surface where the planner must surface choices, so vocabulary elsewhere
+            // (risk tables, carry-over notes) no longer hard-blocks. Plans WITHOUT the section fall
+            // back to a whole-document scan, so undeclared choices are still caught.
+            const ddSectionMatch = content.match(/(^|\\n)#{1,3}\\s*(design\\s+decisions?|설계\\s*결정)[^\\n]*\\n([\\s\\S]*?)(?=\\n#{1,3}\\s|\$)/i);
+            const progressScanText = stripNonProse(ddSectionMatch ? ddSectionMatch[3] : content);
+            const hasSignals = designSignals.test(progressScanText) || designSignals.test(stripNonProse(reqForDebate));
             if (hasDebateRef || hasApprovedDesign) {
               // A design-decision record exists — either a debate (DECISION-NNN / debate event) OR an
               // AK-approved Stage 1.5 design stage (DESIGN.md/.html). Gate satisfied.
             } else if (hasSignals) {
               // Floor + signal hard-layer: when a choice is detected, a waiver is NOT enough — debate is required.
-              missing.push('DEBATE GATE: design-decision signals (vs / option A|B / approach 1|2 / trade-off / alternative / irreversible) detected in the plan or requirements, but no debate decision is recorded. A waiver is NOT sufficient here — run /team-shinchan:debate (or /team-shinchan:fierce-debate for irreversible/high-stakes) and cite the resulting DECISION-NNN in PROGRESS.md.');
+              missing.push('DEBATE GATE: design-decision signals (vs / option A|B / approach 1|2 / trade-off / alternative / irreversible) detected in the plan Design Decisions section (or plan body when no such section exists) or in REQUESTS.md, but no debate decision is recorded. A waiver is NOT sufficient here — run /team-shinchan:debate (or /team-shinchan:fierce-debate for irreversible/high-stakes) and cite the resulting DECISION-NNN in PROGRESS.md.');
             } else if (!hasWaiver) {
               missing.push('DEBATE GATE: planning to execution requires a design-decision record. Either run /team-shinchan:debate and cite the DECISION-NNN in PROGRESS.md, OR add a one-line waiver WITH A REASON to PROGRESS.md: \"Design decisions: none - {why no design choice exists}\".');
             }

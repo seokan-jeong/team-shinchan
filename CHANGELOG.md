@@ -1,6 +1,16 @@
 # Changelog
 
-## [Unreleased]
+## [4.47.0] - 2026-06-18
+
+### Senior-rigor gates for `:start` — root-cause + outcome enforcement
+
+Diagnosed from a green-gates-but-broken-QA run (main-075) and recurring symptom-patching across a real project (one root cause → 5 per-widget tickets): the right capabilities existed but were unwired at the converging seam. Four **hard** gates wired in — each with positive (ALLOW) + negative (BLOCK) behavior tests and no `continue-on-error` escape:
+
+- **Seam Gate** (`hooks/transition-gate.sh`, design→planning): DESIGN must carry a substantive `## Blast Radius & Seam` section — impact map + existing-mechanism survey + single-seam-vs-symptom justification. `agents/hiroshi.md` writes it; the gate enforces presence + substance; Action Kamen judges quality.
+- **Outcome-Verification Gate** (status→completed): requires recorded behavior evidence (a `## Verification` section / `VERIFICATION.md` with `Verdict: PASS`). `agents/shinnosuke.md` Stage 4 runs the built-in `verify`/`run` skill against each acceptance criterion; AK independently re-runs ≥1 AC (`run_tests:true`) instead of grading the self-report. Closes the "구현 다 하고 QA하면 엉망" hole.
+- **Scope-Invariant Gate** (`hooks/scope-guard.sh`, real-time PreToolUse): hard-blocks any Edit/Write matching a plan-declared `scope.forbidden_paths` (segment-based glob match); `agents/nene.md` declares it. Absent ⇒ no-op (backward compatible). Closes main-075's "prose invariant ignored, gate certified clean".
+- **Recurrence Gate** (requirements→planning): when a file referenced in REQUESTS was changed in ≥2 prior workflows and no `Recurrence:` root-cause acknowledgment exists, block. Conservative concrete file-level signal.
+- **Tests**: new `tests/validate/scope-guard-behavior.js` (SG-1..5, registered in `tests/validate/index.js`); TC-BR1/BR2, TC-V1, TC-RG1/2/3 added to `tests/validate/transition-gate-behavior.js`; stale e2e fixture S-1b fixed.
 
 ### Debate gate — false-positive reduction (PRO-2406 field report)
 

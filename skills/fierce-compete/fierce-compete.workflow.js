@@ -32,6 +32,11 @@ const BO = (A.builderPersona && String(A.builderPersona).trim())
 const AK = (A.judgePersona && String(A.judgePersona).trim())
   ? `${String(A.judgePersona).trim()} ${JUDGE_DIRECTIVES}`
   : `You are Action Kamen, team-shinchan’s uncompromising reviewer. ${JUDGE_DIRECTIVES}`
+// Learning block for the work-doing builders (main-077): injected by the SKILL as `builderLearnings`.
+// Additive to the persona; empty/absent → no change (NFR-2, graceful).
+const BUILDER_LEARNINGS = (A.builderLearnings && String(A.builderLearnings).trim())
+  ? `${String(A.builderLearnings).trim()}\n\n`
+  : ''
 
 const IMPL = {
   type: 'object', additionalProperties: false, required: ['approach', 'patch'],
@@ -69,7 +74,7 @@ log(`Fierce compete: "${task}" — ${N} independent implementations, head-to-hea
 const impls = (await parallel(
   Array.from({ length: N }, (_, i) => () =>
     agent(
-      `${BO}\n\nTask: ${task}\n\n${ctx}You are builder #${i + 1} of ${N}, competing independently against the others. Produce your single strongest solution.`,
+      `${BO}\n\n${BUILDER_LEARNINGS}Task: ${task}\n\n${ctx}You are builder #${i + 1} of ${N}, competing independently against the others. Produce your single strongest solution.`,
       { label: `impl:${i + 1}`, phase: 'Implement', schema: IMPL }
     ).then(r => r && { index: i + 1, ...r })
   )

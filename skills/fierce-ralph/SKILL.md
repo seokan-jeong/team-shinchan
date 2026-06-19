@@ -20,6 +20,7 @@ Fierce ralph is a main-loop **Workflow** whose loop condition is owned by the SC
 - **Personas (DRY)**: resolve worker + verifier personas from the agent files and pass them in `args` (the runtime can't load plugin subagents):
   ```bash
   node ${CLAUDE_PLUGIN_ROOT}/src/workflow-personas.js kazama actionkamen
+  node ${CLAUDE_PLUGIN_ROOT}/src/workflow-personas.js --learnings kazama
   ```
 
 ## Step 2: Run the fierce-ralph Workflow
@@ -32,6 +33,7 @@ Workflow({
     progressDoc: ".shinchan-docs/{DOC_ID}/PROGRESS.md",   // optional
     maxIterations: 20,                                     // capped at 20 (default 20 when the user did not specify)
     workerPersona: "<workflow-personas.js kazama>",
+    workerLearnings: "<workflow-personas.js --learnings kazama>",
     judgePersona: "<workflow-personas.js actionkamen>"
   }
 })

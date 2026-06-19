@@ -22,14 +22,15 @@ If args length > 2000 characters:
 
 Quality-first: a single agent juggling all five dimensions in one context under-attends the later ones and never re-checks its own findings. When `/team-shinchan:review` runs in the **main loop**, the adversarial multi-dimension Workflow is the **default** — independent per-dimension agents, a non-skippable per-finding refutation, completeness + interaction critics, and a deterministic 3-lens judge panel.
 
-1. Resolve `scope` + `files` (git diff), pick the rubric from `${CLAUDE_PLUGIN_ROOT}/agents/_shared/eval-rubrics.json`, and resolve Action Kamen's persona via `node ${CLAUDE_PLUGIN_ROOT}/src/workflow-personas.js actionkamen` — exactly as `team-shinchan:fierce-review` Step 1 specifies.
+1. Resolve `scope` + `files` (git diff), pick the rubric from `${CLAUDE_PLUGIN_ROOT}/agents/_shared/eval-rubrics.json`, and resolve Action Kamen's persona via `node ${CLAUDE_PLUGIN_ROOT}/src/workflow-personas.js actionkamen` — exactly as `team-shinchan:fierce-review` Step 1 specifies. Also resolve `node ${CLAUDE_PLUGIN_ROOT}/src/workflow-personas.js --learnings actionkamen` and inject it as `args.learnings` (mirror fierce-review; distinct from `args.persona` — FR-5/AC-8).
 2. Launch the Workflow (`deepen` defaults to true):
    ```
    Workflow({
      scriptPath: "${CLAUDE_PLUGIN_ROOT}/skills/fierce-review/fierce-review.workflow.js",
      args: { scope: "<one-line scope>", files: ["<path>", "..."], baseRef: "main",
              rubric: { /* object from eval-rubrics.json */ },
-             persona: "<string from workflow-personas.js actionkamen>" }
+             persona: "<string from workflow-personas.js actionkamen>",
+             learnings: "<string from workflow-personas.js --learnings actionkamen>" }
    })
    ```
 3. Record + present per `team-shinchan:fierce-review` Steps 3–4 (write `.shinchan-docs/reviews/REVIEW-{NNN}.json`; an APPROVED artifact counts as code-review evidence for `team-shinchan:verification-before-completion`). Never finalize without user confirmation.

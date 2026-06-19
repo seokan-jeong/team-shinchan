@@ -19,6 +19,7 @@ Fierce compete is a main-loop **Workflow** that runs a guaranteed competitive to
 - **Personas (DRY)**: resolve builder + judge personas from the agent files and pass them in `args`:
   ```bash
   node ${CLAUDE_PLUGIN_ROOT}/src/workflow-personas.js bo actionkamen
+  node ${CLAUDE_PLUGIN_ROOT}/src/workflow-personas.js --learnings bo
   ```
 
 ## Step 2: Run the fierce-compete Workflow
@@ -31,6 +32,7 @@ Workflow({
     n: 4,                                  // 2..4 (default 4 when the user did not specify)
     files: ["<path>", "..."],              // context the builders should read
     builderPersona: "<workflow-personas.js bo>",
+    builderLearnings: "<workflow-personas.js --learnings bo>",
     judgePersona: "<workflow-personas.js actionkamen>"
   }
 })

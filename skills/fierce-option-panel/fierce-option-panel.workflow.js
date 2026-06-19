@@ -68,6 +68,11 @@ const GEN = (A.generatorPersona && String(A.generatorPersona).trim())
 const JUDGE = (A.judgePersona && String(A.judgePersona).trim())
   ? `${String(A.judgePersona).trim()} ${JUDGE_DIRECTIVES}`
   : `You are Action Kamen, team-shinchan's uncompromising reviewer. ${JUDGE_DIRECTIVES}`
+// Learning block for the work-doing generators (main-077): injected by the SKILL as
+// `generatorLearnings`. Additive to the persona; empty/absent → no change (NFR-2, graceful).
+const GEN_LEARNINGS = (A.generatorLearnings && String(A.generatorLearnings).trim())
+  ? `${String(A.generatorLearnings).trim()}\n\n`
+  : ''
 
 const OPTION = {
   type: 'object', additionalProperties: false, required: ['option', 'evidence', 'weight'],
@@ -104,7 +109,7 @@ log(`fierce-option-panel: "${question}" — ${N} diverse generators (structure-f
 const raw = (await parallel(
   Array.from({ length: N }, (_, i) => () =>
     agent(
-      `${GEN}\n\nInterview question: ${question}\n\n${ctx}You are generator #${i + 1} of ${N}, ` +
+      `${GEN}\n\n${GEN_LEARNINGS}Interview question: ${question}\n\n${ctx}You are generator #${i + 1} of ${N}, ` +
       `working INDEPENDENTLY from the others. Produce your single best candidate option.`,
       { label: `gen:${i + 1}`, phase: 'Generate', schema: OPTION }
     ).then(r => r && { index: i + 1, ...r })

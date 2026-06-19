@@ -63,10 +63,19 @@ const reviewingWorkflowScript = files.some(f => /\.workflow\.js$/.test(String(f)
 const WORKFLOW_API_NOTE = reviewingWorkflowScript
   ? ' WORKFLOW-RUNTIME GROUND TRUTH (some files under review are Claude Code Workflow scripts, *.workflow.js): the runtime provides these GLOBAL primitives — never flag them as undefined or as missing imports: agent(prompt, opts?), parallel(thunks), pipeline(items, ...stages), phase(title), log(msg), workflow(name, args), plus the globals args and budget. Such a script starts with `export const meta = {...}` and runs its body with top-level await. EMPIRICAL EXECUTION OUTWEIGHS INFERENCE: if a script produced output it necessarily ran through the primitives on that path, so do not raise a "this primitive does not exist / the script crashes at this call" finding unless you have evidence the runtime itself rejected it.'
   : ''
+// Learning block (main-077): injected by the SKILL as `args.learnings`, distinct from `persona`
+// and additive (FR-5/AC-8). Woven into AK so it reaches every work-doing agent built on it —
+// the dimension reviewers, skeptic/verifier, completeness/interaction critics, and judges (all
+// already carry the persona, so adding learnings here is consistent — Step 3). Empty/absent →
+// no change (NFR-2, graceful).
+const LEARNINGS = (A.learnings && String(A.learnings).trim())
+  ? `\n\n${String(A.learnings).trim()}`
+  : ''
 const AK = ((A.persona && String(A.persona).trim())
   ? `${String(A.persona).trim()} ${REVIEW_DIRECTIVES}`
   : `You are Action Kamen, team-shinchan’s uncompromising, justice-minded reviewer. ${REVIEW_DIRECTIVES}`)
   + WORKFLOW_API_NOTE
+  + LEARNINGS
 const fileList = files.length ? files.join('\n') : '(no explicit file list — discover changed files yourself with git)'
 
 const DIMENSIONS = [

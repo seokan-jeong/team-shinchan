@@ -92,10 +92,11 @@ Read REQUESTS.md **and DESIGN.md** → **Impact Scope Analysis** → Codebase an
    - `tests/validate/*.js` → `KNOWN_*` arrays must include new entries
 3. **Include ALL discovered files** in the phase's `### 변경 사항` section
 4. **If a paired file exists but you're only changing one side**, explicitly justify why the other side doesn't need updating
+5. **Delivery AC (Action Kamen S5)** — for EVERY value the change PRODUCES that another component consumes (a hook `decision`/stdout, an injected `args.*` field, a written record, an emitted block, an event), the plan MUST (a) include the **consumer's use-site** as a changed/verified file in `### 변경 사항`, and (b) add at least one acceptance criterion that asserts **end-to-end DELIVERY** — the value demonstrably reaches and is USED by the consumer — with a `verify` that exercises that path. An AC/test that only checks the value was produced / injected / "the string is present" does **NOT** count: that is exactly how inert-but-tested features (a block hook whose JSON never reached Claude Code; a learnings arg the script never read) slipped past green gates. Action Kamen rejects on S5 if a produced value has no consumer use-site or no delivery-asserting AC.
 
 Skipping this step is the #1 cause of post-implementation bugs. If ontology exists, combine with ontology impact analysis.
 
-5. **Declare the scope invariant** (`scope.forbidden_paths`). When the work has an explicit do-NOT-touch boundary — a read-only research/analysis deliverable, a "docs only" change, a fix scoped to one layer — write that boundary into `WORKFLOW_STATE.yaml` so it is machine-enforced (not just prose). `hooks/scope-guard.sh` HARD-BLOCKS any Edit/Write to a matching path the moment it is attempted. Globs: `dir/**` (anything under dir), `dir/*` (direct children), `*.lock` (suffix), exact paths.
+6. **Declare the scope invariant** (`scope.forbidden_paths`). When the work has an explicit do-NOT-touch boundary — a read-only research/analysis deliverable, a "docs only" change, a fix scoped to one layer — write that boundary into `WORKFLOW_STATE.yaml` so it is machine-enforced (not just prose). `hooks/scope-guard.sh` HARD-BLOCKS any Edit/Write to a matching path the moment it is attempted. Globs: `dir/**` (anything under dir), `dir/*` (direct children), `*.lock` (suffix), exact paths.
    ```yaml
    scope:
      forbidden_paths:

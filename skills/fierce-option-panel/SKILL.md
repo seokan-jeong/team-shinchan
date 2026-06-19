@@ -42,6 +42,7 @@ workflow, so the extra per-turn cost is worth it. Documented identically in
 - **Personas (DRY)**: resolve generator + judge personas from the agent files:
   ```bash
   node ${CLAUDE_PLUGIN_ROOT}/src/workflow-personas.js misae actionkamen
+  node ${CLAUDE_PLUGIN_ROOT}/src/workflow-personas.js --learnings misae
   ```
 
 ## Step 2: Run the fierce-option-panel Workflow
@@ -55,6 +56,7 @@ Workflow({
     kMax: 6,                                // interview.fierce_panel_k_max
     files: ["<path>", "..."],              // context the generators should read
     generatorPersona: "<workflow-personas.js misae>",
+    generatorLearnings: "<workflow-personas.js --learnings misae>",
     judgePersona: "<workflow-personas.js actionkamen>"
   }
 })

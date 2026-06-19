@@ -141,12 +141,16 @@ function runValidation() {
     // Check that every entry has a Tier field
     console.log('\nChecking Tier field presence...');
     const entryBlocks = learnContent.split(/\n---\n/).filter(b => /^### \[/.test(b.trim()));
-    const missingTier = entryBlocks.filter(b => !/\*\*Tier\*\*:/.test(b));
+    // `[skeleton]` entries are deterministic metric-only stubs written by hooks/session-wrap.sh
+    // (main-076 FR-1); they intentionally carry NO Tier/Confidence/Insight (the NFR-1 determinism
+    // boundary — the model fills those later). Exempt them from the Tier-presence requirement.
+    const realEntries = entryBlocks.filter(b => !/^### \[skeleton\]/.test(b.trim()));
+    const missingTier = realEntries.filter(b => !/\*\*Tier\*\*:/.test(b));
     if (missingTier.length > 0) {
       errors.push(`${missingTier.length} learning entry(ies) missing **Tier**: field`);
       console.log(`  \x1b[31m✗\x1b[0m ${missingTier.length} entry(ies) missing **Tier** field`);
-    } else if (entryBlocks.length > 0) {
-      console.log(`  \x1b[32m✓\x1b[0m All ${entryBlocks.length} entries have **Tier** field`);
+    } else if (realEntries.length > 0) {
+      console.log(`  \x1b[32m✓\x1b[0m All ${realEntries.length} entries have **Tier** field`);
     } else {
       console.log('  \x1b[33m-\x1b[0m No entries found to check');
     }

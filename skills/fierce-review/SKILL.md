@@ -28,7 +28,7 @@ The script can't read files/git — resolve these here, pass them in `args`.
 
 **Rubric (single source of truth):** read `${CLAUDE_PLUGIN_ROOT}/agents/_shared/eval-rubrics.json` and pick the rubric matching the scope — `default` for code, `documentation` for `.md` docs (REQUESTS/PROGRESS/IMPLEMENTATION/RETROSPECTIVE), `planning` for plan docs. Pass that rubric **object** in `args` so the judge reuses the exact items + `pass_threshold_pct` (never fork the rubric).
 
-**Persona (DRY):** resolve Action Kamen's persona via `node ${CLAUDE_PLUGIN_ROOT}/src/workflow-personas.js actionkamen` and pass it as `args.persona` (runtime can't load plugin subagents; the script appends the review directives).
+**Persona (DRY):** resolve Action Kamen's persona via `node ${CLAUDE_PLUGIN_ROOT}/src/workflow-personas.js actionkamen` and pass it as `args.persona` (runtime can't load plugin subagents; the script appends the review directives). Also resolve `node ${CLAUDE_PLUGIN_ROOT}/src/workflow-personas.js --learnings actionkamen` and pass it as `args.learnings` (distinct from `args.persona`, additive — FR-5/AC-8).
 
 ## Step 2: Run the fierce-review Workflow
 
@@ -41,6 +41,7 @@ Workflow({
     baseRef: "main",
     rubric: { /* the object loaded from eval-rubrics.json */ },
     persona: "<the string printed by workflow-personas.js actionkamen>",
+    learnings: "<the string printed by workflow-personas.js --learnings actionkamen>",
     deepen: true           // default: also verifies the critics' own finds (set false for a lighter pass)
   }
 })

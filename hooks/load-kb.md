@@ -49,6 +49,10 @@ Each learning entry has an optional `tier` field (`preference` | `procedural` | 
 
 Score each learning entry instead of loading by recency alone:
 
+The canonical arithmetic now lives in `src/score-learning.js` (single source of truth — DEC-1 of
+main-077). This section documents it; the module implements it; `tests/score-learning.test.js`
+gates any prose↔code drift with a golden vector.
+
 ```
 score = (tier_weight * 3) + (stage_category_match * 2) + (tag_overlap_count * 1)
 ```
@@ -56,6 +60,11 @@ score = (tier_weight * 3) + (stage_category_match * 2) + (tag_overlap_count * 1)
 - `tier_weight`: preference=3, procedural=2, tool=1 (tool=0 if stage != execution)
 - `stage_category_match`: 1 if category is in stage's preferred list, else 0
 - `tag_overlap_count`: number of learning tags matching context keywords (from WORKFLOW_STATE.yaml phase and REQUESTS.md)
+
+> **Golden vector (drift gate)**: `{tier:preference, category:convention, tags:[architecture,agents]}`
+> against `{stage:planning, keywords:[architecture,plan]}` scores **12** (= 3·3 + 1·2 + 1·1). See
+> `tests/score-learning.test.js`. Changing the formula here without updating `src/score-learning.js`
+> (or vice-versa) makes that test fail.
 
 Sort descending by score; tie-break by recency. Display top 5.
 

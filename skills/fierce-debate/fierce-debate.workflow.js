@@ -78,9 +78,9 @@ phase('Advocate')
 log(`Fierce debate: "${topic}" — ${PANEL.length} options, mandatory cross-refutation.`)
 const advocates = (await parallel(PANEL.map((o) => () =>
   agent(
-    `${o.persona || DEFAULT_PERSONA}\n\nYou are the dedicated advocate for option "${o.label}" in this decision: ${topic}\n\nArgue MAXIMALLY for "${o.label}" — the strongest honest case, concrete evidence, and the single tradeoff you accept. Do NOT hedge toward any other option.`,
+    `${o.persona || DEFAULT_PERSONA}\n\n${o.learnings ? o.learnings + '\n\n' : ''}You are the dedicated advocate for option "${o.label}" in this decision: ${topic}\n\nArgue MAXIMALLY for "${o.label}" — the strongest honest case, concrete evidence, and the single tradeoff you accept. Do NOT hedge toward any other option.`,
     { label: `advocate:${o.label}`, phase: 'Advocate', schema: ADVOCATE }
-  ).then(r => r && { ...r, option: o.label, persona: o.persona || DEFAULT_PERSONA })
+  ).then(r => r && { ...r, option: o.label, persona: o.persona || DEFAULT_PERSONA, learnings: o.learnings || '' })
 ))).filter(Boolean)
 
 if (advocates.length < 2) {
@@ -93,7 +93,7 @@ phase('Refute')
 const refutations = (await parallel(advocates.flatMap(a =>
   advocates.filter(b => b.option !== a.option).map(b => () =>
     agent(
-      `${a.persona}\n\nYou championed "${a.option}". Now REFUTE the strongest claim made for "${b.option}":\n\n"${b.strongest_claim}"\n\nAttack it as hard as you honestly can. Set holds=true ONLY if it genuinely survives your attack.`,
+      `${a.persona}\n\n${a.learnings ? a.learnings + '\n\n' : ''}You championed "${a.option}". Now REFUTE the strongest claim made for "${b.option}":\n\n"${b.strongest_claim}"\n\nAttack it as hard as you honestly can. Set holds=true ONLY if it genuinely survives your attack.`,
       { label: `refute:${a.option}->${b.option}`, phase: 'Refute', schema: REBUTTAL }
     ).then(r => r && { by: a.option, target: b.option, ...r })
   )

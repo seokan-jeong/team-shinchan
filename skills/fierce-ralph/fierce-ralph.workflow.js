@@ -36,6 +36,12 @@ const KAZAMA = (A.workerPersona && String(A.workerPersona).trim())
 const AK = (A.judgePersona && String(A.judgePersona).trim())
   ? `${String(A.judgePersona).trim()} ${GATE_DIRECTIVES}`
   : `You are Action Kamen, team-shinchan’s uncompromising verifier. ${GATE_DIRECTIVES}`
+// Learning block for the work-doing worker (main-077): injected by the SKILL as `workerLearnings`.
+// Additive to the persona; empty/absent → no change (NFR-2, graceful). Not applied to the
+// verifier/gate (pure judges with no persona-learning contract).
+const WORKER_LEARNINGS = (A.workerLearnings && String(A.workerLearnings).trim())
+  ? `${String(A.workerLearnings).trim()}\n\n`
+  : ''
 
 const WORK = {
   type: 'object', additionalProperties: false, required: ['summary', 'remaining'],
@@ -84,7 +90,7 @@ while (!done && iter < MAX) {
     : ''
   const hintNote = nextHint ? `\n\nSuggested next step from the last verification: ${nextHint}` : ''
   const w = await agent(
-    `${KAZAMA}\n\nGoal: ${goal}\n${progressCtx}\n\nDo the next incomplete unit of work toward the goal NOW (iteration ${iter}/${MAX}). Then report what you changed and what remains.${hintNote}${stagnNote}`,
+    `${KAZAMA}\n\n${WORKER_LEARNINGS}Goal: ${goal}\n${progressCtx}\n\nDo the next incomplete unit of work toward the goal NOW (iteration ${iter}/${MAX}). Then report what you changed and what remains.${hintNote}${stagnNote}`,
     { label: `work:${iter}`, phase: 'Loop', schema: WORK }
   )
 

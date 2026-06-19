@@ -37,6 +37,8 @@ cd "${CLAUDE_PLUGIN_ROOT}" && node tests/validate/workflow-state-schema.js
 - WORKFLOW_STATE.yaml template + transition gates present
 - Big-project layer intact: `schemas/project-state.schema.json` parses and
   `skills/bigproject/SKILL.md` contains a `PROJECT.yaml` template
+- `schemas/workflow-state.schema.json` declares `current.completion_prompted` as an OPTIONAL
+  boolean (main-076 FR-6 / HR-8: absent ⇒ false; NOT in `required`)
 
 **On failure:**
 - Issue: Invalid WORKFLOW_STATE.yaml structure

@@ -123,3 +123,25 @@ Saved to: .shinchan-docs/eval-history.jsonl
 - One clear insight per entry
 - Include enough context for future reference
 - Always record agent evaluations when agents were used
+
+## Block-Nudge Path (main-076 FR-3/FR-4/FR-5)
+
+When `hooks/session-wrap.sh` emits `{"decision":"block"}` at a completed execution-stage Stop, the
+model receives the block reason and MUST present the user a binary choice — do NOT auto-pick:
+
+**(a) "now" → full retrospective (FR-4).** Produce the complete draft per §1–§5 above:
+`Insight`, `Tags`, category, tier, and per-agent eval `scores`. This FILLS the deterministic
+skeleton that the shell hook already wrote (the `eval-history.jsonl` record with `skeleton:true`
+and the `learnings.md` [skeleton] stub). Write the model record WITHOUT `skeleton:true` and WITH
+`scores` — consumers distinguish the two by `skeleton !== true`. **Human approval is required
+before finalizing** (full-auto-draft + human-approve). Do NOT delete the skeleton record; the
+scored record supersedes it on read.
+
+**(b) "skip" → explicit-skip persistence (FR-5).** Persist ONLY the deterministic skeleton plus a
+`skipped: {reason}` marker (append to the `learnings.md` skeleton stub and add `"skipped":"{reason}"`
+to a one-line eval-history record). Write NO `Insight`/`Tags`/`scores` — fabricating insight for a
+skipped session is prohibited (HR-2: the skip reason + timestamp must be auditable; no silent skip).
+
+**Determinism boundary (NFR-1)**: this rich-draft branch is MODEL work. The shell hook
+(`hooks/session-wrap.sh`) NEVER produces `Insight`/`Tags`/`scores` — it only writes the
+`skeleton:true` metric record. Never move this logic into the shell hook.

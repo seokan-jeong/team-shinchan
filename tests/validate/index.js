@@ -29,6 +29,8 @@ const transitionGateBehavior = require('./transition-gate-behavior');
 const agentToolGuardBehavior = require('./agent-tool-guard-behavior');
 const layerGuardBehavior = require('./layer-guard-behavior');
 const scopeGuardBehavior = require('./scope-guard-behavior');
+const sessionWrapNoLlm = require('./session-wrap-no-llm');
+const sessionWrapBehavior = require('./session-wrap-behavior');
 
 async function runAllValidations() {
   console.log('\n╔════════════════════════════════════════╗');
@@ -60,7 +62,9 @@ async function runAllValidations() {
     transitionGateBehavior: 0,
     agentToolGuardBehavior: 0,
     layerGuardBehavior: 0,
-    scopeGuardBehavior: 0
+    scopeGuardBehavior: 0,
+    sessionWrapNoLlm: 0,
+    sessionWrapBehavior: 0
   };
 
   const times = {
@@ -88,7 +92,9 @@ async function runAllValidations() {
     transitionGateBehavior: 0,
     agentToolGuardBehavior: 0,
     layerGuardBehavior: 0,
-    scopeGuardBehavior: 0
+    scopeGuardBehavior: 0,
+    sessionWrapNoLlm: 0,
+    sessionWrapBehavior: 0
   };
 
   // Run agent schema validation
@@ -213,6 +219,14 @@ async function runAllValidations() {
   results.scopeGuardBehavior = scopeGuardBehavior.runValidation();
   times.scopeGuardBehavior = Date.now() - start;
 
+  start = Date.now();
+  results.sessionWrapNoLlm = sessionWrapNoLlm.runValidation();
+  times.sessionWrapNoLlm = Date.now() - start;
+
+  start = Date.now();
+  results.sessionWrapBehavior = sessionWrapBehavior.runValidation();
+  times.sessionWrapBehavior = Date.now() - start;
+
   // Summary
   // Note: tokenBudget stores warning count (not error count) — exclude from totalErrors
   // Warnings are advisory only and do not indicate validation failure.
@@ -250,6 +264,8 @@ async function runAllValidations() {
   console.log(`║  Agent Tool Guard:   ${results.agentToolGuardBehavior === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.agentToolGuardBehavior).padStart(5)}ms  ║`);
   console.log(`║  Layer Guard:        ${results.layerGuardBehavior === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.layerGuardBehavior).padStart(5)}ms  ║`);
   console.log(`║  Scope Guard:        ${results.scopeGuardBehavior === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.scopeGuardBehavior).padStart(5)}ms  ║`);
+  console.log(`║  SW No-LLM:          ${results.sessionWrapNoLlm === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.sessionWrapNoLlm).padStart(5)}ms  ║`);
+  console.log(`║  SW Behavior:        ${results.sessionWrapBehavior === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.sessionWrapBehavior).padStart(5)}ms  ║`);
   console.log('╠════════════════════════════════════════════════╣');
 
   if (totalErrors === 0 && totalWarnings === 0) {

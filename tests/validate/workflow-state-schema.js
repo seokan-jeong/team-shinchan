@@ -147,6 +147,23 @@ function runValidation() {
     }
   });
 
+  // ── main-076 FR-6: completion_prompted schema field is optional boolean ──
+  console.log('\nChecking completion_prompted field (FR-6)...');
+  try {
+    const schema = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'schemas/workflow-state.schema.json'), 'utf-8'));
+    const cp = schema.properties.current.properties.completion_prompted;
+    const req = schema.properties.current.required || [];
+    if (cp && cp.type === 'boolean' && !req.includes('completion_prompted')) {
+      console.log('  \x1b[32m✓\x1b[0m completion_prompted is optional boolean (HR-8)');
+    } else {
+      errors.push('completion_prompted must be optional boolean (not required)');
+      console.log('  \x1b[31m✗\x1b[0m completion_prompted not optional boolean');
+    }
+  } catch (e) {
+    errors.push('completion_prompted schema check failed: ' + e.message);
+    console.log('  \x1b[31m✗\x1b[0m completion_prompted schema check failed');
+  }
+
   console.log('\n----------------------------------------');
   console.log(`Errors: ${errors.length}`);
   console.log('----------------------------------------\n');

@@ -116,6 +116,38 @@ Include `ground_truth` from eval-metrics.js output when available. If not availa
 Saved to: .shinchan-docs/eval-history.jsonl
 ```
 
+### 6. Skill Feedback
+
+Record how the plugin SKILLS exercised this session performed, so
+`/team-shinchan:skill-feedback` can surface verdict trends and flag skills that need
+`/team-shinchan:writing-skills` work. This is the **writer** side of
+`.shinchan-docs/skill-feedback.jsonl` (the reader groups by skill, shows the yes/partial/no
+verdict distribution + recent suggestions, and flags any skill with 3+ negative verdicts).
+
+**For each team-shinchan SKILL actually used this session** (e.g. `start`, `micro-execute`,
+`debate`, a `verify-*` skill — NOT agents; agents are scored in §5), append one JSONL line to
+`.shinchan-docs/skill-feedback.jsonl`:
+
+```
+{"ts":"2026-02-25T10:30:00.000Z","doc_id":"main-031","skill":"micro-execute","verdict":"partial","suggestion":"Spec-review missed an off-by-one the skeptic later caught — add a boundary-value checklist item."}
+```
+
+- `verdict` ∈ {`yes`, `partial`, `no`}: `yes` = the skill did its job cleanly; `partial` = it
+  worked but needed rework or a reviewer caught something it should have; `no` = it failed or
+  produced an unusable result. **Ground the verdict in evidence** (AK rejections, retries, skeptic
+  refutations, rework count) — do NOT default to `yes`.
+- `suggestion` = one concrete, actionable improvement (or `""` when `verdict` is `yes` and there is
+  nothing to fix). Specific enough to drive a `/team-shinchan:writing-skills` edit.
+- Use the current `doc_id`, or `"session"` if no workflow is active. Create the file if missing.
+- Only emit entries for skills genuinely exercised — do not pad the ledger.
+
+**Output:**
+```
+[Auto-Retrospective] Skill feedback recorded:
+  - micro-execute: partial — add a boundary-value checklist item
+Saved to: .shinchan-docs/skill-feedback.jsonl
+```
+
 ## Rules
 
 - Never skip after meaningful tasks
@@ -123,14 +155,16 @@ Saved to: .shinchan-docs/eval-history.jsonl
 - One clear insight per entry
 - Include enough context for future reference
 - Always record agent evaluations when agents were used
+- Always record skill feedback (§6) when team-shinchan skills were exercised — it is the writer side of `/team-shinchan:skill-feedback`
 
 ## Block-Nudge Path (main-076 FR-3/FR-4/FR-5)
 
 When `hooks/session-wrap.sh` emits `{"decision":"block"}` at a completed execution-stage Stop, the
 model receives the block reason and MUST present the user a binary choice — do NOT auto-pick:
 
-**(a) "now" → full retrospective (FR-4).** Produce the complete draft per §1–§5 above:
-`Insight`, `Tags`, category, tier, and per-agent eval `scores`. This FILLS the deterministic
+**(a) "now" → full retrospective (FR-4).** Produce the complete draft per §1–§6 above:
+`Insight`, `Tags`, category, tier, per-agent eval `scores`, and per-skill `skill-feedback` entries
+(§6). This FILLS the deterministic
 skeleton that the shell hook already wrote (the `eval-history.jsonl` record with `skeleton:true`
 and the `learnings.md` [skeleton] stub). Write the model record WITHOUT `skeleton:true` and WITH
 `scores` — consumers distinguish the two by `skeleton !== true`. **Human approval is required
@@ -139,8 +173,9 @@ scored record supersedes it on read.
 
 **(b) "skip" → explicit-skip persistence (FR-5).** Persist ONLY the deterministic skeleton plus a
 `skipped: {reason}` marker (append to the `learnings.md` skeleton stub and add `"skipped":"{reason}"`
-to a one-line eval-history record). Write NO `Insight`/`Tags`/`scores` — fabricating insight for a
-skipped session is prohibited (HR-2: the skip reason + timestamp must be auditable; no silent skip).
+to a one-line eval-history record). Write NO `Insight`/`Tags`/`scores` and NO `skill-feedback`
+entries — fabricating insight (or skill verdicts) for a skipped session is prohibited (HR-2: the
+skip reason + timestamp must be auditable; no silent skip).
 
 **Determinism boundary (NFR-1)**: this rich-draft branch is MODEL work. The shell hook
 (`hooks/session-wrap.sh`) NEVER produces `Insight`/`Tags`/`scores` — it only writes the

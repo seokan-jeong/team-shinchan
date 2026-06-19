@@ -518,6 +518,13 @@ Task(subagent_type="team-shinchan:shinnosuke", model="opus",
   Stages 1 + 1.5 DONE. Start Stage 2 (Planning) via Nene, then Stage 3 (Execution), then Stage 4 (Completion).
   CRITICAL: After Stage 3, you MUST execute Stage 4 — write RETROSPECTIVE.md, IMPLEMENTATION.md, and run final Action Kamen review. See 'Stage 4: Completion' section in agents/shinnosuke.md.
 
+  ## Learning-capture vs heavy completion (main-076 FR-7)
+  Learning/eval capture is the EXECUTION stage's definition-of-done — hooks/session-wrap.sh writes
+  a deterministic skeleton each execution Stop and nudges the retrospective ONCE per stage. The
+  heavy IMPLEMENTATION.md + comprehensive Action Kamen final review is a SEPARATE, push-gated
+  formal completion. Never lump the two: skipping the heavy completion must not skip learning
+  capture, and a captured learning does not substitute for the formal review.
+
   ## Micro-Task Execution (RULE 2.7) — MANDATORY, this is the /start default
   WORKFLOW_STATE.current.execution_mode is `micro-execute`. Stage 3 MUST run via the
   micro-execute path — do NOT fall back to the standard Phase Loop and do NOT use the

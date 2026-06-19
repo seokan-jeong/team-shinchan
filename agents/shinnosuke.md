@@ -290,6 +290,10 @@ Present the AK-approved PROGRESS.md plan summary to the user for final confirmat
 - Ask user: "PROGRESS.md has passed AK review. Ready to start execution?"
 - If user approves:
   - Write stage=execution, owner=bo to WORKFLOW_STATE.yaml
+  - On entering (or re-entering) the execution stage, ALSO set `current.completion_prompted: false`
+    (main-076 DEC-2: the block-once completion nudge is scoped per-stage; a genuinely new execution
+    stage gets its own single nudge). This is the writer side of the `completion_prompted` flag that
+    `hooks/session-wrap.sh` reads.
   - Narrate: "Plan approved — advancing to Stage 3 (Execution)"
 - If user requests changes:
   - Re-invoke Nene with the requested changes
@@ -460,6 +464,12 @@ For single-Phase waves or Phases without wave metadata: execute sequentially as 
 
 **Step Splitting**: 4+ file changes or complex logic → split phase into Steps (N-1, N-2...). Each step independently verifiable. Include breakdown in delegation prompt.
 
+**Execution-stage Definition-of-Done (main-076 FR-7)**: Capturing a learning/eval skeleton is part
+of the EXECUTION stage's definition-of-done, not Stage 4. `hooks/session-wrap.sh` writes a
+deterministic skeleton every execution Stop and nudges the retrospective ONCE per stage
+(`completion_prompted`). This cheap capture is decoupled from — and must never be skipped along
+with — the heavy formal completion below.
+
 **Phase Loop Completion Check**: After each phase completes, check PROGRESS.md. If ALL phase checkboxes are `[x]`:
 1. Narrate: "All execution phases complete."
 2. **Ask user**: "Ready to proceed to Stage 4 (Completion: documentation, review, commit/push/PR)?"
@@ -470,6 +480,12 @@ For single-Phase waves or Phases without wave metadata: execute sequentially as 
 ### Stage 4: Completion (MANDATORY — DO NOT SKIP)
 
 **<HARD-GATE> After ALL Stage 3 phases complete, you MUST execute Stage 4. Do NOT declare the workflow done without completing these steps. </HARD-GATE>**
+
+> **Framing (main-076 FR-7)**: Stage 4 here is the **heavy, push-gated formal completion** —
+> comprehensive IMPLEMENTATION.md + the comprehensive Action Kamen final review. It is SEPARATE
+> from the cheap per-execution learning capture (which is the execution-stage definition-of-done,
+> enforced by `hooks/session-wrap.sh`). Do not conflate the two: skipping heavy completion must
+> NOT skip learning capture, and learning capture being done does NOT substitute for this review.
 
 When all Stage 3 phases are complete and Action Kamen has approved:
 

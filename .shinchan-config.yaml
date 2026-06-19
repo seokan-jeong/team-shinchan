@@ -41,3 +41,15 @@ executor:
   # resource), execution is fully serial. With serial_fallback true the executor logs an
   # NFR-5 warning so operators can inspect plan granularity. (default: true)
   serial_fallback: true                # default: true
+
+# Completion nudge (main-076 FR-2 / NFR-4 / DEC-2). On a natural execution-stage Stop with
+# >=1 file change, hooks/session-wrap.sh emits a single decision:block handing the user to the
+# model, which asks "run the retrospective now / leave a skip reason". Block-once is enforced by
+# current.completion_prompted (resets per new execution stage).
+#
+# DEFAULT-ON: mirrors the interview.fierce_option_panel default-on-exception precedent above,
+# under the quality-over-cost principle (lost learnings degrade the whole memory/eval system).
+# To opt OUT (e.g. headless/CI sessions per Risk R-2), set nudge: false — the hook then no-ops
+# the block while still writing the deterministic metric skeleton (FR-1).
+completion:
+  nudge: true                          # default: true (ON) — escape hatch: set false to disable the block-once nudge

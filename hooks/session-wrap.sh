@@ -133,6 +133,72 @@ if (activeYaml) {
   } catch(e) {}
 }
 
+// ── (NEW main-076 FR-1) Deterministic retrospective skeleton — NO LLM (NFR-1) ──
+// Writes ONLY machine-derivable metrics + a skeleton:true marker. The model (block-nudge path)
+// writes prose/scores. Consumers distinguish by skeleton !== true.
+if (docDir && activeYaml) {
+  try {
+    const yamlSk = fs.readFileSync(activeYaml, 'utf-8').replace(/#.*/g, '');
+    const stageSk = (yamlSk.match(/^\\s*stage:\\s*(.+)$/m) || [])[1];
+    const stageVal = stageSk ? stageSk.trim().replace(/[\"']/g, '') : '';
+    // HR-6: only capture for execution stage with >=1 file change (no empty skeletons)
+    if (stageVal === 'execution' && files.size >= 1) {
+      const nowIso = new Date().toISOString();
+      // (a) eval-history.jsonl skeleton record (skeleton:true, OMITS scores)
+      const evalPath = path.join(docsDir, 'eval-history.jsonl');
+      const skeletonRec = JSON.stringify({
+        ts: nowIso, doc_id: docId, stage: 'execution',
+        files_changed: files.size,
+        agents: { count: agentCount, names: Object.keys(agents) },
+        duration: durationMin, skeleton: true
+      });
+      fs.appendFileSync(evalPath, skeletonRec + '\\n');
+      // (b) learnings.md metric-only stub (no Insight/Tags prose)
+      const learnPath = path.join(docsDir, 'learnings.md');
+      if (!fs.existsSync(learnPath)) fs.writeFileSync(learnPath, '# Team-Shinchan Learnings\\n');
+      const stub = '\\n### [skeleton] ' + docId + ' (' + nowIso.slice(0,10) + ')\\n'
+        + '- **Source**: ' + docId + '\\n'
+        + '- **Stage**: execution\\n'
+        + '- **Files changed**: ' + files.size + '\\n'
+        + '- **Agents**: ' + agentCount + ' (' + agentSummary + ')\\n'
+        + '- **Duration**: ' + durationMin + ' min\\n'
+        + '- **Skeleton**: true (metrics only — awaiting model retrospective)\\n\\n---\\n';
+      fs.appendFileSync(learnPath, stub);
+    }
+  } catch(e) {} // NFR-3 graceful failure
+}
+
+// ── (NEW main-076 FR-2) AND-gate detection (DEC-3) — sets shouldBlock; emit is Task 2.3 ──
+// Block-once guard: the PERSISTED current.completion_prompted flag is the SOLE, authoritative
+// dedup (DEC-3 persisted-authoritative). There is NO transient stop_hook_active signal here —
+// it is delivered via the Stop-hook STDIN JSON, which this node -e block does not receive, so an
+// env read would be dead. The persisted flag (absent ⇒ false, HR-8) is the only block-once guard.
+let shouldBlock = false;
+let blockYamlPath = activeYaml;
+try {
+  if (docDir && activeYaml) {
+    const yamlG = fs.readFileSync(activeYaml, 'utf-8').replace(/#.*/g, '');
+    const stageG = (yamlG.match(/^\\s*stage:\\s*(.+)$/m) || [])[1];
+    const stageGv = stageG ? stageG.trim().replace(/[\"']/g, '') : '';
+    // completion_prompted: absent ⇒ false (HR-8)
+    const promptedM = yamlG.match(/^\\s*completion_prompted:\\s*(true|false)/m);
+    const alreadyPrompted = promptedM ? promptedM[1] === 'true' : false;
+    // DEC-1: natural-stop = terminal turn in the already-loaded event stream (no lookahead API).
+    // Terminality is inferred from the loaded events, never from a tool peek.
+    const lastEv = events[events.length - 1];
+    const naturalStop = !!lastEv && lastEv.type !== 'tool_use'; // no trailing pending tool call
+    // config: completion.nudge default true if absent (read .shinchan-config.yaml)
+    let nudgeEnabled = true;
+    try {
+      const cfg = fs.readFileSync(path.join(process.cwd(), '.shinchan-config.yaml'), 'utf-8').replace(/#.*/g, '');
+      const nm = cfg.match(/completion:\\s*[\\s\\S]*?nudge:\\s*(true|false)/);
+      if (nm) nudgeEnabled = nm[1] === 'true';
+    } catch(e) {}
+    shouldBlock = (stageGv === 'execution') && (files.size >= 1) && naturalStop
+      && !alreadyPrompted && nudgeEnabled;
+  }
+} catch(e) { shouldBlock = false; } // NFR-3: any failure ⇒ no block (fail-safe)
+
 // ── PROGRESS.md Snapshot (FR-6, FR-7, FR-8) ──
 if (docDir && activeYaml) {
   const progressMd = path.join(docDir, 'PROGRESS.md');
@@ -220,6 +286,29 @@ if (activeYaml) {
 }
 if (cleaned > 0) {
   console.log('  Tool cache: ' + cleaned + ' expired file(s) removed (TTL: ' + ttlDays + 'd)');
+}
+
+// ── (NEW main-076 FR-3) Block-once: state-write FIRST, block-emit LAST (HR-1 fail-open) ──
+if (shouldBlock && blockYamlPath) {
+  let wroteState = false;
+  try {
+    let y = fs.readFileSync(blockYamlPath, 'utf-8');
+    if (/^\\s*completion_prompted:/m.test(y)) {
+      y = y.replace(/^(\\s*)completion_prompted:\\s*(true|false)/m, '\$1completion_prompted: true');
+    } else {
+      // insert under current: (regex write, like the budget-counter writes in this same hook)
+      y = y.replace(/^(current:\\s*\\n)/m, '\$1  completion_prompted: true\\n');
+    }
+    fs.writeFileSync(blockYamlPath, y); // FIRST (HR-1): a crash AFTER here costs at most one missed nudge, never an infinite block
+    wroteState = true;
+  } catch(e) { wroteState = false; }
+  // Emit block LAST, only if state persisted (fail-open: no state write ⇒ no block)
+  if (wroteState) {
+    const reason = 'This looks like a completed execution-stage session. Run the retrospective now '
+      + '(I will fill Insight/Tags/tier + per-agent eval per hooks/auto-retrospective.md, you approve), '
+      + 'OR tell me to skip and give a one-line reason (I will record skipped:{reason} with no fabricated insight).';
+    console.log(JSON.stringify({ decision: 'block', reason })); // ABSOLUTE LAST stdout write
+  }
 }
 " 2>/dev/null || true)
 

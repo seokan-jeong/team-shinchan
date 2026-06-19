@@ -65,6 +65,10 @@
             "null"
           ],
           "description": "1-based phase index within the parent project (set by bigproject; absent for standalone workflows)"
+        },
+        "completion_prompted": {
+          "type": "boolean",
+          "description": "Block-once guard (main-076 FR-6): set true after the completion-nudge block fires for the current execution stage so the next Stop no-ops. Absent ⇒ false (HR-8 backward compat). Resets on entry to a new execution stage (DEC-2)."
         }
       },
       "required": [

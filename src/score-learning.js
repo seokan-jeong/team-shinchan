@@ -52,11 +52,16 @@ function scoreLearning(entry, ctx) {
   const preferred = STAGE_CATEGORIES[stage] || [];
   const stageMatch = entry.category && (stage === 'completion' || preferred.includes(entry.category)) ? 1 : 0;
 
-  // tag overlap (normalised both sides)
+  // tag overlap (normalised both sides; each unique tag counts at most once — a duplicated
+  // tag on an entry must not inflate the score)
   const kw = new Set(keywords.map(normaliseTag).filter(Boolean));
   const tags = Array.isArray(entry.tags) ? entry.tags : [];
-  let overlap = 0;
-  for (const t of tags) if (kw.has(normaliseTag(t))) overlap++;
+  const matched = new Set();
+  for (const t of tags) {
+    const n = normaliseTag(t);
+    if (n && kw.has(n)) matched.add(n);
+  }
+  const overlap = matched.size;
 
   return (tierWeight * 3) + (stageMatch * 2) + (overlap * 1);
 }

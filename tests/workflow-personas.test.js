@@ -98,3 +98,23 @@ test('AC-7: a frontend-tagged learning scores higher for aichan than for masao (
   const masaoScore = SL.scoreLearning(entry, { stage: 'execution', keywords: masaoKw });
   assert.ok(aichanScore > masaoScore, `aichan(${aichanScore}) should beat masao(${masaoScore}) via tag_overlap`);
 });
+
+test('REVIEW-CRIT: parseLearnings excludes [skeleton] metric stubs (never injectable)', () => {
+  const md = [
+    '# Team-Shinchan Learnings', '',
+    '### [skeleton] main-077 (2026-06-19)',
+    '- **Source**: main-077',
+    '- **Stage**: execution',
+    '- **Skeleton**: true (metrics only)', '',
+    '---', '',
+    '### [pattern] A real learning',
+    '- **Tier**: procedural',
+    '- **Tags**: architecture',
+    '- **Insight**: a genuine reusable insight', '',
+    '---',
+  ].join('\n');
+  const entries = P.parseLearnings(md);
+  assert.ok(!entries.some(e => e.category === 'skeleton'), 'skeleton stubs must be filtered out (no injection)');
+  assert.strictEqual(entries.length, 1);
+  assert.strictEqual(entries[0].category, 'pattern');
+});

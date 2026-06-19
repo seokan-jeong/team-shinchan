@@ -40,3 +40,10 @@ test('CONST-4: bare and #-prefixed tags both overlap', () => {
   assert.strictEqual(scoreLearning(entry, ctx), 4);
   assert.strictEqual(normaliseTag('#Frontend'), 'frontend');
 });
+
+test('REVIEW-LOW: duplicate tags on an entry count at most once (no score inflation)', () => {
+  const ctx = { stage: 'planning', keywords: ['architecture'] };
+  const dup = scoreLearning({ tier: 'procedural', category: 'pattern', tags: ['architecture', 'architecture'] }, ctx);
+  const single = scoreLearning({ tier: 'procedural', category: 'pattern', tags: ['architecture'] }, ctx);
+  assert.strictEqual(dup, single, 'a duplicated tag must not inflate the overlap score');
+});

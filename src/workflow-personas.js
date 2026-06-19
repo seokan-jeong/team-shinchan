@@ -186,6 +186,11 @@ function parseLearnings(content) {
       const head = block.match(/^### \[([^\]]+)\]\s*(.*)$/m);
       if (!head) continue;
       const category = head[1].trim().toLowerCase();
+      // `[skeleton]` entries are deterministic metric-only stubs written by hooks/session-wrap.sh
+      // (main-076 FR-1) — no Tier/Insight by design. They must NEVER be injected as learnings:
+      // a Tier-less skeleton defaults to procedural and would score the floor (8) at completion
+      // stage and leak an empty-insight stub into the agent prompt.
+      if (category === 'skeleton') continue;
       const title = head[2].trim();
       const tierM = block.match(/^\s*-\s*\*\*Tier\*\*:\s*(.+)$/m);
       const dateM = block.match(/^\s*-\s*\*\*Date\*\*:\s*(.+)$/m);

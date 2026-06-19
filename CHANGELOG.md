@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.48.0] - 2026-06-19
+
+### Completion-stage forcing function — stop skipping retrospective/learning (PR #12)
+
+Workflows routinely stopped at the "work is done" point and skipped the completion / learning stage. Root cause: every forcing function gated on a *transition* (an action the model takes), but skipping completion is an *absence of action* (premature turn-end) — only the deterministic `Stop` hook can catch it. The fix lands at `hooks/session-wrap.sh`, the one Stop hook that already fires every turn-end.
+
+- **Deterministic learning capture (no LLM, NFR-1)** — on every execution-stage Stop, `session-wrap.sh` writes a metric-only `skeleton:true` record to `.shinchan-docs/learnings.md` + `eval-history.jsonl`. This cheap capture can no longer be skipped.
+- **Block-once completion nudge** — on a natural execution-stage Stop with ≥1 file change and no prior nudge, the hook emits a single `decision:block` so the model asks the user: run the retrospective now, or record an explicit skip reason (no fabricated insight on skip). `current.completion_prompted` (new optional WORKFLOW_STATE field, schema + `verify-workflow`) guarantees at most one nudge per execution stage; `.shinchan-config.yaml completion.nudge` (default ON) is the documented off switch for headless/CI.
+- **Structural reframe** — learning capture is now part of the execution stage's definition-of-done; the heavy IMPLEMENTATION.md + comprehensive Action Kamen review remains a separate, push-gated formal completion (`agents/shinnosuke.md`, `skills/start`).
+- **Tests** — `tests/validate/session-wrap-behavior.js` (block-once, auto-capture skeleton, no-op safety) and `session-wrap-no-llm.js` (asserts the determinism boundary).
+
+Built end-to-end via the plugin's own `/start` workflow (dogfood). A high-effort code review then caught and fixed a hook-protocol bug: the block JSON was emitted to stdout mixed with narration (so it never reached Claude Code) — the block now emits as the hook's clean, whole-stdout decision, with a regression test that fails on the polluted output.
+
 ## [4.47.0] - 2026-06-18
 
 ### Senior-rigor gates for `:start` — root-cause + outcome enforcement

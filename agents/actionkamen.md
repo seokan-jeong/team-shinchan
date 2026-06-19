@@ -135,6 +135,33 @@ For each file modified in this implementation:
 
 Format: `S4: {file} modified but no regression test evidence provided — MEDIUM`
 
+### S5 — Delivery / End-to-End Wiring Gate
+
+For each value this change PRODUCES that is meant to be consumed elsewhere — a hook `decision`
+on stdout, an injected `args.*` field, a written record/file, an emitted block, an event —
+locate the CONSUMER's actual use-site and confirm the value demonstrably reaches and affects it.
+**Injection ≠ delivery; production ≠ consumption.** A test that only asserts the value was
+produced / injected / "the string is present" does NOT satisfy this gate — the asserting test
+must exercise the end-to-end path (the consumer's observable behavior changes because the value
+arrived).
+
+- Produced value with NO consumer use-site (the consumer never reads it, or can't parse the
+  format it's delivered in) → **HIGH → S5 FAIL**: the feature is structurally present but
+  functionally inert.
+- Delivery is wired, but the only asserting test checks production/injection rather than the
+  consumer's effective use → **MEDIUM (WARN)**.
+
+Canonical inert-but-tested cases this gate exists to catch (each shipped green until an independent
+review caught it):
+- a Stop hook emitted `{"decision":"block"}` to stdout mixed with narration → `scripts/run.cjs` /
+  Claude Code parse the WHOLE stdout as the decision → unparseable → the block never fired (the
+  test asserted the JSON string was present, not that the hook blocked);
+- a learnings block injected as `args.learnings` that the workflow script never read into the
+  dispatched prompt → computed and dropped (injection without delivery);
+- a metric-only `[skeleton]` stub passing a relevance filter it should not, injected as if a real learning.
+
+Format: `S5: {produced value} has no verified consumer use-site / no delivery-asserting test — HIGH|MEDIUM`
+
 ### Skepticism Audit Output Format
 
 ```markdown
@@ -146,10 +173,12 @@ Format: `S4: {file} modified but no regression test evidence provided — MEDIUM
 | S2 — Assumption Audit | PASS/WARN | {findings or "no unvalidated assumptions"} |
 | S3 — Coverage Traceability | PASS/WARN | {N} unmapped ACs |
 | S4 — Regression Guard | PASS/WARN | {findings or "ok"} |
+| S5 — Delivery / Wiring | PASS/WARN/FAIL | {inert findings or "delivery verified end-to-end"} |
 ```
 
-S1 FAIL → immediate REJECTED (do not proceed to rubric scoring).
-S2/S3/S4 WARN → continue to rubric scoring; include findings in review report.
+S1 FAIL OR S5 FAIL (a produced value is functionally inert — no consumer use-site / undeliverable
+format) → immediate REJECTED (do not proceed to rubric scoring).
+S2/S3/S4 WARN and S5 MEDIUM → continue to rubric scoring; include findings in the review report.
 
 ## Test Execution Mode
 

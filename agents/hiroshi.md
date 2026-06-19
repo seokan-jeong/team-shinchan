@@ -190,6 +190,14 @@ Input: `decisions` (all `{turn, decision, choice}`), `DOC_ID`, `REQUESTS.md` pat
      3. **Single-seam vs symptom-site** — one line: is this change the single root-cause seam, or
         one of N symptom sites? If the latter, name the real seam and justify why you are NOT
         fixing it there. (A recurring-class symptom patch must escalate, not proceed silently.)
+     4. **Delivery trace** — for EVERY value this change PRODUCES that is consumed elsewhere (a hook
+        decision / stdout, an injected `args.*` field, a written record/file, an emitted block, an
+        event), trace it end-to-end: producer → carrier → the consumer's ACTUAL use-site
+        (`file:function`) → the test that asserts the value ARRIVES and is USED there (not just that
+        it was produced). Every consumer use-site MUST appear in the impact map above. If a produced
+        value has no consumer use-site, the feature is **inert** — redesign the seam, do not proceed.
+        (Injection ≠ delivery. This is the trace that catches "built, tested, but functionally dead";
+        Action Kamen enforces it as **S5**.)
    - `## Interfaces & Data Flow` — key contracts between components.
    - `## Open Questions` — ONLY when `exit_reason` is a `*_escalate` and the user chose "record":
      list every unresolved `open_decisions` item.

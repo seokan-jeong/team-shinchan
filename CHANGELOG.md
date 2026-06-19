@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.48.1] - 2026-06-19
+
+### Follow-ups from the main-076 retrospective backlog (PR #13)
+
+- **`commands/start.md` design-skip drift fixed.** The command carried a stale inline flow that omitted the Stage 1.5 Design interview (Step 2B) and wrote a divergent `WORKFLOW_STATE` shape — a second, design-less source of truth for `/start` (the same class as the v4.45.0–.2 design-skip regression). It is now a thin pointer that delegates wholly to `skills/start/SKILL.md` (Steps 0 → 2C, design default-on), keeping only the non-negotiables. Single source of truth.
+- **`skill-feedback.jsonl` writer added (dead loop closed).** `/team-shinchan:skill-feedback` read the ledger but nothing ever wrote it. `hooks/auto-retrospective.md` §6 now appends a per-skill `{ts, doc_id, skill, verdict: yes|partial|no, suggestion}` record during the Stage-4 retrospective (mirroring the §5 agent-eval → `eval-history.jsonl` path), schema-aligned to the reader and grounded in evidence (AK rejections, retries, skeptic refutations). Wired into the block-nudge "now" branch; excluded on an explicit skip.
+
 ## [4.48.0] - 2026-06-19
 
 ### Completion-stage forcing function — stop skipping retrospective/learning (PR #12)

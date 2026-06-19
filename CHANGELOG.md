@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.49.0] - 2026-06-19
+
+### Inject recalled learnings into sub-agent prompts — hill-climbing hop 1 (PR #14)
+
+The self-improvement loop was open at its first hop: the agents that do the work **never saw recalled learnings**. `load-kb` surfaced them only in the main-thread context; `workflow-personas` built sub-agent personas without them — so past corrections never changed future behavior. This closes that hop, **per-project and deterministically**.
+
+- **`src/score-learning.js` (NEW)** — pure `scoreLearning()`, the single source of truth for the load-kb §2c formula (`tier_weight*3 + stage_match*2 + tag_overlap`); `load-kb.md §2c` becomes a doc-pointer. A golden-vector test makes prose↔JS drift fail mechanically.
+- **`src/workflow-personas.js`** — new pure `buildLearningBlock(agent, ctx, {maxTokens=400})`: parses `.shinchan-docs/learnings.md`, folds the agent's role keywords into the scoring context (grounded in `domain-router.json`), applies a min-score floor and a token budget (lowest-score-first eviction), and returns an injectable learning block — or `''` on miss/empty (graceful). `extractPersona()` is byte-identical (snapshot-proven). A thin `--learnings` CLI sources context from the active workflow.
+- **5 `fierce-*.workflow.js`** — weave the learning block into the dispatched work-agent prompt (debate, compete, ralph, option-panel, review). End-to-end delivery, not just injection.
+- **Fixes:** `[skeleton]` metric stubs (session-wrap FR-1) are never injected as learnings (they previously scored the floor at the completion stage) and are exempt from the memory-system `**Tier**` validator — clearing a v4.48.x case where accumulating skeleton entries turned `./run-tests.sh static` red. Duplicate tags no longer inflate the overlap score.
+
+Learning data is per-project (`.shinchan-docs/` is project-local), so an app project and a fullstack project stay fully isolated — injection only ever uses the current project's learnings.
+
+Built via the plugin's own `/start` workflow (dogfood); final Action Kamen review 15/15; `node --test` 20/20; static green.
+
 ## [4.48.1] - 2026-06-19
 
 ### Follow-ups from the main-076 retrospective backlog (PR #13)

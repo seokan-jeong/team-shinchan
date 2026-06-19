@@ -120,16 +120,19 @@ Saved to: .shinchan-docs/eval-history.jsonl
 
 Record how the plugin SKILLS exercised this session performed, so
 `/team-shinchan:skill-feedback` can surface verdict trends and flag skills that need
-`/team-shinchan:writing-skills` work. This is the **writer** side of
-`.shinchan-docs/skill-feedback.jsonl` (the reader groups by skill, shows the yes/partial/no
-verdict distribution + recent suggestions, and flags any skill with 3+ negative verdicts).
+`/team-shinchan:writing-skills` work. This is the **writer** side of the **global**
+`~/.shinchan/skill-feedback.jsonl` ledger (the reader groups by skill ACROSS projects, shows the
+yes/partial/no verdict distribution + recent suggestions, and flags any skill with 3+ negative
+verdicts). It is GLOBAL — not per-project — because team-shinchan SKILLS are global plugin code, so
+"which skill needs improvement" is a cross-project signal. (Learnings and eval-history stay
+per-project in `.shinchan-docs/`; skill quality does not.)
 
 **For each team-shinchan SKILL actually used this session** (e.g. `start`, `micro-execute`,
 `debate`, a `verify-*` skill — NOT agents; agents are scored in §5), append one JSONL line to
-`.shinchan-docs/skill-feedback.jsonl`:
+`~/.shinchan/skill-feedback.jsonl` (run `mkdir -p ~/.shinchan` first; create the file if missing):
 
 ```
-{"ts":"2026-02-25T10:30:00.000Z","doc_id":"main-031","skill":"micro-execute","verdict":"partial","suggestion":"Spec-review missed an off-by-one the skeptic later caught — add a boundary-value checklist item."}
+{"ts":"2026-02-25T10:30:00.000Z","project":"team-shinchan","doc_id":"main-031","skill":"micro-execute","verdict":"partial","suggestion":"Spec-review missed an off-by-one the skeptic later caught — add a boundary-value checklist item."}
 ```
 
 - `verdict` ∈ {`yes`, `partial`, `no`}: `yes` = the skill did its job cleanly; `partial` = it
@@ -138,14 +141,15 @@ verdict distribution + recent suggestions, and flags any skill with 3+ negative 
   refutations, rework count) — do NOT default to `yes`.
 - `suggestion` = one concrete, actionable improvement (or `""` when `verdict` is `yes` and there is
   nothing to fix). Specific enough to drive a `/team-shinchan:writing-skills` edit.
-- Use the current `doc_id`, or `"session"` if no workflow is active. Create the file if missing.
+- Set `project` to the project root's basename (the repo/dir name) so the reader can attribute
+  cross-project trends; set `doc_id` to the current workflow id, or `"session"` if none.
 - Only emit entries for skills genuinely exercised — do not pad the ledger.
 
 **Output:**
 ```
 [Auto-Retrospective] Skill feedback recorded:
   - micro-execute: partial — add a boundary-value checklist item
-Saved to: .shinchan-docs/skill-feedback.jsonl
+Saved to: ~/.shinchan/skill-feedback.jsonl
 ```
 
 ## Rules

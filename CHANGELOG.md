@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.50.0] - 2026-06-19
+
+### S5 — end-to-end Delivery gate: catch "built, tested, but inert" (PR #15)
+
+The workflow's gates (micro-execute + Action Kamen) reliably guarantee a *tested artifact exists* — but not that the *feature works end-to-end*. Repeatedly a structurally-correct, fully-tested change turned out to be functionally inert because the produced value never reached its consumer (a hook decision that didn't parse; an injected arg the script never read), and the tests asserted **production** ("the string is present") rather than **delivery** ("it reaches and is used"). Only an independent adversarial review caught it. This release makes that check first-class:
+
+- **`agents/actionkamen.md`** — new Skepticism rule **S5 (Delivery / End-to-End Wiring)**. For each value the change produces that is consumed elsewhere, Action Kamen locates the consumer's actual use-site and requires a test that exercises the end-to-end path. A produced value with no consumer use-site (or an undeliverable format) is **inert → S5 FAIL → REJECT**; delivery wired but a production-only test → WARN. *Injection ≠ delivery.*
+- **`agents/hiroshi.md`** — `## Blast Radius & Seam` now requires a **Delivery trace**: producer → carrier → consumer use-site → the asserting test; every consumer use-site must appear in the impact map.
+- **`agents/nene.md`** — Impact Scope Analysis now requires a **Delivery AC**: the consumer use-site as a changed/verified file, plus an acceptance criterion asserting end-to-end delivery (not just that the value was produced/injected).
+
+The harness's own structural blind spot — "produced but never delivered" — is now caught by the workflow itself at the design, planning, and review gates, instead of relying on a human or skeptic.
+
 ## [4.49.0] - 2026-06-19
 
 ### Inject recalled learnings into sub-agent prompts — hill-climbing hop 1 (PR #14)

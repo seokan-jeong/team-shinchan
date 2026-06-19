@@ -8,12 +8,12 @@ user-invocable: true
 
 ## Steps
 
-1. Read `.shinchan-docs/skill-feedback.jsonl`
-2. If file doesn't exist, report "No skill feedback collected yet. Feedback is gathered during Stage 4 retrospectives."
-3. Group entries by skill name
+1. Read the **global** ledger `~/.shinchan/skill-feedback.jsonl` — skill feedback is global because team-shinchan SKILLS are global plugin code, so it aggregates ACROSS every project. Also read the legacy per-project `.shinchan-docs/skill-feedback.jsonl` if it exists (pre-v4.50 data) and merge the entries.
+2. If neither exists, report "No skill feedback collected yet. Feedback is gathered during Stage 4 retrospectives."
+3. Group entries by skill name (across projects).
 4. For each skill, show:
-   - Total invocations assessed
+   - Total invocations assessed + which projects contributed (from each entry's `project` field)
    - Verdict distribution (yes/partial/no)
    - Top suggestions (sorted by recency)
-5. Highlight skills with 3+ negative verdicts as candidates for `/team-shinchan:writing-skills`
-6. Output as a formatted table
+5. Highlight skills with 3+ negative verdicts (counted across all projects) as candidates for `/team-shinchan:writing-skills`
+6. Output as a formatted table. If the user asks about one project only, filter entries by the `project` field first.

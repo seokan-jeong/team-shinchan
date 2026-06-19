@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.51.0] - 2026-06-19
+
+### skill-feedback now aggregates globally (DI-2)
+
+`skill-feedback` was collected per-project, but team-shinchan SKILLS are global plugin code — so "which skill needs improvement" is a cross-project signal that was fragmented across each project's ledger. It now aggregates in the global `~/.shinchan/skill-feedback.jsonl`:
+
+- The Stage-4 retrospective writer (`hooks/auto-retrospective.md`) appends to the global ledger with a `project` field for attribution.
+- `/team-shinchan:skill-feedback` reads the global ledger and groups by skill **across projects** (flagging any skill with 3+ negative verdicts), with a `project` filter for a single-project view; it still reads the legacy per-project ledger for backward-compat.
+
+Learnings and eval-history remain correctly per-project; only skill quality — a property of global code — rolls up globally.
+
 ## [4.50.0] - 2026-06-19
 
 ### S5 — end-to-end Delivery gate: catch "built, tested, but inert" (PR #15)

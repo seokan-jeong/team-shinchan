@@ -191,7 +191,10 @@ try {
     let nudgeEnabled = true;
     try {
       const cfg = fs.readFileSync(path.join(process.cwd(), '.shinchan-config.yaml'), 'utf-8').replace(/#.*/g, '');
-      const nm = cfg.match(/completion:\\s*[\\s\\S]*?nudge:\\s*(true|false)/);
+      // review-fix #2: anchor nudge to the completion: block's indented children so a nudge: in an
+      // unrelated later section cannot be misread when completion lacks its own nudge key.
+      const blockM = cfg.match(/^completion:[ \\t]*\\n(?:[ \\t]+[^\\n]*\\n)*/m);
+      const nm = blockM && blockM[0].match(/^[ \\t]+nudge:\\s*(true|false)/m);
       if (nm) nudgeEnabled = nm[1] === 'true';
     } catch(e) {}
     shouldBlock = (stageGv === 'execution') && (files.size >= 1) && naturalStop
@@ -313,7 +316,20 @@ if (shouldBlock && blockYamlPath) {
 " 2>/dev/null || true)
 
 if [ -n "$OUTPUT" ]; then
-  echo "$OUTPUT"
+  # main-076 review-fix #1: a completion-nudge block must reach Claude Code as the hook's ENTIRE
+  # stdout being the decision JSON. run.cjs forwards stdout verbatim and only propagates a block via
+  # that JSON; narration mixed in would make stdout unparseable and the block would silently never
+  # fire. On a block, emit ONLY the JSON (it is the last stdout line) and skip narration + ontology.
+  OUT_LAST=$(printf '%s\n' "$OUTPUT" | tail -n 1)
+  case "$OUT_LAST" in
+    *'"decision":"block"'*)
+      printf '%s\n' "$OUT_LAST"
+      exit 0
+      ;;
+    *)
+      echo "$OUTPUT"
+      ;;
+  esac
 fi
 
 # ── Ontology Refresh ──────────────────────────────────────────────────

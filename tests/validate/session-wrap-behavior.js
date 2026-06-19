@@ -65,8 +65,13 @@ function runValidation() {
     const last = JSON.parse(lines[lines.length - 1]);
     lastLineOk = last && last.decision === 'block';
   } catch (e) { lastLineOk = false; }
+  // review-fix #1: on a block the hook's WHOLE stdout must be the clean decision JSON — run.cjs
+  // forwards stdout verbatim and Claude Code parses it; narration mixed in ⇒ unparseable ⇒ no block.
+  let wholeStdoutClean = false;
+  try { wholeStdoutClean = JSON.parse(out.trim()).decision === 'block'; } catch (e) { wholeStdoutClean = false; }
   blocked ? ok('AC-1 first execution stop emits decision:block') : bad('AC-1 expected a block');
   lastLineOk ? ok('MEDIUM#2 decision:block is the parseable LAST line of stdout') : bad('MEDIUM#2 last line is not parseable decision:block');
+  wholeStdoutClean ? ok('review#1 whole stdout is clean decision:block JSON (block actually reaches Claude Code)') : bad('review#1 stdout polluted by narration — block would NOT fire');
   promptedSet ? ok('AC-2 completion_prompted set true after block') : bad('AC-2 flag not set');
   skel ? ok('AC-3 skeleton:true record, no scores') : bad('AC-3 skeleton record missing/has scores');
 

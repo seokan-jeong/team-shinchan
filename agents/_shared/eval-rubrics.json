@@ -1,5 +1,6 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "anchors_note": "Each item carries score anchors for bands 1/3/5 (DI-3): score against these to calibrate across reviews; 2 and 4 interpolate. A score's rationale should name the band it matched.",
   "rubrics": {
     "default": {
       "description": "Default code review rubric — applied to Stage 3 implementation reviews",
@@ -8,19 +9,34 @@
           "id": "correctness",
           "label": "Correctness",
           "max": 5,
-          "criteria": "Does the implementation do what the spec requires? Are edge cases handled? Input validation present?"
+          "criteria": "Does the implementation do what the spec requires? Are edge cases handled? Input validation present?",
+          "anchors": {
+            "5": "Does exactly what the spec requires; edge cases, failure paths, and input validation all handled and verified.",
+            "3": "Happy path is correct, but 1-2 edge cases or a failure path are unhandled.",
+            "1": "Fails on a known or likely input, or does not meet the stated spec."
+          }
         },
         {
           "id": "completeness",
           "label": "Completeness",
           "max": 5,
-          "criteria": "Are all specified requirements implemented? No missing features or skipped ACs?"
+          "criteria": "Are all specified requirements implemented? No missing features or skipped ACs?",
+          "anchors": {
+            "5": "Every specified requirement/AC implemented; no gaps or skipped ACs.",
+            "3": "Most requirements implemented; one meaningful gap or skipped AC.",
+            "1": "Major features missing; well under the required scope."
+          }
         },
         {
           "id": "quality",
           "label": "Quality",
           "max": 5,
-          "criteria": "Is the code well-structured, readable, and maintainable? Follows project patterns? No magic numbers or deep chains?"
+          "criteria": "Is the code well-structured, readable, and maintainable? Follows project patterns? No magic numbers or deep chains?",
+          "anchors": {
+            "5": "DRY, readable, pattern-compliant, and tested; no smells, magic numbers, or deep chains.",
+            "3": "Works but has duplication, a pattern mismatch, weak naming, or a test gap.",
+            "1": "Unmaintainable or unsafe patterns; effectively untested."
+          }
         }
       ],
       "pass_threshold_pct": 60
@@ -32,19 +48,34 @@
           "id": "clarity",
           "label": "Clarity",
           "max": 5,
-          "criteria": "Is the document clear, unambiguous, and free of contradictions? Does it use precise language?"
+          "criteria": "Is the document clear, unambiguous, and free of contradictions? Does it use precise language?",
+          "anchors": {
+            "5": "Precise, unambiguous, internally consistent; no contradictions.",
+            "3": "Mostly clear; a few ambiguous statements or a minor inconsistency.",
+            "1": "Ambiguous or self-contradictory; a reader cannot rely on it."
+          }
         },
         {
           "id": "completeness",
           "label": "Completeness",
           "max": 5,
-          "criteria": "Does the document cover all required sections? Are all FRs/ACs/phases addressed?"
+          "criteria": "Does the document cover all required sections? Are all FRs/ACs/phases addressed?",
+          "anchors": {
+            "5": "All required sections present; every FR/AC/phase addressed.",
+            "3": "Most sections present; one required section or several ACs missing.",
+            "1": "Major sections missing; key requirements unaddressed."
+          }
         },
         {
           "id": "actionability",
           "label": "Actionability",
           "max": 5,
-          "criteria": "Can an implementer act on this document without asking follow-up questions? Are file paths, commands, and expected outputs specified?"
+          "criteria": "Can an implementer act on this document without asking follow-up questions? Are file paths, commands, and expected outputs specified?",
+          "anchors": {
+            "5": "An implementer can act with zero follow-up; paths, commands, and expected outputs all specified.",
+            "3": "Mostly actionable; some paths/commands/outputs missing and a few questions remain.",
+            "1": "Not actionable; an implementer must ask many follow-ups."
+          }
         }
       ],
       "pass_threshold_pct": 60
@@ -56,19 +87,34 @@
           "id": "phase_completeness",
           "label": "Phase Completeness",
           "max": 5,
-          "criteria": "Every phase has goals, file changes, AC checkboxes, agent assignment, and wave/dependency metadata. 4+ file phases are split into Steps."
+          "criteria": "Every phase has goals, file changes, AC checkboxes, agent assignment, and wave/dependency metadata. 4+ file phases are split into Steps.",
+          "anchors": {
+            "5": "Every phase has goals, file changes, testable AC checkboxes, agent assignment, and wave/dependency metadata; 4+ file phases split into Steps.",
+            "3": "Phases mostly complete; one phase missing metadata, or an oversized phase not split.",
+            "1": "Phases lack goals/ACs/metadata; not executable as written."
+          }
         },
         {
           "id": "ac_reference_validity",
           "label": "AC Reference Validity",
           "max": 5,
-          "criteria": "Each phase references at least one AC from REQUESTS.md. AC checkboxes are testable per Spec Granularity Rules (running X produces Y)."
+          "criteria": "Each phase references at least one AC from REQUESTS.md. AC checkboxes are testable per Spec Granularity Rules (running X produces Y).",
+          "anchors": {
+            "5": "Every phase references >=1 REQUESTS AC; all AC checkboxes testable (running X produces Y).",
+            "3": "Most phases reference an AC; a few ACs are vague or not testable.",
+            "1": "Phases lack AC references, or ACs are not testable."
+          }
         },
         {
           "id": "feasibility",
           "label": "Feasibility & File References",
           "max": 5,
-          "criteria": "File references resolve to existing files (or new files marked Create). Phase dependencies are correctly ordered. Risks are present."
+          "criteria": "File references resolve to existing files (or new files marked Create). Phase dependencies are correctly ordered. Risks are present.",
+          "anchors": {
+            "5": "All file refs resolve (or are marked Create); dependencies correctly ordered; risks present.",
+            "3": "Mostly feasible; a file ref or two unresolved, or a dependency mis-ordered.",
+            "1": "References do not resolve / dependencies wrong; the plan is not executable."
+          }
         }
       ],
       "pass_threshold_pct": 60

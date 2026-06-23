@@ -236,15 +236,19 @@ AK may only run commands that are:
 
 ### Default Rubric
 
-Applied in Stage 2 of Two-Stage Review (Code Quality). Scores each item 1-5:
+Applied in Stage 2 of Two-Stage Review (Code Quality). Score each item 1-5 **against its anchor
+bands** below — calibrated scoring (DI-3) so the same artifact earns the same score across reviews.
+The primary anchor source is `agents/_shared/eval-rubrics.json` (the `anchors` field per item); the
+table here is the HR-5 fallback used only when that file is absent. Every score's rationale MUST
+name the band (1/3/5) it matched.
 
-| Item | Criteria | Max Score |
-|------|----------|-----------|
-| Correctness | Does the implementation do what the spec requires? Are edge cases handled? | 5 |
-| Completeness | Are all specified requirements implemented? No missing features? | 5 |
-| Quality | Is the code well-structured, readable, and maintainable? Follows project patterns? | 5 |
+| Item | Max | 1 (fail) | 3 (partial) | 5 (excellent) |
+|------|-----|----------|-------------|---------------|
+| Correctness | 5 | Fails on a known/likely input, or does not meet the spec | Happy path correct; 1-2 edge cases or a failure path unhandled | Spec met exactly; edge cases, failure paths, and validation all handled + verified |
+| Completeness | 5 | Major features missing; well under scope | Most implemented; one meaningful gap or skipped AC | Every requirement/AC implemented; no gaps |
+| Quality | 5 | Unmaintainable/unsafe; effectively untested | Works but has duplication / pattern mismatch / weak naming / a test gap | DRY, readable, pattern-compliant, tested; no smells |
 
-**Total**: 15 points. **Pass threshold**: 9 points or above (≥60%). **Fail threshold**: 8 points or below (<60%).
+**Total**: 15 points. **Pass threshold**: 9 points or above (≥60%). **Fail threshold**: 8 points or below (<60%). Scores of 2 and 4 interpolate between the adjacent bands.
 
 Note: If the rubric is poorly suited to the task type (e.g., documentation tasks where "code quality" doesn't apply), note this in the report and recommend the caller override with a task-specific `rubric:` field.
 
@@ -258,7 +262,7 @@ load the appropriate rubric when the caller specifies a task type:
 
 ```bash
 # Example: load planning rubric
-Read("agents/_shared/eval-rubrics.json") → parse rubrics.planning → apply items + pass_threshold_pct
+Read("agents/_shared/eval-rubrics.json") → parse rubrics.planning → score each item against its `anchors` (1/3/5 bands) → apply pass_threshold_pct
 ```
 
 If the file is absent, fall back to the inline markdown rubric table above (HR-5 fallback).
@@ -272,9 +276,9 @@ Include in every review report, after the standard summary table:
 
 | Item | Score | Rationale |
 |------|-------|-----------|
-| Correctness | N/5 | {one-sentence rationale} |
-| Completeness | N/5 | {one-sentence rationale} |
-| Quality | N/5 | {one-sentence rationale} |
+| Correctness | N/5 | {rationale — name the anchor band (1/3/5) this matched} |
+| Completeness | N/5 | {rationale — name the anchor band (1/3/5) this matched} |
+| Quality | N/5 | {rationale — name the anchor band (1/3/5) this matched} |
 | **Total** | **N/15** | {PASS ≥9 / FAIL ≤8} |
 ```
 

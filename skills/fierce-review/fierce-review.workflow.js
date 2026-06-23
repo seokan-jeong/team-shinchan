@@ -35,9 +35,9 @@ const deepen = A.deepen !== false   // quality-first: deepen is the DEFAULT; onl
 // malforms `rubric`. Keep it in sync with eval-rubrics.json `default` (3 items, 60%).
 const DEFAULT_RUBRIC = {
   items: [
-    { label: 'Correctness', max: 5 },
-    { label: 'Completeness', max: 5 },
-    { label: 'Quality', max: 5 },
+    { label: 'Correctness', max: 5, anchors: { '1': 'Fails on a known/likely input or misses the spec', '3': 'Happy path correct; 1-2 edge/failure cases unhandled', '5': 'Spec met exactly; edge cases + validation handled and verified' } },
+    { label: 'Completeness', max: 5, anchors: { '1': 'Major features missing; well under scope', '3': 'Most done; one meaningful gap or skipped AC', '5': 'Every requirement/AC implemented; no gaps' } },
+    { label: 'Quality', max: 5, anchors: { '1': 'Unmaintainable/unsafe; effectively untested', '3': 'Works but duplication / pattern mismatch / weak naming / test gap', '5': 'DRY, readable, pattern-compliant, tested; no smells' } },
   ],
   pass_threshold_pct: 60,
 }
@@ -256,7 +256,7 @@ const JUDGE_LENSES = [
   { key: 'maintainability', emphasis: 'maintainability & operability — readability, DRY/SRP, pattern compliance, test quality, and the 6-month cost of living with this change' },
 ]
 const judgePromptFor = (lens) =>
-  `${AK}\n\nYou are ONE of three independent judges; YOUR lens is **${lens.emphasis}**. Produce a full verdict for the review of: ${scope}\n\nScore against this rubric (use these exact item labels and pass threshold):\n${JSON.stringify(rubric)}\n\nFindings are tagged 'verified' (survived the adversarial skeptic) or 'UNVERIFIED' (verifier did not return, or a single-pass critic find). Treat UNVERIFIED with skepticism but weigh it:\n${findingsDigest}\n\nUncovered areas flagged by the completeness critic: ${uncovered}\n\nScore each rubric item 0..max with a one-sentence rationale FROM YOUR LENS (one entry per rubric item, exact labels). Do NOT soften your lens to be "balanced" — the other two lenses cover other angles. Populate must_fix (CRITICAL/HIGH) / should_fix (MEDIUM) / could_fix (LOW); each entry MUST begin with "[SEVERITY] file:line" and include the suggested fix. NOTE: the script reconciles the three judges deterministically — MIN score per item across judges, union of fix lists, and BLOCKS approval on any confirmed CRITICAL/HIGH finding — so be accurate to your lens, not strategic.`
+  `${AK}\n\nYou are ONE of three independent judges; YOUR lens is **${lens.emphasis}**. Produce a full verdict for the review of: ${scope}\n\nScore against this rubric (use these exact item labels and pass threshold):\n${JSON.stringify(rubric)}\n\nFindings are tagged 'verified' (survived the adversarial skeptic) or 'UNVERIFIED' (verifier did not return, or a single-pass critic find). Treat UNVERIFIED with skepticism but weigh it:\n${findingsDigest}\n\nUncovered areas flagged by the completeness critic: ${uncovered}\n\nScore each rubric item 0..max with a one-sentence rationale FROM YOUR LENS (one entry per rubric item, exact labels); CALIBRATE each score against that item's \`anchors\` (the 1/3/5 bands in the rubric above) and name the band you matched in the rationale. Do NOT soften your lens to be "balanced" — the other two lenses cover other angles. Populate must_fix (CRITICAL/HIGH) / should_fix (MEDIUM) / could_fix (LOW); each entry MUST begin with "[SEVERITY] file:line" and include the suggested fix. NOTE: the script reconciles the three judges deterministically — MIN score per item across judges, union of fix lists, and BLOCKS approval on any confirmed CRITICAL/HIGH finding — so be accurate to your lens, not strategic.`
 const judgeResults = await parallel(JUDGE_LENSES.map(l => () =>
   agent(judgePromptFor(l), { label: `judge:${l.key}`, phase: 'Judge', schema: VERDICT }).then(v => (v ? { lens: l.key, v } : null))
 ))

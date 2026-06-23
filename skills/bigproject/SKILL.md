@@ -145,6 +145,17 @@ user_decision = AskUserQuestion(questions=[{
 ## Step 5: Phase Loop (main thread, dependency order)
 
 Iterate phases in `execution_order`. On resume, skip any phase whose `status == complete`.
+
+> **Why phases run sequentially (not parallel), even when `depends_on` is empty.** Two things
+> block safe parallelism here: (1) each phase's Stage-1 interview uses `AskUserQuestion`, which only
+> the main thread can call — interviews are inherently serial; (2) phases implement code into the
+> **same working tree**, so dispatching independent phases' Stage 2–4 concurrently would race on
+> files (undeclared overlaps, git-index contention) and corrupt the tree. Safe parallel execution
+> requires per-phase **worktree isolation**, which only a Workflow script provides
+> (`parallel()` + `isolation: worktree`) — this prose+`Task` loop cannot. If a large project genuinely
+> needs parallel phase execution, drive those phases through the Workflow tier (a `fierce-*`-style
+> script with worktree isolation) rather than parallelizing this loop. Keep this loop serial.
+
 For each phase **P**:
 
 1. **Dependency gate**: if any phase in `P.depends_on` is not `complete` → mark P `blocked`

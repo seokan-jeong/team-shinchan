@@ -160,6 +160,7 @@ If you see the help menu, you are ready to go.
 - Try `/team-shinchan:brainstorm {problem}` to explore before building
 - Try `/team-shinchan:start {your task}` to see the full workflow
 - Use `/team-shinchan:debate` for design decisions
+- Wire an event-driven entry: the opt-in [CI-Failure Responder recipe](docs/ci-responder.md) (CI fails → headless auto-fix PR)
 
 ---
 

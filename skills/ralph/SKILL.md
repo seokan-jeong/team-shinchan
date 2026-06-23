@@ -58,10 +58,17 @@ Don't stop until complete. Idle detection enabled.
      c. Phase completion: checked items \`- [x]\` in PROGRESS.md increased
    - If ANY of (a, b, c) is true → progress detected → reset idle counter to 0
    - If ALL of (a, b, c) are false → no progress → increment idle counter
-5. **Stagnation detection** (after each idle-detection check):
+5. **Stagnation detection** (after each idle-detection check) — a STOP condition, not just narration:
    Run: \`node src/stagnation-detector.js --jsonl .shinchan-docs/work-tracker.jsonl --doc-id {DOC_ID} --window 20\`
-   If output \`stagnation: true\`, include pattern names in the continuation prompt:
-   "Stagnation detected: {pattern names}. Adjusting approach to address: {evidence}."
+   \`stagnation: true\` means a hard pattern (REPEAT_ERROR / OSCILLATION / AC_STALL) RECURRED in the
+   window — the loop is stuck, not merely slow (the detector already requires repeated occurrences, so
+   it is not a single transient).
+   - **First** \`stagnation: true\`: narrate the pattern and try ONE corrective approach —
+     "Stagnation detected: {pattern names}. Adjusting approach to address: {evidence}."
+   - **Second consecutive** \`stagnation: true\` (the correction did not break the pattern): **STOP the
+     loop NOW and escalate to the user** with the pattern + evidence — do NOT continue toward the
+     15-iteration cap. A confirmed-recurring stagnation pattern will not resolve by looping; burning
+     the remaining iterations is waste. Record \`event: stagnation_stop\` to boulder-log.jsonl.
 6. **Idle detection**:
    - If idle counter >= 3: "Idle detected — 3 consecutive iterations with no measurable progress"
    - Auto-generate continuation prompt with new approach:
@@ -80,10 +87,11 @@ Don't stop until complete. Idle detection enabled.
 
 ### Safety Limits
 - **Max iterations**: 15 (hard limit — "Boulder limit reached — manual intervention required")
+- **Stagnation stop**: 2 consecutive `stagnation: true` detections → stop + escalate before the cap (step 5)
 - **Max retries per task**: 3 (report failure if exceeded)
 - **Progress narration**: Every iteration, show current Phase, task, and progress indicator
 - **Log file**: .shinchan-docs/{DOC_ID}/boulder-log.jsonl (append-only JSONL, skip if no active workflow)
-  Format: \`{"ts":"ISO8601","iteration":N,"event":"idle_detected|retry|success|limit_reached","reason":"...","backoff_ms":N}\`
+  Format: \`{"ts":"ISO8601","iteration":N,"event":"idle_detected|retry|success|limit_reached|stagnation_stop","reason":"...","backoff_ms":N}\`
 
 ### Completion Conditions
 Complete only when all conditions met:

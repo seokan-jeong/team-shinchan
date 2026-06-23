@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.54.0] - 2026-06-23
+
+### Outcome benchmark harness — does the harness actually improve coding outcomes? (build)
+
+Benchmarking ponytail's method to produce the external evidence the internal validators never gave. This release lands the **harness build + deterministic tests**; the headline numbers come from a separate, user-gated paid run (honest — it does **not** yet prove `/implement` beats bare Claude).
+
+- **`benchmarks/run.js`** — both arms via real headless `claude -p --output-format json --model haiku`. arm-A = `/team-shinchan:implement` (Bo); arm-B = the same binary with the plugin disabled (clean `CLAUDE_CONFIG_DIR`) + a runtime assertion that no team-shinchan hook fired — the guard against an unfair baseline (ponytail's #126 lesson). `git worktree` isolation per run; real `total_cost_usd` drives a ~$1 kill-switch; the only live `claude` call sits behind an injectable invoker so tests never spend money.
+- **`benchmarks/scorer.js`** — deterministic, LLM-free: apply the diff → run the pinned `node --test` → real exit code; non-applying/empty diff = FAIL. Fixed a real `NODE_TEST_CONTEXT` leak that would have corrupted grading.
+- **`bar.json`** (committed before any results = tamper-evident) + `verdict.js` (single binary win/no-win: pass-rate higher AND tokens/$ not worse AND zero safety violations).
+- Vendored MIT fixture (`tests/fixtures/leven`, pinned SHA) + bugfix/feature/refactor tasks; 32 deterministic tests, zero paid calls; reuses `eval-schema.js` + `MODEL_PRICING`.
+
+To produce the numbers: `node benchmarks/run.js --all` (≤$1). A no-win will be reported plainly.
+
 ## [4.53.0] - 2026-06-23
 
 ### Audit-hardening: ralph stagnation brake, bigproject serial-constraint doc, CI-responder recipe

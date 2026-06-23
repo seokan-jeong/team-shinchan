@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.52.0] - 2026-06-23
+
+### Anchored Action-Kamen rubric scores (DI-3)
+
+The AK review rubric scored each dimension 1–5 with no definition of what 1 vs 3 vs 5 means, so scores weren't calibrated across reviews. Every rubric item now carries a 1/3/5 **anchor band matrix**, and the reviewers score against it:
+
+- `agents/_shared/eval-rubrics.json` (v1.1.0) — `anchors` {1,3,5} added to all items in the `default`, `documentation`, and `planning` rubrics (2/4 interpolate).
+- `agents/actionkamen.md` — the fallback rubric is now the band matrix; scoring loads and applies the anchors and each score's rationale must name the band it matched.
+- `skills/fierce-review` — the judge prompt calibrates against the anchors and the offline fallback rubric carries them too.
+
+Result: the same artifact earns the same score across reviews — reproducible APPROVED/REJECTED verdicts.
+
 ## [4.51.0] - 2026-06-19
 
 ### skill-feedback now aggregates globally (DI-2)

@@ -1,0 +1,8 @@
+{
+  "id": "refactor-01",
+  "kind": "refactor",
+  "prompt": "Refactor the prefix/suffix trimming loops in index.js for readability (e.g. extract a small helper or add clarifying comments) WITHOUT changing any observable behavior. All existing tests must still pass unchanged.",
+  "fixture": "leven",
+  "fixture_sha": "235e7758c8ec95fc3a30ef32528ce1fa409c040a",
+  "test_cmd": "node --test"
+}

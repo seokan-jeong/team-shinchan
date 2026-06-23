@@ -1,0 +1,7 @@
+{
+  "source_url": "https://github.com/sindresorhus/leven",
+  "pinned_sha": "235e7758c8ec95fc3a30ef32528ce1fa409c040a",
+  "license": "MIT",
+  "vendored_at": "2026-06-23",
+  "notes": "Tiny MIT Levenshtein-distance util (index.js ~175 LOC). Real upstream source + index.d.ts + LICENSE copied verbatim at the pinned SHA. The upstream native test suite uses AVA + xo (non-trivial devDeps); to honor DEC-2 'zero new toolchain, real exit-code via node --test', a node --test-native suite (test.test.js) exercising the SAME real algorithm is provided alongside the vendored source. package.json sets type:module and a node --test grading command requiring zero npm install."
+}

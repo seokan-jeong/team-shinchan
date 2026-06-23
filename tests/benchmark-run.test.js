@@ -51,34 +51,51 @@ test('readCostUsd: reads real total_cost_usd, fails loudly when absent', () => {
   assert.throws(() => readCostUsd(noCost), /total_cost_usd/, 'must throw, not silently return $0');
 });
 
-// ---- worktree isolation ----
-function makeRepoWithCommit() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'run-repo-'));
-  const git = (c) => execSync('git ' + c, { cwd: dir, stdio: 'pipe' });
-  git('init -q');
-  git('config user.email t@t.t');
-  git('config user.name t');
+// ---- fixture-copy isolation (replaces the broken upstream-sha worktree) ----
+function makeVendoredFixture() {
+  // a plain vendored fixture dir (NO .git), like tests/fixtures/leven
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'run-fixture-'));
   fs.writeFileSync(path.join(dir, 'f.txt'), 'base\n');
-  git('add -A');
-  git('commit -qm base');
-  const sha = execSync('git rev-parse HEAD', { cwd: dir }).toString().trim();
-  return { dir, sha };
+  // include a leaked .shinchan-docs to prove the copy excludes it (fairness)
+  fs.mkdirSync(path.join(dir, '.shinchan-docs'), { recursive: true });
+  fs.writeFileSync(path.join(dir, '.shinchan-docs', 'work-tracker.jsonl'), '{"event":"leak"}\n');
+  return dir;
 }
 
-test('withWorktree: removes the worktree even when fn throws (try/finally)', () => {
-  const { dir, sha } = makeRepoWithCommit();
-  const { withWorktree } = require('../benchmarks/run.js');
-  let createdPath = null;
+test('withFixtureCopy: copies the vendored fixture into a fresh git baseline, then removes it', () => {
+  const { withFixtureCopy } = require('../benchmarks/run.js');
+  const fixture = makeVendoredFixture();
+  let copyDir = null;
+  const seen = withFixtureCopy(fixture, (cwd) => {
+    copyDir = cwd;
+    assert.ok(fs.existsSync(path.join(cwd, 'f.txt')), 'fixture file copied');
+    assert.ok(fs.existsSync(path.join(cwd, '.git')), 'copy is a git repo (baseline committed)');
+    assert.ok(!fs.existsSync(path.join(cwd, '.shinchan-docs')), '.shinchan-docs excluded from copy (fairness)');
+    // a clean baseline: git diff is empty against the committed tree
+    const diff = execSync('git diff', { cwd, stdio: 'pipe' }).toString();
+    assert.equal(diff.trim(), '', 'baseline committed → clean git diff');
+    return 'ok';
+  });
+  assert.equal(seen, 'ok', 'fn ran and returned');
+  assert.ok(copyDir, 'fn received a copy dir');
+  assert.ok(!fs.existsSync(copyDir), 'copy removed after fn (no leftover state)');
+  fs.rmSync(fixture, { recursive: true, force: true });
+});
+
+test('withFixtureCopy: removes the copy even when fn throws (try/finally)', () => {
+  const { withFixtureCopy } = require('../benchmarks/run.js');
+  const fixture = makeVendoredFixture();
+  let copyDir = null;
   assert.throws(() => {
-    withWorktree(dir, sha, (wt) => {
-      createdPath = wt;
-      assert.ok(fs.existsSync(wt), 'worktree exists inside fn');
+    withFixtureCopy(fixture, (cwd) => {
+      copyDir = cwd;
+      assert.ok(fs.existsSync(cwd), 'copy exists inside fn');
       throw new Error('boom');
     });
   }, /boom/);
-  assert.ok(createdPath, 'fn ran');
-  assert.ok(!fs.existsSync(createdPath), 'worktree removed after throwing fn (no leftover)');
-  fs.rmSync(dir, { recursive: true, force: true });
+  assert.ok(copyDir, 'fn ran');
+  assert.ok(!fs.existsSync(copyDir), 'copy removed after throwing fn (no leftover)');
+  fs.rmSync(fixture, { recursive: true, force: true });
 });
 
 // ---- arm-B plugin-off + no-hook-fired assertion ----

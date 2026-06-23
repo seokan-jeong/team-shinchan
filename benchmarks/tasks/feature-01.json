@@ -4,5 +4,6 @@
   "prompt": "Add a small named export `levenRatio(first, second)` to index.js that returns a normalized similarity ratio in [0, 1], computed as 1 - leven(first, second) / Math.max(first.length, second.length) (and exactly 1 when both strings are empty). Reuse the existing leven function. Keep the existing default export and `closestMatch` export unchanged.",
   "fixture": "leven",
   "fixture_sha": "235e7758c8ec95fc3a30ef32528ce1fa409c040a",
-  "test_cmd": "node --test"
+  "test_cmd": "node --test test.test.js",
+  "fixture_sha_note": "PROVENANCE ONLY — the vendored upstream SHA. Isolation copies tests/fixtures/<fixture>; this SHA is NOT a git checkout target."
 }

@@ -4,5 +4,6 @@
   "prompt": "Refactor the prefix/suffix trimming loops in index.js for readability (e.g. extract a small helper or add clarifying comments) WITHOUT changing any observable behavior. All existing tests must still pass unchanged.",
   "fixture": "leven",
   "fixture_sha": "235e7758c8ec95fc3a30ef32528ce1fa409c040a",
-  "test_cmd": "node --test"
+  "test_cmd": "node --test test.test.js",
+  "fixture_sha_note": "PROVENANCE ONLY — the vendored upstream SHA. Isolation copies tests/fixtures/<fixture>; this SHA is NOT a git checkout target."
 }

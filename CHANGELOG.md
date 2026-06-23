@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.53.0] - 2026-06-23
+
+### Audit-hardening: ralph stagnation brake, bigproject serial-constraint doc, CI-responder recipe
+
+Closes the three remaining items from the start/bigproject trust audit, each scoped to its real value:
+
+- **ralph stagnation is now a stop condition** (#3). ralph ran the stagnation-detector but only narrated the pattern and looped to the 15-iteration cap. Now a confirmed-recurring stagnation pattern (REPEAT_ERROR / OSCILLATION / AC_STALL) gets one corrective attempt, then on a second consecutive detection **stops and escalates before the cap** — Tier-1 ralph now matches Tier-2 fierce-ralph's deterministic stagnation discipline. (autopilot already had a 15-cap + idle pause; bigproject's phase loop is naturally bounded.)
+- **bigproject phase-loop serial constraint documented** (#2). Safe phase parallelism needs per-phase worktree isolation (phases share one working tree; interviews need the main thread), which only a Workflow script provides. Step 5 now documents why the loop is serial and points to the Workflow tier for parallel-safe execution.
+- **Opt-in event-driven loop recipe** (#1): `docs/ci-responder.md` — a copy-to-activate GitHub Actions workflow that, on CI failure, runs Claude Code headlessly with the plugin and opens a fix PR (never pushes to main), with required hard brakes against an infinite responder loop.
+
 ## [4.52.0] - 2026-06-23
 
 ### Anchored Action-Kamen rubric scores (DI-3)

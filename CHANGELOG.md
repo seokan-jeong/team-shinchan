@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.54.1] - 2026-06-23
+
+### Fix: the outcome benchmark harness now actually runs (v4.54.0 was unrunnable)
+
+v4.54.0 shipped the harness with 32 green tests — all using a **mocked** invoke — so three real-path gaps never surfaced and the "outcome benchmark" couldn't produce an outcome: `node benchmarks/run.js --all` was a no-op (no CLI entrypoint), `runMatrix` never provisioned a fixture (scored an empty dir), and tasks referenced an upstream `fixture_sha` not in any local git so the worktree could never check out. (A mock-only suite can't catch "the real pipeline was never assembled" — the session's recurring *tested ≠ works*, this time in the evidence-machine itself.)
+
+- **Isolation by vendored-copy** (`withFixtureCopy`: copy + `git init`/commit a clean baseline) replaces the upstream-sha worktree; `fixture_sha` is now provenance-only.
+- **CLI entrypoint** (`cli(argv)` with `--all`/`--repeat`/`--ceiling`/`--tasks`) loads tasks + `bar.json`, runs the matrix, writes results JSONL, prints the verdict; `node benchmarks/run.js --all` now executes.
+- **Grading-integrity fix**: bare `node --test` exits 0 with zero discovered tests (vacuous pass); task commands now use explicit `node --test test.test.js`.
+- **Money-free integration test**: real `cli` + real scorer (copy → `git apply` → real `node --test` → verdict) driven by a stub invoke (no claude) — the test that would have caught all three gaps.
+
+Verified ($0): `run.js --all --ceiling 0` executes; `node --test tests/benchmark-*.test.js` → 36/36; static green. The only remaining real-money step is swapping the stub for the real `claude` invoker (the paid run).
+
 ## [4.54.0] - 2026-06-23
 
 ### Outcome benchmark harness — does the harness actually improve coding outcomes? (build)

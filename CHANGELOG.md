@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.55.0] - 2026-06-24
+
+### Release tool now auto-clears the local cache
+
+The post-release local-cache clear is no longer a manual step the operator must remember — `node src/release.js` does it automatically after a real release (`--push`/`--gh-release`/`--full`): it clears the per-version dirs under `~/.claude/plugins/cache/team-shinchan/team-shinchan` and fast-forwards the marketplace clone, so the just-released version is what loads locally. Forcing function over prose — the tool enforces it, not memory.
+
+- Best-effort and never fails the release; `--no-clear-cache` opts out; `--dry-run` previews only.
+- Prints a restart reminder, since clearing the version the current session loaded deregisters its plugin agents until Claude Code restarts.
+
 ## [4.54.1] - 2026-06-23
 
 ### Fix: the outcome benchmark harness now actually runs (v4.54.0 was unrunnable)

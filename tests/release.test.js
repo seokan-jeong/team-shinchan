@@ -112,3 +112,39 @@ test('buildReleaseCommands for bump-only emits no git/gh commands', () => {
   const cmds = R.buildReleaseCommands({ version: '4.39.0' }, { branch: 'main', files: [], notesPath: '' });
   assert.equal(cmds.length, 0);
 });
+
+// ---- clearLocalCache: mandatory post-release step (memory: release-cache-clear) ----
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+
+test('parseArgs: clearCache defaults ON; --no-clear-cache turns it off', () => {
+  assert.equal(R.parseArgs(['4.55.0', '--full']).clearCache, true);
+  assert.equal(R.parseArgs(['4.55.0', '--full', '--no-clear-cache']).clearCache, false);
+});
+
+test('clearLocalCache: dry-run previews, touches no disk', () => {
+  const res = R.clearLocalCache({ dryRun: true, version: '4.55.0', cacheDir: '/nope/x', marketplaceDir: '/nope/y' });
+  assert.equal(res.dryRun, true);
+  assert.deepEqual(res.cleared, []);
+  assert.ok(res.lines.join('\n').match(/would clear/i));
+});
+
+test('clearLocalCache: removes cached version dirs (injected paths), never throws', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'rel-cache-'));
+  const cacheDir = path.join(tmp, 'cache');
+  fs.mkdirSync(path.join(cacheDir, '4.48.1'), { recursive: true });
+  fs.mkdirSync(path.join(cacheDir, '4.50.0'), { recursive: true });
+  const res = R.clearLocalCache({ version: '4.55.0', cacheDir, marketplaceDir: path.join(tmp, 'no-marketplace') });
+  assert.deepEqual(res.cleared.sort(), ['4.48.1', '4.50.0']);
+  assert.equal(fs.existsSync(path.join(cacheDir, '4.48.1')), false); // actually removed (delivery, not just reported)
+  assert.equal(res.synced, false); // marketplace dir absent => graceful
+  assert.ok(res.lines.join('\n').match(/Restart Claude Code/));
+  fs.rmSync(tmp, { recursive: true, force: true });
+});
+
+test('clearLocalCache: missing cache dir => graceful (none cached), no throw', () => {
+  const res = R.clearLocalCache({ version: '4.55.0', cacheDir: '/definitely/not/here', marketplaceDir: '/nor/here' });
+  assert.deepEqual(res.cleared, []);
+  assert.ok(res.lines.join('\n').match(/none cached/));
+});

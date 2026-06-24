@@ -81,12 +81,18 @@ node src/release.js 4.39.0 --full --dry-run
 
 ## After a release
 
-Clear the local plugin caches so the new version is what loads locally:
+**Automatic (since v4.55.0):** after a real release (`--push`/`--gh-release`/`--full`), the tool
+clears the local plugin cache + fast-forwards the marketplace clone itself, so the new version is
+what loads locally — no manual step. Pass `--no-clear-cache` to opt out.
 
 ```
-rm -rf ~/.claude/plugins/cache/team-shinchan/team-shinchan/<old-versions>
-git -C ~/.claude/plugins/marketplaces/team-shinchan pull --ff-only
+~/.claude/plugins/cache/team-shinchan/team-shinchan/<versions>   # cleared (re-cached on next load)
+git -C ~/.claude/plugins/marketplaces/team-shinchan pull --ff-only   # synced
 ```
+
+> The cleared versions include the one THIS session loaded, so its team-shinchan plugin agents
+> deregister until you **restart Claude Code** (which then loads the new version). The tool prints
+> this restart reminder. It is best-effort and never fails the release.
 
 ## Tests
 

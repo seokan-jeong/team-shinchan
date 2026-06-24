@@ -53,10 +53,12 @@ function parseArgs(argv) {
   const o = {
     version: null, dryRun: false, notesFile: null, title: null,
     git: false, tag: false, push: false, ghRelease: false, allowDirty: false,
+    clearCache: true,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--dry-run') o.dryRun = true;
+    else if (a === '--no-clear-cache') o.clearCache = false;
     else if (a === '--allow-dirty') o.allowDirty = true;
     else if (a === '--git') o.git = true;
     else if (a === '--tag') o.tag = true;
@@ -135,6 +137,40 @@ function fail(msg) { console.error(`Error: ${msg}`); process.exit(1); }
 function warn(msg) { console.error(`Warning: ${msg}`); }
 function sh(cmd) { return execSync(cmd, { cwd: ROOT, encoding: 'utf8' }); }
 function safeSh(cmd) { try { return sh(cmd); } catch { return ''; } }
+
+// Mandatory post-release step (memory: release-cache-clear): clear the stale local plugin cache
+// + sync the marketplace clone so the just-released version is what loads locally. Best-effort —
+// the release already succeeded, so this NEVER throws. Paths are injectable for tests.
+function clearLocalCache(opts = {}) {
+  const home = os.homedir();
+  const cacheDir = opts.cacheDir || path.join(home, '.claude', 'plugins', 'cache', 'team-shinchan', 'team-shinchan');
+  const marketplaceDir = opts.marketplaceDir || path.join(home, '.claude', 'plugins', 'marketplaces', 'team-shinchan');
+  const version = opts.version || '?';
+  const lines = [];
+  if (opts.dryRun) {
+    lines.push(`  would clear cached versions under ${cacheDir}`);
+    lines.push(`  would sync marketplace: git -C ${marketplaceDir} pull --ff-only`);
+    return { lines, cleared: [], synced: false, dryRun: true };
+  }
+  const cleared = [];
+  try {
+    if (fs.existsSync(cacheDir)) {
+      for (const v of fs.readdirSync(cacheDir)) {
+        try { fs.rmSync(path.join(cacheDir, v), { recursive: true, force: true }); cleared.push(v); } catch { /* best-effort */ }
+      }
+    }
+  } catch { /* best-effort */ }
+  let synced = false;
+  try {
+    if (fs.existsSync(marketplaceDir)) {
+      const dirty = execSync('git status --porcelain', { cwd: marketplaceDir, encoding: 'utf8' }).trim();
+      if (!dirty) { execSync('git pull --ff-only', { cwd: marketplaceDir, encoding: 'utf8', stdio: 'pipe' }); synced = true; }
+    }
+  } catch { /* best-effort */ }
+  lines.push(`  local cache cleared: ${cleared.length ? cleared.join(', ') : '(none cached)'}${synced ? '; marketplace synced' : ''}`);
+  lines.push(`  Restart Claude Code to load v${version} — clearing the loaded version deregisters this session's plugin agents until restart.`);
+  return { lines, cleared, synced, dryRun: false };
+}
 
 function resolveNotes(opts) {
   if (opts.notesFile) return fs.readFileSync(opts.notesFile, 'utf8');
@@ -242,14 +278,21 @@ function main() {
   }
 
   console.log(opts.dryRun ? '\nDry run complete — nothing written.' : '\nAll 4 files updated successfully.');
-  if (!opts.dryRun && (opts.push || opts.ghRelease)) {
-    console.log('Reminder: clear local plugin caches after release (memory: release-cache-clear).');
+  // Mandatory post-release: clear the local cache so the new version loads locally (memory:
+  // release-cache-clear). Runs after a real release (push/gh-release); --no-clear-cache opts out.
+  if (opts.push || opts.ghRelease) {
+    if (opts.clearCache) {
+      console.log('\nLocal cache:');
+      clearLocalCache({ dryRun: opts.dryRun, version: opts.version }).lines.forEach((l) => console.log(l));
+    } else if (!opts.dryRun) {
+      console.log('Reminder: --no-clear-cache set — clear local plugin caches yourself (memory: release-cache-clear).');
+    }
   }
 }
 
 module.exports = {
   isValidSemver, parseArgs, bumpJsonVersion, bumpReadmeBadge,
-  insertChangelogEntry, formatGitLogNotes, buildReleaseCommands,
+  insertChangelogEntry, formatGitLogNotes, buildReleaseCommands, clearLocalCache,
 };
 
 if (require.main === module) main();

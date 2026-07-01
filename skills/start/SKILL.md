@@ -79,6 +79,7 @@ current:
   phase: null
   owner: misae
   status: active
+  answer_mode: human              # /start default — the human answers every AskUserQuestion. `/autopilot` sets this to `proxy` (see "Answer Mode" below + agents/_shared/proxy-user-panel.md). Absent ⇒ human.
   execution_mode: micro-execute   # /start default — pins Stage 3 to the per-task (spec→quality→skeptic) review chain. Set to `dag` ONLY when explicitly opting into parallel dag-executor dispatch.
   # parent_doc_id / phase_number: ONLY when injected by bigproject phase mode; omit standalone.
   # parent_doc_id: "{parent_doc_id}"
@@ -123,6 +124,37 @@ History entry format for AK review (appended after each AK review):
 > - Existing workflows without `ak_gate` field continue to function (backwards-compatible)
 
 > Stage rules and transition gates are defined in CLAUDE.md and hooks/workflow-guard.md.
+
+## Answer Mode — human (default) vs proxy (autopilot)
+
+Read `current.answer_mode` from WORKFLOW_STATE.yaml (absent ⇒ `human`). It controls
+**who answers every `AskUserQuestion` this skill raises** — the requirements interview
+questions (2A.1), the REQUESTS approval (2A.3), the design decisions (2B.1), and the
+DESIGN approval (2B.3):
+
+- **`human` (default)** — behave exactly as written below: call `AskUserQuestion` and
+  wait for the user.
+- **`proxy` (set by `/autopilot`)** — do NOT call `AskUserQuestion`. Instead route the
+  identical `{question, options, header, context_hint}` through the **proxy-user panel**
+  (`agents/_shared/proxy-user-panel.md`): a K=3 diverse panel votes, a cautious judge
+  breaks ties, and the winning option is used **as if the user had picked it**. Append a
+  `proxy_answer` history entry per that spec. Everything else in the flow — Misae's
+  clarity gate, Hiroshi's design-completeness gate, the materiality/closure re-entry
+  loops, and every Action Kamen review — runs **unchanged**. Proxy mode replaces the
+  human at the seam, nothing before it.
+
+> **ROUTING RULE:** wherever a step below calls `AskUserQuestion(...)`, that call is
+> `answer_mode`-aware. Under `proxy`, substitute a proxy-user-panel selection over the
+> same options and continue with the returned choice. This applies to 2A.1, 2A.3, 2B.1,
+> and 2B.3. (Options-overflow pagination is a human-UI concern and is skipped under
+> `proxy` — the panel sees the full `options[]` at once.)
+>
+> **ESCALATION UNDER PROXY:** the 3-way ESCALATE prompts (2A.1b / 2B.1b) must never
+> block autopilot on a human. Under `proxy`, do NOT call `AskUserQuestion` there —
+> auto-select **B (Open Questions로 기록 후 진행)**: record the unresolved items and move
+> on. This is the hands-off, non-destructive default (A risks looping to hard_cap, C
+> discards prior answers). Log it as a `proxy_answer` history entry with
+> `seam: escalation`.
 
 ## Step 2: Greeting + Agent Invocation
 

@@ -69,6 +69,20 @@
         "completion_prompted": {
           "type": "boolean",
           "description": "Block-once guard (main-076 FR-6): set true after the completion-nudge block fires for the current execution stage so the next Stop no-ops. Absent ⇒ false (HR-8 backward compat). Resets on entry to a new execution stage (DEC-2)."
+        },
+        "answer_mode": {
+          "enum": [
+            "human",
+            "proxy"
+          ],
+          "description": "Who answers AskUserQuestion seams in the /start flow. `human` (default; absent ⇒ human) = the user answers. `proxy` (set by /autopilot) = the proxy-user panel (agents/_shared/proxy-user-panel.md) votes on the best option in the user's place. See skills/start/SKILL.md § Answer Mode."
+        },
+        "execution_mode": {
+          "enum": [
+            "micro-execute",
+            "dag"
+          ],
+          "description": "Stage 3 dispatch mode. `micro-execute` (/start default) = per-task spec→quality→skeptic review chain. `dag` = opt-in parallel dag-executor (verify-gate only)."
         }
       },
       "required": [

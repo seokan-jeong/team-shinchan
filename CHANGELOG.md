@@ -1,5 +1,32 @@
 # Changelog
 
+## [4.56.0] - 2026-07-01
+
+### autopilot v2 — same workflow as /start, answered by a proxy-user panel
+
+`/team-shinchan:autopilot` is reworked from a separate AUTONOMOUS 1-shot path into a
+thin wrapper over the `/start` workflow. It now runs the **exact same process as
+`/start`** (requirements interview → design → planning → micro-execute → completion),
+with one substitution: at every point where `/start` would call `AskUserQuestion` and
+wait for the human, a **proxy-user panel answers on the user's behalf**.
+
+- **New `agents/_shared/proxy-user-panel.md`** — a K=3 diverse-lens panel
+  (`user_intent` / `risk_averse` / `pragmatist`) votes on the best option, a cautious
+  judge breaks ties, it never invents an option, and every pick is logged to
+  `WORKFLOW_STATE.history` as `proxy_answer` for auditability.
+- **`answer_mode` on WORKFLOW_STATE** (`human` default | `proxy`) — `/start` keeps its
+  existing human behavior unchanged; `/autopilot` sets `proxy` to route every seam
+  (2A.1/2A.3/2B.1/2B.3 + escalate prompts) through the panel.
+- **autopilot no longer performs branch completion** (merge / PR / keep / discard) —
+  it does the work, runs Stage 4 docs + Action Kamen verification, and stops with a
+  handoff report. Those git/PR operations are out of scope.
+
+**Side benefits:** fixes the long-standing autopilot/`start` design-stage asymmetry
+(autopilot previously skipped design entirely) and removes the duplicated
+expiry/archive logic (now inherited from `/start`).
+
+All 28 static validation suites pass.
+
 ## [4.55.0] - 2026-06-24
 
 ### Release tool now auto-clears the local cache

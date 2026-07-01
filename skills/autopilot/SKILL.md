@@ -10,8 +10,24 @@ user-invocable: true
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 👦 [Shinnosuke] Autopilot mode engaged~ 🤖
+   (same workflow as /start — a proxy panel answers on your behalf)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+## What autopilot IS (and is not)
+
+Autopilot runs the **exact same workflow as `/team-shinchan:start`** — requirements
+interview → design → planning → micro-execute execution → completion — with **one
+substitution**: at every point where `/start` would call `AskUserQuestion` and wait
+for the human, a **proxy-user panel answers instead** (`agents/_shared/proxy-user-panel.md`).
+A K=3 diverse panel votes on the best option, a cautious judge breaks ties, and the
+winning choice is used as if the user had picked it. Every quality gate `/start`
+enforces — Misae's clarity gate, Hiroshi's design gate, the materiality/closure
+re-entry loops, every Action Kamen review — runs **unchanged**.
+
+**Autopilot's job is to DO THE WORK and stop when it is done and verified.** It does
+**NOT** perform branch completion (merge / open PR / keep / discard) — that is out of
+scope and is left to a human or another tool. Autopilot ends with a handoff report.
 
 ## Step 1: Validate Input
 
@@ -21,45 +37,13 @@ If args length > 2000 characters:
   Warn user: "Request was truncated to 2000 characters"
 ```
 
-## Step 2: Expire and Archive Stale Workflows
+## Step 2: Setup (Folder + State) — with answer_mode: proxy
 
-Read `workflow_expiry_days` from:
-1. `.shinchan-config.yaml` in the current project root (key: `workflow_expiry_days`) — takes priority
-2. Otherwise use the plugin default: **7** (from `plugin.json` settings)
-3. If `workflow_expiry_days` is `0` or cannot be read → skip expiry entirely
-
-For each `.shinchan-docs/*/WORKFLOW_STATE.yaml` where `status: active`:
-
-**Expiry check** (skip if `workflow_expiry_days == 0`):
-
-1. Read the `updated` timestamp from WORKFLOW_STATE.yaml
-2. Parse the timestamp (ISO 8601). If parsing fails → skip this entry
-3. Calculate elapsed days: `(now - updated) / 86400000`
-4. If `elapsed >= workflow_expiry_days`:
-   a. Set `status: expired` in WORKFLOW_STATE.yaml
-   b. Add event to history:
-      ```yaml
-      - timestamp: "{ISO now}"
-        event: auto_expired
-        agent: shinnosuke
-        archived_at: "{ISO now}"
-        archived_reason: auto_expiry
-      ```
-   c. Calculate archive path: `.shinchan-docs/archived/{YYYY-MM}/` where YYYY-MM comes from the current date
-   d. Attempt: `mkdir -p .shinchan-docs/archived/{YYYY-MM}/ && mv .shinchan-docs/{DOC_ID}/ .shinchan-docs/archived/{YYYY-MM}/{DOC_ID}/`
-   e. If `mv` fails: silently continue (status stays `expired`, folder stays in place)
-   f. Do NOT output any paused/expired notification to the user
-   g. Continue to next workflow
-
-**Non-expired active workflows are left as-is.** Multiple workflows can be `active` simultaneously.
-The workflow guard protects the most recently updated active workflow.
-Use `/team-shinchan:resume` to switch the guard target to a different workflow.
-
-## Step 3: Setup (Folder + State)
-
-1. **DOC_ID**: If args contains ISSUE-xxx use it; else `{branch}-{next_index}` from git branch + ls. Truncate + warn if args > 2000 chars.
+1. **DOC_ID**: if args contains ISSUE-xxx use it; else `{branch}-{next_index}` from git
+   branch + ls (ignore `*-phase-*` dirs, same as `/start`).
 2. `mkdir -p .shinchan-docs/{DOC_ID}`
-3. Create WORKFLOW_STATE.yaml:
+3. Create WORKFLOW_STATE.yaml **using the `/start` Step 1 template verbatim, with one
+   override: `answer_mode: proxy`** (this is what routes every seam through the panel):
 
 ```yaml
 version: 1
@@ -71,10 +55,16 @@ current:
   phase: null
   owner: misae
   status: active
+  answer_mode: proxy              # AUTOPILOT override — proxy panel answers every AskUserQuestion
+  execution_mode: micro-execute   # per-task spec→quality→skeptic review chain (same as /start)
   interview: { step: 0, collected_count: 0, last_question: null }
   ak_gate:
     requirements:
-      status: pending          # pending | in_review | approved | rejected | escalated
+      status: pending
+      retry_count: 0
+      last_rejection_reasons: []
+    design:
+      status: pending
       retry_count: 0
       last_rejection_reasons: []
     planning:
@@ -85,141 +75,93 @@ history:
   - timestamp: "{timestamp}"
     event: workflow_started
     agent: shinnosuke
+    answer_mode: proxy
 ```
 
-## Step 4: Visual Input Detection
+## Step 3: Run the `/start` flow (Stages 1 + 1.5) in proxy mode
 
-**If args contain image/PDF paths (.png, .jpg, .jpeg, .gif, .svg, .pdf, .webp) or reference visual content:**
+Execute **`skills/start/SKILL.md`** exactly, with these bindings:
 
-```typescript
-Task(subagent_type="team-shinchan:ume", model="sonnet",
-  prompt="Analyze visual content for requirements.\nDOC_ID: {DOC_ID}\nExtract: UI components, layout, design patterns, user flows, ambiguities.\nUser request: {args}")
-```
+- **Skip `/start` Step 1** (state already created above). Run everything else:
+  Step 0 (expiry/archive), Step 2A-pre (Ume visual input detection), Step 2A
+  (requirements interview loop + approval), Step 2B (design interview loop + approval),
+  Step 2C (transition narration).
+- Because `current.answer_mode == proxy`, `/start`'s **"Answer Mode" ROUTING RULE**
+  applies automatically: every `AskUserQuestion` (2A.1 interview questions, 2A.3
+  REQUESTS approval, 2B.1 design decisions, 2B.3 DESIGN approval) resolves via the
+  proxy-user panel, and the 3-way ESCALATE prompts (2A.1b / 2B.1b) auto-select
+  **B (Open Questions로 기록 후 진행)**. No `AskUserQuestion` is ever shown to the user.
+- Design is DEFAULT-ON exactly as in `/start` — it is skipped only via `/start`'s own
+  narrow Step 2B skip conditions (`skip-design` token, Quick-Fix Lite path, or a
+  genuine zero-design-decision REQUESTS.md). Autopilot does not force-skip design.
 
-Store result as `{vision_context}`. Skip if no visual input.
+The proxy panel's selections are logged as `proxy_answer` history entries so a human
+can later audit every decision made on their behalf.
 
-## Step 5: Requirements - Invoke Misae DIRECTLY (Auto-Analyze Mode)
+## Step 4: Stages 2–4 via Shinnosuke (stop before branch completion)
 
-**CRITICAL: Do NOT invoke Shinnosuke for Stage 1. Invoke Misae directly (1-level instead of 2-level).**
-
-In autopilot mode, Misae performs **autonomous analysis** — no user interview. She analyzes the request, infers requirements, identifies risks, and produces REQUESTS.md directly.
-
-```typescript
-Task(subagent_type="team-shinchan:misae", model="sonnet",
-  prompt="mode: AUTONOMOUS (autopilot — no user interview)
-  DOC_ID: {DOC_ID} | WORKFLOW_STATE: .shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml
-  Visual Analysis: {vision_context or 'None'}
-
-  ## AUTOPILOT MODE — No User Interview
-  CRITICAL: Do NOT emit any `interview-question` JSON block. Do NOT ask the user anything. Do NOT wait for user input. You are a sub-agent and cannot reach the user anyway — the parent will NOT call AskUserQuestion. Any question you write will be silently dropped.
-
-  Instead:
-  1. Analyze the user request and infer all requirements autonomously
-  2. Identify hidden requirements, risks, and edge cases from the request context
-  3. **Persist a clarity_score.history entry** in WORKFLOW_STATE.yaml BEFORE writing
-     REQUESTS.md. This makes the rubric the single shared quality signal across
-     interview and autopilot modes (AC9, NFR-1):
-     ```yaml
-     clarity_score:
-       goal_clarity: <0.0-1.0>
-       constraint_clarity: <0.0-1.0>
-       success_criteria: <0.0-1.0>
-       overall: <mean rounded to 2 decimals>
-       history:
-         - turn: 0
-           source: autopilot_inferred   # NEW enum value — required for autopilot path
-           goal_clarity: <0.0-1.0>
-           constraint_clarity: <0.0-1.0>
-           success_criteria: <0.0-1.0>
-           overall: <mean>
-     unresolved_unknowns: []           # autopilot infers everything → empty list
-     ```
-     Do NOT emit any interview-question JSON block. Do NOT increment
-     `current.interview.collected_count` — keep it at 0 (AC9 requirement).
-  4. Produce REQUESTS.md (Problem, FR/NFR, Scope, Hidden Requirements, Risks, AC)
-  5. Run mechanical check + AK review per agents/misae.md Phase E (max 2 retries on AK rejection):
-     - On AK APPROVED: ak_gate.requirements.status becomes 'approved' via the recorded Task verdict (NOT by string-injection — IMMUTABLE rule in agents/misae.md)
-     - On AK ESCALATED (max retries reached): STOP autopilot, report rejection reasons to user, do NOT advance to Stage 2
-  6. On approval, set current.stage to 'planning', return summary
-
-  If visual analysis provided, use as starting point.
-  User request: {args}")
-```
-
-## Step 6: Stages 2-4 via Shinnosuke
-
-Output transition narration:
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-👦 [Shinnosuke] Stage 1 complete — Requirements locked
-→ Stage 2: Planning starts. Nene designs phases.
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-Then invoke Shinnosuke:
+`/start` Step 2C hands off to Shinnosuke for Stages 2–4. Autopilot uses the same
+handoff, with the **branch-completion gate removed** and Safety Limits added:
 
 ```typescript
 Task(
   subagent_type="team-shinchan:shinnosuke",
   model="opus",
-  prompt=`/team-shinchan:autopilot — Continue from Stage 2.
-  DOC_ID: {DOC_ID} | REQUESTS.md: approved and complete.
+  prompt=`/team-shinchan:autopilot — Continue from Stage 2 (proxy/autonomous).
+  DOC_ID: {DOC_ID} | REQUESTS.md: approved | DESIGN.md: approved (or skipped per Step 2B conditions).
+  Stages 1 + 1.5 DONE. answer_mode: proxy, execution_mode: micro-execute.
 
-## Autonomous Execution Mode
+  ## Autonomous execution — no human gates
+  Every decision that would normally prompt the user is resolved by the proxy-user
+  panel (agents/_shared/proxy-user-panel.md), logged as a proxy_answer history entry.
+  Do NOT call AskUserQuestion. The Stage 4 completion-entry decision is also proxy-
+  resolved (it is non-destructive: it only writes docs and runs review).
 
-Complete autonomously, except for the **required user gates** below (project memory + IMMUTABLE rules):
+  1. Stage 2 (Planning) via Nene — request MICRO-TASK FORMAT for PROGRESS.md
+     (agents/nene.md 'Micro-Task Plan Format'). Nene plans AGAINST the approved
+     DESIGN.md — architecture is already decided, do NOT re-decide it.
+  2. S2→S3 AK Gate per agents/shinnosuke.md (DO NOT auto-approve — IMMUTABLE rule):
+     - Sprint-Contract AC Testability Review (FR-3)
+     - Mechanical Pre-Check: node src/mechanical-check.js --file .shinchan-docs/{DOC_ID}/PROGRESS.md
+     - AK Review Loop (max 2 retries; on max retries → STOP autopilot, report reasons)
+  3. Stage 3 execution — micro-execute pattern (RULE 2.7): for EACH micro-task, fresh
+     implementer → spec-compliance review → code-quality review → independent skeptic
+     refutation. Never skip any of the four. See skills/micro-execute/SKILL.md.
+     - Drift Gate after each phase: node src/drift-check.js --requests .shinchan-docs/{DOC_ID}/REQUESTS.md --progress .shinchan-docs/{DOC_ID}/PROGRESS.md
+  4. Stage 4 (Completion) per shinnosuke.md — this is the definition of "work done":
+     - Write RETROSPECTIVE.md via Masumi (Task subagent_type="team-shinchan:masumi")
+     - Write IMPLEMENTATION.md via Masumi
+     - Extract learnings to .shinchan-docs/learnings.md
+     - Action Kamen final verification of the entire workflow
+     - **STOP HERE.** Do NOT run Branch Completion Options (merge/PR/keep/discard) and
+       do NOT run Parking Lot Triage as an interactive gate — those are OUT OF SCOPE for
+       autopilot. Leave the branch as-is for a human or another tool to finish.
 
-1. Start Stage 2 (Planning) via Nene, then Stage 3 (Execution), then Stage 4 (Completion)
-2. Run S2→S3 AK Gate per agents/shinnosuke.md (DO NOT auto-approve — IMMUTABLE rule):
-   - Sprint-Contract AC Testability Review (FR-3) — extract AC, AK reviews testability
-   - Mechanical Pre-Check: `node src/mechanical-check.js --file .shinchan-docs/{DOC_ID}/PROGRESS.md`
-   - AK Review Loop (max 2 retries; on max retries → escalate to user, STOP autopilot)
-   - Skip Step 3 user-approval (autopilot proceeds directly on AK APPROVED for Stage 2)
-3. Execute using micro-execute pattern (RULE 2.7 in agents/shinnosuke.md):
-   - For each micro-task: fresh implementer subagent → spec compliance review → code quality review
-   - Run Drift Gate after each phase: `node src/drift-check.js --requests .shinchan-docs/{DOC_ID}/REQUESTS.md --progress .shinchan-docs/{DOC_ID}/PROGRESS.md`
-   - See skills/micro-execute/SKILL.md for full protocol
-4. After all execution phases complete:
-   a. **Required user gate** (project memory `feedback_completion_stage`): ask "All execution phases done. Proceed to Stage 4 (Completion)?" — autopilot mode honors this gate, never skips silently
-   b. On user approval, run Stage 4 (Completion) per shinnosuke.md Stage 4:
-      - Write RETROSPECTIVE.md via **Masumi** — `Task(subagent_type="team-shinchan:masumi", model="sonnet", ...)` (NOT Bo — see agents/masumi.md)
-      - Write IMPLEMENTATION.md via **Masumi**
-      - Extract learnings to `.shinchan-docs/learnings.md` (per docs/workflow-guide.md Stage 4)
-      - Action Kamen final verification of entire workflow
-      - Branch Completion Options (Step 4.5 in shinnosuke.md): A=merge / B=PR / C=keep / D=discard — required user input even in autopilot
-      - Parking Lot Triage (Step 6 in shinnosuke.md): process `discovered_issues` if any
-5. Auto-fix issues when discovered (within retry caps)
+  ## Safety limits
+  - Max iterations: 15 — if reached, pause and report (stage/phase, done, remaining, blocker, next step).
+  - No measurable progress in 3 consecutive iterations → pause and report.
+  - Scope escalation: if requirements reveal 20+ files or 3+ domains → recommend
+    /team-shinchan:bigproject and pause.
+  - Auto-fix issues when discovered, within the retry caps above.
 
-## Micro-Task Execution (RULE 2.7)
+  ## Handoff report (on completion)
+  When Stage 4 verification passes, output:
+    ✅ 작업 완료 — DOC_ID: {DOC_ID}
+    브랜치 {branch} 준비됨. PR/merge는 범위 밖 — 사람 또는 다른 도구가 처리하세요.
+    (요약: 무엇을 구현했는지, 검증 결과, 미해결 Open Questions 있으면 명시)
 
-When invoking Nene for Stage 2 planning, request MICRO-TASK FORMAT for PROGRESS.md.
-Each phase should be broken into 2-3 minute tasks with exact file paths, complete code,
-and verification commands. See agents/nene.md 'Micro-Task Plan Format' section.
-
-## Stage Rule Compliance
-
-- planning Stage: Only planning (no code modification)
-- execution Stage: Implementation proceeds
-- completion Stage: Documentation and verification
-
-## Safety Limits
-
-- **Max iterations**: 15 (pause and report if reached)
-- **Progress check**: If no measurable progress in 3 consecutive iterations, pause and report to user
-- **Scope escalation**: If requirements analysis reveals 20+ files or 3+ domains, recommend switching to /team-shinchan:bigproject
-
-## On Max Iterations Reached
-
-If the 15-iteration limit is reached, output:
-- Current stage and phase
-- What was completed
-- What remains incomplete
-- Specific blocker (if any)
-- Recommended next step for user
-
-User request: ${args || '(Request content analysis needed)'}
+  User request: ${args || '(Request content analysis needed)'}
 `
 )
 ```
 
-**STOP HERE. The above Tasks handle everything.**
+**STOP HERE. The above handles requirements → design → planning → execution →
+completion, all with the proxy panel standing in for the user, and stops before any
+branch/PR operation.**
+
+## Prohibited
+
+- Calling `AskUserQuestion` (autopilot is hands-off — the proxy panel answers)
+- Skipping the design stage except via `/start`'s own Step 2B skip conditions
+- Auto-approving any AK gate (IMMUTABLE — AK verdicts come from recorded Task reviews)
+- Performing branch completion (merge / PR / keep / discard) — out of scope

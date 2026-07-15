@@ -33,6 +33,13 @@ This skill (Kazama's narrated boulder loop via Task — cheap, delegatable, auto
 
 **Never silently jump to Tier 2** — on a high-stakes long task, offer the opt-in; the user launches `/team-shinchan:fierce-ralph`.
 
+## Step 1.5: Linear Sync — START (standalone only)
+
+If invoked **standalone** (not as Stage 3 of an active `/start`/`autopilot` workflow),
+run the **START → In Progress** transition per `agents/_shared/linear-sync.md` before
+executing. When driven inside a workflow, skip — the workflow owns the issue lifecycle.
+No-op if no Linear issue / Linear MCP unavailable.
+
 ## Step 2: Execute Task with Boulder Mechanism
 
 **Do not read further. Execute this Task NOW:**
@@ -105,5 +112,10 @@ User request: ${args || '(Task to complete)'}
 `
 )
 ```
+
+**When the loop completes** (all conditions met, Action Kamen approved) and this was a
+**standalone** invocation, run the **FINISH → In Review** transition per
+`agents/_shared/linear-sync.md` for the same issue (no-op if not Linear-based / driven
+inside a workflow), then STOP.
 
 **STOP HERE. The above Task handles everything.**

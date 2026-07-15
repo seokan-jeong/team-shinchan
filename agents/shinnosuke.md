@@ -602,6 +602,13 @@ Wait for user selection, then execute:
 
 **Step 5: Mark Complete**
 Update WORKFLOW_STATE.yaml: `status: completed`, append history event `workflow_completed`.
+
+**Linear Sync — FINISH (In Review).** Unless `current.parent_doc_id` is set (a
+bigproject phase — the parent project owns the issue, do NOT transition here), run the
+**FINISH → In Review** transition per `agents/_shared/linear-sync.md`: use
+`current.linear_issue` (or re-detect from the request/branch), confirm with
+`get_issue`, and if real move the issue to In Review. No-op if no Linear issue / Linear
+MCP unavailable. Never let a Linear error block completion.
 Narrate completion to user:
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

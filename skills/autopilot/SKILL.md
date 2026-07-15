@@ -78,6 +78,13 @@ history:
     answer_mode: proxy
 ```
 
+4. **Linear Sync — START (In Progress).** Run the **START → In Progress** transition
+   per `agents/_shared/linear-sync.md`: detect a Linear issue in `args`/DOC_ID/branch,
+   confirm it with `get_issue`, and if real move it to In Progress and persist it to
+   `current.linear_issue` in WORKFLOW_STATE.yaml. No-op if no Linear issue / Linear
+   MCP unavailable. (The FINISH → In Review transition fires later in `shinnosuke.md`
+   Stage 4 Step 5 — autopilot reaches Stage 4 completion before stopping.)
+
 ## Step 3: Run the `/start` flow (Stages 1 + 1.5) in proxy mode
 
 Execute **`skills/start/SKILL.md`** exactly, with these bindings:

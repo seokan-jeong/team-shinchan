@@ -125,6 +125,14 @@ History entry format for AK review (appended after each AK review):
 
 > Stage rules and transition gates are defined in CLAUDE.md and hooks/workflow-guard.md.
 
+4. **Linear Sync — START (In Progress).** If this is a **standalone** invocation
+   (NOT bigproject phase mode — i.e. no injected `parent_doc_id`), run the **START →
+   In Progress** transition per `agents/_shared/linear-sync.md`: detect a Linear
+   issue in `args`/DOC_ID/branch, confirm it with `get_issue`, and if real move it to
+   In Progress and persist it to `current.linear_issue` in WORKFLOW_STATE.yaml. When
+   invoked with injected bigproject phase context, **skip this** — the parent project
+   owns the issue lifecycle. No-op if no Linear issue / Linear MCP unavailable.
+
 ## Answer Mode — human (default) vs proxy (autopilot)
 
 Read `current.answer_mode` from WORKFLOW_STATE.yaml (absent ⇒ `human`). It controls

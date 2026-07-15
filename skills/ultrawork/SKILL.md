@@ -63,6 +63,13 @@ console.log(JSON.stringify({ waves, warnings }, null, 2));
 
 Store result as `{wave_plan}`. Pass to Step 3 execution.
 
+## Step 2.9: Linear Sync — START (standalone only)
+
+If invoked **standalone** (not as Stage 3 of an active `/start`/`autopilot` workflow),
+run the **START → In Progress** transition per `agents/_shared/linear-sync.md` before
+executing. When driven inside a workflow, skip — the workflow owns the issue lifecycle.
+No-op if no Linear issue / Linear MCP unavailable.
+
 ## Step 3: Execute
 
 ```typescript
@@ -87,6 +94,12 @@ After all parallel agents complete:
 Run: `node src/stagnation-detector.js --jsonl .shinchan-docs/work-tracker.jsonl --window 20`
 If `stagnation: true`, surface findings in the summary before handing off to Action Kamen:
 "Stagnation patterns detected: {pattern names} — {evidence}. Reviewing before AK handoff."
+
+## Step 3.6: Linear Sync — FINISH (standalone only)
+
+After integration and Action Kamen verification pass, and if this was a **standalone**
+invocation, run the **FINISH → In Review** transition per `agents/_shared/linear-sync.md`
+for the same issue (no-op if not Linear-based / driven inside a workflow).
 
 ## Concurrency Guidelines
 

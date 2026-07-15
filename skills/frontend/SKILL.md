@@ -18,6 +18,13 @@ If args length > 2000 characters:
   Warn user: "Request was truncated to 2000 characters"
 ```
 
+## Step 1.5: Linear Sync — START (In Progress)
+
+Before dispatching, run the **START → In Progress** transition per
+`agents/_shared/linear-sync.md`: detect a Linear issue in `args`/branch, confirm it
+with `get_issue`, and if real move it to In Progress. No-op if no Linear issue / Linear
+MCP unavailable — never block the work.
+
 ## Step 2: Execute Task
 
 **Do not read further. Execute this Task NOW:**
@@ -52,5 +59,8 @@ User request: ${args || '(Please describe the frontend task)'}
 `
 )
 ```
+
+**After the Task returns successfully**, run the **FINISH → In Review** transition per
+`agents/_shared/linear-sync.md` for the same issue (no-op if not Linear-based), then STOP.
 
 **STOP HERE. The above Task handles everything.**

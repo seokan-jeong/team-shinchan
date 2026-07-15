@@ -142,6 +142,15 @@ user_decision = AskUserQuestion(questions=[{
 - **C** → STOP.
 - **A** → continue to Step 5.
 
+5. **Linear Sync — START (In Progress).** Once the plan is approved, run the **START →
+   In Progress** transition per `agents/_shared/linear-sync.md`, keyed to the
+   **project** issue: detect a Linear issue in `args`/PROJECT_ID/branch, confirm it
+   with `get_issue`, and if real move it to In Progress and persist it to
+   `current.linear_issue` in PROJECT.yaml. This fires **once for the whole project** —
+   individual phases must NOT transition it (their WORKFLOW_STATE carries
+   `parent_doc_id`, so both `start`'s START seam and `shinnosuke.md`'s FINISH seam skip
+   Linear Sync). No-op if no Linear issue / Linear MCP unavailable.
+
 ## Step 5: Phase Loop (main thread, dependency order)
 
 Iterate phases in `execution_order`. On resume, skip any phase whose `status == complete`.
@@ -195,7 +204,12 @@ When every phase is `complete`:
 2. Optional holistic review: `Task(subagent_type="team-shinchan:actionkamen")` across phases.
 3. In PROJECT.yaml set `current.status = completed`, `current.active_phase = null`, refresh
    `updated`, append a `project_completed` event.
-4. Final report to the user: phases delivered, links to each phase's IMPLEMENTATION.md, and
+4. **Linear Sync — FINISH (In Review).** Now that **every** phase is complete, run the
+   **FINISH → In Review** transition per `agents/_shared/linear-sync.md` using
+   `current.linear_issue` from PROJECT.yaml (or re-detect). This is the single point
+   where the project's issue moves to In Review — never per phase. No-op if no Linear
+   issue / Linear MCP unavailable.
+5. Final report to the user: phases delivered, links to each phase's IMPLEMENTATION.md, and
    the project retrospective.
 
 ## Prohibited

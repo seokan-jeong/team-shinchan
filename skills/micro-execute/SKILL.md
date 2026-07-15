@@ -36,6 +36,20 @@ Else:
   rubric_override = null  (Action Kamen uses default 3-item rubric)
 ```
 
+## Step 1.5: Linear Sync (standalone only)
+
+If this skill was invoked **standalone** (a direct task description, NOT as Stage 3 of an
+active `/start`/`autopilot` workflow — i.e. there is no owning WORKFLOW_STATE.yaml whose
+`current.stage` is `execution`), apply `agents/_shared/linear-sync.md`:
+
+- **START → In Progress** now, before execution begins.
+- **FINISH → In Review** after all micro-tasks are complete and verified (Action Kamen
+  final pass), at the very end of Step 3.
+
+When driven **inside** a workflow, do NOT transition here — the workflow owns the issue
+lifecycle (`shinnosuke.md` Stage 4 handles FINISH). No-op if no Linear issue / Linear MCP
+unavailable.
+
 ## Step 2: Parse or Generate Micro-Task Plan
 
 ### If plan_source exists (PROGRESS.md or plan file):

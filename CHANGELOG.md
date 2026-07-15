@@ -1,5 +1,36 @@
 # Changelog
 
+## [4.57.0] - 2026-07-15
+
+### Linear Sync — auto status transitions for Linear-based work
+
+Every **work skill** now advances a linked Linear issue automatically: when a task
+starts it moves the issue to **In Progress**, and when the work is done and verified it
+moves it to **In Review**.
+
+- **New `agents/_shared/linear-sync.md`** — the single source of truth: detects a Linear
+  issue in the request/branch (`ABC-123` id or `linear.app/.../issue/...` URL), confirms
+  it is real via `get_issue`, resolves the team's In-Progress / In-Review status names
+  (`list_issue_statuses`), and transitions via `save_issue`. Idempotent and forward-only;
+  a no-op when no issue is referenced, when the Linear MCP is unavailable, or when
+  `linear.auto_transition: false` in `.shinchan-config.yaml`. Linear errors warn but never
+  block the work.
+- **START (In Progress) wired into**: `start` (standalone), `autopilot`, `bigproject`
+  (project-level), `orchestrate` (inherits `start`), and the direct-dispatch skills
+  `implement` / `backend` / `frontend` / `devops` / `micro-execute` / `ralph` / `ultrawork`.
+- **FINISH (In Review) wired into**: `shinnosuke.md` Stage 4 completion (covers
+  start/autopilot/orchestrate), `bigproject` project completion, and the direct-dispatch
+  skills after their Task returns.
+- **bigproject rule**: one issue represents the whole project — it moves once at project
+  start and once after the *last* phase; individual phases (which carry `parent_doc_id`)
+  never transition it. `micro-execute`/`ralph`/`ultrawork` likewise skip the transition
+  when running as Stage 3 inside a workflow (the workflow owns the lifecycle).
+- **Config** (`.shinchan-config.yaml`, all optional): `linear.auto_transition` (default
+  `true`), `linear.in_progress_status` (default `"In Progress"`), `linear.in_review_status`
+  (default `"In Review"`).
+
+All static validation suites pass.
+
 ## [4.56.0] - 2026-07-01
 
 ### autopilot v2 — same workflow as /start, answered by a proxy-user panel

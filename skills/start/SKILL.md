@@ -204,6 +204,7 @@ stagnation_window = config.get("interview.stagnation_window", 2)           # NEW
 soft_cap          = config.get("interview.soft_cap",          6)           # NEW
 ak_double_check   = config.get("interview.ak_double_check",   False)       # NEW
 project_type      = config.get("interview.project_type",      "greenfield")# NEW
+problem_framing_gate = config.get("interview.problem_framing_gate", True)   # NEW (main-079, FR-7 default true)
 
 # Sanity check (FR-6, HR-2, HR-3): invalid values → fall back to defaults + warn
 warnings = []
@@ -225,6 +226,12 @@ if warnings:
 # Write resolved gate_loop_enabled + gate_threshold into WORKFLOW_STATE.current so
 # mechanical-check Check D can enforce the gate without reading .shinchan-config.yaml.
 write_to_state({"current.gate_loop_enabled": gate_loop_enabled, "current.gate_threshold": gate_threshold})
+
+# main-079 FR-4/FR-6/FR-7: resolve problem-framing gate live-ness ONCE before the 2A.1 loop.
+brainstorm_exists = file_exists(".shinchan-docs/{DOC_ID}/brainstorm-output.md")  # FR-4 one-shot cap
+gate_live = (problem_framing_gate
+             and current.answer_mode != "proxy"    # FR-6 autopilot exclusion
+             and not brainstorm_exists)             # FR-4 one-shot
 ```
 
 **2A.1 — Interview loop (clarity-gated, hard_cap is the only ceiling):**
@@ -251,6 +258,7 @@ for turn in 1..hard_cap:
     soft_cap: {soft_cap}
     ak_double_check: {ak_double_check}
     project_type: {project_type}
+    gate_live: {gate_live}   # main-079: Layer-1 gate live-ness; false ⇒ Misae skips solution-smell (NFR-4)
     Return the interview-question JSON block per agents/misae.md contract.")
 
   Parse the last ```interview-question ... ``` fenced block in result.
@@ -259,6 +267,55 @@ for turn in 1..hard_cap:
   if turn == 1 and parsed.status == "done" and parsed.reason in {"pre_interview_clear", "user_skip_override"}:
     exit_reason = parsed.reason
     break  # skip the loop entirely; jump to FINALIZE_DRAFT with answers == []
+
+  # main-079 FR-3 / AC-2: problem-framing gate — needs_reframe interceptor.
+  # Placed BEFORE the ask/done GUARD because `needs_reframe` is neither "ask" nor "done";
+  # the GUARD (b) set is intentionally left unchanged (additive, minimal seam).
+  if turn == 1 and parsed.status == "needs_reframe":
+    # HR-8: turn counter NOT incremented and clarity_score.history NOT written — pre-scoring detour.
+    # (1) Reuse skills/brainstorm VERBATIM (NFR-3): Hiroshi writes .shinchan-docs/{DOC_ID}/brainstorm-output.md.
+    invoke Skill team-shinchan:brainstorm with args = {args}   # HR-9: PHASE_CONTEXT flows through as it already does
+    # Ignore brainstorm's own Step-5 "proceed with /requirements?" suggestion — the 3-way below supersedes it.
+    # (2) Extract the reframed problem: the prose UNDER the "## Problem Reframe" header of
+    #     .shinchan-docs/{DOC_ID}/brainstorm-output.md (the 2-3 sentence restatement — see
+    #     skills/brainstorm/SKILL.md Output Format). This is the ONLY section used for ①.
+    reframed_problem = read_section(".shinchan-docs/{DOC_ID}/brainstorm-output.md", from="## Problem Reframe", to="## Alternative Approaches")
+    # (3) 3-way choice — answer_mode-aware ROUTING RULE (under proxy this branch is unreachable: gate_live=false via FR-6)
+    choice = AskUserQuestion(questions=[{
+      question: "brainstorm 결과를 검토했습니다. 어떻게 진행할까요?",
+      header:   "문제 프레이밍",
+      options: [
+        {label: "① 재정의된 문제로 진행", description: "brainstorm의 Problem Reframe로 요구사항 시작"},
+        {label: "② 원래 방향 유지",        description: "원래 요청 그대로 요구사항 시작"},
+        {label: "③ 직접 편집",            description: "직접 수정한 방향으로 시작"}],
+      multiSelect: false}])
+    if choice == "③ 직접 편집":
+      # AskUserQuestion is MULTIPLE-CHOICE ONLY — capture the edited request with a follow-up
+      # open prompt (design-review nit): print "수정된 요청/방향을 한 문장 이상으로 입력해주세요:"
+      # and read the user's next free-text message as effective_request.
+      effective_request = <user's typed free-text reply to the follow-up prompt>
+    elif choice == "① 재정의된 문제로 진행":
+      effective_request = reframed_problem
+    else:  # ② 원래 방향 유지
+      effective_request = args
+    # (4) audit trail — DEC-4 / NFR-5 / HR-3, same history write path as ak_review (HR-2, no new path)
+    append_history({event: "reframe_choice", agent: "hiroshi",
+                    choice: {"① 재정의된 문제로 진행": "reframed",
+                             "② 원래 방향 유지":       "kept_original",
+                             "③ 직접 편집":            "edited"}[choice],
+                    timestamp: ISO_now()})
+    # (5) Turn-safe re-entry (HR-8): re-invoke Misae at turn 1 (counter NOT incremented) with the
+    #     chosen direction and gate_live=false (brainstorm-output.md now exists → FR-4 one-shot →
+    #     needs_reframe CANNOT recur → guaranteed termination, HR-5). Then fall through to the
+    #     zero-turn fast-path check + GUARD for this SAME iteration (turn still == 1).
+    args      = effective_request
+    gate_live = false
+    result = Task(subagent_type="team-shinchan:misae", model="sonnet", prompt=<the 2A.1 prompt above, with turn=1, user_request=effective_request, gate_live=false>)
+    Parse the last ```interview-question``` fenced block in result → parsed
+    # Do NOT re-run the zero-turn fast-path block above for this fresh `parsed` — control simply
+    # falls through to the GUARD below (this SAME iteration, turn still == 1). A `done` re-entry
+    # (pre_interview_clear/user_skip_override) is already handled downstream: GUARD clause (d)
+    # accepts those reasons and the general `if status == "done": break` exits with answers == [].
 
   GUARD (parsing / options integrity / FR-4 contract):
     Validate ALL of the following before calling AskUserQuestion:

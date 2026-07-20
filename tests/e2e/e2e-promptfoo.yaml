@@ -65,6 +65,22 @@ prompts:
 
       User request: {{task}}
 
+  - id: start-gate-e2e
+    label: "/start Problem-Framing Gate (control flow)"
+    raw: |
+      You describe the control flow of the team-shinchan /start problem-framing gate (main-079),
+      based ONLY on these rules:
+      - Layer-1 (/start 2A.0): gate_live = interview.problem_framing_gate AND answer_mode != "proxy"
+        AND NOT exists(.shinchan-docs/{DOC_ID}/brainstorm-output.md). gate_live is injected into Misae.
+      - Layer-2 (Misae Step-0, turn 1): only if gate_live is true does it evaluate solution-smell and
+        possibly return status: needs_reframe. If gate_live is false it never evaluates solution-smell.
+      - /start 2A.1 turn==1 interceptor: on status == needs_reframe it invokes skills/brainstorm ONCE,
+        offers a 3-way AskUserQuestion (① reframed / ② keep original / ③ edit), then re-invokes Misae
+        at turn 1 with the chosen direction and gate_live = false (so it cannot fire again — one-shot).
+      Answer the scenario precisely and concretely.
+
+      Scenario: {{task}}
+
 providers:
   - id: anthropic:messages:claude-haiku-4-5-20251001
     label: haiku
@@ -237,6 +253,47 @@ tests:
           return (lower.includes("user") || lower.includes("manual") || lower.includes("help") || lower.includes("intervene") || lower.includes("assist")) &&
                  // Should be transparent about failure
                  (lower.includes("fail") || lower.includes("reject") || lower.includes("issue") || lower.includes("problem"));
+
+  # ═══════════════════════════════════════
+  # Scenario 6: Problem-Framing Gate (main-079)
+  # ═══════════════════════════════════════
+
+  - description: "PFG E2E AC-2: needs_reframe triggers brainstorm + 3-way + interview re-entry"
+    prompt: start-gate-e2e
+    vars:
+      task: "gate_live=true; Misae returned status:needs_reframe for 'Add a filter dropdown'. Describe the next control flow."
+    assert:
+      - type: javascript
+        value: |
+          const t = output.toLowerCase();
+          // consumer use-site actually exercised: brainstorm invoked, choice offered, interview re-entered
+          return t.includes("brainstorm") &&
+                 (t.includes("①") || t.includes("choice") || t.includes("3-way") || t.includes("three") || t.includes("askuserquestion")) &&
+                 (t.includes("re-invoke") || t.includes("reinvoke") || t.includes("re-enter") || t.includes("interview") || t.includes("turn 1"));
+
+  - description: "PFG E2E AC-3: one-shot cap — brainstorm-output.md exists ⇒ no re-fire"
+    prompt: start-gate-e2e
+    vars:
+      task: "brainstorm-output.md already exists this session; a solution-shaped request arrives. Does the gate fire again? Explain via gate_live."
+    assert:
+      - type: javascript
+        value: "return /no|not fire|does not|gate_live\\s*(=|is)\\s*false|one-shot/i.test(output);"
+
+  - description: "PFG E2E AC-4: proxy (autopilot) never activates the gate"
+    prompt: start-gate-e2e
+    vars:
+      task: "answer_mode is proxy; a solution-shaped request arrives. Does the problem-framing gate activate? Explain via gate_live."
+    assert:
+      - type: javascript
+        value: "return /no|not activ|does not|gate_live\\s*(=|is)\\s*false|normal step.?0/i.test(output);"
+
+  - description: "PFG E2E AC-8: flag off fully disables the gate"
+    prompt: start-gate-e2e
+    vars:
+      task: "interview.problem_framing_gate is false; a solution-shaped request arrives. Does needs_reframe ever get evaluated? Explain via gate_live."
+    assert:
+      - type: javascript
+        value: "return /no|never|does not|gate_live\\s*(=|is)\\s*false|disabled/i.test(output);"
 
 # Output configuration
 outputPath: ./tests/e2e/test-results/e2e-results.json

@@ -74,6 +74,21 @@ prompts:
 
       Task: {{task}}
 
+  - id: misae-step0-gate
+    label: "Misae Step-0 Solution-Smell Gate"
+    raw: |
+      You are Misae's Step-0 solution-smell gate (team-shinchan main-079).
+      Decide ONLY whether user_request is "solution-smell" using these DETERMINISTIC rules:
+      - impl_verb present: any of {add, attach, create, build, implement, insert, wire, hook up, put, 추가, 붙여, 만들}
+      - deliverable present: any of {button, dropdown, filter, modal, endpoint, field, column, toggle, banner, page, form, 버튼, 필터, 드롭다운}
+      - problem ABSENT: request does NOT contain {문제, issue, bug, broken} nor describe what's wrong
+      - target_user ABSENT: request does NOT contain {사용자, user, logged-in, admin, or a role noun}
+      solution_smell = impl_verb AND deliverable AND problem-absent AND target-absent.
+      If user_request contains the literal "skip-brainstorm" (case-insensitive): NOT a gate hit.
+      Output EXACTLY one JSON line: {"status":"needs_reframe"} if solution_smell else {"status":"ask"}.
+
+      user_request: {{task}}
+
   - id: masumi-prompt
     label: "Masumi (Librarian)"
     raw: |
@@ -539,6 +554,62 @@ tests:
           return lower.includes("success") || lower.includes("criteria") ||
                  lower.includes("goal") || lower.includes("measure") ||
                  lower.includes("verify") || lower.includes("before");
+
+  # main-079 AC-1: 6 solution-shaped → needs_reframe
+  - description: "PFG solution 1: add a filter dropdown"
+    prompt: misae-step0-gate
+    vars: { task: "Add a filter dropdown to the results page" }
+    assert: [{ type: icontains, value: "needs_reframe" }]
+  - description: "PFG solution 2: add export button"
+    prompt: misae-step0-gate
+    vars: { task: "Add an export button to the dashboard toolbar" }
+    assert: [{ type: icontains, value: "needs_reframe" }]
+  - description: "PFG solution 3: attach a banner"
+    prompt: misae-step0-gate
+    vars: { task: "Attach a promo banner to the landing page" }
+    assert: [{ type: icontains, value: "needs_reframe" }]
+  - description: "PFG solution 4: create a modal"
+    prompt: misae-step0-gate
+    vars: { task: "Create a settings modal with a toggle" }
+    assert: [{ type: icontains, value: "needs_reframe" }]
+  - description: "PFG solution 5: 필터 추가 (ko)"
+    prompt: misae-step0-gate
+    vars: { task: "결과 페이지에 필터 드롭다운을 추가해줘" }
+    assert: [{ type: icontains, value: "needs_reframe" }]
+  - description: "PFG solution 6: build a form field"
+    prompt: misae-step0-gate
+    vars: { task: "Build a new address form field on checkout" }
+    assert: [{ type: icontains, value: "needs_reframe" }]
+  # main-079 AC-1: 6 problem-shaped → ask (no gate) — includes anchored + bug + target_user (HR-7 both directions)
+  - description: "PFG problem 1: search abandonment (problem stated)"
+    prompt: misae-step0-gate
+    vars: { task: "Users cannot find relevant items in their session and abandon search; what should we do?" }
+    assert: [{ type: not-icontains, value: "needs_reframe" }]
+  - description: "PFG problem 2: bug report"
+    prompt: misae-step0-gate
+    vars: { task: "The login button is broken and throws a 500 error for logged-in users" }
+    assert: [{ type: not-icontains, value: "needs_reframe" }]
+  - description: "PFG problem 3: anchored file path (no smell verbs)"
+    prompt: misae-step0-gate
+    vars: { task: "Refactor src/foo.js to reduce duplication for the admin user" }
+    assert: [{ type: not-icontains, value: "needs_reframe" }]
+  - description: "PFG problem 4: target_user present"
+    prompt: misae-step0-gate
+    vars: { task: "Give admin users a faster way to review flagged content" }
+    assert: [{ type: not-icontains, value: "needs_reframe" }]
+  - description: "PFG problem 5: issue framing (ko)"
+    prompt: misae-step0-gate
+    vars: { task: "사용자가 검색 결과에서 원하는 항목을 못 찾는 문제를 해결하고 싶다" }
+    assert: [{ type: not-icontains, value: "needs_reframe" }]
+  - description: "PFG problem 6: no deliverable"
+    prompt: misae-step0-gate
+    vars: { task: "Improve onboarding so new users understand the product" }
+    assert: [{ type: not-icontains, value: "needs_reframe" }]
+  # main-079 AC-5: skip-brainstorm escape hatch → no gate
+  - description: "PFG AC-5: skip-brainstorm literal disables the gate"
+    prompt: misae-step0-gate
+    vars: { task: "Add a filter dropdown to the results page skip-brainstorm" }
+    assert: [{ type: not-icontains, value: "needs_reframe" }]
 
 # Output configuration
 outputPath: ./test-results/promptfoo-results.json

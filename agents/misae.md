@@ -141,6 +141,12 @@ When `turn == 1` AND `prior_answers == []`, BEFORE designing any question:
    ```
    Skip everything below.
 
+   **`skip-brainstorm` (FR-5, main-079)**: additionally, if `user_request` (case-insensitive)
+   contains the literal `skip-brainstorm`, set `solution_smell_enabled = false` (the
+   Solution-Smell Gate in step 3.5 below is skipped; the rest of Step 0 continues unchanged).
+   Otherwise `solution_smell_enabled = true`. This is symmetric to, but narrower than,
+   `skip-interview` — it opts out of only the problem-framing gate, not the whole interview.
+
 2. **Compute pre-score** using the rubric (no extra LLM call — piggyback on this same
    invocation, NFR-3). Score `user_request` as if it were the only context. Output ONE
    line of prose reasoning before the JSON (FR-5, HR-4) of the form:
@@ -151,6 +157,14 @@ When `turn == 1` AND `prior_answers == []`, BEFORE designing any question:
 3. **5-field count** (HR-1, HR-5): match the patterns in the Clarity Scoring Rubric
    section. Count how many of {problem, scope, constraint, success_criterion, target_user}
    are explicit.
+
+3.5. **Solution-smell gate (FR-1, FR-2 — main-079, runs BEFORE the WS-09 anchor check)**: if
+   `gate_live` (injected by the parent; treat as `false` when absent) is `true` AND
+   `solution_smell_enabled`, evaluate the Solution-Smell Gate (see the "Solution-Smell Gate
+   (FR-1, FR-2, FR-5)" section below). On HIT, append the `needs_reframe` history event and
+   IMMEDIATELY return `{"status": "needs_reframe", "matched_lexicon": [...], "absent_fields": [...]}`
+   — do NOT proceed to steps 4–5 (no `clarity_score`, no turn consumed — HR-8). On miss, fall
+   through to the anchor-signal check (step 4) unchanged (NFR-1 conservative pass-through).
 
 4. **Anchor-signal skip check (WS-09 — see "TICKET WS-09" section below, main-075 benchmark
    adoption)**: BEFORE the clarity-threshold decision, scan `user_request` for ANY ONE
@@ -278,6 +292,10 @@ Legacy variants (`gate_loop_enabled: false` only):
 - The JSON block is the contract — the parent parses it. Prose before the block is fine.
 - DO NOT call `AskUserQuestion` yourself.
 - DO NOT batch turns. ONE question per invocation.
+- **`needs_reframe` (main-079, additive)**: when the Solution-Smell Gate fires (turn 1,
+  `gate_live` true), return `{"status": "needs_reframe", ...}` INSTEAD of `ask`/`done`. This
+  status is emitted only from Step-0 step 3.5 and is consumed by `skills/start` 2A.1's turn==1
+  interceptor before its ask/done GUARD. It carries no `clarity_score` (returned pre-scoring).
 
 #### Interview Plan (turn topics are EXAMPLES; clarity gate is the real driver)
 
@@ -759,6 +777,50 @@ If <3 fields present, even `overall = 1.0` does NOT skip — interview proceeds 
 If `user_request` contains the case-insensitive literal `skip-interview`, immediately
 return `status: done, reason: user_skip_override` and persist
 `clarity_score.history[0].source: user_skip_override` regardless of computed score.
+
+#### Solution-Smell Gate (FR-1, FR-2, FR-5 — problem-framing gate, main-079)
+
+> **Gated by `gate_live`** (injected by `skills/start` 2A.1). If the parent does not inject
+> `gate_live` (legacy callers) OR injects `gate_live: false`, this gate is INERT — Step 0
+> behaves byte-for-byte as before (NFR-4). Evaluated ONLY at `mode == DESIGN_NEXT_QUESTION`,
+> `turn == 1`, `prior_answers == []`.
+
+**Precedence (total order, DEC-3):** `skip-brainstorm` → `skip-interview` → **solution-smell
+(this gate)** → WS-09 anchor-signal → pre_interview_clear/threshold. This gate runs strictly
+BEFORE WS-09 (FR-2): an anchored request may STILL route to `needs_reframe` if solution-smell
+fires — an anchor does not certify a well-framed problem.
+
+**Detection (pure string rules, no extra LLM call — DEC-1):**
+- `IMPL_VERB_LEXICON`   = {add, attach, create, build, implement, insert, wire, hook up, put, 추가, 붙여, 만들}
+- `DELIVERABLE_LEXICON` = {button, dropdown, filter, modal, endpoint, field, column, toggle, banner, page, form, 버튼, 필터, 드롭다운}
+- `problem_absent`  = NONE of the `problem` field patterns match (reuse the "5-field tie-breaker": "문제","issue","bug","broken", or describes what's wrong)
+- `target_absent`   = NONE of the `target_user` field patterns match (reuse the "5-field tie-breaker": "사용자","user","logged-in","admin", role noun)
+
+`solution_smell = has_impl_verb AND has_deliverable AND problem_absent AND target_absent`
+(conservative AND — NFR-1 precision-over-recall; if ANY clause is false, pass through unchanged).
+
+**Escape hatch — `skip-brainstorm` (FR-5):** if `user_request` (case-insensitive) contains the
+literal `skip-brainstorm`, set `solution_smell_enabled = false` — this gate is skipped and the
+REST of Step 0 runs unchanged (narrower than `skip-interview`, which opts out of the whole interview).
+
+**On HIT** (`gate_live AND solution_smell_enabled AND solution_smell`): append a `needs_reframe`
+history event, then return the new status. Do NOT compute or emit `clarity_score` — this returns
+BEFORE scoring, so `clarity_score.history` stays untouched and no turn is consumed (HR-8):
+
+```yaml
+# append to WORKFLOW_STATE.yaml history[] (same write path as ak_review — HR-2)
+- timestamp: "{ISO now}"
+  event: needs_reframe
+  agent: misae
+  matched_lexicon: ["impl_verb:add", "deliverable:filter"]
+  absent_fields: ["problem", "target_user"]
+```
+```interview-question
+{"status": "needs_reframe", "matched_lexicon": ["impl_verb:add","deliverable:filter"], "absent_fields": ["problem","target_user"]}
+```
+
+`needs_reframe` is a NEW status value (additive to `ask`/`done`), consumed ONLY by `skills/start`
+2A.1's turn==1 interceptor (placed BEFORE the ask/done GUARD), which routes to `skills/brainstorm`.
 
 #### TICKET WS-09 — Anchor-Signal Skip (extended zero-turn fast path)
 

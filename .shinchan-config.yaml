@@ -27,6 +27,19 @@ interview:
   # option_source: basic_fallback. 0 or unset = no cap (rely on graceful degradation).
   fierce_panel_token_budget_per_turn: 60000   # default: 60000
 
+  # problem_framing_gate: solution-smell → brainstorm gate (main-079). On the /start
+  # (human-in-loop) path only, when Misae Step-0 detects an implementation-shaped request
+  # lacking problem / target_user context, it returns status: needs_reframe; /start routes
+  # through skills/brainstorm once, offers a 3-way choice, then enters the interview on the
+  # chosen direction.
+  #
+  # DEFAULT-ON EXCEPTION: mirrors the fierce_option_panel / completion.nudge default-on
+  # precedent above, under the quality-over-cost principle (a misdiagnosed problem is the
+  # SDLC's most expensive error class). To opt OUT set false — Misae Step-0 then never
+  # evaluates solution-smell and never returns needs_reframe (byte-identical prior behavior).
+  # NOT active under answer_mode: proxy (autopilot, FR-6) regardless of this value.
+  problem_framing_gate: true           # default: true (ON) — escape hatch: set false to disable the gate
+
 # DAG executor (interview-metrics-researc-002 Phase 2). Drives the executing stage as a
 # topologically-ordered task DAG with static conflict-graph serialization, a per-task verify
 # gate, a recovery ladder, and a strict ALL-PASS completion gate. See src/dag-executor.js and

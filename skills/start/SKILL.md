@@ -279,7 +279,7 @@ for turn in 1..hard_cap:
     # (2) Extract the reframed problem: the prose UNDER the "## Problem Reframe" header of
     #     .shinchan-docs/{DOC_ID}/brainstorm-output.md (the 2-3 sentence restatement — see
     #     skills/brainstorm/SKILL.md Output Format). This is the ONLY section used for ①.
-    reframed_problem = read_section(".shinchan-docs/{DOC_ID}/brainstorm-output.md", "## Problem Reframe")
+    reframed_problem = read_section(".shinchan-docs/{DOC_ID}/brainstorm-output.md", from="## Problem Reframe", to="## Alternative Approaches")
     # (3) 3-way choice — answer_mode-aware ROUTING RULE (under proxy this branch is unreachable: gate_live=false via FR-6)
     choice = AskUserQuestion(questions=[{
       question: "brainstorm 결과를 검토했습니다. 어떻게 진행할까요?",
@@ -312,8 +312,10 @@ for turn in 1..hard_cap:
     gate_live = false
     result = Task(subagent_type="team-shinchan:misae", model="sonnet", prompt=<the 2A.1 prompt above, with turn=1, user_request=effective_request, gate_live=false>)
     Parse the last ```interview-question``` fenced block in result → parsed
-    # Re-evaluate the zero-turn fast-path (pre_interview_clear/user_skip_override) for this fresh
-    # `parsed`; if it is not a fast-path done, control continues into the GUARD below normally.
+    # Do NOT re-run the zero-turn fast-path block above for this fresh `parsed` — control simply
+    # falls through to the GUARD below (this SAME iteration, turn still == 1). A `done` re-entry
+    # (pre_interview_clear/user_skip_override) is already handled downstream: GUARD clause (d)
+    # accepts those reasons and the general `if status == "done": break` exits with answers == [].
 
   GUARD (parsing / options integrity / FR-4 contract):
     Validate ALL of the following before calling AskUserQuestion:

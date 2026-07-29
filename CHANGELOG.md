@@ -1,5 +1,38 @@
 # Changelog
 
+## [4.58.0] - 2026-07-29
+
+### Problem-framing gate — reframe solution-shaped requests before building
+
+`/start` now catches requests phrased as a *solution* ("add a Redis cache", "switch to
+GraphQL") before any requirements work begins, and routes them through `/brainstorm` to
+recover the underlying *problem* first.
+
+- **Misae solution-smell Step 0** (`agents/misae.md`) — a new pre-interview gate classifies
+  the incoming request as `needs_reframe` (solution-shaped) or `ask` (problem-shaped) using a
+  deterministic detection lexicon.
+- **`needs_reframe` → brainstorm routing** (`skills/start/SKILL.md`) — a `needs_reframe`
+  verdict intercepts the workflow into `/brainstorm` (3-way problem/alternatives/recommendation),
+  then re-enters `/start` with the reframed problem. Delivery, one-shot, and proxy paths all
+  honor the gate; it is skippable via flag.
+- **Config** (`.shinchan-config.yaml`, optional): the gate can be turned off for teams that
+  prefer to take requests as-stated.
+- **Coverage**: promptfoo classification suite (12 cases) + 4 `start`-gate e2e cases assert the
+  full consumer path (brainstorm actually fires, 3-way, re-entry), not just the classifier.
+
+### Misae agent diet — 1097 → 792 lines via `_shared` extraction
+
+`agents/misae.md` is slimmed by ~28% by moving background, rationale, and worked examples out
+of the always-loaded system prompt into 5 on-demand `agents/_shared/misae-*.md` files, replaced
+by short `${CLAUDE_PLUGIN_ROOT}`-prefixed pointer stubs.
+
+- Operative rules (formulas, precedence, caps, thresholds, detection lexicons), IMMUTABLE RULES,
+  and every mode-contract JSON stay 100% inline and byte-identical.
+- **New `tests/validate/misae-inline-preservation.js`** pins the protected blocks against the
+  git-immutable pre-diet baseline and asserts the 5 stub links resolve and are PLUGIN_ROOT-prefixed.
+
+All static validation suites pass; `node --test` green.
+
 ## [4.57.0] - 2026-07-15
 
 ### Linear Sync — auto status transitions for Linear-based work

@@ -31,6 +31,7 @@ const layerGuardBehavior = require('./layer-guard-behavior');
 const scopeGuardBehavior = require('./scope-guard-behavior');
 const sessionWrapNoLlm = require('./session-wrap-no-llm');
 const sessionWrapBehavior = require('./session-wrap-behavior');
+const misaeInlinePreservation = require('./misae-inline-preservation');
 
 async function runAllValidations() {
   console.log('\n╔════════════════════════════════════════╗');
@@ -64,7 +65,8 @@ async function runAllValidations() {
     layerGuardBehavior: 0,
     scopeGuardBehavior: 0,
     sessionWrapNoLlm: 0,
-    sessionWrapBehavior: 0
+    sessionWrapBehavior: 0,
+    misaeInlinePreservation: 0
   };
 
   const times = {
@@ -94,7 +96,8 @@ async function runAllValidations() {
     layerGuardBehavior: 0,
     scopeGuardBehavior: 0,
     sessionWrapNoLlm: 0,
-    sessionWrapBehavior: 0
+    sessionWrapBehavior: 0,
+    misaeInlinePreservation: 0
   };
 
   // Run agent schema validation
@@ -227,6 +230,10 @@ async function runAllValidations() {
   results.sessionWrapBehavior = sessionWrapBehavior.runValidation();
   times.sessionWrapBehavior = Date.now() - start;
 
+  start = Date.now();
+  results.misaeInlinePreservation = misaeInlinePreservation.runValidation();
+  times.misaeInlinePreservation = Date.now() - start;
+
   // Summary
   // Note: tokenBudget stores warning count (not error count) — exclude from totalErrors
   // Warnings are advisory only and do not indicate validation failure.
@@ -266,6 +273,7 @@ async function runAllValidations() {
   console.log(`║  Scope Guard:        ${results.scopeGuardBehavior === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.scopeGuardBehavior).padStart(5)}ms  ║`);
   console.log(`║  SW No-LLM:          ${results.sessionWrapNoLlm === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.sessionWrapNoLlm).padStart(5)}ms  ║`);
   console.log(`║  SW Behavior:        ${results.sessionWrapBehavior === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.sessionWrapBehavior).padStart(5)}ms  ║`);
+  console.log(`║  Misae Inline Presv: ${results.misaeInlinePreservation === 0 ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m'}  ${String(times.misaeInlinePreservation).padStart(5)}ms  ║`);
   console.log('╠════════════════════════════════════════════════╣');
 
   if (totalErrors === 0 && totalWarnings === 0) {

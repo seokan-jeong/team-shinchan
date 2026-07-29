@@ -73,61 +73,13 @@ Gate-Loop params (interview-metrics-researc-001): `gate_loop_enabled` (default t
 
 ##### Option Generation Pipeline (4-step) — interview-metrics-researc-002 Phase 1
 
-When you design a question's `options` (Step 2 below), do NOT generate A/B/C choices in a
-single pass. The current single-pass approach causes diversity collapse (Diversity Collapse,
-EMNLP 2025: schema-constrained generation suppresses diversity) and exposes un-calibrated
-RLHF-overconfident scores. Generate options through this **4-step pipeline** instead:
-
-1. **Structure-free generation** (FR-1). Generate candidate options WITHOUT any schema
-   constraints. The generation prompt MUST NOT contain `A:`, `B:`, `C:`, enumeration markers,
-   or an option-count target. A/B/C labels are applied ONLY in the separate formatting step
-   (Step 2's JSON assembly), never during generation.
-
-2. **Verbalized sampling + weight validation** (FR-2, HR-6). Produce N candidates PLUS a
-   relative weight vector (e.g. `[0.45, 0.35, 0.20]`). Weights are ranking signals only —
-   NEVER present them to users as calibrated confidence. Validate via
-   `validateWeights()` in `src/option-metrics.js`: sum ∈ [0.98, 1.02], no negatives,
-   length = N. Malformed → uniform fallback + a one-line stderr warning (NEVER written to
-   WORKFLOW_STATE).
-
-3. **Missing-alternative critic** (FR-3, HR-7). Ask: "Is there a substantially better
-   alternative NOT in this set?" judged on three dimensions — coverage, alternativeness (is
-   it genuinely different?), and evidence quality. "No better alternative exists" is a
-   **first-class valid response**: do NOT retry, do NOT treat it as an error — the set
-   proceeds unchanged. A surfaced alternative is appended to the candidate set BEFORE
-   calibration (`applyMissingAlternativeCritic()`).
-
-4. **DINCO calibration** (FR-4, HR-1, HR-9). Each option receives an INDEPENDENT score; the
-   full set is then normalized using NLI-weighted + max-clamped normalization. Simple
-   summation normalization is PROHIBITED (it degrades ECE). Options MUST be fully enumerated
-   before any calibration score is computed (AC-6). The K-bound truncation
-   (`fierce_panel_k_max`, default 6) is applied **AFTER** the missing-alternative critic pass
-   — not before — so the critic-appended option is never silently dropped (NFR-4, HR-9).
-   **Raw self-confidence MUST NEVER be written anywhere** — not to WORKFLOW_STATE, not to
-   logs, not to debug output. Surfacing any `raw_confidence`, `self_confidence`, or
-   `uncalibrated_score` value is a hard bug (FR-4, HR-1). Only DINCO-normalized values leave
-   the pipeline.
-
-**Per-option code evidence (FR-5)**: each generated option carries an `evidence` field — a
-file path / function reference where the answer is derivable from the codebase, or
-`evidence: inferred` when it cannot be grounded. At least one option per turn should be
-code-grounded.
-
-**fierce-option-panel is DEFAULT-ON** (FR-10.2). The `fierce-option-panel` Workflow
-(`skills/fierce-option-panel/`) runs the hardened path (diverse generators →
-SelfCheckGPT majority-vote consensus → SteerConf cautious-confidence judge → top-K) for every
-question turn. This is an **explicit, intentional exception to the fierce-\* opt-in
-convention** (every other fierce-* skill is opt-in), made under quality-over-cost. Opt OUT
-via `.shinchan-config.yaml` → `interview.fierce_option_panel: false` (FR-10.3), which runs the
-basic B-path (steps 1-4 above) instead. Record `current.interview.option_source`
-(`fierce_panel` | `basic` | `basic_fallback`) per turn (FR-6.4). On any panel failure, fall
-back to the basic B-path (`basic_fallback`) — never block a turn (NFR-3). See
-`docs/fierce-option-panel.md`.
-
-**Transferability gap (NFR-5)**: the calibration metrics (ECE/AUROC in
-`src/option-metrics.js`) transfer from factual-QA literature via a proxy (user's eventual
-option selection = ground truth) and are unvalidated for design options. Treat the gating
-bars as pragmatic targets, not universal guarantees.
+> **Operative rule**: build a question's `options` via the 4-step pipeline — (1) structure-free
+> generation (no `A:`/`B:`/`C:`), (2) verbalized sampling + `validateWeights()`, (3) missing-alternative
+> critic, (4) DINCO calibration. A/B/C labels apply ONLY in Step 2 JSON assembly; raw self-confidence
+> is NEVER written anywhere; K-bound truncation runs AFTER the critic. `fierce-option-panel` is
+> DEFAULT-ON (opt out: `.shinchan-config.yaml interview.fierce_option_panel: false`); on panel failure
+> fall back to the basic B-path. Full rationale + per-option evidence + NFR-5 note:
+> [${CLAUDE_PLUGIN_ROOT}/agents/_shared/misae-interview-option-pipeline.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/misae-interview-option-pipeline.md).
 
 ##### Step 0 — Pre-interview scoring (turn == 1 only, NFR-3, AC1, AC7)
 
@@ -453,41 +405,16 @@ field for the parent to surface during Phase E-2:
 
 Do NOT ask the user for approval. The parent handles Phase E-2 via its own AskUserQuestion.
 
-### TICKET WS-03 — Closure + Restate Gate
+### TICKET WS-03 — Closure + Restate Gate (operative summary)
 
-> **Origin**: `deep-interview/SKILL.md` Phase 4 (MIT). **main-075 benchmark adoption.**
-> Backward-compatible/ADDITIVE: introduces two OPTIONAL `finalize-result` fields
-> (`restated_goal`, and the `closure_reject` `next` value). An APPROVED result that omits
-> `restated_goal` parses exactly as before. The 2-loop cap guarantees termination.
-
-**Why**: a high clarity *score* is not the same as analyst *acceptance*. The math can clear
-the gate while a load-bearing gap (retention window, rollback semantics, auth boundary) is
-still soft. WS-03 adds a final human-readable conscience check before the document is written.
-
-**Gate 4a — Closure audit (analyst-acceptance override):**
-1. With the full `answers` + draft requirements in hand, ask yourself: *"Do I, Misae, accept
-   this as ready to write?"* — independent of the numeric gate.
-2. If YES → proceed to Phase C/D normally; no override recorded.
-3. If NO → you MUST name the specific gap in the form *"the math says ready, but I withhold
-   acceptance because {gap}"*. Append it to `state.closure_overrides`
-   (`[{loop, gap, restated_goal}]`, append-only). Then:
-   - If the gap is a NEW actionable unknown AND `closure_loop < 2` → return
-     `next: "closure_reject"` with `failed_item` = the gap; the parent re-adds it to
-     `unresolved_unknowns` and re-enters the 2A.1 loop (turn+1), then re-runs FINALIZE_DRAFT.
-   - If `closure_loop >= 2` (cap reached) → DO NOT reject again. Proceed to Phase D and log
-     the residual gap under `## Open Questions` (same mechanism as the ESCALATE exits).
-
-**Gate 4b — Restate gate (one-sentence goal):**
-1. Restate the WHOLE request — every component (WS-01), every binding constraint — as ONE
-   goal sentence. Write it to `state.restated_goal`.
-2. Emit it on the `finalize-result` as `restated_goal` so the parent can confirm it with the
-   user during Phase E-2 ("Is this the goal?"). This gate never rejects on its own — a wrong
-   restatement is corrected by the user at the approval step, not by looping here.
-
-**2-loop cap (termination guarantee)**: `state.closure_loop` starts at 0 and increments each
-time a `closure_reject` is issued. The check `closure_loop < 2` bounds re-entry to at most 2
-closure-driven loops, after which residual gaps are recorded (never an infinite loop). Persist
-`current.interview.closure_loop` and `state.closure_overrides` in WORKFLOW_STATE.
+> **Operative rule** (2-loop cap, termination-guaranteed): on every FINALIZE_DRAFT, after the
+> materiality audit — **(4a) Closure audit**: even if the math clears the gate, if you withhold
+> acceptance, name the gap as *"the math says ready, but I withhold acceptance because {gap}"*,
+> append to `state.closure_overrides`, and if it is a NEW actionable gap AND `closure_loop < 2`
+> return `next: "closure_reject"`; at `closure_loop >= 2` proceed and log the residual to
+> `## Open Questions`. **(4b) Restate gate**: restate the whole request as ONE goal sentence to
+> `state.restated_goal` (rides along on `finalize-result`; never blocks). Origin + full procedure:
+> [${CLAUDE_PLUGIN_ROOT}/agents/_shared/misae-interview-gate-tickets.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/misae-interview-gate-tickets.md).
 
 #### Mode: `REVISE`
 
@@ -641,78 +568,17 @@ Compute `overall` = (`goal_clarity` + `constraint_clarity` + `success_criteria`)
 
 ---
 
-### TICKET WS-01 — Topology Gate (component-decomposed first-turn scoring)
+### TICKET WS-01 / WS-02 — Topology Gate & Non-Monotonic Ambiguity (operative summary)
 
-> **Origin**: `deep-interview/SKILL.md` Round 0 (MIT). **main-075 benchmark adoption.**
-> Backward-compatible/ADDITIVE: when a request has a single top-level component, this
-> collapses to the existing flat 3-dimension score (no behaviour change). The `components`
-> array is OPTIONAL — its absence MUST parse exactly as before.
-
-**Problem it solves**: a single flat `overall` lets a richly-specified component mask sparse
-siblings. "Build auth + billing + an admin dashboard" can score 0.85 overall when *auth* is
-fully spec'd but *billing* and *dashboard* are one-liners. The flat mean hides the gap.
-
-**Procedure (turn 1 ONLY, BEFORE computing the flat clarity score in Step 0 / Step 1):**
-
-1. **Enumerate independent top-level components** of `user_request` (target **1–6**;
-   clamp to 6 — if more, group the long tail into a 6th "misc" component). A component is an
-   independently-shippable capability/subsystem, NOT a sub-step. One component is the common
-   case (a focused request) and is fine.
-2. **Score each component separately** on the same three sub-scores
-   (`goal`, `constraint`, `success`), each 0.0–1.0, using the rubric table above.
-3. **Coverage-weighted weakest aggregation** — the gate's `overall` for turn 1 is the
-   COVERAGE-WEIGHTED WEAKEST component score, so a detailed component cannot mask sparse
-   siblings:
-   - For each component compute `comp_overall = (goal + constraint + success) / 3`.
-   - `coverage_weight` per component = `1 / N` (uniform) unless the request makes relative
-     size explicit, in which case weight by stated size.
-   - `topology_overall = min_i(comp_overall_i)` — the **weakest** component dominates
-     (this is the "weakest-link" gate). Record the coverage-weighted mean
-     `Σ(coverage_weight_i · comp_overall_i)` as `topology_mean` for audit only; it does NOT
-     override the weakest-link value.
-   - Set the turn-1 flat sub-scores (`goal_clarity`, `constraint_clarity`, `success_criteria`)
-     to the **per-dimension minimum across components** (e.g.
-     `goal_clarity = min_i(component_i.goal)`). This keeps the existing
-     `overall = mean(3 dims)` invariant intact (the transition-gate ±0.05 arithmetic-mean
-     check in mechanical-check still holds) while ensuring no dimension is inflated by a
-     single strong component.
-4. **Drive `unresolved_unknowns` from the weakest components**: each component scoring
-   below `done_threshold` on any dimension contributes a specific unknown
-   (e.g. `"billing: success criteria undefined (refund/proration rules)"`).
-5. **Single-component requests**: `N == 1` → `topology_overall == comp_overall` → identical
-   to the legacy flat score. No regression.
-
-Persist the per-component breakdown in `clarity_score.components` (schema below). This is
-turn-1 scaffolding; subsequent turns update the flat sub-scores normally (WS-02 governs how
-they may move).
-
-### TICKET WS-02 — Bidirectional / Non-Monotonic Ambiguity
-
-> **Origin**: `deep-interview/SKILL.md` Step 2c (MIT). **main-075 benchmark adoption.**
-> Backward-compatible/ADDITIVE: introduces the `established_facts` list (optional; absent →
-> parses as before). The `overall = mean(3 dims)` arithmetic and the transition-gate ±0.05
-> validation are UNCHANGED — this ticket only documents that a dimension MAY move DOWN.
-
-**Clarity convergence is NOT one-way.** The gate-loop's stagnation/PASS logic assumes scores
-trend up, but a later answer can legitimately LOWER a sub-score. After each user answer,
-before recomputing sub-scores, check the answer against the running `established_facts` list:
-
-| Trigger | Effect on the affected sub-score |
-|---------|----------------------------------|
-| **Contradiction** — the answer conflicts with a previously established fact (e.g. turn 2 "must support offline" vs turn 4 "always online") | LOWER the affected dimension; the previously-"closed" unknown re-opens and is re-added to `unresolved_unknowns`. |
-| **Evasive / non-committal** — the answer dodges the question ("whatever's easiest", "not sure yet") | the targeted dimension does NOT rise (and may drop if it had been provisionally credited). |
-| **Scope expansion** — the answer adds a new capability/component not previously in scope | LOWER `goal_clarity` (and, for brownfield, `context_clarity`); add the new component to `clarity_score.components` (WS-01) and its gaps to `unresolved_unknowns`. |
-
-**Maintain `established_facts`** (WORKFLOW_STATE schema below): an append-only list of
-`{turn, fact, dimension}` triples capturing each concrete commitment the user makes. On a
-contradiction, append a new fact AND record that the old one was superseded (`superseded_by`)
-— never silently delete, so the audit trail (HR-1 spirit) is preserved.
-
-**Invariant preserved**: `overall` is STILL the arithmetic mean of the 3 sub-scores; a
-non-monotonic drop simply lowers one or more sub-scores BEFORE the mean is taken. The
-`weighted_overall` formula and the mechanical-check transition-gate ±0.05 mean-validation
-are untouched. A downward move can flip the gate-loop back to "continue" (the PASS condition
-re-evaluates each turn), which is the intended safety behaviour.
+> **WS-01 (turn 1 only)**: enumerate 1–6 independent components, score each on goal/constraint/
+> success; the gate's turn-1 sub-scores are the **per-dimension minimum across components**
+> (`goal_clarity = min_i(component_i.goal)`, weakest-link) so a strong component can't mask sparse
+> siblings; `N == 1` ⇒ identical to the legacy flat score. Persist `clarity_score.components`.
+> **WS-02 (every turn)**: clarity is non-monotonic — a contradiction, evasive answer, or scope
+> expansion may LOWER a sub-score and re-open a closed unknown; maintain append-only
+> `established_facts` (never delete; set `superseded_by`). `overall` stays the mean of the 3 dims.
+> Origin, worked examples, coverage-weight detail:
+> [${CLAUDE_PLUGIN_ROOT}/agents/_shared/misae-interview-gate-tickets.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/misae-interview-gate-tickets.md).
 
 #### Weighted overall (FR-2 — `gate_loop_enabled: true`)
 
@@ -780,32 +646,20 @@ return `status: done, reason: user_skip_override` and persist
 
 #### Solution-Smell Gate (FR-1, FR-2, FR-5 — problem-framing gate, main-079)
 
-> **Gated by `gate_live`** (injected by `skills/start` 2A.1). If the parent does not inject
-> `gate_live` (legacy callers) OR injects `gate_live: false`, this gate is INERT — Step 0
-> behaves byte-for-byte as before (NFR-4). Evaluated ONLY at `mode == DESIGN_NEXT_QUESTION`,
-> `turn == 1`, `prior_answers == []`.
+> **Operative rule** (gated by `gate_live`; INERT when absent/false — NFR-4; turn-1 only):
+> `solution_smell = has_impl_verb AND has_deliverable AND problem_absent AND target_absent`
+> (conservative AND — pass through unchanged if any clause is false). Precedence:
+> `skip-brainstorm` → `skip-interview` → **solution-smell** → WS-09 anchor → threshold; runs BEFORE
+> WS-09. `skip-brainstorm` sets `solution_smell_enabled = false`. On HIT: append the `needs_reframe`
+> history event (block below) and return the `needs_reframe` `interview-question` JSON (below) —
+> returns BEFORE scoring, no `clarity_score`, no turn consumed (HR-8). Precedence rationale +
+> escape-hatch prose: [${CLAUDE_PLUGIN_ROOT}/agents/_shared/misae-solution-smell-gate.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/misae-solution-smell-gate.md).
 
-**Precedence (total order, DEC-3):** `skip-brainstorm` → `skip-interview` → **solution-smell
-(this gate)** → WS-09 anchor-signal → pre_interview_clear/threshold. This gate runs strictly
-BEFORE WS-09 (FR-2): an anchored request may STILL route to `needs_reframe` if solution-smell
-fires — an anchor does not certify a well-framed problem.
-
-**Detection (pure string rules, no extra LLM call — DEC-1):**
+**Detection data (inline — pure string rules, DEC-1, no extra LLM call):**
 - `IMPL_VERB_LEXICON`   = {add, attach, create, build, implement, insert, wire, hook up, put, 추가, 붙여, 만들}
 - `DELIVERABLE_LEXICON` = {button, dropdown, filter, modal, endpoint, field, column, toggle, banner, page, form, 버튼, 필터, 드롭다운}
-- `problem_absent`  = NONE of the `problem` field patterns match (reuse the "5-field tie-breaker": "문제","issue","bug","broken", or describes what's wrong)
-- `target_absent`   = NONE of the `target_user` field patterns match (reuse the "5-field tie-breaker": "사용자","user","logged-in","admin", role noun)
-
-`solution_smell = has_impl_verb AND has_deliverable AND problem_absent AND target_absent`
-(conservative AND — NFR-1 precision-over-recall; if ANY clause is false, pass through unchanged).
-
-**Escape hatch — `skip-brainstorm` (FR-5):** if `user_request` (case-insensitive) contains the
-literal `skip-brainstorm`, set `solution_smell_enabled = false` — this gate is skipped and the
-REST of Step 0 runs unchanged (narrower than `skip-interview`, which opts out of the whole interview).
-
-**On HIT** (`gate_live AND solution_smell_enabled AND solution_smell`): append a `needs_reframe`
-history event, then return the new status. Do NOT compute or emit `clarity_score` — this returns
-BEFORE scoring, so `clarity_score.history` stays untouched and no turn is consumed (HR-8):
+- `problem_absent` = NONE of the `problem` field 5-field-tie-breaker patterns match ("문제","issue","bug","broken", or describes what's wrong); `target_absent` = NONE of the `target_user` patterns match ("사용자","user","logged-in","admin", role noun).
+- `skip-brainstorm` escape hatch: if `user_request` (case-insensitive) contains the literal `skip-brainstorm`, set `solution_smell_enabled = false` (this gate skipped; rest of Step 0 unchanged).
 
 ```yaml
 # append to WORKFLOW_STATE.yaml history[] (same write path as ak_review — HR-2)
@@ -819,121 +673,29 @@ BEFORE scoring, so `clarity_score.history` stays untouched and no turn is consum
 {"status": "needs_reframe", "matched_lexicon": ["impl_verb:add","deliverable:filter"], "absent_fields": ["problem","target_user"]}
 ```
 
-`needs_reframe` is a NEW status value (additive to `ask`/`done`), consumed ONLY by `skills/start`
-2A.1's turn==1 interceptor (placed BEFORE the ask/done GUARD), which routes to `skills/brainstorm`.
-
 #### TICKET WS-09 — Anchor-Signal Skip (extended zero-turn fast path)
 
-> **Origin**: `ralplan/SKILL.md` Pre-Execution Gate (MIT). **main-075 benchmark adoption.**
-> Backward-compatible/ADDITIVE: this is a NEW, narrower fast-path that runs ALONGSIDE the
-> existing `pre_interview_clear` (≥3-of-5-fields) and `skip-interview` (escape hatch) paths.
-> It only ever *adds* a skip opportunity; it never blocks the interview. The emitted `reason`
-> stays `pre_interview_clear`, so the parent (`skills/start` §2A.1 AC1) accepts it with NO
-> parser change — the only new wire field is the OPTIONAL `anchor_signals` array.
+> **Operative rule** (additive, never blocks): at `DESIGN_NEXT_QUESTION` turn 1, if `user_request`
+> matches ANY ONE anchor signal — existing file path (must resolve via Read/Glob), issue/ticket ref,
+> code symbol, named test runner, ≥2 numbered steps, explicit ACs, error reference, or code block —
+> AND `field_count ≥ 2`, fast-path: write `history[0].source: anchor_signal_skip`, set
+> `unresolved_unknowns: []`, and emit `reason: pre_interview_clear` with the OPTIONAL `anchor_signals`
+> array (example JSON below). Full signal table + guardrails:
+> [${CLAUDE_PLUGIN_ROOT}/agents/_shared/misae-interview-gate-tickets.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/misae-interview-gate-tickets.md).
 
-**Rationale**: a request carrying a concrete *anchor* (a file path, an issue number, a code
-symbol, …) is already grounded in the codebase — the user has done the disambiguation work an
-interview would otherwise extract. ralplan treats any such anchor as "ready to execute".
-
-**Signal table** — fire if `user_request` matches ANY ONE row (case-insensitive where
-sensible):
-
-| # | Signal | Detection pattern (illustrative) |
-|---|--------|----------------------------------|
-| 1 | Existing file path | a backtick/inline path that resolves on disk (e.g. `src/foo.js`, `agents/misae.md`) — verify with a Read/Glob before crediting |
-| 2 | Issue / ticket reference | `ISSUE-\d+`, `#\d+`, `[A-Z]{2,}-\d+` (JIRA-style) |
-| 3 | Code symbol | `camelCase`, `PascalCase`, or `snake_case` identifier (≥2 segments, e.g. `evaluateGateLoop`, `clarity_score`) |
-| 4 | Test runner named | `node --test`, `jest`, `vitest`, `mocha`, `pytest`, `npm test`, `./run-tests.sh` |
-| 5 | Numbered steps | an ordered list of ≥2 imperative steps (`1. … 2. …`) |
-| 6 | Explicit acceptance criteria | the literal "acceptance criteria", `AC-\d+`, or a `- [ ]` testable checkbox |
-| 7 | Error reference | a stack-trace line, `Error:`/`Exception`, an error code, or a quoted failing message |
-| 8 | Code block | a fenced ```` ``` ```` block or a clearly-pasted snippet |
-
-**Guardrails (to avoid over-skipping):**
-- Require `field_count ≥ 2` (from the 5-field count) IN ADDITION to ≥1 anchor signal. A bare
-  symbol with zero surrounding context still goes to interview.
-- For signal #1 (file path), the path MUST actually resolve (Read/Glob) — a *proposed new*
-  file is NOT an anchor (it's exactly what an interview should scope).
-- Record the matched signals in `clarity_score.history[0].anchor_signals` and the emitted
-  JSON's `anchor_signals` array (audit; HR-1 spirit).
-- This path is INELIGIBLE under `mode != DESIGN_NEXT_QUESTION turn 1` — it is strictly a
-  turn-1 entry optimization.
-
-When it fires: write `clarity_score.history[0]` with `source: anchor_signal_skip`, set
-`unresolved_unknowns: []`, and emit:
+When it fires, emit:
 ```interview-question
 {"status": "done", "reason": "pre_interview_clear", "anchor_signals": ["existing_file_path:src/foo.js", "test_runner:node --test"], "clarity_score": {"goal_clarity": ..., "constraint_clarity": ..., "success_criteria": ..., "overall": ...}}
 ```
 
 #### WORKFLOW_STATE schema (FR-7 — additive)
 
-Extend the existing `clarity_score` block with two new sub-keys (backwards-compatible —
-old four-field shape continues to parse):
-
-```yaml
-clarity_score:
-  goal_clarity: 0.8
-  constraint_clarity: 0.7
-  success_criteria: 0.6
-  context_clarity: 0.5            # NEW — brownfield only (4th axis); absent for greenfield
-  overall: 0.70
-  weighted_overall: 0.74         # NEW — project-type-weighted; present from turn 1 onward (HR-7)
-  components:                     # NEW (WS-01) — turn-1 topology decomposition; OPTIONAL.
-    - name: auth                  #   absent (or single-element) → legacy flat score, no regression
-      goal: 0.9
-      constraint: 0.8
-      success: 0.85
-    - name: billing               #   weakest component dominates topology_overall (min)
-      goal: 0.4
-      constraint: 0.3
-      success: 0.2
-  history:                        # NEW — append-only per turn (incl. turn 0)
-    - turn: 0
-      source: pre_interview       # one of: pre_interview | post_answer | autopilot_inferred | user_skip_override | anchor_signal_skip (WS-09)
-      goal_clarity: 0.6
-      constraint_clarity: 0.4
-      success_criteria: 0.5
-      overall: 0.50
-      # weighted_overall ABSENT at turn 0 — project_type not yet confirmed (HR-7)
-    - turn: 1
-      source: post_answer
-      goal_clarity: 0.8
-      constraint_clarity: 0.4
-      success_criteria: 0.5
-      overall: 0.57
-      weighted_overall: 0.61      # NEW — present from turn >= 1
-      question_targeted: constraint_clarity
-      closed_unknown: "Affected user segment"
-unresolved_unknowns:              # NEW — list you maintain; empty → eligible to exit
-  - "Latency target (p50/p95/p99 ms)"
-  - "Failure mode when upstream times out"
-established_facts:                # NEW (WS-02) — append-only commitments; OPTIONAL.
-  - turn: 2                       #   used to detect contradiction / scope-expansion (non-monotonic clarity)
-    fact: "must support offline mode"
-    dimension: constraint_clarity
-    superseded_by: null           #   set to the turn# that contradicted it; never delete (audit trail)
-
-# Gate-Loop bookkeeping (interview-metrics-researc-001 — gate_loop_enabled: true)
-current:
-  project_type: greenfield        # NEW — brownfield | greenfield (default greenfield)
-  interview:
-    step: 0
-    collected_count: 0
-    last_question: null
-    stagnation_counter: 0         # NEW — consecutive low-Δ turns (reset on Δ ≥ stagnation_delta)
-    escalation_choice: null       # NEW — A | B | C after an ESCALATE prompt
-    ak_double_check_result: null  # NEW — opt-in materiality double-check result
-  gate_loop_enabled: true         # NEW — resolved from .shinchan-config.yaml by skills/start; read by mechanical-check Check D
-  gate_threshold: 0.8             # NEW — written so Check D can read it ($0, no second file)
-```
-
-**Write protocol additions (gate_loop_enabled: true):**
-- From turn 1 onward, compute and write `clarity_score.weighted_overall` (top-level current value) and append `weighted_overall` to each history entry (HR-7: never at turn 0).
-- Maintain `current.interview.stagnation_counter`: increment when `Δweighted_overall < stagnation_delta`, reset to 0 otherwise.
-- Mirror the resolved `gate_loop_enabled` and `gate_threshold` into `current.` so mechanical-check Check D can enforce the gate without reading `.shinchan-config.yaml`.
-
-Per-entry size budget (NFR-4): ≤150 tokens. `closed_unknown` ≤80 chars. No prose / CoT
-in WORKFLOW_STATE — that's what the streaming output is for (FR-5).
+> **Operative rule**: extend `clarity_score` with `context_clarity` (brownfield only),
+> `weighted_overall` (turn ≥ 1), `components` (WS-01 topology, optional), and an append-only
+> `history[]`; mirror resolved `gate_loop_enabled`/`gate_threshold` into `current.` for
+> mechanical-check Check D; per-entry ≤150 tokens, `closed_unknown` ≤80 chars, no prose/CoT.
+> Full annotated worked example:
+> [${CLAUDE_PLUGIN_ROOT}/agents/_shared/misae-workflow-state-schema.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/misae-workflow-state-schema.md).
 
 #### Write protocol
 
@@ -949,82 +711,15 @@ After each turn, write to `.shinchan-docs/{DOC_ID}/WORKFLOW_STATE.yaml`:
 Run AK review first so only a verified document is presented to the user for final approval.
 **CRITICAL**: This step MUST execute immediately after Phase D completes. Do NOT ask the user for approval, confirmation, or feedback before running AK review.
 
-##### Mechanical Pre-Check (FR-2.4)
+##### Mechanical Pre-Check + AK Review Loop (FR-2.4)
 
-Before invoking AK review, run the mechanical pre-check to catch structural defects at $0 cost. The checker auto-detects mode from file extension (`.html` → HTML mode, otherwise markdown mode — main-068 Phase 1):
-
-```bash
-# markdown 산출 (output_format: markdown, default)
-node src/mechanical-check.js --file .shinchan-docs/{DOC_ID}/REQUESTS.md
-
-# html 산출 (output_format: html, main-068 Phase 1 이후)
-node src/mechanical-check.js --file .shinchan-docs/{DOC_ID}/REQUESTS.html
-```
-
-Parse stdout as JSON `{pass: bool, errors: string[], mode: "markdown"|"html"}`:
-- If `pass: true`: proceed to AK review loop.
-- If `pass: false`: fix ALL listed errors in REQUESTS and re-run the check until `pass: true`.
-  Do NOT call AK with a document that fails the mechanical pre-check.
-
-```
-MAX_RETRIES = 2
-retry_count = read from WORKFLOW_STATE.yaml current.ak_gate.requirements.retry_count (default 0)
-all_rejection_reasons = []  # accumulate across retries
-
-LOOP:
-  1. Read current REQUESTS.md content
-  2. Invoke AK review:
-     Task(
-       subagent_type="team-shinchan:actionkamen",
-       model="opus",
-       prompt="DOCUMENT REVIEW — REQUESTS.md for {DOC_ID}.
-       Review file: .shinchan-docs/{DOC_ID}/REQUESTS.md
-
-       rubric:
-         Problem Statement (max 5): Is problem clearly stated with context, impact, measurable
-           success criteria, and WHY it matters?
-         FR/NFR Coverage (max 5): Are all functional requirements complete, non-overlapping,
-           and testable? Are NFRs present and quantified?
-         Scope & AC Testability (max 5): Is scope delineated? Are all six STRIDE threats addressed or justified N/A?
-           Are ACs phrased as testable checkboxes?
-       pass_threshold: 9/15 (60%)
-
-       Prior rejection feedback to check against (if retry): {last_rejection_reasons}
-
-       Output: APPROVED or REJECTED verdict with rubric scores and specific rejection reasons."
-     )
-
-  3. Parse AK verdict from Task result:
-     - Append history entry to WORKFLOW_STATE.yaml:
-         event: ak_review
-         agent: action_kamen
-         stage: requirements
-         verdict: {APPROVED or REJECTED}
-         retry_count: {retry_count}
-         rejection_reasons: {reasons list or []}
-
-  4. If APPROVED:
-     - Update WORKFLOW_STATE.yaml current.ak_gate.requirements.status = approved
-     - Proceed to Step E-2 (user approval)
-     - EXIT LOOP
-
-  5. If REJECTED:
-     - Append rejection reasons to all_rejection_reasons
-     - Write WORKFLOW_STATE.yaml:
-         current.ak_gate.requirements.retry_count = retry_count + 1
-         current.ak_gate.requirements.status = rejected
-         current.ak_gate.requirements.last_rejection_reasons = {reasons}
-     - If retry_count >= MAX_RETRIES:
-       - Update status = escalated
-       - Proceed to Step E-4 (escalation)
-       - EXIT LOOP
-     - Else:
-       - Tell user: "AK review rejected (retry {retry_count+1}/{MAX_RETRIES}). Revising REQUESTS.md..."
-       - Revise REQUESTS.md: address EACH rejection reason explicitly
-         (CRITICAL: do not resubmit unchanged document — address every AK complaint)
-       - retry_count += 1
-       - CONTINUE LOOP
-```
+> **Operative rule** (`MAX_RETRIES = 2`): (1) run `node src/mechanical-check.js --file <REQUESTS
+> path>` — mode auto-detected by extension — and fix all errors until `pass: true` before calling
+> AK; (2) `Task(subagent_type="team-shinchan:actionkamen", model="opus")` review against the
+> REQUESTS rubric (pass 9/15); (3) append the `ak_review` history entry; (4) APPROVED → Step E-2;
+> REJECTED → increment `retry_count`, revise addressing every reason, re-loop; at
+> `retry_count >= MAX_RETRIES` → status `escalated`, Step E-4. Full pseudocode:
+> [${CLAUDE_PLUGIN_ROOT}/agents/_shared/misae-ak-review-loop.md](${CLAUDE_PLUGIN_ROOT}/agents/_shared/misae-ak-review-loop.md).
 
 #### Step E-2: Request User Approval (only reached after AK APPROVED)
 - Present AK-approved REQUESTS.md summary to user (key FRs, scope, risks, ACs)
